@@ -1,0 +1,267 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Add" xml:space="preserve">
+    <value>Thêm thiết bị</value>
+  </data>
+  <data name="AlreadyConnectedMessage" xml:space="preserve">
+    <value>WebSocket đã được kết nối.</value>
+  </data>
+  <data name="AlreadyConnectedTitle" xml:space="preserve">
+    <value>Kết nối lại</value>
+  </data>
+  <data name="ConfirmLogOut" xml:space="preserve">
+    <value>Bạn có chắc chắn muốn đăng xuất?</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Kết nối</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Đã kết nối</value>
+  </data>
+  <data name="ConnectionClosedMessage" xml:space="preserve">
+    <value>Kết nối tới máy chủ đã bị đóng.</value>
+  </data>
+  <data name="ConnectionClosedTitle" xml:space="preserve">
+    <value>Kết nối đã đóng</value>
+  </data>
+  <data name="ConnectionErrorMessage" xml:space="preserve">
+    <value>Đã xảy ra lỗi khi cố gắng kết nối lại: {0}</value>
+  </data>
+  <data name="ConnectionErrorTitle" xml:space="preserve">
+    <value>Lỗi kết nối lại</value>
+  </data>
+  <data name="ConnectionLostMessage" xml:space="preserve">
+    <value>Kết nối bị mất. Bạn có muốn kết nối lại không?</value>
+  </data>
+  <data name="ConnectionLostTitle" xml:space="preserve">
+    <value>Mất kết nối</value>
+  </data>
+  <data name="ConnectionStatus" xml:space="preserve">
+    <value>Trạng thái kết nối</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Tạo</value>
+  </data>
+  <data name="CuttingMachineManager" xml:space="preserve">
+    <value>Quản lý máy chặt</value>
+  </data>
+  <data name="CuttingManager" xml:space="preserve">
+    <value>Quản lý máy chặt</value>
+  </data>
+  <data name="DeviceManage" xml:space="preserve">
+    <value>Quản lý thiết bị</value>
+  </data>
+  <data name="DeviceManager" xml:space="preserve">
+    <value>Quản lý thiết bị</value>
+  </data>
+  <data name="DeviceOutput" xml:space="preserve">
+    <value>Sản lượng máy chặt</value>
+  </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>Ngắt kết nối</value>
+  </data>
+  <data name="Disconnected" xml:space="preserve">
+    <value>Ngắt kết nối</value>
+  </data>
+  <data name="Distribution" xml:space="preserve">
+    <value>Phân phối đơn</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Tài khoản khách</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Trang chủ</value>
+  </data>
+  <data name="IPAddress" xml:space="preserve">
+    <value>Địa chỉ IP</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Tiếng việt</value>
+  </data>
+  <data name="LogOut" xml:space="preserve">
+    <value>Đăng xuất</value>
+  </data>
+  <data name="MachineName" xml:space="preserve">
+    <value>Tên thiết bị</value>
+  </data>
+  <data name="MonthlyPlan" xml:space="preserve">
+    <value>Kế hoạch hằng tháng</value>
+  </data>
+  <data name="Plant" xml:space="preserve">
+    <value>Xưởng</value>
+  </data>
+  <data name="PODistribution" xml:space="preserve">
+    <value>Phân phối đơn</value>
+  </data>
+  <data name="ProductionSchedule" xml:space="preserve">
+    <value>Kế hoạch sản xuất</value>
+  </data>
+  <data name="Progress" xml:space="preserve">
+    <value>Tiến độ chặt</value>
+  </data>
+  <data name="ReadData" xml:space="preserve">
+    <value>Đọc dữ liệu</value>
+  </data>
+  <data name="Reconnecting" xml:space="preserve">
+    <value>Kết nối lại...</value>
+  </data>
+  <data name="ReconnectingMessage" xml:space="preserve">
+    <value>Đang kết nối lại..</value>
+  </data>
+  <data name="ReconnectInProgressMessage" xml:space="preserve">
+    <value>Đã có một nỗ lực kết nối lại đang diễn ra.</value>
+  </data>
+  <data name="ReconnectInProgressTitle" xml:space="preserve">
+    <value>Kết nối lại</value>
+  </data>
+  <data name="ReconnectionAttemptMessage" xml:space="preserve">
+    <value>Đang thử kết nối lại...</value>
+  </data>
+  <data name="ReconnectionFailedMessage" xml:space="preserve">
+    <value>Kết nối lại không thành công. Bạn có muốn thử lại không?</value>
+  </data>
+  <data name="ReconnectionFailedTitle" xml:space="preserve">
+    <value>Thử kết nối lại không thành công</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>Chọn máy chặt:</value>
+  </data>
+  <data name="Send" xml:space="preserve">
+    <value>Gửi phân phối đơn</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+  <data name="SystemManagerment" xml:space="preserve">
+    <value>Quản lý hệ thống</value>
+  </data>
+  <data name="UserManager" xml:space="preserve">
+    <value>Quản lý người dùng</value>
+  </data>
+  <data name="WebSocketErrorMessage" xml:space="preserve">
+    <value>Lỗi WebSocket: {0}</value>
+  </data>
+  <data name="WorkCenter" xml:space="preserve">
+    <value>Trung tâm làm việc</value>
+  </data>
+  <data name="WriteData" xml:space="preserve">
+    <value>Ghi dữ liệu</value>
+  </data>
+</root>

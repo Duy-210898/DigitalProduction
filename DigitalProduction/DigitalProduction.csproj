@@ -1,0 +1,181 @@
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DigitalProduction</RootNamespace>
+    <AssemblyName>DigitalProduction</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.BonusSkins.v23.1" />
+    <Reference Include="DevExpress.Data.Desktop.v23.1" />
+    <Reference Include="DevExpress.Data.v23.1" />
+    <Reference Include="DevExpress.Utils.v23.1" />
+    <Reference Include="DevExpress.Sparkline.v23.1.Core" />
+    <Reference Include="DevExpress.XtraBars.v23.1, Version=23.1.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraEditors.v23.1" />
+    <Reference Include="DevExpress.Printing.v23.1.Core" />
+    <Reference Include="DevExpress.Drawing.v23.1" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="websocket-sharp, Version=1.0.1.0, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSocketSharp-netstandard.1.0.1\lib\net45\websocket-sharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConnectionManager.cs" />
+    <Compile Include="frmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMain.Designer.cs">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmLogin.Designer.cs">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LanguageManager.cs" />
+    <Compile Include="NotificationManager.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ucDeviceManager.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucDeviceManager.Designer.cs">
+      <DependentUpon>ucDeviceManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucDeviceOutput.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucDeviceOutput.Designer.cs">
+      <DependentUpon>ucDeviceOutput.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucDistribution.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucDistribution.Designer.cs">
+      <DependentUpon>ucDistribution.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucProgress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucProgress.Designer.cs">
+      <DependentUpon>ucProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucProgressManagement.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucProgressManagement.Designer.cs">
+      <DependentUpon>ucProgressManagement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucSchedule.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucSchedule.Designer.cs">
+      <DependentUpon>ucSchedule.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucUserManagement.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucUserManagement.Designer.cs">
+      <DependentUpon>ucUserManagement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WebSocketClient.cs" />
+    <EmbeddedResource Include="en.resx" />
+    <EmbeddedResource Include="frmLogin.resx">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMain.resx">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="ucDeviceManager.resx">
+      <DependentUpon>ucDeviceManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucDeviceOutput.resx">
+      <DependentUpon>ucDeviceOutput.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucDistribution.resx">
+      <DependentUpon>ucDistribution.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucProgress.resx">
+      <DependentUpon>ucProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucProgressManagement.resx">
+      <DependentUpon>ucProgressManagement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucSchedule.resx">
+      <DependentUpon>ucSchedule.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucUserManagement.resx">
+      <DependentUpon>ucUserManagement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="vi.resx" />
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
