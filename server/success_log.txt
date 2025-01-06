@@ -1,0 +1,1864 @@
+[2024-11-25T08:07:12.686Z] Connected to device at 10.30.4.128
+[2024-11-25T08:10:51.459Z] Connected to device at 10.30.4.128
+[2024-11-25T08:11:29.061Z] Connected to device at 10.30.4.128
+[2024-11-25T08:18:32.081Z] Connected to device at 10.30.4.128
+[2024-11-25T08:18:38.410Z] Connected to device at 10.30.4.128
+[2024-11-25T08:18:48.511Z] Connected to device at 10.30.4.128
+[2024-11-25T08:19:49.294Z] Connected to device at 10.30.4.128
+[2024-11-25T08:21:07.605Z] Connected to device at 10.30.4.128
+[2024-11-25T08:22:39.668Z] Connected to device at 10.30.4.128
+[2024-11-25T08:23:52.816Z] Connected to device at 10.30.4.128
+[2024-11-25T08:53:18.581Z] Connected to device at 10.30.4.128
+[2024-11-25T09:01:12.890Z] Connected to device at 10.30.4.128
+[2024-11-25T09:02:19.798Z] Connected to device at 10.30.4.128
+[2024-11-25T09:02:46.801Z] Connected to device at 10.30.4.128
+[2024-11-25T09:04:33.823Z] Connected to device at 10.30.4.128
+[2024-11-25T09:09:00.749Z] Connected to device at 10.30.4.128
+[2024-11-25T09:11:04.739Z] Connected to device at 10.30.4.128
+[2024-11-25T09:12:27.776Z] Connected to device at 10.30.4.128
+[2024-11-25T09:17:38.059Z] Connected to device at 10.30.4.128
+[2024-11-25T09:19:13.947Z] Connected to device at 10.30.4.128
+[2024-11-25T09:22:56.589Z] Connected to device at 10.30.4.128
+[2024-11-25T09:24:11.315Z] Connected to device at 10.30.4.128
+[2024-11-25T09:26:30.666Z] Connected to device at 10.30.4.128
+[2024-11-25T09:28:44.362Z] Connected to device at 10.30.4.128
+[2024-11-25T09:31:15.678Z] Connected to device at 10.30.4.128
+[2024-11-25T09:33:58.002Z] Connected to device at 10.30.4.128
+[2024-11-25T09:34:25.227Z] Connected to device at 10.30.4.128
+[2024-11-26T00:52:35.478Z] Connected to device at 10.30.4.128
+[2024-11-26T00:57:54.515Z] Connected to device at 10.30.4.128
+[2024-11-26T01:00:46.687Z] Connected to device at 10.30.4.128
+[2024-11-26T01:01:34.439Z] Connected to device at 10.30.4.128
+[2024-11-26T01:02:56.877Z] Connected to device at 10.30.4.128
+[2024-11-26T01:04:33.695Z] Connected to device at 10.30.4.128
+[2024-11-26T01:09:07.458Z] Connected to device at 10.30.4.128
+[2024-11-26T01:11:58.115Z] Connected to device at 10.30.4.128
+[2024-11-26T01:12:13.405Z] Connected to device at 10.30.4.128
+[2024-11-26T01:14:57.618Z] Connected to device at 10.30.4.128
+[2024-11-26T01:15:30.599Z] Connected to device at 10.30.4.128
+[2024-11-26T01:17:41.924Z] Connected to device at 10.30.4.128
+[2024-11-26T01:21:09.103Z] Connected to device at 10.30.4.128
+[2024-11-26T01:29:23.397Z] Connected to device at 10.30.4.128
+[2024-11-26T01:30:18.697Z] Connected to device at 10.30.4.128
+[2024-11-26T01:33:30.860Z] Connected to device at 10.30.4.128
+[2024-11-26T01:35:56.891Z] Connected to device at 10.30.4.128
+[2024-11-26T01:41:18.205Z] Connected to device at 10.30.4.128
+[2024-11-26T01:51:07.570Z] Connected to device at 10.30.4.128
+[2024-11-26T02:51:38.995Z] Connected to device at 10.30.4.128
+[2024-11-26T02:54:14.861Z] Connected to device at 10.30.4.128
+[2024-11-26T03:06:13.256Z] Connected to device at 10.30.4.128
+[2024-11-26T03:06:29.745Z] Connected to device at 10.30.4.128
+[2024-11-26T03:15:39.794Z] Connected to device at 10.30.4.128
+[2024-11-26T03:16:40.911Z] Connected to device at 10.30.4.128
+[2024-11-26T03:22:44.528Z] Connected to device at 10.30.4.128
+[2024-11-26T03:26:04.734Z] Connected to device at 10.30.28.23
+[2024-11-26T03:26:10.501Z] Connected to device at 10.30.4.128
+[2024-11-26T03:26:10.576Z] Connected to device at 10.30.28.23
+[2024-11-26T03:27:15.835Z] Connected to device at 10.30.4.128
+[2024-11-26T03:27:15.907Z] Connected to device at 10.30.28.23
+[2024-11-26T03:28:06.160Z] Connected to device at 10.30.4.128
+[2024-11-26T03:28:06.234Z] Connected to device at 10.30.28.23
+[2024-11-26T03:29:36.962Z] Connected to device at 10.30.28.23
+[2024-11-26T03:31:01.898Z] Connected to device at 10.30.28.23
+[2024-11-26T03:31:30.768Z] Connected to device at 10.30.28.23
+[2024-11-26T03:38:35.879Z] Connected to device at 10.30.28.23
+[2024-11-26T03:38:41.106Z] Connected to device at 10.30.28.23
+[2024-11-26T03:39:37.147Z] Connected to device at 10.30.28.23
+[2024-11-26T03:40:22.022Z] Disconnected from device at 10.30.28.23
+[2024-11-26T03:40:22.028Z] Connection closed to device at 10.30.28.23
+[2024-11-26T03:47:43.098Z] Connected to device at 10.30.4.128
+[2024-11-26T03:49:03.102Z] Connected to device at 10.30.4.128
+[2024-11-26T03:52:08.816Z] Connected to device at 10.30.4.128
+[2024-11-26T03:55:06.829Z] Connected to device at 10.30.4.128
+[2024-11-26T03:57:36.980Z] Connected to device at 10.30.4.128
+[2024-11-26T03:58:59.489Z] Connected to device at 10.30.4.128
+[2024-11-26T04:02:33.870Z] Connected to device at 10.30.4.128
+[2024-11-26T04:04:34.773Z] Connected to device at 10.30.4.128
+[2024-11-26T04:06:03.401Z] Connected to device at 10.30.4.128
+[2024-11-26T04:17:21.670Z] Connected to device at 10.30.4.128
+[2024-11-26T04:17:37.950Z] Connected to device at 10.30.4.128
+[2024-11-26T04:19:20.773Z] Connected to device at 10.30.4.128
+[2024-11-26T04:22:01.520Z] Connected to device at 10.30.4.128
+[2024-11-26T04:24:55.745Z] Connected to device at 10.30.4.128
+[2024-11-26T05:31:05.573Z] Connected to device at 10.30.4.128
+[2024-11-26T05:33:04.106Z] Connected to device at 10.30.4.128
+[2024-11-26T06:09:35.629Z] Connected to device at 10.30.4.128
+[2024-11-26T06:11:40.217Z] Connected to device at 10.30.4.128
+[2024-11-26T06:12:20.104Z] Connected to device at 10.30.4.128
+[2024-11-26T06:13:46.058Z] Connected to device at 10.30.4.128
+[2024-11-26T06:14:11.192Z] Connected to device at 10.30.4.128
+[2024-11-26T06:16:01.422Z] Connected to device at 10.30.4.128
+[2024-11-26T06:17:36.138Z] Connected to device at 10.30.4.128
+[2024-11-26T06:17:45.370Z] Connected to device at 10.30.4.128
+[2024-11-26T06:19:39.608Z] Connected to device at 10.30.4.128
+[2024-11-26T06:21:05.031Z] Connected to device at 10.30.4.128
+[2024-11-26T06:21:14.845Z] Connected to device at 10.30.4.128
+[2024-11-26T06:24:27.435Z] Connected to device at 10.30.4.128
+[2024-11-26T06:27:06.793Z] Connected to device at 10.30.4.128
+[2024-11-26T06:28:03.715Z] Connected to device at 10.30.4.128
+[2024-11-26T06:29:45.221Z] Connected to device at 10.30.4.128
+[2024-11-26T06:31:22.161Z] Connected to device at 10.30.4.128
+[2024-11-26T06:32:50.101Z] Connected to device at 10.30.4.128
+[2024-11-26T06:34:02.137Z] Connected to device at 10.30.4.128
+[2024-11-26T06:34:40.061Z] Connected to device at 10.30.4.128
+[2024-11-26T06:36:23.439Z] Connected to device at 10.30.4.128
+[2024-11-26T06:41:29.333Z] Connected to device at 10.30.4.128
+[2024-11-26T06:42:12.467Z] Connected to device at 10.30.4.128
+[2024-11-26T06:44:40.625Z] Connection closed to device at 10.30.4.128
+[2024-11-26T06:44:40.625Z] Disconnected from device at 10.30.4.128
+[2024-11-26T06:44:50.806Z] Connected to device at 10.30.4.128
+[2024-11-26T06:45:17.964Z] Disconnected from device at 10.30.4.128
+[2024-11-26T06:45:17.965Z] Connection closed to device at 10.30.4.128
+[2024-11-26T06:45:22.838Z] Connected to device at 10.30.4.128
+[2024-11-26T06:46:37.799Z] Disconnected from device at 10.30.4.128
+[2024-11-26T06:46:37.800Z] Connection closed to device at 10.30.4.128
+[2024-11-26T06:46:42.926Z] Connected to device at 10.30.4.128
+[2024-11-26T06:51:33.758Z] Disconnected from device at 10.30.4.128
+[2024-11-26T06:51:33.759Z] Connection closed to device at 10.30.4.128
+[2024-11-26T06:51:41.079Z] Connected to device at 10.30.4.128
+[2024-11-26T06:54:42.375Z] Connection closed to device at 10.30.4.128
+[2024-11-26T06:54:42.375Z] Disconnected from device at 10.30.4.128
+[2024-11-26T06:54:51.198Z] Connected to device at 10.30.4.128
+[2024-11-26T07:05:39.993Z] Connection closed to device at 10.30.4.128
+[2024-11-26T07:05:39.993Z] Disconnected from device at 10.30.4.128
+[2024-11-26T07:12:37.493Z] Connected to device at 10.30.4.128
+[2024-11-26T07:14:00.706Z] Connected to device at 10.30.4.128
+[2024-11-26T07:14:46.824Z] Connected to device at 10.30.4.128
+[2024-11-26T07:15:12.858Z] Connected to device at 10.30.4.128
+[2024-11-26T07:19:50.930Z] Connected to device at 10.30.4.128
+[2024-11-26T07:26:09.025Z] Connection closed to device at 10.30.4.128
+[2024-11-26T07:26:09.026Z] Disconnected from device at 10.30.4.128
+[2024-11-26T07:39:09.461Z] Connected to device at 10.30.4.128
+[2024-11-26T07:39:33.312Z] Connected to device at 10.30.4.128
+[2024-11-26T07:48:24.511Z] Connected to device at 10.30.4.128
+[2024-11-26T07:49:44.441Z] Connected to device at 10.30.4.128
+[2024-11-26T07:50:30.081Z] Connected to device at 10.30.4.128
+[2024-11-26T07:50:55.629Z] Connected to device at 10.30.4.128
+[2024-11-26T07:55:09.000Z] Connected to device at 10.30.4.128
+[2024-11-26T07:55:41.665Z] Connected to device at 10.30.4.128
+[2024-11-26T07:58:56.460Z] Connected to device at 10.30.4.128
+[2024-11-26T08:03:26.006Z] Connected to device at 10.30.4.128
+[2024-11-26T08:04:11.119Z] Connected to device at 10.30.4.128
+[2024-11-26T08:05:40.182Z] Connected to device at 10.30.4.128
+[2024-11-26T08:17:09.336Z] Connected to device at 10.30.4.128
+[2024-11-26T08:18:32.607Z] Connected to device at 10.30.4.128
+[2024-11-26T08:18:40.413Z] Connected to device at 10.30.4.128
+[2024-11-26T08:23:31.027Z] Connected to device at 10.30.4.128
+[2024-11-26T08:35:07.999Z] Connected to device at 10.30.4.128
+[2024-11-26T08:36:23.539Z] Connected to device at 10.30.4.128
+[2024-11-26T08:39:50.970Z] Connected to device at 10.30.4.128
+[2024-11-26T08:40:12.320Z] Connected to device at 10.30.4.128
+[2024-11-26T08:43:23.246Z] Connected to device at 10.30.4.128
+[2024-11-26T08:44:00.434Z] Disconnected from device at 10.30.4.128
+[2024-11-26T08:44:00.436Z] Connection closed to device at 10.30.4.128
+[2024-11-26T08:44:05.267Z] Connected to device at 10.30.4.128
+[2024-11-26T08:44:48.676Z] Connected to device at 10.30.4.128
+[2024-11-26T08:50:47.975Z] Connected to device at 10.30.4.128
+[2024-11-26T08:51:11.052Z] Connected to device at 10.30.4.128
+[2024-11-26T08:52:41.116Z] Connected to device at 10.30.4.128
+[2024-11-26T08:57:15.610Z] Connected to device at 10.30.4.128
+[2024-11-26T08:57:25.485Z] Connection closed to device at 10.30.4.128
+[2024-11-26T08:57:25.483Z] Disconnected from device at 10.30.4.128
+[2024-11-26T08:57:30.411Z] Connected to device at 10.30.4.128
+[2024-11-26T09:02:25.745Z] Connected to device at 10.30.4.128
+[2024-11-26T09:05:58.558Z] Connected to device at 10.30.4.128
+[2024-11-26T09:09:43.193Z] Connected to device at 10.30.4.128
+[2024-11-26T09:12:35.107Z] Connected to device at 10.30.4.128
+[2024-11-26T09:22:14.571Z] Disconnected from device at 10.30.4.128
+[2024-11-26T09:22:14.573Z] Connection closed to device at 10.30.4.128
+[2024-11-26T09:25:36.801Z] Connected to device at 10.30.4.128
+[2024-11-26T09:29:10.100Z] Connected to device at 10.30.4.128
+[2024-11-26T09:29:45.649Z] Connection closed to device at 10.30.4.128
+[2024-11-26T09:29:45.650Z] Disconnected from device at 10.30.4.128
+[2024-11-26T09:29:50.596Z] Connected to device at 10.30.4.128
+[2024-11-26T09:29:58.029Z] Connected to device at 10.30.4.128
+[2024-11-26T09:30:37.050Z] Disconnected from device at 10.30.4.128
+[2024-11-26T09:30:37.052Z] Connection closed to device at 10.30.4.128
+[2024-11-26T09:32:37.314Z] Connected to device at 10.30.4.128
+[2024-11-26T09:33:00.039Z] Connected to device at 10.30.4.128
+[2024-11-26T09:34:41.760Z] Disconnected from device at 10.30.4.128
+[2024-11-26T09:34:41.762Z] Connection closed to device at 10.30.4.128
+[2024-11-26T09:34:50.101Z] Connected to device at 10.30.4.128
+[2024-11-26T09:35:15.359Z] Connected to device at 10.30.4.128
+[2024-11-26T09:35:22.925Z] Connected to device at 10.30.4.128
+[2024-11-26T09:36:29.539Z] Connected to device at 10.30.4.128
+[2024-11-26T09:43:05.530Z] Connected to device at 10.30.4.128
+[2024-11-26T09:45:04.229Z] Connected to device at 10.30.4.128
+[2024-11-26T09:50:27.083Z] Disconnected from device at 10.30.4.128
+[2024-11-26T09:50:27.085Z] Connection closed to device at 10.30.4.128
+[2024-11-26T09:50:34.387Z] Connected to device at 10.30.4.128
+[2024-11-26T09:53:07.101Z] Connected to device at 10.30.4.128
+[2024-11-26T09:56:05.802Z] Connected to device at 10.30.4.128
+[2024-11-26T10:00:15.135Z] Connected to device at 10.30.4.128
+[2024-11-26T10:03:44.452Z] Connected to device at 10.30.4.128
+[2024-11-26T10:07:34.407Z] Connected to device at 10.30.4.128
+[2024-11-26T10:47:00.256Z] Connected to device at 10.30.4.128
+[2024-11-26T10:48:12.236Z] Connected to device at 10.30.4.128
+[2024-11-26T10:50:36.430Z] Connected to device at 10.30.4.128
+[2024-11-26T10:51:04.537Z] Connected to device at 10.30.4.128
+[2024-11-26T10:52:10.348Z] Connected to device at 10.30.4.128
+[2024-11-26T10:52:15.847Z] Disconnected from device at 10.30.4.128
+[2024-11-26T10:52:15.849Z] Connection closed to device at 10.30.4.128
+[2024-11-26T10:52:20.815Z] Connected to device at 10.30.4.128
+[2024-11-26T10:52:25.157Z] Connected to device at 10.30.4.128
+[2024-11-27T00:32:06.775Z] Connected to device at 10.30.4.128
+[2024-11-27T00:52:41.721Z] Connected to device at 10.30.4.128
+[2024-11-27T00:55:10.230Z] Connected to device at 10.30.4.128
+[2024-11-27T00:59:31.792Z] Connected to device at 10.30.4.128
+[2024-11-27T01:00:02.228Z] Disconnected from device at 10.30.4.128
+[2024-11-27T01:00:02.230Z] Connection closed to device at 10.30.4.128
+[2024-11-27T01:00:11.852Z] Connected to device at 10.30.4.128
+[2024-11-27T01:02:46.188Z] Connected to device at 10.30.4.128
+[2024-11-27T01:03:15.204Z] Disconnected from device at 10.30.4.128
+[2024-11-27T01:03:15.207Z] Connection closed to device at 10.30.4.128
+[2024-11-27T01:03:16.129Z] Connected to device at 10.30.4.128
+[2024-11-27T01:03:24.146Z] Connected to device at 10.30.4.128
+[2024-11-27T01:05:57.738Z] Disconnected from device at 10.30.4.128
+[2024-11-27T01:05:57.740Z] Connection closed to device at 10.30.4.128
+[2024-11-27T01:06:04.316Z] Connected to device at 10.30.4.128
+[2024-11-27T01:16:43.769Z] Connected to device at 10.30.4.128
+[2024-11-27T01:17:47.951Z] Disconnected from device at 10.30.4.128
+[2024-11-27T01:17:47.952Z] Connection closed to device at 10.30.4.128
+[2024-11-27T01:17:53.840Z] Connected to device at 10.30.4.128
+[2024-11-27T01:18:17.065Z] Connected to device at 10.30.4.128
+[2024-11-27T01:23:36.107Z] Disconnected from device at 10.30.4.128
+[2024-11-27T01:23:36.109Z] Connection closed to device at 10.30.4.128
+[2024-11-27T01:31:40.911Z] Connected to device at 10.30.4.128
+[2024-11-27T01:32:18.584Z] Connected to device at 10.30.4.128
+[2024-11-27T01:32:48.837Z] Connected to device at 10.30.4.128
+[2024-11-27T01:34:11.017Z] Connected to device at 10.30.4.128
+[2024-11-27T01:34:17.639Z] Connected to device at 10.30.4.128
+[2024-11-27T01:34:57.965Z] Connected to device at 10.30.4.128
+[2024-11-27T01:35:39.576Z] Connected to device at 10.30.4.128
+[2024-11-27T01:36:07.211Z] Connected to device at 10.30.4.128
+[2024-11-27T01:40:10.758Z] Connected to device at 10.30.4.128
+[2024-11-27T01:40:44.803Z] Disconnected from device at 10.30.4.128
+[2024-11-27T01:40:44.805Z] Connection closed to device at 10.30.4.128
+[2024-11-27T01:40:50.758Z] Connected to device at 10.30.4.128
+[2024-11-27T01:40:59.963Z] Connected to device at 10.30.4.128
+[2024-11-27T01:49:33.445Z] Connected to device at 10.30.4.128
+[2024-11-27T01:50:15.592Z] Disconnected from device at 10.30.4.128
+[2024-11-27T01:50:15.594Z] Connection closed to device at 10.30.4.128
+[2024-11-27T01:50:23.453Z] Connected to device at 10.30.4.128
+[2024-11-27T01:50:52.574Z] Connected to device at 10.30.4.128
+[2024-11-27T01:57:40.456Z] Connected to device at 10.30.4.128
+[2024-11-27T01:58:16.534Z] Disconnected from device at 10.30.4.128
+[2024-11-27T01:58:16.536Z] Connection closed to device at 10.30.4.128
+[2024-11-27T01:58:20.459Z] Connected to device at 10.30.4.128
+[2024-11-27T02:01:05.652Z] Connected to device at 10.30.4.128
+[2024-11-27T02:03:04.957Z] Connection closed to device at 10.30.4.128
+[2024-11-27T02:03:04.957Z] Disconnected from device at 10.30.4.128
+[2024-11-27T02:03:16.367Z] Connected to device at 10.30.4.128
+[2024-11-27T02:05:59.237Z] Connected to device at 10.30.4.128
+[2024-11-27T02:07:22.599Z] Connected to device at 10.30.4.128
+[2024-11-27T02:12:20.816Z] Connected to device at 10.30.4.128
+[2024-11-27T02:14:55.315Z] Connected to device at 10.30.4.128
+[2024-11-27T02:16:29.509Z] Disconnected from device at 10.30.4.128
+[2024-11-27T02:16:29.510Z] Connection closed to device at 10.30.4.128
+[2024-11-27T02:16:35.411Z] Connected to device at 10.30.4.128
+[2024-11-27T02:18:22.930Z] Connected to device at 10.30.4.128
+[2024-11-27T02:21:13.214Z] Connected to device at 10.30.4.128
+[2024-11-27T02:24:00.108Z] Connected to device at 10.30.4.128
+[2024-11-27T02:24:07.456Z] Connected to device at 10.30.4.128
+[2024-11-27T02:24:51.397Z] Connected to device at 10.30.4.128
+[2024-11-27T02:29:35.134Z] Connected to device at 10.30.4.128
+[2024-11-27T02:31:53.230Z] Connected to device at 10.30.4.128
+[2024-11-27T02:32:13.321Z] Connected to device at 10.30.4.128
+[2024-11-27T02:37:26.443Z] Connected to device at 10.30.4.128
+[2024-11-27T02:39:15.455Z] Connected to device at 10.30.4.128
+[2024-11-27T02:39:39.569Z] Connection closed to device at 10.30.4.128
+[2024-11-27T02:39:39.620Z] Disconnected from device at 10.30.4.128
+[2024-11-27T02:39:45.477Z] Connected to device at 10.30.4.128
+[2024-11-27T02:43:21.888Z] Connected to device at 10.30.4.128
+[2024-11-27T02:45:06.360Z] Connected to device at 10.30.4.128
+[2024-11-27T02:48:53.695Z] Connected to device at 10.30.4.128
+[2024-11-27T02:50:26.155Z] Connected to device at 10.30.4.128
+[2024-11-27T02:51:27.451Z] Connected to device at 10.30.4.128
+[2024-11-27T03:04:41.631Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:04:41.632Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:04:48.008Z] Connected to device at 10.30.4.128
+[2024-11-27T03:06:26.158Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:06:26.159Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:08:42.615Z] Connected to device at 10.30.4.128
+[2024-11-27T03:22:12.103Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:22:12.105Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:22:20.228Z] Connected to device at 10.30.4.128
+[2024-11-27T03:25:25.026Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:25:25.028Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:25:25.812Z] Connected to device at 10.30.4.128
+[2024-11-27T03:29:13.753Z] Connected to device at 10.30.4.128
+[2024-11-27T03:29:52.838Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:29:52.840Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:29:53.741Z] Connected to device at 10.30.4.128
+[2024-11-27T03:35:46.411Z] Connected to device at 10.30.4.128
+[2024-11-27T03:39:26.569Z] Connected to device at 10.30.4.128
+[2024-11-27T03:39:59.626Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:39:59.630Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:40:25.554Z] Connected to device at 10.30.4.128
+[2024-11-27T03:40:25.589Z] Connected to device at 10.30.4.128
+[2024-11-27T03:40:51.554Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:40:51.553Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:40:51.562Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:40:55.610Z] Connected to device at 10.30.4.128
+[2024-11-27T03:42:56.329Z] Connected to device at 10.30.4.128
+[2024-11-27T03:43:22.375Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:43:22.376Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:43:26.316Z] Connected to device at 10.30.4.128
+[2024-11-27T03:47:15.123Z] Connected to device at 10.30.4.128
+[2024-11-27T03:47:46.189Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:47:46.191Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:47:55.027Z] Connected to device at 10.30.4.128
+[2024-11-27T03:47:55.087Z] Connected to device at 10.30.4.128
+[2024-11-27T03:47:55.092Z] Connected to device at 10.30.4.128
+[2024-11-27T03:50:37.682Z] Connected to device at 10.30.4.128
+[2024-11-27T03:57:56.983Z] Connected to device at 10.30.4.128
+[2024-11-27T03:58:17.323Z] Connected to device at 10.30.4.128
+[2024-11-27T03:59:10.395Z] Disconnected from device at 10.30.4.128
+[2024-11-27T03:59:10.397Z] Connection closed to device at 10.30.4.128
+[2024-11-27T03:59:17.298Z] Connected to device at 10.30.4.128
+[2024-11-27T04:01:06.468Z] Connected to device at 10.30.4.128
+[2024-11-27T04:01:45.601Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:01:45.599Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:01:45.824Z] Connected to device at 10.30.4.128
+[2024-11-27T04:07:14.618Z] Connected to device at 10.30.4.128
+[2024-11-27T04:07:42.616Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:07:42.618Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:07:43.419Z] Connected to device at 10.30.4.128
+[2024-11-27T04:09:57.984Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:23.969Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:23.970Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:24.293Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.293Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.294Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.294Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.295Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.295Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.296Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.297Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.297Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.297Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.298Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.298Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.298Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.298Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.299Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.329Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.360Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:24.343Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.361Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:24.361Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.377Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:24.378Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:24.379Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:24.380Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:24.380Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:25.329Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:25.331Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:25.331Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:25.510Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:25.521Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:25.524Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:25.524Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:25.525Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:25.531Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:25.542Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:25.543Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:26.335Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:26.352Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:26.352Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:26.499Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:26.508Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:26.508Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:26.547Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:26.550Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:26.551Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:26.568Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:26.572Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:26.572Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:26.580Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:26.583Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:26.583Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:26.593Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:26.601Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:26.601Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:26.625Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:26.633Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:26.633Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.330Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.351Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.351Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.458Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.462Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.462Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.500Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.512Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.512Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.545Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.549Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.550Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.589Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.592Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.592Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.673Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.677Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.677Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.697Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.697Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.704Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.704Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.697Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.704Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.704Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.716Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.722Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.722Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.732Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.735Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.735Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.736Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.745Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.745Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.756Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.760Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.760Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.766Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.771Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.771Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:27.981Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:27.990Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:27.990Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.329Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.350Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.350Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.442Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.461Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.461Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.463Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.486Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.486Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.505Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.527Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.527Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.695Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.695Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.702Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.702Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.702Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.754Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.755Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.760Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.760Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.761Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.865Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.874Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.875Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.884Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.875Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.885Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.885Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.885Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.885Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.940Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.941Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.941Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.949Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.941Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.949Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.949Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.941Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.949Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.949Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.949Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.962Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.962Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.963Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.965Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.965Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:28.965Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.963Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.966Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.966Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.966Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.963Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.982Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:28.998Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:28.998Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.010Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.024Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.024Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.032Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.035Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.035Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.074Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.083Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.083Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.330Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.352Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.352Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.460Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.464Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.464Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.485Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.481Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.485Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.511Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.508Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.512Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.567Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.567Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.570Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.570Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.571Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.628Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.628Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.623Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.683Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.684Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.690Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.691Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.690Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.753Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.753Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.754Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.754Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.761Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.761Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.761Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.762Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.762Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.832Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.832Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.832Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.841Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.842Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.842Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.842Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.918Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.919Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.919Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.919Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.919Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:29.932Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.932Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:29.932Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.933Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.933Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:29.933Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.036Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.036Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.036Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.048Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.049Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:30.049Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.049Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.342Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.342Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.343Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.357Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.357Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:30.357Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.357Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.357Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.358Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.342Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.342Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.479Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.479Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.480Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.480Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.480Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.481Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.481Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.481Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.482Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.482Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.482Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.483Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.483Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.483Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.484Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.484Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.495Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.495Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:30.496Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.496Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.496Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.496Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.496Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.496Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.497Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.497Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.497Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.497Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.497Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.497Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.497Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.497Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.498Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.636Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.636Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.637Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.636Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.637Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.637Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.648Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.648Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:30.648Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.649Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.638Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.649Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.648Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.649Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.649Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.838Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.839Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.839Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.840Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.841Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.845Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.848Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.841Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:30.855Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:30.856Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.856Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.856Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.855Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.856Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.857Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.856Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:30.856Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.129Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.129Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.130Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.130Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.130Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.131Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.131Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.131Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.131Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.132Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.132Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.146Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.147Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:31.147Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.147Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.147Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.147Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.147Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.148Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.148Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.148Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.148Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.148Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.531Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.531Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.531Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.532Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.532Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.532Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.532Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.532Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.533Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.533Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.533Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.533Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.534Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.546Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.546Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:31.547Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.547Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.533Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.547Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.547Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.547Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.533Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:31.547Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.547Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.548Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.547Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.548Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.548Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.549Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.548Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:31.548Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.070Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.070Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.071Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.071Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.072Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.072Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.072Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.072Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.072Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.072Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.073Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.073Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.073Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.073Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.073Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.073Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.074Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.074Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.074Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.074Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.074Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.075Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.075Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.075Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.075Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.091Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.091Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:32.091Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.092Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.093Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.093Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.093Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.093Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.093Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.093Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.093Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.093Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.094Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.094Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.094Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.094Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.094Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.094Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.752Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.752Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.752Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.753Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.753Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.753Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.754Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.753Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.754Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.754Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.752Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.754Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.754Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.755Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.755Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.755Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.756Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.756Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.756Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.757Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.757Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.757Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.758Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.758Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.758Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:32.778Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.778Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:32.778Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.779Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.780Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.780Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.780Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.780Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.780Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.780Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.780Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.780Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.781Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.781Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.781Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.781Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.781Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:32.781Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.582Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.608Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.608Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.608Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.609Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.609Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.609Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.609Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.609Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.610Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.610Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.610Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.610Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.610Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.610Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.611Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.611Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.612Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.612Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.612Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.612Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.613Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.613Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.613Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.613Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.613Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:33.633Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.633Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:33.633Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.633Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.633Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.633Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.633Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.634Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.634Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.634Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.634Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.634Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.634Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.634Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.634Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.635Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.635Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.635Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.635Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.635Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.635Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.635Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.635Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.636Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.636Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.636Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:33.636Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.535Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.536Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.536Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.536Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.538Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.538Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.538Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.539Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.539Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.540Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.540Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.540Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.541Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.541Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.541Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.542Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.542Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.542Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.542Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.542Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.543Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.543Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.543Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.543Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:35.570Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.570Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:35.570Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.570Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.571Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.571Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.571Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.571Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.572Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.572Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.572Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.572Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.573Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.573Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.573Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.573Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.573Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.573Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.573Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.573Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.574Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.574Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.574Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.574Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:35.574Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.632Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.643Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.643Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.643Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.644Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.644Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.644Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.644Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.644Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.644Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.645Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.645Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.645Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.645Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.645Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.646Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.646Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.646Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.646Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.646Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.646Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.647Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.647Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.647Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.647Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.647Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.648Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.648Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.648Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.648Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.649Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.652Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.652Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.652Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.653Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.653Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.653Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.653Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.653Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.654Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:36.674Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.674Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:36.674Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.675Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.675Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.675Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.675Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.675Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.676Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.676Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.676Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.676Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.676Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.676Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.677Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.677Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.677Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.677Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.677Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.678Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.678Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.678Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.678Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.678Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.679Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.679Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.679Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.679Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.679Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.679Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.680Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.680Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.680Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.680Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.680Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.681Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.681Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.681Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.681Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.681Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:36.681Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.225Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.226Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.226Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.227Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.227Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.228Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.228Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.228Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.228Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.228Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.229Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.229Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.232Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.232Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.232Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.236Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.242Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.244Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.244Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.245Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.245Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.245Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.245Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.245Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.246Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.246Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.247Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.247Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.247Z] Connected to device at 10.30.4.128
+[2024-11-27T04:10:39.267Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.267Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:10:39.267Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.267Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.267Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.267Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.268Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.269Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.269Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.269Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.269Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.269Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.269Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.269Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.269Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.270Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.270Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.270Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.270Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.270Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.270Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:10:39.270Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:13:32.392Z] Connected to device at 10.30.4.128
+[2024-11-27T04:14:02.390Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:14:02.391Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:14:03.115Z] Connected to device at 10.30.4.128
+[2024-11-27T04:17:09.350Z] Connected to device at 10.30.4.128
+[2024-11-27T04:17:39.480Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:17:39.482Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:17:39.615Z] Connected to device at 10.30.4.128
+[2024-11-27T04:19:30.129Z] Connected to device at 10.30.4.128
+[2024-11-27T04:19:38.415Z] Connected to device at 10.30.4.128
+[2024-11-27T04:19:44.572Z] Connected to device at 10.30.4.128
+[2024-11-27T04:21:21.485Z] Connected to device at 10.30.4.128
+[2024-11-27T04:24:37.352Z] Connected to device at 10.30.4.128
+[2024-11-27T04:24:37.386Z] Connected to device at 10.30.4.128
+[2024-11-27T04:27:06.773Z] Connected to device at 10.30.4.128
+[2024-11-27T04:27:51.555Z] Connected to device at 10.30.4.128
+[2024-11-27T04:28:16.551Z] Disconnected from device at 10.30.4.128
+[2024-11-27T04:28:16.553Z] Connection closed to device at 10.30.4.128
+[2024-11-27T04:28:21.541Z] Connected to device at 10.30.4.128
+[2024-11-27T05:36:51.920Z] Connected to device at 10.30.4.128
+[2024-11-27T05:37:25.952Z] Disconnected from device at 10.30.4.128
+[2024-11-27T05:37:25.955Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:37:31.904Z] Connected to device at 10.30.4.128
+[2024-11-27T05:39:15.747Z] Connected to device at 10.30.4.128
+[2024-11-27T05:39:48.860Z] Disconnected from device at 10.30.4.128
+[2024-11-27T05:39:48.862Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:39:49.084Z] Connected to device at 10.30.4.128
+[2024-11-27T05:41:14.182Z] Connected to device at 10.30.4.128
+[2024-11-27T05:41:40.171Z] Disconnected from device at 10.30.4.128
+[2024-11-27T05:41:40.173Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:41:40.428Z] Connected to device at 10.30.4.128
+[2024-11-27T05:43:55.345Z] Connected to device at 10.30.4.128
+[2024-11-27T05:44:21.432Z] Disconnected from device at 10.30.4.128
+[2024-11-27T05:44:21.434Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:44:21.503Z] Connected to device at 10.30.4.128
+[2024-11-27T05:44:30.211Z] Connected to device at 10.30.4.128
+[2024-11-27T05:45:02.212Z] Disconnected from device at 10.30.4.128
+[2024-11-27T05:45:02.214Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:45:02.514Z] Connected to device at 10.30.4.128
+[2024-11-27T05:49:38.769Z] Connected to device at 10.30.4.128
+[2024-11-27T05:50:09.871Z] Disconnected from device at 10.30.4.128
+[2024-11-27T05:50:09.872Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:52:34.824Z] Connected to device at 10.30.4.128
+[2024-11-27T05:53:00.852Z] Disconnected from device at 10.30.4.128
+[2024-11-27T05:53:00.853Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:54:16.648Z] Connected to device at 10.30.4.128
+[2024-11-27T05:57:02.192Z] Connected to device at 10.30.4.128
+[2024-11-27T05:57:03.237Z] Connected to device at 10.30.4.128
+[2024-11-27T05:57:29.197Z] Disconnected from device at 10.30.4.128
+[2024-11-27T05:57:29.199Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:57:29.350Z] Connection closed to device at 10.30.4.128
+[2024-11-27T05:59:57.448Z] Connected to device at 10.30.4.128
+[2024-11-27T06:00:36.942Z] Connected to device at 10.30.4.128
+[2024-11-27T06:00:37.977Z] Connected to device at 10.30.4.128
+[2024-11-27T06:00:46.910Z] Connected to device at 10.30.4.128
+[2024-11-27T06:00:52.982Z] Connected to device at 10.30.4.128
+[2024-11-27T06:00:56.912Z] Connected to device at 10.30.4.128
+[2024-11-27T06:01:06.914Z] Connected to device at 10.30.4.128
+[2024-11-27T06:01:16.913Z] Connected to device at 10.30.4.128
+[2024-11-27T06:01:26.914Z] Connected to device at 10.30.4.128
+[2024-11-27T06:01:54.458Z] Connected to device at 10.30.4.128
+[2024-11-27T06:01:55.493Z] Connected to device at 10.30.4.128
+[2024-11-27T06:01:56.930Z] Connected to device at 10.30.4.128
+[2024-11-27T06:01:58.774Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:01:58.776Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:01:58.784Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:01:58.784Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:01:58.788Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:01:58.798Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:01:58.803Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:01:58.809Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:01:58.815Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:01:58.822Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:02:06.929Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.792Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.793Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.802Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.802Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.804Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.803Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.804Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.810Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:02:08.810Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:02:08.810Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:02:08.810Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:02:08.817Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:02:08.816Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:02:08.845Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:08.846Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:02:08.847Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:02:16.930Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:16.933Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:02:16.933Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:02:26.943Z] Connected to device at 10.30.4.128
+[2024-11-27T06:02:36.948Z] Connected to device at 10.30.4.128
+[2024-11-27T06:03:44.419Z] Connected to device at 10.30.4.128
+[2024-11-27T06:03:45.451Z] Connected to device at 10.30.4.128
+[2024-11-27T06:04:13.407Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:04:13.409Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:04:13.412Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:04:23.411Z] Connected to device at 10.30.4.128
+[2024-11-27T06:04:23.441Z] Connected to device at 10.30.4.128
+[2024-11-27T06:31:12.053Z] Connected to device at 10.30.4.128
+[2024-11-27T06:31:13.116Z] Connected to device at 10.30.4.128
+[2024-11-27T06:31:22.030Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:04.511Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:05.544Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:32.492Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:41:32.494Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:41:32.499Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:41:35.509Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:39.514Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:42.498Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:42.530Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:44.503Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:47.531Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:53.551Z] Connected to device at 10.30.4.128
+[2024-11-27T06:41:54.503Z] Connected to device at 10.30.4.128
+[2024-11-27T06:42:04.504Z] Connected to device at 10.30.4.128
+[2024-11-27T06:42:04.511Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:42:04.511Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:42:14.511Z] Connected to device at 10.30.4.128
+[2024-11-27T06:42:24.512Z] Connected to device at 10.30.4.128
+[2024-11-27T06:42:31.338Z] Connected to device at 10.30.4.128
+[2024-11-27T06:42:34.512Z] Connected to device at 10.30.4.128
+[2024-11-27T06:42:44.512Z] Connected to device at 10.30.4.128
+[2024-11-27T06:42:44.515Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:42:44.515Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:42:54.513Z] Connected to device at 10.30.4.128
+[2024-11-27T06:42:54.516Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:42:54.516Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:42:59.155Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:00.191Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:08.237Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:09.124Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:13.203Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:19.138Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:21.169Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:25.186Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:29.138Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:29.142Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:43:29.142Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:43:39.144Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:45.182Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:48.186Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:54.251Z] Connected to device at 10.30.4.128
+[2024-11-27T06:43:58.156Z] Connected to device at 10.30.4.128
+[2024-11-27T06:44:08.170Z] Connected to device at 10.30.4.128
+[2024-11-27T06:44:18.185Z] Connected to device at 10.30.4.128
+[2024-11-27T06:44:28.194Z] Connected to device at 10.30.4.128
+[2024-11-27T06:44:38.207Z] Connected to device at 10.30.4.128
+[2024-11-27T06:44:48.208Z] Connected to device at 10.30.4.128
+[2024-11-27T06:44:51.844Z] Connected to device at 10.30.4.128
+[2024-11-27T06:44:58.211Z] Connected to device at 10.30.4.128
+[2024-11-27T06:45:08.209Z] Connected to device at 10.30.4.128
+[2024-11-27T06:45:18.209Z] Connected to device at 10.30.4.128
+[2024-11-27T06:45:18.212Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:45:18.212Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:46:20.568Z] Connected to device at 10.30.4.128
+[2024-11-27T06:48:11.438Z] Connected to device at 10.30.4.128
+[2024-11-27T06:49:18.767Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:49:18.769Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:50:56.537Z] Connected to device at 10.30.4.128
+[2024-11-27T06:52:36.955Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:52:36.957Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:52:46.593Z] Connected to device at 10.30.4.128
+[2024-11-27T06:54:55.566Z] Connection closed to device at 10.30.4.128
+[2024-11-27T06:54:55.566Z] Disconnected from device at 10.30.4.128
+[2024-11-27T06:57:44.760Z] Connected to device at 10.30.4.128
+[2024-11-27T06:58:24.910Z] Connected to device at 10.30.4.128
+[2024-11-27T06:58:52.025Z] Connected to device at 10.30.4.128
+[2024-11-27T07:00:22.457Z] Connected to device at 10.30.4.128
+[2024-11-27T07:01:27.792Z] Connected to device at 10.30.4.128
+[2024-11-27T07:01:53.421Z] Connected to device at 10.30.4.128
+[2024-11-27T07:02:08.402Z] Connected to device at 10.30.4.128
+[2024-11-27T07:02:20.404Z] Connected to device at 10.30.4.128
+[2024-11-27T07:03:38.272Z] Connected to device at 10.30.4.128
+[2024-11-27T07:04:32.292Z] Connected to device at 10.30.4.128
+[2024-11-27T07:05:09.282Z] Connected to device at 10.30.4.128
+[2024-11-27T07:07:15.406Z] Connected to device at 10.30.4.128
+[2024-11-27T07:14:06.786Z] Connected to device at 10.30.4.128
+[2024-11-27T07:14:22.558Z] Connected to device at 10.30.4.128
+[2024-11-27T07:44:54.706Z] Connected to device at 10.30.4.128
+[2024-11-27T08:22:38.300Z] Connected to device at 10.30.4.128
+[2024-11-27T08:23:01.205Z] Connected to device at 10.30.4.128
+[2024-11-27T08:24:02.863Z] Connected to device at 10.30.4.128
+[2024-11-27T08:24:19.016Z] Connected to device at 10.30.4.128
+[2024-11-27T08:24:37.554Z] Connected to device at 10.30.4.128
+[2024-11-27T08:24:48.423Z] Connected to device at 10.30.4.128
+[2024-11-27T08:25:26.181Z] Connected to device at 10.30.4.128
+[2024-11-27T08:27:26.001Z] Connected to device at 10.30.4.128
+[2024-11-27T08:28:35.419Z] Connected to device at 10.30.4.128
+[2024-11-27T08:34:10.514Z] Connected to device at 10.30.4.128
+[2024-11-27T08:35:32.732Z] Connected to device at 10.30.4.128
+[2024-11-27T08:46:17.553Z] Connected to device at 10.30.4.128
+[2024-11-27T08:46:31.383Z] Connected to device at 10.30.4.128
+[2024-11-27T08:47:29.770Z] Connected to device at 10.30.4.128
+[2024-11-27T08:47:36.837Z] Connected to device at 10.30.4.128
+[2024-11-27T08:50:31.561Z] Connected to device at 10.30.4.128
+[2024-11-27T08:53:33.741Z] Connected to device at 10.30.4.128
+[2024-11-27T08:58:39.636Z] Connected to device at 10.30.4.128
+[2024-11-27T09:00:42.800Z] Connected to device at 10.30.4.128
+[2024-11-27T09:00:46.290Z] Connected to device at 10.30.4.128
+[2024-11-27T09:02:09.867Z] Connected to device at 10.30.4.128
+[2024-11-27T09:02:10.857Z] Connected to device at 10.30.4.128
+[2024-11-27T09:04:32.923Z] Connected to device at 10.30.4.128
+[2024-11-27T09:05:06.511Z] Connected to device at 10.30.4.128
+[2024-11-27T09:10:24.866Z] Connected to device at 10.30.4.128
+[2024-11-27T09:10:50.178Z] Connected to device at 10.30.4.128
+[2024-11-27T09:15:07.116Z] Connected to device at 10.30.4.128
+[2024-11-27T09:17:11.822Z] Connected to device at 10.30.4.128
+[2024-11-27T09:17:19.394Z] Connected to device at 10.30.4.128
+[2024-11-27T09:25:59.329Z] Connected to device at 10.30.4.128
+[2024-11-27T09:26:54.439Z] Connected to device at 10.30.4.128
+[2024-11-27T09:27:34.913Z] Connected to device at 10.30.4.128
+[2024-11-27T09:28:47.919Z] Connected to device at 10.30.4.128
+[2024-11-27T09:32:05.907Z] Connected to device at 10.30.4.128
+[2024-11-27T09:33:50.494Z] Connected to device at 10.30.4.128
+[2024-11-27T09:37:22.654Z] Connected to device at 10.30.4.128
+[2024-11-27T09:38:58.649Z] Connected to device at 10.30.4.128
+[2024-11-27T09:45:25.715Z] Connected to device at 10.30.4.128
+[2024-11-27T09:46:04.988Z] Connected to device at 10.30.4.128
+[2024-11-27T09:46:40.051Z] Connected to device at 10.30.4.128
+[2024-11-27T09:47:27.555Z] Connected to device at 10.30.4.128
+[2024-11-27T09:48:05.581Z] Connected to device at 10.30.4.128
+[2024-11-27T09:48:08.831Z] Connected to device at 10.30.4.128
+[2024-11-27T09:48:31.460Z] Connected to device at 10.30.4.128
+[2024-11-27T09:48:55.690Z] Connected to device at 10.30.4.128
+[2024-11-27T09:49:50.322Z] Connected to device at 10.30.4.128
+[2024-11-27T09:50:51.072Z] Connected to device at 10.30.4.128
+[2024-11-27T09:53:03.098Z] Connected to device at 10.30.4.128
+[2024-11-27T09:53:49.710Z] Connected to device at 10.30.4.128
+[2024-11-27T10:00:13.020Z] Connected to device at 10.30.4.128
+[2024-11-27T10:06:02.234Z] Connected to device at 10.30.4.128
+[2024-11-27T10:06:27.506Z] Connected to device at 10.30.4.128
+[2024-11-27T10:07:00.533Z] Connected to device at 10.30.4.128
+[2024-11-27T10:08:49.453Z] Connected to device at 10.30.4.128
+[2024-11-27T10:11:01.688Z] Connected to device at 10.30.4.128
+[2024-11-27T10:12:43.892Z] Connected to device at 10.30.4.128
+[2024-11-27T10:14:45.956Z] Connected to device at 10.30.4.128
+[2024-11-27T10:17:45.116Z] Connected to device at 10.30.4.128
+[2024-11-27T10:20:15.736Z] Connected to device at 10.30.4.128
+[2024-11-27T10:21:19.742Z] Connected to device at 10.30.4.128
+[2024-11-27T10:21:53.222Z] Connected to device at 10.30.4.128
+[2024-11-27T10:25:47.628Z] Connected to device at 10.30.4.128
+[2024-11-27T10:26:15.375Z] Connected to device at 10.30.4.128
+[2024-11-27T10:27:39.731Z] Connected to device at 10.30.4.128
+[2024-11-27T10:28:02.293Z] Connected to device at 10.30.4.128
+[2024-11-27T10:28:31.563Z] Connected to device at 10.30.4.128
+[2024-11-27T10:29:44.514Z] Connected to device at 10.30.4.128
+[2024-11-27T10:36:49.054Z] Connected to device at 10.30.4.128
+[2024-11-27T10:38:01.628Z] Connected to device at 10.30.4.128
+[2024-11-27T10:38:06.388Z] Connected to device at 10.30.4.128
+[2024-11-27T10:39:00.838Z] Connected to device at 10.30.4.128
+[2024-11-27T10:41:17.184Z] Connected to device at 10.30.4.128
+[2024-11-27T10:44:14.384Z] Connected to device at 10.30.4.128
+[2024-11-27T10:45:43.594Z] Connected to device at 10.30.4.128
+[2024-11-27T10:47:07.226Z] Connected to device at 10.30.4.128
+[2024-11-27T10:49:10.744Z] Connected to device at 10.30.4.128
+[2024-11-27T10:49:21.493Z] Connected to device at 10.30.4.128
+[2024-11-27T10:52:12.859Z] Connected to device at 10.30.4.128
+[2024-11-27T10:53:41.639Z] Connected to device at 10.30.4.128
+[2024-11-27T10:53:44.832Z] Connected to device at 10.30.4.128
+[2024-11-27T10:53:46.532Z] Connected to device at 10.30.4.128
+[2024-11-27T10:55:52.940Z] Connected to device at 10.30.4.128
+[2024-11-27T10:56:46.697Z] Connected to device at 10.30.4.128
+[2024-11-27T10:57:28.125Z] Connected to device at 10.30.4.128
+[2024-11-27T10:58:24.495Z] Connected to device at 10.30.4.128
+[2024-11-29T00:42:45.989Z] Connected to device at 10.30.4.128
+[2024-11-29T00:43:04.984Z] Connected to device at 10.30.4.128
+[2024-11-29T00:44:00.299Z] Connected to device at 10.30.4.128
+[2024-11-29T00:44:40.796Z] Connected to device at 10.30.4.128
+[2024-11-29T00:48:05.903Z] Connected to device at 10.30.4.128
+[2024-11-29T00:49:26.424Z] Connected to device at 10.30.4.128
+[2024-11-29T00:52:32.559Z] Connected to device at 10.30.4.128
+[2024-11-29T00:52:56.748Z] Connected to device at 10.30.4.128
+[2024-11-29T00:53:28.507Z] Connected to device at 10.30.4.128
+[2024-11-29T00:54:11.198Z] Connected to device at 10.30.4.128
+[2024-11-29T00:54:21.173Z] Connected to device at 10.30.4.128
+[2024-11-29T00:54:31.131Z] Connected to device at 10.30.4.128
+[2024-11-29T00:54:41.132Z] Connected to device at 10.30.4.128
+[2024-11-29T00:54:51.194Z] Connected to device at 10.30.4.128
+[2024-11-29T00:55:01.147Z] Connected to device at 10.30.4.128
+[2024-11-29T00:55:11.163Z] Connected to device at 10.30.4.128
+[2024-11-29T00:55:21.171Z] Connected to device at 10.30.4.128
+[2024-11-29T00:55:31.167Z] Connected to device at 10.30.4.128
+[2024-11-29T00:55:41.171Z] Connected to device at 10.30.4.128
+[2024-11-29T00:55:51.169Z] Connected to device at 10.30.4.128
+[2024-11-29T00:56:01.217Z] Connected to device at 10.30.4.128
+[2024-11-29T00:56:11.167Z] Connected to device at 10.30.4.128
+[2024-11-29T00:56:21.168Z] Connected to device at 10.30.4.128
+[2024-11-29T00:56:31.170Z] Connected to device at 10.30.4.128
+[2024-11-29T00:56:41.168Z] Connected to device at 10.30.4.128
+[2024-11-29T00:56:51.167Z] Connected to device at 10.30.4.128
+[2024-11-29T00:56:51.176Z] Connection closed to device at 10.30.4.128
+[2024-11-29T00:56:51.176Z] Disconnected from device at 10.30.4.128
+[2024-11-29T00:57:00.524Z] Connected to device at 10.30.4.128
+[2024-11-29T00:57:10.493Z] Connected to device at 10.30.4.128
+[2024-11-29T00:57:20.508Z] Connected to device at 10.30.4.128
+[2024-11-29T00:57:30.504Z] Connected to device at 10.30.4.128
+[2024-11-29T00:57:40.517Z] Connected to device at 10.30.4.128
+[2024-11-29T00:57:50.523Z] Connected to device at 10.30.4.128
+[2024-11-29T00:58:00.531Z] Connected to device at 10.30.4.128
+[2024-11-29T00:59:46.960Z] Connected to device at 10.30.4.128
+[2024-11-29T00:59:56.937Z] Connected to device at 10.30.4.128
+[2024-11-29T01:00:07.012Z] Connected to device at 10.30.4.128
+[2024-11-29T01:00:17.015Z] Connected to device at 10.30.4.128
+[2024-11-29T01:01:57.105Z] Connected to device at 10.30.4.128
+[2024-11-29T01:02:07.075Z] Connected to device at 10.30.4.128
+[2024-11-29T01:02:17.091Z] Connected to device at 10.30.4.128
+[2024-11-29T01:02:27.102Z] Connected to device at 10.30.4.128
+[2024-11-29T01:02:37.104Z] Connected to device at 10.30.4.128
+[2024-11-29T01:02:47.163Z] Connected to device at 10.30.4.128
+[2024-11-29T01:02:57.122Z] Connected to device at 10.30.4.128
+[2024-11-29T01:03:07.173Z] Connected to device at 10.30.4.128
+[2024-11-29T01:03:17.129Z] Connected to device at 10.30.4.128
+[2024-11-29T01:03:27.174Z] Connected to device at 10.30.4.128
+[2024-11-29T01:03:37.172Z] Connected to device at 10.30.4.128
+[2024-11-29T01:03:47.178Z] Connected to device at 10.30.4.128
+[2024-11-29T01:03:57.174Z] Connected to device at 10.30.4.128
+[2024-11-29T01:04:07.126Z] Connected to device at 10.30.4.128
+[2024-11-29T01:04:17.128Z] Connected to device at 10.30.4.128
+[2024-11-29T01:04:27.132Z] Connected to device at 10.30.4.128
+[2024-11-29T01:04:37.129Z] Connected to device at 10.30.4.128
+[2024-11-29T01:04:37.139Z] Connection closed to device at 10.30.4.128
+[2024-11-29T01:04:37.139Z] Disconnected from device at 10.30.4.128
+[2024-11-29T01:04:47.183Z] Connected to device at 10.30.4.128
+[2024-11-29T01:04:47.193Z] Connection closed to device at 10.30.4.128
+[2024-11-29T01:04:47.193Z] Disconnected from device at 10.30.4.128
+[2024-11-29T01:06:21.075Z] Connected to device at 10.30.4.128
+[2024-11-29T01:06:38.724Z] Connected to device at 10.30.4.128
+[2024-11-29T01:06:53.972Z] Connected to device at 10.30.4.128
+[2024-11-29T01:07:03.993Z] Connected to device at 10.30.4.128
+[2024-11-29T01:07:13.958Z] Connected to device at 10.30.4.128
+[2024-11-29T01:07:23.960Z] Connected to device at 10.30.4.128
+[2024-11-29T01:07:33.976Z] Connected to device at 10.30.4.128
+[2024-11-29T01:07:43.971Z] Connected to device at 10.30.4.128
+[2024-11-29T01:07:53.983Z] Connected to device at 10.30.4.128
+[2024-11-29T01:08:03.991Z] Connected to device at 10.30.4.128
+[2024-11-29T01:08:13.986Z] Connected to device at 10.30.4.128
+[2024-11-29T01:08:23.989Z] Connected to device at 10.30.4.128
+[2024-11-29T01:08:33.988Z] Connected to device at 10.30.4.128
+[2024-11-29T01:08:43.988Z] Connected to device at 10.30.4.128
+[2024-11-29T01:08:53.979Z] Connected to device at 10.30.4.128
+[2024-11-29T01:09:03.984Z] Connected to device at 10.30.4.128
+[2024-11-29T01:09:13.978Z] Connected to device at 10.30.4.128
+[2024-11-29T01:09:23.982Z] Connected to device at 10.30.4.128
+[2024-11-29T01:09:33.983Z] Connected to device at 10.30.4.128
+[2024-11-29T01:09:33.993Z] Connection closed to device at 10.30.4.128
+[2024-11-29T01:09:33.993Z] Disconnected from device at 10.30.4.128
+[2024-11-29T01:09:43.981Z] Connected to device at 10.30.4.128
+[2024-11-29T01:09:43.989Z] Connection closed to device at 10.30.4.128
+[2024-11-29T01:09:43.989Z] Disconnected from device at 10.30.4.128
+[2024-11-29T01:13:17.647Z] Connected to device at 10.30.4.128
+[2024-11-29T01:15:21.432Z] Connected to device at 10.30.4.128
+[2024-11-29T01:17:00.633Z] Connected to device at 10.30.4.128
+[2024-11-29T01:18:21.186Z] Connected to device at 10.30.4.128
+[2024-11-29T01:18:35.558Z] Connection closed to device at 10.30.4.128
+[2024-11-29T01:18:35.559Z] Disconnected from device at 10.30.4.128
+[2024-11-29T01:20:00.901Z] Connected to device at 10.30.4.128
+[2024-11-29T01:21:29.250Z] Connection closed to device at 10.30.4.128
+[2024-11-29T01:21:29.250Z] Disconnected from device at 10.30.4.128
+[2024-11-29T01:23:55.266Z] Connected to device at 10.30.4.128
+[2024-11-29T01:25:16.960Z] Connected to device at 10.30.4.128
+[2024-11-29T01:25:29.656Z] Written 2 to register 1032
+[2024-11-29T01:26:32.983Z] Disconnected from device at 10.30.4.128
+[2024-11-29T01:26:32.984Z] Connection closed to device at 10.30.4.128
+[2024-11-29T01:26:37.937Z] Connected to device at 10.30.4.128
+[2024-11-29T01:27:01.643Z] Connected to device at 10.30.4.128
+[2024-11-29T01:29:57.015Z] Connected to device at 10.30.4.128
+[2024-11-29T01:31:48.348Z] Connected to device at 10.30.4.128
+[2024-11-29T01:32:44.600Z] Connected to device at 10.30.4.128
+[2024-11-29T01:34:15.894Z] Connected to device at 10.30.4.128
+[2024-11-29T01:35:01.809Z] Connected to device at 10.30.4.128
+[2024-11-29T01:35:51.858Z] Connected to device at 10.30.4.128
+[2024-11-29T01:36:48.261Z] Connected to device at 10.30.4.128
+[2024-11-29T01:37:05.336Z] Written 2 to register 1032
+[2024-11-29T01:37:33.225Z] Written 2 to register 1032
+[2024-11-29T01:37:40.651Z] Written 2 to register 1032
+[2024-11-29T01:38:53.061Z] Connected to device at 10.30.4.128
+[2024-11-29T01:39:42.455Z] Connected to device at 10.30.4.128
+[2024-11-29T01:53:15.925Z] Connected to device at 10.30.4.128
+[2024-11-29T01:57:45.445Z] Connected to device at 10.30.4.128
+[2024-11-29T01:59:25.421Z] Connected to device at 10.30.4.128
+[2024-11-29T01:59:36.434Z] Written 2 to register 1032
+[2024-11-29T01:59:43.775Z] Written 2 to register 1032
+[2024-11-29T02:00:01.678Z] Written 2 to register 1032
+[2024-11-29T02:01:58.353Z] Connected to device at 10.30.4.128
+[2024-11-29T02:03:02.035Z] Connected to device at 10.30.4.128
+[2024-11-29T02:08:02.713Z] Connected to device at 10.30.4.128
+[2024-11-29T02:08:45.404Z] Connected to device at 10.30.4.128
+[2024-11-29T02:10:40.633Z] Connected to device at 10.30.4.128
+[2024-11-29T02:12:13.532Z] Connected to device at 10.30.4.128
+[2024-11-29T02:12:23.564Z] Written 2 to register 1032
+[2024-11-29T02:15:05.160Z] Connected to device at 10.30.4.128
+[2024-11-29T02:15:13.581Z] Written 2 to register 1032
+[2024-11-29T02:17:37.674Z] Connected to device at 10.30.4.128
+[2024-11-29T02:17:47.333Z] Written 2 to register 1032
+[2024-11-29T02:19:51.672Z] Connected to device at 10.30.4.128
+[2024-11-29T02:20:04.244Z] Written 2 to register 1032
+[2024-11-29T02:29:14.445Z] Connected to device at 10.30.4.128
+[2024-11-29T02:29:18.674Z] Connected to device at 10.30.4.128
+[2024-11-29T02:30:07.973Z] Written 2 to register 1032
+[2024-11-29T02:30:23.142Z] Written 2 to register 1032
+[2024-11-29T02:32:58.022Z] Connected to device at 10.30.4.128
+[2024-11-29T02:33:09.299Z] Written 2 to register 1032
+[2024-11-29T02:33:14.820Z] Written 2 to register 1032
+[2024-11-29T02:33:47.792Z] Connected to device at 10.30.4.128
+[2024-11-29T02:34:03.365Z] Written 2 to register 1032
+[2024-11-29T02:34:26.068Z] Written 2 to register 1032
+[2024-11-29T02:36:54.578Z] Connected to device at 10.30.4.128
+[2024-11-29T02:37:15.973Z] Connected to device at 10.30.4.128
+[2024-11-29T02:37:58.689Z] Connected to device at 10.30.4.128
+[2024-11-29T02:38:27.887Z] Written 2 to register 1032
+[2024-11-29T02:39:39.280Z] Connected to device at 10.30.4.128
+[2024-11-29T02:41:48.861Z] Connected to device at 10.30.4.128
+[2024-11-29T02:42:12.863Z] Written 2 to register 1032
+[2024-11-29T02:46:26.155Z] Connected to device at 10.30.4.128
+[2024-11-29T02:46:37.516Z] Written 2 to register 1032
+[2024-11-29T02:56:52.414Z] Connected to device at 10.30.4.128
+[2024-11-29T02:57:16.902Z] Written 2 to register 1032
+[2024-11-29T02:57:28.492Z] Written 2 to register 1032
+[2024-11-29T02:59:50.177Z] Connected to device at 10.30.4.128
+[2024-11-29T03:00:00.622Z] Written 2 to register 1032
+[2024-11-29T03:00:56.707Z] Connected to device at 10.30.4.128
+[2024-11-29T03:01:59.748Z] Connected to device at 10.30.4.128
+[2024-11-29T03:02:56.525Z] Connected to device at 10.30.4.128
+[2024-11-29T03:03:07.556Z] Written 2 to register 1032
+[2024-11-29T03:09:03.025Z] Disconnected from device at 10.30.4.128
+[2024-11-29T03:09:03.027Z] Connection closed to device at 10.30.4.128
+[2024-11-29T03:38:20.307Z] Connected to device at 10.30.4.128
+[2024-11-29T03:39:01.941Z] Connected to device at 10.30.4.128
+[2024-11-29T03:42:26.905Z] Connected to device at 10.30.4.128
+[2024-11-29T03:51:07.009Z] Connected to device at 10.30.4.128
+[2024-11-29T03:51:57.370Z] Connected to device at 10.30.4.128
+[2024-11-29T03:58:09.356Z] Connected to device at 10.30.4.128
+[2024-11-29T03:58:34.541Z] Written 2 to register 1032
+[2024-11-29T03:59:48.656Z] Connected to device at 10.30.4.128
+[2024-11-29T04:01:46.547Z] Connected to device at 10.30.4.128
+[2024-11-29T04:02:08.218Z] Written 2 to register 1032
+[2024-11-29T04:02:19.482Z] Written 2 to register 1032
+[2024-11-29T04:02:28.162Z] Written 2 to register 1032
+[2024-11-29T04:05:34.455Z] Connected to device at 10.30.4.128
+[2024-11-29T04:05:53.909Z] Connected to device at 10.30.4.128
+[2024-11-29T04:06:13.197Z] Connected to device at 10.30.4.128
+[2024-11-29T04:11:30.042Z] Written 2 to register 1032
+[2024-11-29T04:16:03.835Z] Connected to device at 10.30.4.128
+[2024-11-29T04:17:28.827Z] Connected to device at 10.30.4.128
+[2024-11-29T04:17:58.314Z] Disconnected from device at 10.30.4.128
+[2024-11-29T04:17:58.315Z] Connection closed to device at 10.30.4.128
+[2024-11-29T04:17:58.868Z] Connected to device at 10.30.4.128
+[2024-11-29T04:19:02.634Z] Connected to device at 10.30.4.128
+[2024-11-29T04:19:47.474Z] Connected to device at 10.30.4.128
+[2024-11-29T04:22:41.572Z] Connected to device at 10.30.4.128
+[2024-11-29T04:24:45.749Z] Connected to device at 10.30.4.128
+[2024-11-29T04:26:26.770Z] Connected to device at 10.30.4.128
+[2024-11-29T04:27:27.697Z] Connected to device at 10.30.4.128
+[2024-11-29T04:28:01.007Z] Connected to device at 10.30.4.128
+[2024-11-29T04:34:07.680Z] Disconnected from device at 10.30.4.128
+[2024-11-29T04:34:07.686Z] Connection closed to device at 10.30.4.128
+[2024-11-29T05:28:46.153Z] Connected to device at 10.30.4.128
+[2024-11-29T05:29:19.925Z] Connected to device at 10.30.4.128
+[2024-11-29T05:44:52.088Z] Connected to device at 10.30.4.128
+[2024-11-29T05:45:22.006Z] Written 2 to register 1032
+[2024-11-29T08:07:04.162Z] Disconnected from device at 10.30.4.128
+[2024-11-29T08:07:04.166Z] Connection closed to device at 10.30.4.128
+[2024-11-29T08:23:30.284Z] Connected to device at 10.30.4.128
+[2024-11-29T08:44:57.445Z] Connected to device at 10.30.4.128
+[2024-11-29T08:51:56.243Z] Connected to device at 10.30.4.128
+[2024-11-29T09:14:44.782Z] Connected to device at 10.30.4.128
+[2024-11-29T09:37:33.269Z] Connected to device at 10.30.4.128
+[2024-11-29T09:48:08.410Z] Disconnected from device at 10.30.4.128
+[2024-11-29T09:48:08.412Z] Connection closed to device at 10.30.4.128
+[2024-11-29T09:49:00.279Z] Connected to device at 10.30.4.128
+[2024-11-29T09:52:34.078Z] Connected to device at 10.30.4.128
+[2024-11-29T09:57:08.348Z] Connected to device at 10.30.4.128
+[2024-11-29T09:57:55.568Z] Disconnected from device at 10.30.4.128
+[2024-11-29T09:57:55.572Z] Connection closed to device at 10.30.4.128
+[2024-11-29T09:58:05.697Z] Connected to device at 10.30.4.128
+[2024-11-29T09:58:59.749Z] Connected to device at 10.30.4.128
+[2024-11-29T10:14:48.608Z] Connected to device at 10.30.4.128
+[2024-11-29T10:23:58.800Z] Connected to device at 10.30.4.128
+[2024-11-29T10:32:24.131Z] Connected to device at 10.30.4.128
+[2024-11-29T10:32:52.574Z] Connected to device at 10.30.4.128
+[2024-11-29T10:49:14.742Z] Connected to device at 10.30.4.128
+[2024-11-30T00:49:37.750Z] Connected to device at 10.30.4.128
+[2024-11-30T01:10:08.993Z] Connected to device at 10.30.4.128
+[2024-11-30T01:11:51.186Z] Connected to device at 10.30.4.128
+[2024-11-30T01:25:02.446Z] Connected to device at 10.30.4.128
+[2024-11-30T01:33:51.061Z] Connected to device at 10.30.4.128
+[2024-11-30T01:39:29.940Z] Written 2 to register 1032
+[2024-11-30T01:39:39.557Z] Written 2 to register 1032
+[2024-11-30T01:53:31.120Z] Written 2 to register 1032
+[2024-11-30T01:53:54.401Z] Written 2 to register 1032
+[2024-11-30T01:54:00.661Z] Written 2 to register 1032
+[2024-11-30T01:54:45.476Z] Written 2 to register 1032
+[2024-11-30T01:56:04.843Z] Written 2 to register 1032
+[2024-11-30T01:59:37.359Z] Connected to device at 10.30.4.128
+[2024-11-30T02:01:12.613Z] Connected to device at 10.30.4.128
+[2024-11-30T02:05:46.714Z] Connected to device at 10.30.4.128
+[2024-11-30T02:06:06.935Z] Written 2 to register 1032
+[2024-11-30T02:06:07.117Z] Written 2 to register 1032
+[2024-11-30T02:06:50.156Z] Connected to device at 10.30.4.128
+[2024-11-30T02:06:59.071Z] Connected to device at 10.30.4.128
+[2024-11-30T02:08:16.309Z] Connected to device at 10.30.4.128
+[2024-11-30T02:08:41.837Z] Connected to device at 10.30.4.128
+[2024-11-30T02:08:57.569Z] Written 2 to register 1032
+[2024-11-30T02:10:01.814Z] Written 2 to register 1032
+[2024-11-30T02:10:27.448Z] Written 3 to register 1032
+[2024-11-30T02:10:27.450Z] Written 3 to register 1032
+[2024-11-30T03:29:32.115Z] Connected to device at 10.30.28.23
+[2024-11-30T03:31:39.287Z] Written 2 to register 1032
+[2024-11-30T03:37:28.703Z] Written 3 to register 1032
+[2024-11-30T03:41:01.182Z] Connected to device at 10.30.28.23
+[2024-11-30T03:46:27.153Z] Written 2 to register 1032
+[2024-11-30T03:46:32.176Z] Connected to device at 10.30.28.23
+[2024-11-30T03:50:18.544Z] Connected to device at 10.30.28.23
+[2024-11-30T03:50:26.260Z] Connected to device at 10.30.28.23
+[2024-11-30T04:09:01.074Z] Written 2 to register 1032
+[2024-11-30T04:15:14.633Z] Written 2 to register 1032
+[2024-11-30T08:41:47.916Z] Connected to device at 10.30.28.23
+[2024-11-30T08:47:00.528Z] Written 2 to register 1032
+[2024-11-30T09:04:05.927Z] Written 2 to register 1032
+[2024-11-30T09:04:15.503Z] Written 2 to register 1032
+[2024-11-30T09:04:40.935Z] Written 2 to register 1032
+[2024-11-30T09:05:14.597Z] Written 2 to register 1032
+[2024-11-30T09:05:14.624Z] Written 2 to register 1032
+[2024-11-30T09:05:35.387Z] Written 2 to register 1032
+[2024-11-30T09:07:10.323Z] Written 2 to register 1032
+[2024-11-30T09:07:10.325Z] Written 2 to register 1032
+[2024-11-30T09:19:17.018Z] Written 2 to register 1032
+[2024-12-02T01:39:18.414Z] Connected to device at 10.30.28.23
+[2024-12-02T01:57:43.652Z] Connected to device at 10.30.28.23
+[2024-12-02T01:59:09.616Z] Written 7 to register 1032
+[2024-12-02T01:59:10.629Z] Written 7 to register 1032
+[2024-12-02T02:01:20.000Z] Disconnected from device at 10.30.28.23
+[2024-12-02T02:01:20.002Z] Connection closed to device at 10.30.28.23
+[2024-12-02T02:01:23.699Z] Connected to device at 10.30.28.23
+[2024-12-02T02:01:28.035Z] Connected to device at 10.30.28.23
+[2024-12-02T02:02:31.873Z] Written 7 to register 1032
+[2024-12-02T02:17:46.675Z] Connected to device at 10.30.28.23
+[2024-12-02T02:19:33.037Z] Connected to device at 10.30.28.23
+[2024-12-02T02:19:56.725Z] Connected to device at 10.30.28.23
+[2024-12-02T02:22:11.169Z] Connected to device at 10.30.28.23
+[2024-12-02T02:23:20.415Z] Connected to device at 10.30.28.23
+[2024-12-02T02:26:24.583Z] Connected to device at 10.30.28.23
+[2024-12-02T02:26:36.859Z] Written 7 to register 1032
+[2024-12-02T02:26:37.831Z] Written 2 to register 1032
+[2024-12-02T02:32:15.684Z] Connected to device at 10.30.28.23
+[2024-12-02T02:36:45.846Z] Connected to device at 10.30.28.23
+[2024-12-02T02:37:11.609Z] Connected to device at 10.30.28.23
+[2024-12-02T02:37:35.820Z] Connected to device at 10.30.28.23
+[2024-12-02T02:37:45.709Z] Connected to device at 10.30.28.23
+[2024-12-02T02:40:15.391Z] Connected to device at 10.30.28.23
+[2024-12-02T02:45:00.511Z] Connected to device at 10.30.28.23
+[2024-12-02T02:45:31.765Z] Connected to device at 10.30.28.23
+[2024-12-02T02:46:01.282Z] Connected to device at 10.30.28.23
+[2024-12-02T02:47:39.374Z] Connected to device at 10.30.28.23
+[2024-12-02T02:50:05.902Z] Connected to device at 10.30.28.23
+[2024-12-02T02:50:52.071Z] Connected to device at 10.30.28.23
+[2024-12-02T02:54:51.873Z] Connected to device at 10.30.28.23
+[2024-12-02T02:59:33.015Z] Connected to device at 10.30.28.23
+[2024-12-02T03:00:14.467Z] Connected to device at 10.30.28.23
+[2024-12-02T03:01:31.704Z] Connected to device at 10.30.28.23
+[2024-12-02T03:02:00.026Z] Connected to device at 10.30.28.23
+[2024-12-02T03:04:40.100Z] Connected to device at 10.30.28.23
+[2024-12-02T03:06:00.932Z] Connected to device at 10.30.28.23
+[2024-12-02T03:08:01.402Z] Connected to device at 10.30.28.23
+[2024-12-02T03:08:20.436Z] Connected to device at 10.30.28.23
+[2024-12-02T03:08:29.732Z] Written 7 to register 1032
+[2024-12-02T03:08:30.766Z] Written 7 to register 1032
+[2024-12-02T03:23:13.493Z] Connected to device at 10.30.28.23
+[2024-12-02T03:24:49.553Z] Connected to device at 10.30.28.23
+[2024-12-02T03:32:48.098Z] Connected to device at 10.30.28.23
+[2024-12-02T03:33:20.986Z] Connected to device at 10.30.28.23
+[2024-12-02T03:33:33.233Z] Written 7 to register 1032
+[2024-12-02T03:33:34.233Z] Written 2 to register 1032
+[2024-12-02T03:36:53.967Z] Written 7 to register 1032
+[2024-12-02T03:36:55.074Z] Written 7 to register 1032
+[2024-12-02T03:39:10.766Z] Connected to device at 10.30.28.23
+[2024-12-02T03:41:42.787Z] Connected to device at 10.30.28.23
+[2024-12-02T03:43:47.650Z] Connected to device at 10.30.28.23
+[2024-12-02T03:49:17.129Z] Connected to device at 10.30.28.23
+[2024-12-02T03:51:57.795Z] Written 7 to register 1032
+[2024-12-02T03:52:48.378Z] Written 7 to register 1032
+[2024-12-02T03:52:52.282Z] Written 3 to register 1032
+[2024-12-02T03:55:49.980Z] Connected to device at 10.30.28.23
+[2024-12-02T03:56:05.669Z] Connected to device at 10.30.28.23
+[2024-12-02T03:59:00.317Z] Connected to device at 10.30.28.23
+[2024-12-02T04:00:22.752Z] Connected to device at 10.30.28.23
+[2024-12-02T04:01:09.941Z] Connected to device at 10.30.28.23
+[2024-12-02T04:04:13.590Z] Connected to device at 10.30.28.23
+[2024-12-02T04:04:24.867Z] Written 7 to register 1032
+[2024-12-02T04:11:28.476Z] Connected to device at 10.30.28.23
+[2024-12-02T04:25:12.640Z] Connected to device at 10.30.28.23
+[2024-12-02T04:31:03.754Z] Written 7 to register 1032
+[2024-12-02T04:31:07.794Z] Written 3 to register 1032
+[2024-12-02T04:31:08.829Z] Written 3 to register 1032
+[2024-12-02T05:29:27.962Z] Connected to device at 10.30.28.23
+[2024-12-02T06:12:35.037Z] Connected to device at 10.30.28.23
+[2024-12-02T06:12:41.213Z] Connected to device at 10.30.28.23
+[2024-12-02T06:12:45.404Z] Written 7 to register 1032
+[2024-12-02T06:12:55.299Z] Connected to device at 10.30.28.23
+[2024-12-02T06:40:04.475Z] Connected to device at 10.30.28.23
+[2024-12-02T06:40:13.057Z] Connected to device at 10.30.28.23
+[2024-12-02T06:40:16.257Z] Written 7 to register 1032
+[2024-12-02T06:40:17.274Z] Written 3 to register 1032
+[2024-12-02T06:40:23.003Z] Connected to device at 10.30.28.23
+[2024-12-02T07:02:39.252Z] Connected to device at 10.30.28.23
+[2024-12-02T07:02:48.092Z] Connected to device at 10.30.28.23
+[2024-12-02T07:04:31.271Z] Written 7 to register 1032
+[2024-12-02T07:06:38.218Z] Connected to device at 10.30.28.23
+[2024-12-02T07:09:26.660Z] Written 7 to register 1032
+[2024-12-02T07:09:55.965Z] Written 7 to register 1032
+[2024-12-02T07:13:25.906Z] Written 2 to register 1032
+[2024-12-02T07:14:18.454Z] Disconnected from device at 10.30.28.23
+[2024-12-02T07:14:18.456Z] Connection closed to device at 10.30.28.23
+[2024-12-02T07:14:28.432Z] Connected to device at 10.30.28.23
+[2024-12-02T07:14:31.454Z] Connected to device at 10.30.28.23
+[2024-12-02T07:16:32.972Z] Disconnected from device at 10.30.28.23
+[2024-12-02T07:16:32.975Z] Connection closed to device at 10.30.28.23
+[2024-12-02T07:16:41.466Z] Connected to device at 10.30.28.23
+[2024-12-02T07:17:03.099Z] Connected to device at 10.30.28.23
+[2024-12-02T07:18:01.531Z] Connected to device at 10.30.28.23
+[2024-12-02T07:18:08.749Z] Written 7 to register 1032
+[2024-12-02T07:21:12.113Z] Disconnected from device at 10.30.28.23
+[2024-12-02T07:21:12.118Z] Connection closed to device at 10.30.28.23
+[2024-12-02T07:21:17.309Z] Connected to device at 10.30.28.23
+[2024-12-02T07:21:56.726Z] Connected to device at 10.30.28.23
+[2024-12-02T07:23:02.486Z] Written 7 to register 1032
+[2024-12-02T07:24:07.526Z] Connected to device at 10.30.28.23
+[2024-12-02T07:29:23.538Z] Connected to device at 10.30.28.23
+[2024-12-02T07:41:12.739Z] Connected to device at 10.30.28.23
+[2024-12-02T07:42:05.982Z] Connected to device at 10.30.28.23
+[2024-12-02T07:42:54.663Z] Written 7 to register 1032
+[2024-12-02T07:42:59.959Z] Connected to device at 10.30.28.23
+[2024-12-02T08:13:58.008Z] Connected to device at 10.30.28.23
+[2024-12-02T08:26:40.192Z] Connected to device at 10.30.28.23
+[2024-12-02T08:26:50.604Z] Connected to device at 10.30.28.23
+[2024-12-02T08:42:50.033Z] Connected to device at 10.30.28.23
+[2024-12-02T08:43:19.319Z] Connected to device at 10.30.28.23
+[2024-12-02T08:44:07.322Z] Connected to device at 10.30.28.23
+[2024-12-02T08:51:31.626Z] Written 7 to register 1032
+[2024-12-02T08:51:32.626Z] Written 7 to register 1032
+[2024-12-02T08:51:44.246Z] Connected to device at 10.30.28.23
+[2024-12-02T09:02:11.687Z] Disconnected from device at 10.30.28.23
+[2024-12-02T09:02:11.689Z] Connection closed to device at 10.30.28.23
+[2024-12-02T09:02:17.160Z] Connected to device at 10.30.28.23
+[2024-12-02T09:10:31.640Z] Written 7 to register 1032
+[2024-12-02T09:10:32.609Z] Written 7 to register 1032
+[2024-12-02T09:10:42.279Z] Connected to device at 10.30.28.23
+[2024-12-02T09:10:51.530Z] Written 7 to register 1032
+[2024-12-02T09:10:52.528Z] Written 7 to register 1032
+[2024-12-02T09:18:24.638Z] Written 7 to register 1032
+[2024-12-02T09:28:08.864Z] Connected to device at 10.30.28.23
+[2024-12-02T09:29:54.110Z] Written 7 to register 1032
+[2024-12-02T09:36:38.296Z] Connected to device at 10.30.28.23
+[2024-12-02T09:36:51.953Z] Connected to device at 10.30.28.23
+[2024-12-02T09:36:57.928Z] Connected to device at 10.30.28.23
+[2024-12-02T09:37:12.404Z] Connected to device at 10.30.28.23
+[2024-12-02T09:37:22.474Z] Connected to device at 10.30.28.23
+[2024-12-02T09:37:55.613Z] Connected to device at 10.30.28.23
+[2024-12-02T09:38:27.721Z] Connected to device at 10.30.28.23
+[2024-12-02T09:38:30.958Z] Written 3 to register 1032
+[2024-12-02T09:43:11.751Z] Connected to device at 10.30.28.23
+[2024-12-02T09:44:35.752Z] Written 7 to register 1032
+[2024-12-02T09:44:59.961Z] Connected to device at 10.30.28.23
+[2024-12-03T01:04:42.798Z] Connected to device at 10.30.28.23
+[2024-12-03T01:20:07.123Z] Connected to device at 10.30.28.23
+[2024-12-03T01:36:57.573Z] Connected to device at 10.30.28.23
+[2024-12-03T01:37:46.596Z] Connected to device at 10.30.28.23
+[2024-12-03T01:38:22.327Z] Connected to device at 10.30.28.23
+[2024-12-03T01:38:52.586Z] Connected to device at 10.30.28.23
+[2024-12-03T01:40:49.276Z] Connected to device at 10.30.28.23
+[2024-12-03T01:43:50.328Z] Connected to device at 10.30.28.23
+[2024-12-03T01:45:06.792Z] Connected to device at 10.30.28.23
+[2024-12-03T01:46:23.427Z] Connected to device at 10.30.28.23
+[2024-12-03T01:50:33.747Z] Connected to device at 10.30.28.23
+[2024-12-03T01:52:28.779Z] Connected to device at 10.30.28.23
+[2024-12-03T01:52:47.430Z] Connected to device at 10.30.28.23
+[2024-12-03T01:57:37.514Z] Connected to device at 10.30.28.23
+[2024-12-03T02:00:48.127Z] Connected to device at 10.30.28.23
+[2024-12-03T02:02:13.350Z] Connected to device at 10.30.28.23
+[2024-12-03T02:03:37.925Z] Connected to device at 10.30.28.23
+[2024-12-03T02:05:49.798Z] Connected to device at 10.30.28.23
+[2024-12-03T02:11:08.751Z] Connected to device at 10.30.28.23
+[2024-12-03T02:13:06.156Z] Written 7 to register 1032
+[2024-12-03T02:13:07.185Z] Written 3 to register 1032
+[2024-12-03T02:13:18.378Z] Connected to device at 10.30.28.23
+[2024-12-03T02:23:00.346Z] Connected to device at 10.30.28.23
+[2024-12-03T02:24:38.456Z] Written 7 to register 1032
+[2024-12-03T02:27:50.355Z] Connected to device at 10.30.28.23
+[2024-12-03T02:31:36.843Z] Connected to device at 10.30.28.23
+[2024-12-03T02:32:16.444Z] Written 7 to register 1032
+[2024-12-03T02:32:17.469Z] Written 7 to register 1032
+[2024-12-03T02:37:25.808Z] Connected to device at 10.30.28.23
+[2024-12-03T02:38:02.805Z] Connected to device at 10.30.28.23
+[2024-12-03T02:38:40.788Z] Connected to device at 10.30.28.23
+[2024-12-03T02:39:43.443Z] Connected to device at 10.30.28.23
+[2024-12-03T02:40:01.766Z] Written 7 to register 1032
+[2024-12-03T02:45:37.480Z] Written 7 to register 1032
+[2024-12-03T02:45:38.468Z] Written 7 to register 1032
+[2024-12-03T02:46:00.729Z] Written 7 to register 1032
+[2024-12-03T02:46:01.788Z] Written 2 to register 1032
+[2024-12-03T02:46:03.754Z] Written 3 to register 1032
+[2024-12-03T02:46:17.838Z] Written 7 to register 1032
+[2024-12-03T02:46:18.883Z] Written 7 to register 1032
+[2024-12-03T02:48:16.163Z] Written 2 to register 1032
+[2024-12-03T02:48:59.611Z] Written 7 to register 1032
+[2024-12-03T02:51:48.546Z] Written 7 to register 1032
+[2024-12-03T02:54:41.162Z] Connected to device at 10.30.28.23
+[2024-12-03T02:58:56.283Z] Connected to device at 10.30.28.23
+[2024-12-03T02:59:21.051Z] Connected to device at 10.30.28.23
+[2024-12-03T02:59:55.242Z] Connected to device at 10.30.28.23
+[2024-12-03T03:00:29.404Z] Connected to device at 10.30.28.23
+[2024-12-03T03:02:08.653Z] Connected to device at 10.30.28.23
+[2024-12-03T03:02:35.089Z] Written 7 to register 1032
+[2024-12-03T03:04:10.973Z] Written 7 to register 1032
+[2024-12-03T03:06:20.624Z] Connected to device at 10.30.28.23
+[2024-12-03T03:06:52.159Z] Connected to device at 10.30.28.23
+[2024-12-03T03:07:17.561Z] Written 7 to register 1032
+[2024-12-03T03:10:42.508Z] Written 7 to register 1032
+[2024-12-03T03:11:14.777Z] Written 7 to register 1032
+[2024-12-03T03:11:55.250Z] Written 7 to register 1032
+[2024-12-03T03:12:19.447Z] Written 7 to register 1032
+[2024-12-03T03:12:20.465Z] Written 2 to register 1032
+[2024-12-03T03:13:09.006Z] Written 7 to register 1032
+[2024-12-03T03:13:09.998Z] Written 7 to register 1032
+[2024-12-03T03:14:04.511Z] Written 7 to register 1032
+[2024-12-03T03:14:05.519Z] Written 7 to register 1032
+[2024-12-03T03:14:35.816Z] Written 7 to register 1032
+[2024-12-03T03:14:36.812Z] Written 7 to register 1032
+[2024-12-03T03:15:02.045Z] Written 7 to register 1032
+[2024-12-03T03:17:07.144Z] Written 7 to register 1032
+[2024-12-03T03:18:32.856Z] Connected to device at 10.30.28.23
+[2024-12-03T03:19:22.040Z] Connected to device at 10.30.28.23
+[2024-12-03T03:22:39.156Z] Written 7 to register 1032
+[2024-12-03T03:24:15.975Z] Connected to device at 10.30.28.23
+[2024-12-03T03:24:40.382Z] Written 7 to register 1032
+[2024-12-03T03:25:19.809Z] Written 7 to register 1032
+[2024-12-03T03:26:18.858Z] Connected to device at 10.30.28.23
+[2024-12-03T03:26:36.817Z] Connected to device at 10.30.28.23
+[2024-12-03T03:27:05.237Z] Written 7 to register 1032
+[2024-12-03T03:27:06.258Z] Written 7 to register 1032
+[2024-12-03T03:29:31.774Z] Written 7 to register 1032
+[2024-12-03T03:29:32.808Z] Written 2 to register 1032
+[2024-12-03T03:30:48.570Z] Written 7 to register 1032
+[2024-12-03T03:32:28.861Z] Connected to device at 10.30.28.23
+[2024-12-03T03:35:18.609Z] Written 7 to register 1032
+[2024-12-03T03:35:21.663Z] Written 3 to register 1032
+[2024-12-03T03:36:06.025Z] Written 7 to register 1032
+[2024-12-03T03:36:07.049Z] Written 2 to register 1032
+[2024-12-03T03:36:59.569Z] Written 7 to register 1032
+[2024-12-03T03:37:34.868Z] Written 7 to register 1032
+[2024-12-03T03:37:35.876Z] Written 7 to register 1032
+[2024-12-03T03:38:17.239Z] Written 7 to register 1032
+[2024-12-03T03:38:23.376Z] Written 3 to register 1032
+[2024-12-03T03:38:24.325Z] Written 3 to register 1032
+[2024-12-03T03:39:46.030Z] Written 7 to register 1032
+[2024-12-03T03:39:47.022Z] Written 7 to register 1032
+[2024-12-03T03:40:08.194Z] Written 7 to register 1032
+[2024-12-03T03:40:09.213Z] Written 7 to register 1032
+[2024-12-03T05:50:55.292Z] Connected to device at 10.30.28.23
+[2024-12-03T05:53:24.450Z] Connected to device at 10.30.28.23
+[2024-12-03T05:54:09.110Z] Written 7 to register 1032
+[2024-12-03T05:54:10.104Z] Written 7 to register 1032
+[2024-12-03T05:58:30.723Z] Written 7 to register 1032
+[2024-12-03T06:01:11.390Z] Written 7 to register 1032
+[2024-12-03T06:01:18.457Z] Written 3 to register 1032
+[2024-12-03T06:01:19.470Z] Written 3 to register 1032
+[2024-12-03T06:08:26.797Z] Written 7 to register 1032
+[2024-12-03T06:08:27.811Z] Written 7 to register 1032
+[2024-12-03T06:12:50.508Z] Written 7 to register 1032
+[2024-12-03T06:12:51.508Z] Written 7 to register 1032
+[2024-12-03T06:16:12.509Z] Written 7 to register 1032
+[2024-12-03T06:16:13.504Z] Written 7 to register 1032
+[2024-12-03T06:17:21.195Z] Written 7 to register 1032
+[2024-12-03T06:17:27.275Z] Written 3 to register 1032
+[2024-12-03T06:20:13.917Z] Written 7 to register 1032
+[2024-12-03T06:26:17.207Z] Written 7 to register 1032
+[2024-12-03T06:26:18.399Z] Written 7 to register 1032
+[2024-12-03T06:26:47.483Z] Written 7 to register 1032
+[2024-12-03T06:34:33.961Z] Written 7 to register 1032
+[2024-12-05T04:21:05.692Z] Connected to device at 10.30.4.128
+[2024-12-05T04:21:11.872Z] Connected to device at 10.30.4.128
+[2024-12-05T04:22:17.951Z] Connected to device at 10.30.4.128
+[2024-12-05T04:23:58.050Z] Written 7 to register 1032
+[2024-12-05T04:24:11.172Z] Written 7 to register 1032
+[2024-12-05T04:24:14.212Z] Written 3 to register 1032
+[2024-12-10T03:47:57.006Z] Connected to device at 10.30.4.128
+[2024-12-10T08:02:19.240Z] Connected to device at 10.30.4.128
+[2024-12-10T08:02:24.069Z] Connected to device at 10.30.4.128
+[2024-12-10T08:02:51.683Z] Connected to device at 10.30.4.128
+[2024-12-25T01:34:43.777Z] Connected to device at 10.30.4.128
+[2024-12-25T01:39:37.076Z] Disconnected from device at 10.30.4.128
+[2024-12-25T01:39:37.077Z] Connection closed to device at 10.30.4.128
+[2024-12-25T01:39:44.049Z] Connected to device at 10.30.4.128
+[2024-12-25T01:41:05.022Z] Disconnected from device at 10.30.4.128
+[2024-12-25T01:41:05.023Z] Connection closed to device at 10.30.4.128
+[2024-12-25T01:41:14.084Z] Connected to device at 10.30.4.128
+[2024-12-25T06:25:04.382Z] Connected to device at 10.30.28.23
+[2024-12-25T06:26:09.080Z] Connected to device at 10.30.28.23
+[2024-12-25T06:28:07.461Z] Connected to device at 10.30.28.23
+[2024-12-25T06:33:31.639Z] Connected to device at 10.30.28.23
+[2024-12-25T06:34:01.963Z] Connected to device at 10.30.28.23
+[2024-12-25T06:34:48.631Z] Connected to device at 10.30.28.23
+[2024-12-25T06:36:11.401Z] Connected to device at 10.30.28.23
+[2024-12-25T06:36:52.953Z] Written 7 to register 1032
+[2024-12-25T06:37:05.069Z] Written 7 to register 1032
+[2024-12-25T06:37:06.078Z] Written 7 to register 1032
+[2024-12-25T06:51:15.315Z] Connected to device at 10.30.28.23
+[2024-12-25T08:20:54.422Z] Written 7 to register 1032
+[2024-12-25T08:35:23.449Z] Written 2 to register 1032
+[2024-12-25T08:40:02.813Z] Written 7 to register 1032
+[2024-12-25T08:40:03.814Z] Written 7 to register 1032
+[2024-12-25T08:40:07.958Z] Written 2 to register 1032
+[2024-12-25T08:43:58.925Z] Written 7 to register 1032
+[2024-12-25T08:49:59.904Z] Written 2 to register 1032
+[2024-12-26T02:46:48.807Z] Connected to device at 10.30.28.23
+[2024-12-26T03:29:49.988Z] Disconnected from device at 10.30.28.23
+[2024-12-26T03:29:49.990Z] Connection closed to device at 10.30.28.23
+[2024-12-26T03:29:58.606Z] Connected to device at 10.30.28.23
+[2024-12-26T03:31:04.818Z] Connected to device at 10.30.28.23
+[2024-12-26T03:31:54.506Z] Written 2 to register 1032
+[2024-12-26T04:57:49.759Z] Disconnected from device at 10.30.28.23
+[2024-12-26T04:57:49.761Z] Connection closed to device at 10.30.28.23
+[2024-12-26T06:01:32.661Z] Connected to device at 10.30.28.23
+[2024-12-28T06:53:18.408Z] Connected to device at 10.30.4.128
+[2024-12-28T07:48:32.705Z] Connected to device at 10.30.4.128
+[2024-12-28T07:49:01.735Z] Connected to device at 10.30.4.128
+[2024-12-28T07:50:34.323Z] Connected to device at 10.30.4.128
+[2024-12-28T07:50:56.970Z] Connected to device at 10.30.4.128
+[2024-12-28T07:53:29.236Z] Connected to device at 10.30.4.128
+[2024-12-28T07:54:10.152Z] Connected to device at 10.30.4.128
+[2024-12-28T08:03:19.823Z] Connected to device at 10.30.4.128
+[2025-01-02T08:40:42.222Z] Connected to device at 10.30.4.128
+[2025-01-04T07:48:56.727Z] Connected to device at 10.30.4.128
