@@ -235,6 +235,7 @@
             this.btnSend.Size = new System.Drawing.Size(170, 29);
             this.btnSend.TabIndex = 4;
             this.btnSend.Text = "simpleButton1";
+            this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             // 
             // panel3
             // 
@@ -407,6 +408,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "ucDistribution";
             this.Size = new System.Drawing.Size(971, 736);
+            this.Load += new System.EventHandler(this.ucDistribution_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSize)).EndInit();
             this.panel2.ResumeLayout(false);
             this.tbl.ResumeLayout(false);

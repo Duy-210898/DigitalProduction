@@ -32,11 +32,12 @@
             // 
             // ucDeviceOutput
             // 
+            this.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
+            this.Appearance.Options.UseBackColor = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Name = "ucDeviceOutput";
             this.Size = new System.Drawing.Size(793, 736);
-            this.Load += new System.EventHandler(this.ucDeviceOutput_Load);
             this.ResumeLayout(false);
 
         }

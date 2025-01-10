@@ -8,19 +8,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static DigitalProduction.frmMain;
 
 namespace DigitalProduction
 {
     public partial class ucDeviceOutput : DevExpress.XtraEditors.XtraUserControl
     {
-        public ucDeviceOutput()
+        private WebSocketClient _webSocketClient;
+        public ucDeviceOutput() 
         {
             InitializeComponent();
+            LanguageSettings.LanguageChanged += OnLanguageChanged;
         }
 
-        private void ucDeviceOutput_Load(object sender, EventArgs e)
+        public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
+            _webSocketClient = webSocketClient;
+        }
 
+        public void RefreshLanguage()
+        {
+            OnLanguageChanged();
+        }
+
+        private void OnLanguageChanged()
+        {
         }
     }
 }

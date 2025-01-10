@@ -60,6 +60,42 @@ namespace DigitalProduction
             }
         }
 
+        private void UpdateReconnectStatus(bool isReconnecting)
+        {
+            if (isReconnecting)
+            {
+                statusItem.Caption = resourceManager.GetString("Reconnecting");
+                statusItem.Appearance.ForeColor = Color.Orange;
+            }
+            else
+            {
+                if (ConnectionManager.Instance.IsConnected)
+                {
+                    statusItem.Caption = resourceManager.GetString("Connected");
+                    statusItem.Appearance.ForeColor = Color.Green;
+                }
+                else
+                {
+                    statusItem.Caption = resourceManager.GetString("Disconnected");
+                    statusItem.Appearance.ForeColor = Color.Red;
+                }
+            }
+        }
+
+        private void UpdateConnectionStatus(bool isConnected)
+        {
+            if (isConnected)
+            {
+                statusItem.Caption = resourceManager.GetString("Connected");
+                statusItem.Appearance.ForeColor = Color.Green;
+            }
+            else
+            {
+                statusItem.Caption = resourceManager.GetString("Disconnected");
+                statusItem.Appearance.ForeColor = Color.Red;
+            }
+        }
+
         private void InitializeLogOutButton()
         {
             btnLogOut = new BarButtonItem();
@@ -195,41 +231,6 @@ namespace DigitalProduction
             UpdateConnectionStatus(ConnectionManager.Instance.IsConnected);
         }
 
-        private void UpdateReconnectStatus(bool isReconnecting)
-        {
-            if (isReconnecting)
-            {
-                statusItem.Caption = resourceManager.GetString("Reconnecting");
-                statusItem.Appearance.ForeColor = Color.Orange;
-            }
-            else
-            {
-                if (ConnectionManager.Instance.IsConnected)
-                {
-                    statusItem.Caption = resourceManager.GetString("Connected");
-                    statusItem.Appearance.ForeColor = Color.Green;
-                }
-                else
-                {
-                    statusItem.Caption = resourceManager.GetString("Disconnected");
-                    statusItem.Appearance.ForeColor = Color.Red;
-                }
-            }
-        }
-
-        private void UpdateConnectionStatus(bool isConnected)
-        {
-            if (isConnected)
-            {
-                statusItem.Caption = resourceManager.GetString("Connected");
-                statusItem.Appearance.ForeColor = Color.Green;
-            }
-            else
-            {
-                statusItem.Caption = resourceManager.GetString("Disconnected");
-                statusItem.Appearance.ForeColor = Color.Red;
-            }
-        }
 
         private void InitializeStatusMapping()
         {
@@ -250,14 +251,11 @@ namespace DigitalProduction
             this.Text = resourceManager.GetString("Home");
             accordionControlElement1.Text = resourceManager.GetString("ProductionSchedule");
             accordionControlElement4.Text = resourceManager.GetString("CuttingManager");
-            accordionControlElement2.Text = resourceManager.GetString("PODistribution");
             accordionControlElement3.Text = resourceManager.GetString("SystemManagerment");
             barSubItem1.Caption = resourceManager.GetString("Guest");
 
             btnDeviceManager.Text = resourceManager.GetString("DeviceManager");
             btnMonthlyPlan.Text = resourceManager.GetString("MonthlyPlan");
-            btnDeviceManage.Text = resourceManager.GetString("DeviceManage");
-            btnProgress.Text = resourceManager.GetString("Progress");
             btnDistribution.Text = resourceManager.GetString("Distribution");
             btnUserManager.Text = resourceManager.GetString("UserManager");
             btnDeviceOutput.Text = resourceManager.GetString("DeviceOutput");

@@ -32,6 +32,8 @@
             // 
             // ucUserManagement
             // 
+            this.Appearance.BackColor = System.Drawing.Color.Green;
+            this.Appearance.Options.UseBackColor = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Name = "ucUserManagement";

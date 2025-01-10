@@ -11,13 +11,6 @@ namespace DigitalProduction
         private WebSocketClient _webSocketClient;
         private List<HmiConnectionStatus> currentDeviceStatuses = new List<HmiConnectionStatus>();
 
-        public class HmiConnectionStatus
-        {
-            public string ipAddress { get; set; }
-            public string machineName { get; set; }
-            public string plant { get; set; }
-            public bool isConnected { get; set; }
-        }
 
         public ucDeviceManager()
         {
@@ -30,14 +23,6 @@ namespace DigitalProduction
             _webSocketClient = webSocketClient;
         }
 
-        private async void sendButton_Click(object sender, EventArgs e)
-        {
-            string message = txtMessage.Text;
-            await _webSocketClient.SendAsync(message);
-        }
-
-
-
         public void RefreshLanguage()
         {
             OnLanguageChanged();
@@ -45,7 +30,14 @@ namespace DigitalProduction
 
         private void OnLanguageChanged()
         {
-            // Cập nhật ngôn ngữ khi có sự thay đổi
         }
     }
 }
+public class HmiConnectionStatus
+{
+    public string ipAddress { get; set; }
+    public string machineName { get; set; }
+    public string plant { get; set; }
+    public bool isConnected { get; set; }
+}
+

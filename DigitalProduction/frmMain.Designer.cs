@@ -35,10 +35,7 @@
             this.accordionControl1 = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnMonthlyPlan = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.btnProgress = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.btnDeviceManage = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceOutput = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -75,7 +72,6 @@
             this.accordionControl1.Dock = System.Windows.Forms.DockStyle.Left;
             this.accordionControl1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.accordionControlElement1,
-            this.accordionControlElement2,
             this.accordionControlElement3,
             this.accordionControlElement4});
             this.accordionControl1.Location = new System.Drawing.Point(0, 31);
@@ -103,42 +99,14 @@
             this.btnMonthlyPlan.Text = "Monthly Plan";
             this.btnMonthlyPlan.Click += new System.EventHandler(this.btnSchedule_Click);
             // 
-            // accordionControlElement2
-            // 
-            this.accordionControlElement2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.btnProgress});
-            this.accordionControlElement2.Expanded = true;
-            this.accordionControlElement2.Name = "accordionControlElement2";
-            this.accordionControlElement2.Text = "Cutting Progress";
-            // 
-            // btnProgress
-            // 
-            this.btnProgress.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
-            this.btnProgress.Name = "btnProgress";
-            this.btnProgress.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.btnProgress.Text = "Progress";
-            this.btnProgress.Click += new System.EventHandler(this.btnProgress_Click);
-            // 
             // accordionControlElement3
             // 
             this.accordionControlElement3.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.btnDeviceManage,
             this.btnDistribution,
             this.btnDeviceOutput});
             this.accordionControlElement3.Expanded = true;
             this.accordionControlElement3.Name = "accordionControlElement3";
             this.accordionControlElement3.Text = "PO Distribution";
-            // 
-            // btnDeviceManage
-            // 
-            this.btnDeviceManage.Name = "btnDeviceManage";
-            this.btnDeviceManage.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.btnDeviceManage.Text = "Device Management";
-            this.btnDeviceManage.Click += new System.EventHandler(this.btnDeviceManage_Click);
             // 
             // btnDistribution
             // 
@@ -257,7 +225,6 @@
         private DevExpress.XtraBars.Navigation.AccordionControl accordionControl1;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement1;
         private DevExpress.XtraBars.FluentDesignSystem.FluentDesignFormControl fluentDesignFormControl1;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement2;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement3;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement4;
         private System.Windows.Forms.Panel pnlControl;
@@ -265,8 +232,6 @@
         private DevExpress.XtraBars.BarStaticItem Language;
         private DevExpress.XtraBars.BarSubItem barSubItem1;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnMonthlyPlan;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement btnProgress;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement btnDeviceManage;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnDistribution;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnDeviceOutput;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnDeviceManager;

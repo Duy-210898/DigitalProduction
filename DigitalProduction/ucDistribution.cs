@@ -1,116 +1,147 @@
-﻿using DevExpress.XtraEditors;
+﻿using DevExpress.Data.Filtering.Helpers;
+using DevExpress.XtraEditors;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static DevExpress.Xpo.Logger.LogManager;
 
 namespace DigitalProduction
 {
-    public partial class ucDistribution : DevExpress.XtraEditors.XtraUserControl
+    public partial class ucDistribution : XtraUserControl
     {
-        private readonly WebSocketClient _webSocketClient;
+        private DbHelper dbHelper;
         private readonly DataTable scheduleDataTable;
+        private WebSocketClient _webSocketClient;
+        public ucDistribution()
+        {
+            dbHelper = new DbHelper();
+            InitializeComponent();
+            scheduleDataTable = new DataTable();
+            InitializeScheduleDataTable();
+            InitializeDataGridViewColumns();
+            txtMasterWorkOrder.Focus();
+        }
+        public void SetWebSocketClient(WebSocketClient webSocketClient)
+        {
+            _webSocketClient = webSocketClient;
+            _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
+        }
 
-        //public void SetWebSocketClient(WebSocketClient webSocketClient)
-        //{
-        //    if (webSocketClient == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(webSocketClient), "WebSocketClient cannot be null.");
-        //    }
+        private void InitializeScheduleDataTable()
+        {
+            scheduleDataTable.Columns.Add("MasterWorkOrder");
+            scheduleDataTable.Columns.Add("Factory");
+            scheduleDataTable.Columns.Add("LastNo");
+            scheduleDataTable.Columns.Add("SO");
+            scheduleDataTable.Columns.Add("PO");
+            scheduleDataTable.Columns.Add("Model");
+            scheduleDataTable.Columns.Add("ART");
+            scheduleDataTable.Columns.Add("Size");
+            scheduleDataTable.Columns.Add("SizeQty", typeof(int));
+            scheduleDataTable.Columns.Add("PartId");
+            scheduleDataTable.Columns.Add("PartName");
+            scheduleDataTable.Columns.Add("MaterialsId");
+            scheduleDataTable.Columns.Add("MaterialsName");
+        }
 
-        //    _webSocketClient = webSocketClient;
-        //    _webSocketClient.OnMessage += WebSocket_OnMessage;
-        //}
-        //public ucDistribution()
-        //{
-        //    InitializeComponent();
-        //    if (_webSocketClient != null)
-        //    {
-        //        _webSocketClient.OnMessage += WebSocket_OnMessage;
-        //    }
-        //}
         public void RefreshLanguage()
         {
             OnLanguageChanged();
         }
+
         private void OnLanguageChanged()
         {
-
+            // Logic to refresh UI text for the current language
         }
 
         private void ShowMessage(string title, string message, MessageBoxIcon icon)
         {
             MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
         }
-        private void WebSocket_OnMessage(string data)
+        private void WebSocket_OnResponseReceived(string data)
         {
-            Console.WriteLine($"Received message from server: {data}");
+            Console.WriteLine("Response from server: " + data);
+        }
 
+        private void WebSocket_OnMessage(object data)
+        {
             try
             {
-                var response = JsonConvert.DeserializeObject<Response>(data);
-                if (response != null && response.Action == "delete_order")
+                string jsonData = data as string;
+                Console.WriteLine("Response from server: " + jsonData);
+
+                if (jsonData != null)
                 {
-                    NotificationManager.ShowNotification("Xác nhận xóa đơn", response.Message);
+                    var scheduleResponse = JsonConvert.DeserializeObject<ScheduleResponse>(jsonData);
 
-                    DialogResult dialogResult = MessageBox.Show(response.Message, "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                    if (dialogResult == DialogResult.Yes)
+                    if (scheduleResponse != null)
                     {
-                        SendDeleteOrderConfirmation(response, "Yes");
+                        switch (scheduleResponse.Action)
+                        {
+                            case "getSchedule":
+                                HandleGetScheduleResponse(scheduleResponse);
+                                break;
+
+                            case "saveDistributionData":
+                                Console.WriteLine("Suscess");
+                                break;
+
+                            case "getUniquePages":
+                                HandleGetUniquePagesResponse(scheduleResponse);
+                                break;
+
+                            default:
+                                ShowErrorNotification($"Unsupported action: {scheduleResponse.Action}");
+                                break;
+                        }
                     }
                     else
                     {
-                        SendDeleteOrderConfirmation(response, "No");
+                        ShowErrorNotification("Invalid response format.");
                     }
                 }
                 else
                 {
-                    var scheduleResponse = JsonConvert.DeserializeObject<ScheduleResponse>(data);
-                    if (scheduleResponse != null)
-                    {
-                        this.Invoke((MethodInvoker)delegate
-                        {
-                            if (scheduleResponse.Action == "getSchedule")
-                            {
-                                if (scheduleResponse.Status == "success")
-                                {
-                                    SaveScheduleDataToTable(scheduleResponse.Schedule);
-                                    HandleReceivedSchedule(scheduleResponse.Schedule);
-                                }
-                                else
-                                {
-                                    ShowErrorNotification(scheduleResponse.Message);
-                                }
-                            }
-                            else if (scheduleResponse.Action == "getUniquePages")
-                            {
-                                if (scheduleResponse.Status == "success")
-                                {
-                                    HandleReceivedUniquePages(scheduleResponse.Pages);
-                                }
-                                else
-                                {
-                                    ShowErrorNotification(scheduleResponse.Message);
-                                }
-                            }
-                        });
-                    }
+                    ShowErrorNotification("Received data is not a valid string.");
                 }
             }
             catch (JsonSerializationException jsonEx)
             {
-                Console.WriteLine($"JSON Deserialization Error: {jsonEx.Message}");
+                ShowErrorNotification($"JSON Deserialization Error: {jsonEx.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error processing message: {ex.Message}");
+                ShowErrorNotification($"Error processing message: {ex.Message}");
+            }
+        }
+
+        private void HandleGetScheduleResponse(ScheduleResponse scheduleResponse)
+        {
+            if (scheduleResponse.Status == "success")
+            {
+                SaveScheduleDataToTable(scheduleResponse.Schedule);
+                HandleReceivedSchedule(scheduleResponse.Schedule);
+            }
+            else
+            {
+                ShowErrorNotification(scheduleResponse.Message);
+            }
+        }
+
+        private void HandleGetUniquePagesResponse(ScheduleResponse scheduleResponse)
+        {
+            if (scheduleResponse.Status == "success")
+            {
+                HandleReceivedUniquePages(scheduleResponse.Pages);
+            }
+            else
+            {
+                ShowErrorNotification(scheduleResponse.Message);
             }
         }
         private void HandleReceivedUniquePages(List<int> uniquePages)
@@ -121,31 +152,54 @@ namespace DigitalProduction
                 return;
             }
 
-            cbxPage.Items.Clear();
-            foreach (var page in uniquePages)
+            if (cbxPage.InvokeRequired)
             {
-                cbxPage.Items.Add(page.ToString());
-            }
+                cbxPage.Invoke(new Action(() =>
+                {
+                    cbxPage.Items.Clear();
+                    foreach (var page in uniquePages)
+                    {
+                        cbxPage.Items.Add(page.ToString());
+                    }
 
-            if (cbxPage.Items.Count > 0)
+                    if (cbxPage.Items.Count > 0)
+                    {
+                        cbxPage.SelectedIndex = 0;
+                    }
+                }));
+            }
+            else
             {
-                cbxPage.SelectedIndex = 0;
+                cbxPage.Items.Clear();
+                foreach (var page in uniquePages)
+                {
+                    cbxPage.Items.Add(page.ToString());
+                }
+
+                if (cbxPage.Items.Count > 0)
+                {
+                    cbxPage.SelectedIndex = 0;
+                }
             }
         }
-
-        private void ShowErrorNotification(string message)
-        {
-            ShowMessage("Error", message, MessageBoxIcon.Error);
-        }
-
+        // Đảm bảo gọi `InvokeRequired` đúng cách khi thao tác với DataGridView hoặc các điều khiển UI từ luồng khác
         private void HandleReceivedSchedule(List<ProductionSchedule> schedules)
         {
-            // Kiểm tra xem dữ liệu có tồn tại không
             if (schedules == null || !schedules.Any())
             {
                 ShowErrorNotification("No schedule data received.");
                 return;
             }
+
+            // Thực hiện trong luồng UI
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => HandleReceivedSchedule(schedules)));
+                return;
+            }
+
+            // Khởi tạo lại các cột cho DataGridView nếu chưa được khởi tạo
+            InitializeDataGridViewColumns();
 
             // Hiển thị các bảng điều khiển
             pnlMaterial.Visible = true;
@@ -197,7 +251,6 @@ namespace DigitalProduction
             // Cập nhật thông tin Header
             string factoryName = schedules.FirstOrDefault()?.Factory ?? string.Empty;
 
-            // Kiểm tra giá trị Factory và hiển thị tên tương ứng
             switch (factoryName)
             {
                 case "4001":
@@ -252,8 +305,7 @@ namespace DigitalProduction
             dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.LightSteelBlue;
             dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
             dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Arial", 10, FontStyle.Bold);
-            dgvMaterial.AllowUserToAddRows = false;
-            dgvSize.AllowUserToAddRows = false;
+            dgv.AllowUserToAddRows = false;
             dgv.BorderStyle = BorderStyle.None;
             dgv.CellBorderStyle = DataGridViewCellBorderStyle.None;
             dgv.RowHeadersVisible = false;
@@ -272,6 +324,7 @@ namespace DigitalProduction
         }
         private void UpdateColumnWidthPercentage(DataGridView dgv)
         {
+            if (dgv.Columns.Count == 0) return;  
             float totalWidth = dgv.Width;
             int columnCount = dgv.Columns.Count;
             float[] columnPercentages = { 0.1f, 0.15f, 0.15f, 0.6f };
@@ -281,6 +334,24 @@ namespace DigitalProduction
                 dgv.Columns[i].Width = (i < columnPercentages.Length)
                     ? (int)(totalWidth * columnPercentages[i])
                     : 0;
+            }
+        }
+        private void InitializeDataGridViewColumns()
+        {
+            if (dgvSize.Columns.Count == 0)
+            {
+                dgvSize.Columns.Add("Size", "Size");
+                dgvSize.Columns.Add("SizeQty", "Size Quantity");
+                dgvSize.Columns.Add("UnitUsage", "Unit Usage");
+                dgvSize.Columns.Add("TotalUsage", "Total Usage");
+            }
+
+            if (dgvMaterial.Columns.Count == 0)
+            {
+                dgvMaterial.Columns.Add("PartId", "Part ID");
+                dgvMaterial.Columns.Add("PartName", "Part Name");
+                dgvMaterial.Columns.Add("MaterialsID", "Materials ID");
+                dgvMaterial.Columns.Add("MaterialsName", "Materials Name");
             }
         }
 
@@ -309,24 +380,10 @@ namespace DigitalProduction
             }
         }
 
-
-        private async void SendDeleteOrderConfirmation(Response response, string userChoice)
+        private void ShowErrorNotification(string message)
         {
-            // Xây dựng đối tượng thông điệp với định dạng yêu cầu
-            var message = new
-            {
-                action = "confirm_delete_order",
-                orderId = response.Message,
-                userChoice = userChoice
-            };
-
-            // Chuyển đối tượng thành chuỗi JSON
-            string jsonMessage = JsonConvert.SerializeObject(message);
-
-            // Gửi thông điệp JSON qua WebSocket đến server
-            await _webSocketClient.SendAsync(jsonMessage);
+            ShowMessage("Error", message, MessageBoxIcon.Error);
         }
-
 
         private async void txtMasterWorkOrder_Leave(object sender, EventArgs e)
         {
@@ -340,6 +397,13 @@ namespace DigitalProduction
 
             await SendGetUniquePagesRequestAsync(masterWorkOrder);
         }
+
+        private async Task SendGetDevicesRequestAsync()
+        {
+                var request = JsonConvert.SerializeObject(new { action = "getDevices" });
+                await _webSocketClient.SendAsync(request);
+        }
+
         private async Task SendGetUniquePagesRequestAsync(string masterWorkOrder)
         {
             var request = new { action = "getUniquePages", masterWorkOrder };
@@ -357,13 +421,165 @@ namespace DigitalProduction
                 SendGetScheduleRequestAsync(masterWorkOrder, page);
             }
         }
+
         private async void SendGetScheduleRequestAsync(string masterWorkOrder, string page)
         {
             var workOrderInfo = new { action = "getSchedule", masterWorkOrder, page };
             string jsonRequest = JsonConvert.SerializeObject(workOrderInfo);
             await _webSocketClient.SendAsync(jsonRequest);
         }
+        private void ucDistribution_Load(object sender, EventArgs e)
+        {
+            {
+                List<string> machineNames = dbHelper.GetMachineNames();
+
+                cbxDevice.DataSource = machineNames;
+                cbxDevice.SelectedIndex = -1;
+            }
+        }
+        private DistributionData GetDistributionDataFromControls()
+        {
+            string user = Global.Username;
+            string machineName = cbxDevice.SelectedItem.ToString();
+            string ipAddress = dbHelper.GetIpAddress(machineName);
+
+            var distributionData = new DistributionData
+            {
+                MasterWorkOrder = lblMasterWorkOrder.Text.Replace("Master Work Order: ", ""),
+                SO = lblSO.Text.Replace("SO: ", ""),
+                Model = lblModel.Text.Replace("Model: ", ""),
+                ART = lblArt.Text.Replace("ART: ", ""),
+                SizeData = new List<SizeData>(),
+                MaterialData = new List<MaterialData>(),
+                User = user,
+                IpAddress = ipAddress,
+            };
+
+            // Get SizeData from dgvSize
+            foreach (DataGridViewRow row in dgvSize.Rows)
+            {
+                if (row.IsNewRow) continue;
+                try
+                {
+                    distributionData.SizeData.Add(new SizeData
+                    {
+                        Size = row.Cells["Size"].Value?.ToString(),
+                        SizeQty = Convert.ToInt32(row.Cells["SizeQty"].Value),
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error processing size data: " + ex.Message);
+                }
+            }
+
+            // Get MaterialData from dgvMaterial
+            foreach (DataGridViewRow row in dgvMaterial.Rows)
+            {
+                if (row.IsNewRow) continue;
+                try
+                {
+                    distributionData.MaterialData.Add(new MaterialData
+                    {
+                        PartName = row.Cells["PartName"].Value?.ToString(),
+                        MaterialsName = row.Cells["MaterialsName"].Value?.ToString()
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error processing material data: " + ex.Message);
+                }
+            }
+
+            return distributionData;
+        }
+
+        private async void SendDistributionDataToServer()
+        {
+            try
+            {
+                var distributionData = GetDistributionDataFromControls();
+
+                var request = new
+                {
+                    action = "saveDistributionData",
+                    data = distributionData
+                };
+
+                string jsonRequestWrapper = JsonConvert.SerializeObject(request);
+
+                // Gửi yêu cầu và nhận phản hồi từ máy chủ
+                string jsonResponse = await _webSocketClient.SendAsync(jsonRequestWrapper);
+
+                if (!string.IsNullOrEmpty(jsonResponse))
+                {
+                    // Phân tích phản hồi JSON từ máy chủ
+                    var response = JsonConvert.DeserializeObject<Response>(jsonResponse);
+
+                    if (response != null && response.Status == "success")
+                    {
+                        MessageBox.Show("Distribution Data saved successfully!\nThank you!", "Saved Successfully", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to save data. Message: " + response.Message, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("No response received from the server.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred while sending data: " + ex.Message);
+            }
+        }
+
+
+        private void btnSend_Click(object sender, EventArgs e)
+        {
+            SendDistributionDataToServer();
+        }
     }
+    public class DistributionData
+    {
+        public string MasterWorkOrder { get; set; }
+        public string SO { get; set; }
+        public string Model { get; set; }
+        public string ART { get; set; }
+        public List<SizeData> SizeData { get; set; }
+        public List<MaterialData> MaterialData { get; set; }
+        public string User { get; set; }
+        public string IpAddress { get; set; }
+    }
+
+    public class SizeData
+    {
+        public string Size { get; set; }
+        public int SizeQty { get; set; }
+    }
+
+    public class MaterialData
+    {
+        public string PartName { get; set; }
+        public string MaterialsName { get; set; }
+    }
+
+
+    public class Device
+    {
+        public int DeviceID { get; set; }
+        public string IpAddress { get; set; }
+        public string MachineName { get; set; }
+        public bool ConnectionStatus { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string Plant { get; set; }
+        public int[] PlantID { get; set; }
+    }
+
+
     public class Response
     {
         public string Action { get; set; }
@@ -375,6 +591,8 @@ namespace DigitalProduction
         public string Action { get; set; }
         public string Status { get; set; }
         public string Message { get; set; }
+        public Device[] Devices { get; set; }
+
         public List<int> Pages { get; set; }
         public List<ProductionSchedule> Schedule { get; set; }
     }

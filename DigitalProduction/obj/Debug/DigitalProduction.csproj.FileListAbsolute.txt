@@ -83,3 +83,5 @@ D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucProgress.re
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucProgressManagement.resources
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucSchedule.resources
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucUserManagement.resources
+D:\DigitalProduction\DigitalProduction\bin\Debug\System.Configuration.ConfigurationManager.dll
+D:\DigitalProduction\DigitalProduction\bin\Debug\System.Configuration.ConfigurationManager.xml

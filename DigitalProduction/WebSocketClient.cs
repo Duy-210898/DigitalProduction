@@ -1,146 +1,173 @@
 ﻿using DigitalProduction;
-using static DigitalProduction.frmMain;
 using System.Net.WebSockets;
-using System.Resources;
+using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System;
+using Newtonsoft.Json;
 
-public class WebSocketClient
+public class WebSocketClient : IDisposable
 {
     private ClientWebSocket _webSocket;
+    private TaskCompletionSource<string> ResponseCompletionSource;
     private string _url;
     private bool _isReconnecting = false;
-    private ResourceManager resourceManager;
-    private TaskCompletionSource<string> ResponseCompletionSource;
+    private bool _disposed = false;
+    private readonly object _lock = new object();
+
+    private int _reconnectAttempts = 0;
+    private const int MaxReconnectAttempts = 5;
+    private const int ReconnectDelaySeconds = 5;
+
     public event Action<string> OnErrorOccurred;
+    public event Action OnDisconnected;
+    public event Action<string> OnResponseReceived; 
 
-    public WebSocketClient()
-    {
-        resourceManager = new ResourceManager($"DigitalProduction.{LanguageSettings.CurrentLanguage}", typeof(WebSocketClient).Assembly);
-        LanguageSettings.LanguageChanged += OnLanguageChanged;
-    }
-
-    private void OnLanguageChanged()
-    {
-        resourceManager = new ResourceManager($"DigitalProduction.{LanguageSettings.CurrentLanguage}", typeof(WebSocketClient).Assembly);
-    }
-
+    // Connect to the WebSocket server
     public async Task Connect(string url)
     {
-        _url = url;
-        _webSocket = new ClientWebSocket();
-
-        await ReceiveMessageAsync();
-
-        await _webSocket.ConnectAsync(new Uri(url), System.Threading.CancellationToken.None);
-        Console.WriteLine(resourceManager.GetString("WebSocketOpened"));
-        ConnectionManager.Instance.IsConnected = true;
-        ConnectionManager.Instance.IsReconnecting = false;
-        _isReconnecting = false;
-    }
-
-    private async Task ReceiveMessageAsync()
-    {
-        while (_webSocket.State == WebSocketState.Open)
+        lock (_lock)
         {
-            var buffer = new byte[1024];
-            var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), System.Threading.CancellationToken.None);
-
-            if (result.MessageType == WebSocketMessageType.Text)
+            if (_webSocket != null && _webSocket.State == WebSocketState.Open)
             {
-                var message = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
-                Console.WriteLine("Received message: " + message);
-
-                // Trigger the OnMessage event if the message is not null or empty
-                if (!string.IsNullOrEmpty(message))
-                {
-                    OnMessage?.Invoke(message);
-                    // Set the response if waiting for it
-                    ResponseCompletionSource?.TrySetResult(message);
-                }
-            }
-            else if (result.MessageType == WebSocketMessageType.Close)
-            {
-                Console.WriteLine("WebSocket connection closed.");
-                break;
+                Console.WriteLine("WebSocket is already connected.");
+                return;
             }
         }
-    }
 
-    public event Action<string> OnMessage;
-
-    private async Task Reconnect()
-    {
-        int retryCount = 0;
-        int maxRetries = 5;
-
-        while (retryCount < maxRetries && !ConnectionManager.Instance.IsConnected)
-        {
-            try
-            {
-                Console.WriteLine(resourceManager.GetString("AttemptingReconnect"));
-                await _webSocket.ConnectAsync(new Uri(_url), System.Threading.CancellationToken.None);
-
-                if (ConnectionManager.Instance.IsConnected)
-                {
-                    Console.WriteLine(resourceManager.GetString("WebSocketReconnected"));
-                    ConnectionManager.Instance.IsReconnecting = false;
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(resourceManager.GetString("ReconnectFailed") + ": " + ex.Message);
-            }
-
-            retryCount++;
-            await Task.Delay(5000);
-        }
-
-        var result = MessageBox.Show(resourceManager.GetString("ReconnectionFailedMessage"), resourceManager.GetString("ReconnectionFailedTitle"), MessageBoxButtons.YesNo, MessageBoxIcon.Error);
-
-        if (result == DialogResult.Yes)
-        {
-            await Reconnect();
-        }
-        else
-        {
-            _isReconnecting = false;
-            ConnectionManager.Instance.IsReconnecting = false;
-        }
-    }
-
-    public async Task<string> SendAsync(string message)
-    {
         try
         {
-            if (ConnectionManager.Instance.IsConnected)
-            {
-                ResponseCompletionSource = new TaskCompletionSource<string>();
+            _url = url;
+            _webSocket = new ClientWebSocket();
+            await _webSocket.ConnectAsync(new Uri(url), System.Threading.CancellationToken.None);
 
-                await _webSocket.SendAsync(new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(message)), WebSocketMessageType.Text, true, System.Threading.CancellationToken.None);
-
-                return await ResponseCompletionSource.Task;
-            }
-            else
-            {
-                OnErrorOccurred?.Invoke("WebSocket chưa kết nối.");
-                return null;
-            }
+            ConnectionManager.Instance.IsConnected = true;
         }
         catch (Exception ex)
         {
-            OnErrorOccurred?.Invoke($"Lỗi khi gửi tin nhắn: {ex.Message}");
+            ConnectionManager.Instance.IsConnected = false;
+            OnErrorOccurred?.Invoke(ex.Message);
+            StartReconnect();
+        }
+    }
+
+    // Send a message to the WebSocket server and wait for a response
+    public async Task<string> SendAsync(string message)
+    {
+        if (_webSocket == null || _webSocket.State != WebSocketState.Open)
+        {
+            OnErrorOccurred?.Invoke("WebSocket is not connected.");
+            return null;
+        }
+
+        try
+        {
+            ResponseCompletionSource = new TaskCompletionSource<string>();
+
+            // Send the message to the server
+            await _webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)),
+                                       WebSocketMessageType.Text, true, System.Threading.CancellationToken.None);
+
+            // Receive response (in the same method after sending the request)
+            var buffer = new ArraySegment<byte> (new byte[12840]);
+
+            StringBuilder sb = new StringBuilder();
+            WebSocketReceiveResult result;
+            do {
+                result = await _webSocket.ReceiveAsync(buffer, System.Threading.CancellationToken.None);
+                var chunk = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Trim();
+                sb.Append(chunk.ToString());
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    NotifyDisconnection();
+                    return null;
+                }
+            } while(!result.EndOfMessage);
+
+            // Convert the received byte array to a string and parse as JSON
+            string responseMessage = sb.ToString();
+
+            // Trigger the OnResponseReceived event with the response message
+            OnResponseReceived?.Invoke(responseMessage);
+
+            return responseMessage;
+        }
+        catch (Exception ex)
+        {
+            OnErrorOccurred?.Invoke("Error while sending message: " + ex.Message);
             return null;
         }
     }
 
+    // Disconnect from the WebSocket server
     public async Task Disconnect()
     {
-        if (_webSocket.State == WebSocketState.Open)
+        if (_webSocket == null || _webSocket.State != WebSocketState.Open)
+            return;
+
+        try
         {
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", System.Threading.CancellationToken.None);
+            NotifyDisconnection();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error while disconnecting: " + ex.Message);
+        }
+    }
+
+    // Notify disconnection and attempt to reconnect
+    private void NotifyDisconnection()
+    {
+        lock (_lock)
+        {
+            if (_webSocket != null)
+            {
+                _webSocket.Dispose();
+                _webSocket = null;
+            }
+        }
+
+        Console.WriteLine("WebSocket has been disconnected.");
+        OnDisconnected?.Invoke();
+        ConnectionManager.Instance.IsConnected = false;
+
+        StartReconnect();
+    }
+
+    // Handle reconnection attempts
+    private async void StartReconnect()
+    {
+        if (_isReconnecting || _reconnectAttempts >= MaxReconnectAttempts)
+            return;
+
+        ConnectionManager.Instance.IsReconnecting = true;
+        _reconnectAttempts++;
+
+        Console.WriteLine("Attempting to reconnect...");
+
+        await Task.Delay(ReconnectDelaySeconds * 1000);
+
+        try
+        {
+            await Connect(_url);
+            ConnectionManager.Instance.IsReconnecting = false;
+            Console.WriteLine("Reconnected successfully!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error while reconnecting: " + ex.Message);
+            StartReconnect();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        lock (_lock)
+        {
+            _webSocket?.Dispose();
+            _disposed = true;
         }
     }
 }
