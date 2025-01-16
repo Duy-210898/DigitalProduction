@@ -120,9 +120,6 @@
   <data name="Add" xml:space="preserve">
     <value>Add Device</value>
   </data>
-  <data name="AlreadyConnectedMessage" xml:space="preserve">
-    <value>WebSocket is already connected.</value>
-  </data>
   <data name="AlreadyConnectedTitle" xml:space="preserve">
     <value>Reconnect</value>
   </data>

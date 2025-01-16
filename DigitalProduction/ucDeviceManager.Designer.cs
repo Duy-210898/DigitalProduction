@@ -28,38 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.txtMessage = new System.Windows.Forms.TextBox();
-            this.btnSend = new System.Windows.Forms.Button();
-            this.lblStatus = new System.Windows.Forms.Label();
+            this.gridControl_Devices = new DevExpress.XtraGrid.GridControl();
+            this.gridView_Device = new DevExpress.XtraGrid.Views.Grid.GridView();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Devices)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView_Device)).BeginInit();
             this.SuspendLayout();
             // 
-            // txtMessage
+            // gridControl_Devices
             // 
-            this.txtMessage.Location = new System.Drawing.Point(270, 69);
-            this.txtMessage.Multiline = true;
-            this.txtMessage.Name = "txtMessage";
-            this.txtMessage.Size = new System.Drawing.Size(282, 119);
-            this.txtMessage.TabIndex = 0;
+            this.gridControl_Devices.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridControl_Devices.Location = new System.Drawing.Point(0, 0);
+            this.gridControl_Devices.MainView = this.gridView_Device;
+            this.gridControl_Devices.Name = "gridControl_Devices";
+            this.gridControl_Devices.Size = new System.Drawing.Size(825, 491);
+            this.gridControl_Devices.TabIndex = 0;
+            this.gridControl_Devices.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gridView_Device});
             // 
-            // btnSend
+            // gridView_Device
             // 
-            this.btnSend.Location = new System.Drawing.Point(292, 254);
-            this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(75, 23);
-            this.btnSend.TabIndex = 1;
-            this.btnSend.Text = "button1";
-            this.btnSend.UseVisualStyleBackColor = true;
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.AutoSize = true;
-            this.lblStatus.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblStatus.Location = new System.Drawing.Point(0, 0);
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(35, 13);
-            this.lblStatus.TabIndex = 2;
-            this.lblStatus.Text = "label1";
-            this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.gridView_Device.GridControl = this.gridControl_Devices;
+            this.gridView_Device.Name = "gridView_Device";
+            this.gridView_Device.OptionsCustomization.AllowFilter = false;
+            this.gridView_Device.OptionsCustomization.AllowRowSizing = true;
+            this.gridView_Device.OptionsPrint.PrintGroupFooter = false;
+            this.gridView_Device.OptionsPrint.PrintHorzLines = false;
+            this.gridView_Device.OptionsPrint.PrintVertLines = false;
+            this.gridView_Device.OptionsView.RowAutoHeight = true;
+            this.gridView_Device.OptionsView.ShowFooter = true;
             // 
             // ucDeviceManager
             // 
@@ -67,20 +63,18 @@
             this.Appearance.Options.UseBackColor = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.lblStatus);
-            this.Controls.Add(this.btnSend);
-            this.Controls.Add(this.txtMessage);
+            this.Controls.Add(this.gridControl_Devices);
             this.Name = "ucDeviceManager";
             this.Size = new System.Drawing.Size(825, 491);
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Devices)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView_Device)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TextBox txtMessage;
-        private System.Windows.Forms.Button btnSend;
-        private System.Windows.Forms.Label lblStatus;
+        private DevExpress.XtraGrid.GridControl gridControl_Devices;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView_Device;
     }
 }

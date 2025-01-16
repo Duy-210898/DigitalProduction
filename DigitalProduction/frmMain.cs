@@ -21,12 +21,12 @@ namespace DigitalProduction
 
         private Dictionary<string, string> statusMapping;
 
-        public frmMain(WebSocketClient webSocketClient)
+        public frmMain()
         {
             resourceManager = new ResourceManager("DigitalProduction.en", typeof(frmMain).Assembly);
 
             InitializeComponent();
-            _webSocketClient = webSocketClient;
+            _webSocketClient = WebSocketClient.Instance;
             InitializeLogOutButton();
             InitializeStatusMapping();
 
@@ -172,9 +172,10 @@ namespace DigitalProduction
 
         private void InvokeSetWebSocketClient(UserControl userControl)
         {
-            var methodInfo = userControl.GetType().GetMethod("SetWebSocketClient");
+            var methodInfo = userControl.GetType().GetMethod("SetWebSocketClient", new Type[] { typeof(WebSocketClient) });
             if (methodInfo != null)
             {
+                _webSocketClient.ClearEventHandlers();
                 methodInfo.Invoke(userControl, new object[] { _webSocketClient });
             }
             else
@@ -268,6 +269,7 @@ namespace DigitalProduction
             string selectedLanguage = isChecked ? "vi" : "en";
             LanguageSettings.ChangeLanguage(selectedLanguage);
 
+            LocalizationManager.SetLanguage(selectedLanguage);
             resourceManager = new ResourceManager($"DigitalProduction.{LanguageSettings.CurrentLanguage}", typeof(frmMain).Assembly);
             UpdateFormTexts();
 
@@ -275,10 +277,10 @@ namespace DigitalProduction
             UpdateConnectionStatus(ConnectionManager.Instance.IsConnected);
             UpdateReconnectStatus(ConnectionManager.Instance.IsReconnecting);
 
-            RefreshControlsLanguage();
+            RefreshControlsLanguage(selectedLanguage);
         }
 
-        private void RefreshControlsLanguage()
+        private void RefreshControlsLanguage(string selectedLanguage)
         {
             foreach (Control control in pnlControl.Controls)
             {

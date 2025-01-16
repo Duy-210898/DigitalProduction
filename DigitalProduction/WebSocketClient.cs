@@ -3,16 +3,19 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 using System;
-using Newtonsoft.Json;
 
 public class WebSocketClient : IDisposable
 {
     private ClientWebSocket _webSocket;
+
+    // Accessor to the singleton instance
+    private static WebSocketClient _instance;
+
     private TaskCompletionSource<string> ResponseCompletionSource;
     private string _url;
     private bool _isReconnecting = false;
     private bool _disposed = false;
-    private readonly object _lock = new object();
+    private static object _lock = new object();
 
     private int _reconnectAttempts = 0;
     private const int MaxReconnectAttempts = 5;
@@ -20,8 +23,25 @@ public class WebSocketClient : IDisposable
 
     public event Action<string> OnErrorOccurred;
     public event Action OnDisconnected;
-    public event Action<string> OnResponseReceived; 
+    public event Action<string> OnResponseReceived;
 
+    // Private constructor to prevent external instantiation
+    private WebSocketClient() { }
+
+    public static WebSocketClient Instance
+    {
+        get
+        {
+            lock (_lock)
+            {
+                if (_instance == null)
+                {
+                    _instance = new WebSocketClient();
+                }
+                return _instance;
+            }
+        }
+    }
     // Connect to the WebSocket server
     public async Task Connect(string url)
     {
@@ -169,5 +189,10 @@ public class WebSocketClient : IDisposable
             _webSocket?.Dispose();
             _disposed = true;
         }
+    }
+    // Method to clear all event handlers by setting the event to null
+    public void ClearEventHandlers()
+    {
+        OnResponseReceived = null;
     }
 }

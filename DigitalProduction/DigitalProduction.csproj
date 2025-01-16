@@ -41,6 +41,9 @@
     <Reference Include="DevExpress.XtraEditors.v24.2" />
     <Reference Include="DevExpress.Printing.v24.2.Core" />
     <Reference Include="DevExpress.Drawing.v24.2" />
+    <Reference Include="DevExpress.XtraGrid.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraLayout.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraPrinting.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -64,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionManager.cs" />
+    <Compile Include="Extensions\Extentions.cs" />
+    <Compile Include="LocalizationManager.cs" />
     <Compile Include="dbHelper.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -78,9 +83,15 @@
       <DependentUpon>frmLogin.cs</DependentUpon>
     </Compile>
     <Compile Include="LanguageManager.cs" />
+    <Compile Include="Models\Device.cs" />
+    <Compile Include="Models\DistributionData.cs" />
+    <Compile Include="Models\Employee.cs" />
+    <Compile Include="Models\ProductionSchedule.cs" />
     <Compile Include="NotificationManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResponseMessage.cs" />
+    <Compile Include="ShowMessage.cs" />
     <Compile Include="ucDeviceManager.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -141,6 +152,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Resources\en.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\vi.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="ucDeviceManager.resx">
       <DependentUpon>ucDeviceManager.cs</DependentUpon>
     </EmbeddedResource>
