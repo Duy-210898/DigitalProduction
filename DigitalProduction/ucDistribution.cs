@@ -1,14 +1,13 @@
-﻿using DevExpress.Data.Filtering.Helpers;
-using DevExpress.XtraEditors;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static DevExpress.Xpo.Logger.LogManager;
+using DevExpress.XtraEditors;
+using DigitalProduction.Models;
+using Newtonsoft.Json;
 
 namespace DigitalProduction
 {
@@ -28,7 +27,7 @@ namespace DigitalProduction
         }
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-            _webSocketClient = webSocketClient;
+            _webSocketClient = WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }
 
@@ -541,77 +540,5 @@ namespace DigitalProduction
         {
             SendDistributionDataToServer();
         }
-    }
-    public class DistributionData
-    {
-        public string MasterWorkOrder { get; set; }
-        public string SO { get; set; }
-        public string Model { get; set; }
-        public string ART { get; set; }
-        public List<SizeData> SizeData { get; set; }
-        public List<MaterialData> MaterialData { get; set; }
-        public string User { get; set; }
-        public string IpAddress { get; set; }
-    }
-
-    public class SizeData
-    {
-        public string Size { get; set; }
-        public int SizeQty { get; set; }
-    }
-
-    public class MaterialData
-    {
-        public string PartName { get; set; }
-        public string MaterialsName { get; set; }
-    }
-
-
-    public class Device
-    {
-        public int DeviceID { get; set; }
-        public string IpAddress { get; set; }
-        public string MachineName { get; set; }
-        public bool ConnectionStatus { get; set; }
-        public bool IsActive { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public string Plant { get; set; }
-        public int[] PlantID { get; set; }
-    }
-
-
-    public class Response
-    {
-        public string Action { get; set; }
-        public string Message { get; set; }
-        public string Status { get; set; }
-    }
-    public class ScheduleResponse
-    {
-        public string Action { get; set; }
-        public string Status { get; set; }
-        public string Message { get; set; }
-        public Device[] Devices { get; set; }
-
-        public List<int> Pages { get; set; }
-        public List<ProductionSchedule> Schedule { get; set; }
-    }
-    public class ProductionSchedule
-    {
-        public string MasterWorkOrder { get; set; }
-        public string PartId { get; set; }
-        public string PartName { get; set; }
-        public string MaterialsId { get; set; }
-        public string MaterialsName { get; set; }
-        public int SizeQty { get; set; }
-        public string Factory { get; set; }
-        public string ART { get; set; }
-        public string Model { get; set; }
-        public string PO { get; set; }
-        public string SO { get; set; }
-        public string Size { get; set; }
-        public string LastNo { get; set; }
-        public float UnitUsage { get; set; }
-        public string ProductionProcess { get; set; }
     }
 }

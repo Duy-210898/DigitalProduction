@@ -19,14 +19,11 @@ namespace DigitalProduction
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Initialize WebSocketClient and connect
-            WebSocketClient webSocketClient = new WebSocketClient();
-
             Task.Run(async () =>
             {
                 try
                 {
-                    await webSocketClient.Connect("ws://10.30.4.121:8000");
+                    await WebSocketClient.Instance.Connect("ws://10.30.4.106:8000");
                     Console.WriteLine("Connected to WebSocket server successfully.");
                 }
                 catch (Exception ex)
@@ -35,7 +32,7 @@ namespace DigitalProduction
                 }
             }).Wait();
 
-            Application.Run(new frmMain(webSocketClient));
+            Application.Run(new frmMain());
         }
     }
 }

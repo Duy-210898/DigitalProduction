@@ -482,7 +482,7 @@ async function getAllDeviceData() {
   try {
     const pool = await sql.connect(dbConfig);
     const result = await pool.request()
-      .query('SELECT * FROM DeviceList JOIN Plant ON DeviceList.PlantID = Plant.PlantID WHERE DeviceList.IsActive = 1');
+      .query('SELECT a.IpAddress, a.MachineName, a.ConnectionStatus, b.Plant FROM DeviceList a JOIN Plant b ON a.PlantID = b.PlantID WHERE a.IsActive = 0');
 
     return result.recordset;  
   } catch (error) {
@@ -644,6 +644,17 @@ async function getPlantNames() {
     return [];
   }
 }
+// Lấy danh sách users
+async function getUserList() {
+  try {
+    const pool = await sql.connect(dbConfig);
+    const result = await pool.request().query('SELECT * FROM [CuttingProjectData].[dbo].[Users]');
+    return result.recordset;
+  } catch (error) {
+    console.error('Error fetching user list from database:', error.message);
+    throw error;
+  }
+}
 
 
 module.exports = {
@@ -663,4 +674,5 @@ module.exports = {
   getDistributionDataFromDb,
   getActualOutputData,
   setOrderIsComplete,
+  getUserList,
 };

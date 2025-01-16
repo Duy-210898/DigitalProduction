@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 const { connectToDevice } = require('./modbusClient');
-const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB } = require('./database');
+const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList } = require('./database');
 const { setClients } = require('./notifications'); 
 
 let clients = [];
@@ -74,6 +74,9 @@ async function handleClientMessage(ws, message) {
         break;
       case 'saveDistributionData':
         await handleSaveDistributionData(ws, request);
+        break;
+      case 'getUsers':
+        await handleGetUsers(ws, request);
         break;
       default:
         console.log('Unknown action:', action);
@@ -392,6 +395,17 @@ async function handleGetPlant(ws) {
   } catch (error) {
     console.error('Error getting plant names:', error);
     ws.send(JSON.stringify({ error: 'Failed to retrieve plant names' }));
+  }
+}
+
+// Xử lý yêu cầu lấy thông tin users
+async function handleGetUsers(ws) {
+  try {
+    const usersResponse = await getUserList();
+    ws.send(JSON.stringify({ action: 'getUsers', users: usersResponse }));
+  } catch (error) {
+    console.error('Error getting users:', error);
+    ws.send(JSON.stringify({ error: 'Failed to retrieve users' }));
   }
 }
 
