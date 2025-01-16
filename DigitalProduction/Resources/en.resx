@@ -234,4 +234,7 @@
   <data name="ListOfUser" xml:space="preserve">
     <value>List Of Users</value>
   </data>
+  <data name="Cancle" xml:space="preserve">
+    <value>Cancle</value>
+  </data>
 </root>

@@ -159,4 +159,7 @@
   <data name="ListOfUser" xml:space="preserve">
     <value>Danh sách người dùng</value>
   </data>
+  <data name="Cancle" xml:space="preserve">
+    <value>Hủy</value>
+  </data>
 </root>
