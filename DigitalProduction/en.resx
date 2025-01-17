@@ -186,6 +186,9 @@
   <data name="Home" xml:space="preserve">
     <value>Home</value>
   </data>
+  <data name="InputSO" xml:space="preserve">
+    <value>Input SO:</value>
+  </data>
   <data name="IPAddress" xml:space="preserve">
     <value>IP Address</value>
   </data>
@@ -200,6 +203,9 @@
   </data>
   <data name="MonthlyPlan" xml:space="preserve">
     <value>Monthly Plan</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Page:</value>
   </data>
   <data name="Plant" xml:space="preserve">
     <value>Plant</value>

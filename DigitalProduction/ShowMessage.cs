@@ -9,6 +9,10 @@ namespace DigitalProduction
         {
             MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+        public static void ShowSuccessfully(string message, string caption = "Successfully")
+        {
+            MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.None);
+        }
 
         // Show warning message
         public static void ShowWarning(string message, string caption = "Warning")

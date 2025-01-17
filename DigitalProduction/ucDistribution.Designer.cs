@@ -32,8 +32,6 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.cbxDevice = new System.Windows.Forms.ComboBox();
             this.lblSelect = new System.Windows.Forms.Label();
-            this.txtMasterWorkOrder = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.lblWorkCenter = new System.Windows.Forms.Label();
             this.lblProductionDate = new System.Windows.Forms.Label();
             this.lblCreatedDate = new System.Windows.Forms.Label();
@@ -47,22 +45,31 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.tbl = new System.Windows.Forms.TableLayoutPanel();
             this.lblSO = new System.Windows.Forms.Label();
-            this.cbxPage = new System.Windows.Forms.ComboBox();
-            this.label13 = new System.Windows.Forms.Label();
             this.lblMasterWorkOrder = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
+            this.checkedComboBoxEdit1 = new DevExpress.XtraEditors.CheckedComboBoxEdit();
+            this.cbxPage = new DevExpress.XtraEditors.ComboBoxEdit();
             this.pnlMaterial = new System.Windows.Forms.Panel();
             this.dgvMaterial = new System.Windows.Forms.DataGridView();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
+            this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
+            this.txtSO = new DevExpress.XtraEditors.TextEdit();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.pnlSize = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSize)).BeginInit();
             this.panel2.SuspendLayout();
             this.tbl.SuspendLayout();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.checkedComboBoxEdit1.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxPage.Properties)).BeginInit();
             this.pnlMaterial.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMaterial)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
+            this.panelControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSO.Properties)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.pnlSize.SuspendLayout();
             this.SuspendLayout();
@@ -110,36 +117,13 @@
             this.lblSelect.Text = "Select Machine";
             this.lblSelect.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // txtMasterWorkOrder
-            // 
-            this.txtMasterWorkOrder.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtMasterWorkOrder.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtMasterWorkOrder.Location = new System.Drawing.Point(235, 10);
-            this.txtMasterWorkOrder.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
-            this.txtMasterWorkOrder.Name = "txtMasterWorkOrder";
-            this.txtMasterWorkOrder.Size = new System.Drawing.Size(226, 23);
-            this.txtMasterWorkOrder.TabIndex = 0;
-            this.txtMasterWorkOrder.Leave += new System.EventHandler(this.txtMasterWorkOrder_Leave);
-            // 
-            // label1
-            // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(84, 10);
-            this.label1.Margin = new System.Windows.Forms.Padding(40, 10, 3, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(145, 23);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Input Master Work Order:";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
             // lblWorkCenter
             // 
             this.lblWorkCenter.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblWorkCenter.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblWorkCenter.Location = new System.Drawing.Point(3, 53);
             this.lblWorkCenter.Name = "lblWorkCenter";
-            this.lblWorkCenter.Size = new System.Drawing.Size(226, 26);
+            this.lblWorkCenter.Size = new System.Drawing.Size(180, 26);
             this.lblWorkCenter.TabIndex = 2;
             this.lblWorkCenter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -147,9 +131,9 @@
             // 
             this.lblProductionDate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblProductionDate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblProductionDate.Location = new System.Drawing.Point(235, 53);
+            this.lblProductionDate.Location = new System.Drawing.Point(189, 53);
             this.lblProductionDate.Name = "lblProductionDate";
-            this.lblProductionDate.Size = new System.Drawing.Size(226, 26);
+            this.lblProductionDate.Size = new System.Drawing.Size(271, 26);
             this.lblProductionDate.TabIndex = 2;
             this.lblProductionDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -157,9 +141,9 @@
             // 
             this.lblCreatedDate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblCreatedDate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCreatedDate.Location = new System.Drawing.Point(467, 53);
+            this.lblCreatedDate.Location = new System.Drawing.Point(466, 53);
             this.lblCreatedDate.Name = "lblCreatedDate";
-            this.lblCreatedDate.Size = new System.Drawing.Size(234, 26);
+            this.lblCreatedDate.Size = new System.Drawing.Size(168, 26);
             this.lblCreatedDate.TabIndex = 2;
             this.lblCreatedDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -167,9 +151,9 @@
             // 
             this.lblFactory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblFactory.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFactory.Location = new System.Drawing.Point(707, 53);
+            this.lblFactory.Location = new System.Drawing.Point(640, 53);
             this.lblFactory.Name = "lblFactory";
-            this.lblFactory.Size = new System.Drawing.Size(221, 26);
+            this.lblFactory.Size = new System.Drawing.Size(288, 26);
             this.lblFactory.TabIndex = 2;
             this.lblFactory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -177,9 +161,9 @@
             // 
             this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label6.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(707, 79);
+            this.label6.Location = new System.Drawing.Point(640, 79);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(221, 26);
+            this.label6.Size = new System.Drawing.Size(288, 26);
             this.label6.TabIndex = 2;
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -187,9 +171,9 @@
             // 
             this.lblLastNo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblLastNo.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLastNo.Location = new System.Drawing.Point(467, 79);
+            this.lblLastNo.Location = new System.Drawing.Point(466, 79);
             this.lblLastNo.Name = "lblLastNo";
-            this.lblLastNo.Size = new System.Drawing.Size(234, 26);
+            this.lblLastNo.Size = new System.Drawing.Size(168, 26);
             this.lblLastNo.TabIndex = 2;
             this.lblLastNo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -197,9 +181,9 @@
             // 
             this.lblArt.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblArt.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblArt.Location = new System.Drawing.Point(235, 79);
+            this.lblArt.Location = new System.Drawing.Point(189, 79);
             this.lblArt.Name = "lblArt";
-            this.lblArt.Size = new System.Drawing.Size(226, 26);
+            this.lblArt.Size = new System.Drawing.Size(271, 26);
             this.lblArt.TabIndex = 2;
             this.lblArt.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -209,7 +193,7 @@
             this.lblModel.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblModel.Location = new System.Drawing.Point(3, 79);
             this.lblModel.Name = "lblModel";
-            this.lblModel.Size = new System.Drawing.Size(226, 26);
+            this.lblModel.Size = new System.Drawing.Size(180, 26);
             this.lblModel.TabIndex = 2;
             this.lblModel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -219,7 +203,7 @@
             this.lblPO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPO.Location = new System.Drawing.Point(3, 105);
             this.lblPO.Name = "lblPO";
-            this.lblPO.Size = new System.Drawing.Size(226, 29);
+            this.lblPO.Size = new System.Drawing.Size(180, 29);
             this.lblPO.TabIndex = 2;
             this.lblPO.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -266,50 +250,63 @@
             // 
             this.lblSO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSO.Location = new System.Drawing.Point(235, 105);
+            this.lblSO.Location = new System.Drawing.Point(189, 105);
             this.lblSO.Name = "lblSO";
-            this.lblSO.Size = new System.Drawing.Size(226, 29);
+            this.lblSO.Size = new System.Drawing.Size(271, 29);
             this.lblSO.TabIndex = 2;
             this.lblSO.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // cbxPage
-            // 
-            this.cbxPage.FormattingEnabled = true;
-            this.cbxPage.Location = new System.Drawing.Point(59, 7);
-            this.cbxPage.Name = "cbxPage";
-            this.cbxPage.Size = new System.Drawing.Size(170, 24);
-            this.cbxPage.TabIndex = 4;
-            this.cbxPage.SelectedIndexChanged += new System.EventHandler(this.cbxPage_SelectedIndexChanged);
-            // 
-            // label13
-            // 
-            this.label13.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.Location = new System.Drawing.Point(3, 6);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(53, 24);
-            this.label13.TabIndex = 3;
-            this.label13.Text = "Page:";
-            this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblMasterWorkOrder
             // 
             this.lblMasterWorkOrder.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMasterWorkOrder.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMasterWorkOrder.Location = new System.Drawing.Point(467, 105);
+            this.lblMasterWorkOrder.Location = new System.Drawing.Point(466, 105);
             this.lblMasterWorkOrder.Name = "lblMasterWorkOrder";
-            this.lblMasterWorkOrder.Size = new System.Drawing.Size(234, 29);
+            this.lblMasterWorkOrder.Size = new System.Drawing.Size(168, 29);
             this.lblMasterWorkOrder.TabIndex = 2;
             this.lblMasterWorkOrder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.labelControl2);
+            this.panel1.Controls.Add(this.checkedComboBoxEdit1);
             this.panel1.Controls.Add(this.cbxPage);
-            this.panel1.Controls.Add(this.label13);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(467, 3);
+            this.panel1.Location = new System.Drawing.Point(466, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(234, 34);
+            this.panel1.Size = new System.Drawing.Size(168, 34);
             this.panel1.TabIndex = 3;
+            // 
+            // labelControl2
+            // 
+            this.labelControl2.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelControl2.Appearance.Options.UseFont = true;
+            this.labelControl2.Location = new System.Drawing.Point(30, 10);
+            this.labelControl2.Name = "labelControl2";
+            this.labelControl2.Size = new System.Drawing.Size(28, 16);
+            this.labelControl2.TabIndex = 5;
+            this.labelControl2.Text = "Page";
+            // 
+            // checkedComboBoxEdit1
+            // 
+            this.checkedComboBoxEdit1.Location = new System.Drawing.Point(163, 33);
+            this.checkedComboBoxEdit1.Name = "checkedComboBoxEdit1";
+            this.checkedComboBoxEdit1.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.checkedComboBoxEdit1.Size = new System.Drawing.Size(100, 20);
+            this.checkedComboBoxEdit1.TabIndex = 6;
+            // 
+            // cbxPage
+            // 
+            this.cbxPage.Location = new System.Drawing.Point(64, 4);
+            this.cbxPage.Name = "cbxPage";
+            this.cbxPage.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxPage.Properties.Appearance.Options.UseFont = true;
+            this.cbxPage.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cbxPage.Size = new System.Drawing.Size(83, 22);
+            this.cbxPage.TabIndex = 5;
+            this.cbxPage.SelectedIndexChanged += new System.EventHandler(this.cbxPage_SelectedIndexChanged);
             // 
             // pnlMaterial
             // 
@@ -337,12 +334,10 @@
             // 
             this.tableLayoutPanel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.tableLayoutPanel2.ColumnCount = 4;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.88614F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 24.27497F));
-            this.tableLayoutPanel2.Controls.Add(this.txtMasterWorkOrder, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 19.97852F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 29.86036F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 18.68958F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 31.47154F));
             this.tableLayoutPanel2.Controls.Add(this.lblWorkCenter, 0, 2);
             this.tableLayoutPanel2.Controls.Add(this.lblProductionDate, 1, 2);
             this.tableLayoutPanel2.Controls.Add(this.lblCreatedDate, 2, 2);
@@ -355,6 +350,7 @@
             this.tableLayoutPanel2.Controls.Add(this.lblSO, 1, 4);
             this.tableLayoutPanel2.Controls.Add(this.lblMasterWorkOrder, 2, 4);
             this.tableLayoutPanel2.Controls.Add(this.panel1, 2, 0);
+            this.tableLayoutPanel2.Controls.Add(this.panelControl1, 1, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(20, 3);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
@@ -367,6 +363,37 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(931, 134);
             this.tableLayoutPanel2.TabIndex = 0;
+            // 
+            // panelControl1
+            // 
+            this.panelControl1.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            this.panelControl1.Controls.Add(this.labelControl1);
+            this.panelControl1.Controls.Add(this.txtSO);
+            this.panelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelControl1.Location = new System.Drawing.Point(189, 3);
+            this.panelControl1.Name = "panelControl1";
+            this.panelControl1.Size = new System.Drawing.Size(271, 34);
+            this.panelControl1.TabIndex = 5;
+            // 
+            // labelControl1
+            // 
+            this.labelControl1.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelControl1.Appearance.Options.UseFont = true;
+            this.labelControl1.Location = new System.Drawing.Point(5, 7);
+            this.labelControl1.Name = "labelControl1";
+            this.labelControl1.Size = new System.Drawing.Size(75, 16);
+            this.labelControl1.TabIndex = 5;
+            this.labelControl1.Text = "labelControl1";
+            // 
+            // txtSO
+            // 
+            this.txtSO.Location = new System.Drawing.Point(86, 4);
+            this.txtSO.Name = "txtSO";
+            this.txtSO.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtSO.Properties.Appearance.Options.UseFont = true;
+            this.txtSO.Size = new System.Drawing.Size(181, 22);
+            this.txtSO.TabIndex = 4;
+            this.txtSO.Leave += new System.EventHandler(this.txtMasterWorkOrder_Leave);
             // 
             // tableLayoutPanel1
             // 
@@ -413,10 +440,16 @@
             this.panel2.ResumeLayout(false);
             this.tbl.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.checkedComboBoxEdit1.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxPage.Properties)).EndInit();
             this.pnlMaterial.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvMaterial)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
-            this.tableLayoutPanel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).EndInit();
+            this.panelControl1.ResumeLayout(false);
+            this.panelControl1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSO.Properties)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.pnlSize.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -429,8 +462,6 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ComboBox cbxDevice;
         private System.Windows.Forms.Label lblSelect;
-        private System.Windows.Forms.TextBox txtMasterWorkOrder;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblWorkCenter;
         private System.Windows.Forms.Label lblProductionDate;
         private System.Windows.Forms.Label lblCreatedDate;
@@ -444,8 +475,6 @@
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.TableLayoutPanel tbl;
         private System.Windows.Forms.Label lblSO;
-        private System.Windows.Forms.ComboBox cbxPage;
-        private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label lblMasterWorkOrder;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel pnlMaterial;
@@ -453,5 +482,11 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel pnlSize;
+        private DevExpress.XtraEditors.TextEdit txtSO;
+        private DevExpress.XtraEditors.PanelControl panelControl1;
+        private DevExpress.XtraEditors.LabelControl labelControl1;
+        private DevExpress.XtraEditors.LabelControl labelControl2;
+        private DevExpress.XtraEditors.CheckedComboBoxEdit checkedComboBoxEdit1;
+        private DevExpress.XtraEditors.ComboBoxEdit cbxPage;
     }
 }

@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using DigitalProduction.Models;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace DigitalProduction
 {
@@ -6,6 +8,7 @@ namespace DigitalProduction
     {
         public string Action { get; set; }
         public string Status { get; set; }
+        public string Message { get; set; }
 
         [JsonProperty("devices", NullValueHandling = NullValueHandling.Ignore)]
         public T Devices { get; set; }
@@ -13,6 +16,12 @@ namespace DigitalProduction
         [JsonProperty("users", NullValueHandling = NullValueHandling.Ignore)]
         public T Users { get; set; }
 
+        [JsonProperty("pages", NullValueHandling = NullValueHandling.Ignore)]
+        public List<int> Pages { get; set; }
+
+        [JsonProperty("schedule", NullValueHandling = NullValueHandling.Ignore)]
+        public List<ProductionSchedule> Schedules { get; set; } 
+         
         // Method to serialize the object into JSON string
         public string ToJson()
         {

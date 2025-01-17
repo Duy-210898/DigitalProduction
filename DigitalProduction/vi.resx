@@ -189,6 +189,9 @@
   <data name="Home" xml:space="preserve">
     <value>Trang chủ</value>
   </data>
+  <data name="InputSO" xml:space="preserve">
+    <value>Nhập SO:</value>
+  </data>
   <data name="IPAddress" xml:space="preserve">
     <value>Địa chỉ IP</value>
   </data>
@@ -203,6 +206,9 @@
   </data>
   <data name="MonthlyPlan" xml:space="preserve">
     <value>Kế hoạch hằng tháng</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Trang:</value>
   </data>
   <data name="Plant" xml:space="preserve">
     <value>Xưởng</value>

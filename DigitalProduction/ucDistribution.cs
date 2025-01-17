@@ -3,27 +3,33 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
+using static DevExpress.Utils.Frames.FrameHelper;
 
 namespace DigitalProduction
 {
     public partial class ucDistribution : XtraUserControl
     {
         private DbHelper dbHelper;
+        private ResourceManager resourceManager;
         private readonly DataTable scheduleDataTable;
         private WebSocketClient _webSocketClient;
         public ucDistribution()
         {
             dbHelper = new DbHelper();
+            resourceManager = new ResourceManager("DigitalProduction.en", typeof(frmMain).Assembly);
             InitializeComponent();
             scheduleDataTable = new DataTable();
+            UpdateFormTexts();
             InitializeScheduleDataTable();
             InitializeDataGridViewColumns();
-            txtMasterWorkOrder.Focus();
+            txtSO.Focus();
         }
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
@@ -55,92 +61,86 @@ namespace DigitalProduction
 
         private void OnLanguageChanged()
         {
-            // Logic to refresh UI text for the current language
+            UpdateFormTexts();
+        }
+        private void UpdateFormTexts()
+        {
+            labelControl1.Text = resourceManager.GetString("InputSO");
+            labelControl2.Text = resourceManager.GetString("Page");
         }
 
-        private void ShowMessage(string title, string message, MessageBoxIcon icon)
-        {
-            MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
-        }
         private void WebSocket_OnResponseReceived(string data)
         {
             Console.WriteLine("Response from server: " + data);
         }
 
-        private void WebSocket_OnMessage(object data)
-        {
+        private void WebSocket_OnMessage(string jsonData)
+        { 
             try
             {
-                string jsonData = data as string;
-                Console.WriteLine("Response from server: " + jsonData);
+                ResponseMessage<List<object>> response = ResponseMessage<List<object>>.FromJson(jsonData);
 
-                if (jsonData != null)
+                if (response.Pages != null)
                 {
-                    var scheduleResponse = JsonConvert.DeserializeObject<ScheduleResponse>(jsonData);
-
-                    if (scheduleResponse != null)
-                    {
-                        switch (scheduleResponse.Action)
-                        {
-                            case "getSchedule":
-                                HandleGetScheduleResponse(scheduleResponse);
-                                break;
-
-                            case "saveDistributionData":
-                                Console.WriteLine("Suscess");
-                                break;
-
-                            case "getUniquePages":
-                                HandleGetUniquePagesResponse(scheduleResponse);
-                                break;
-
-                            default:
-                                ShowErrorNotification($"Unsupported action: {scheduleResponse.Action}");
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        ShowErrorNotification("Invalid response format.");
-                    }
+                    HandleGetUniquePagesResponse(response);
+                }
+                else if (response.Schedules != null)
+                {
+                    HandleGetScheduleResponse(response);
+                }
+                else if (response.Action == "saveDistributionData")
+                {
+                    HandleSendSchedules(response);
                 }
                 else
                 {
-                    ShowErrorNotification("Received data is not a valid string.");
+                    ShowMessage.ShowInfo("No Data Found");
                 }
             }
             catch (JsonSerializationException jsonEx)
             {
-                ShowErrorNotification($"JSON Deserialization Error: {jsonEx.Message}");
+                ShowMessage.ShowError($"JSON Deserialization Error: {jsonEx.Message}");
             }
             catch (Exception ex)
             {
-                ShowErrorNotification($"Error processing message: {ex.Message}");
+                ShowMessage.ShowError($"An error occurred: {ex.Message}");
             }
+
         }
 
-        private void HandleGetScheduleResponse(ScheduleResponse scheduleResponse)
+        private void HandleGetScheduleResponse(ResponseMessage<List<object>> response)
         {
-            if (scheduleResponse.Status == "success")
+            if (response.Status == "success")
             {
-                SaveScheduleDataToTable(scheduleResponse.Schedule);
-                HandleReceivedSchedule(scheduleResponse.Schedule);
+                SaveScheduleDataToTable(response.Schedules);
+                HandleReceivedSchedule(response.Schedules);
             }
             else
             {
-                ShowErrorNotification(scheduleResponse.Message);
+                ShowErrorNotification(response.Message);
             }
         }
-
-        private void HandleGetUniquePagesResponse(ScheduleResponse scheduleResponse)
+        private void HandleSendSchedules(ResponseMessage<List<object>> response) 
         {
-            if (scheduleResponse.Status == "success")
+            if (response.Status == "success")
             {
-                HandleReceivedUniquePages(scheduleResponse.Pages);
+                ShowMessage.ShowSuccessfully("Saved distribution data successfully");
             }
             else
             {
-                ShowErrorNotification(scheduleResponse.Message);
+                ShowErrorNotification(response.Message);
+            }
+        }
+
+        private void HandleGetUniquePagesResponse(ResponseMessage<List<object>> response)
+        {
+            if (response.Status == "success")
+            {
+                HandleReceivedUniquePages(response.Pages);
+            }
+            else
+            {
+                ShowErrorNotification(response.Message);
             }
         }
         private void HandleReceivedUniquePages(List<int> uniquePages)
@@ -155,33 +155,33 @@ namespace DigitalProduction
             {
                 cbxPage.Invoke(new Action(() =>
                 {
-                    cbxPage.Items.Clear();
+                    cbxPage.Properties.Items.Clear();
                     foreach (var page in uniquePages)
                     {
-                        cbxPage.Items.Add(page.ToString());
+                        cbxPage.Properties.Items.Add(page.ToString());
                     }
 
-                    if (cbxPage.Items.Count > 0)
+                    if (cbxPage.Properties.Items.Count > 0)
                     {
                         cbxPage.SelectedIndex = 0;
-                    }
+                    }       
                 }));
             }
             else
             {
-                cbxPage.Items.Clear();
+                cbxPage.Properties.Items.Clear();
                 foreach (var page in uniquePages)
                 {
-                    cbxPage.Items.Add(page.ToString());
+                    cbxPage.Properties.Items.Add(page.ToString());
                 }
 
-                if (cbxPage.Items.Count > 0)
+                if (cbxPage.Properties.Items.Count > 0)
                 {
                     cbxPage.SelectedIndex = 0;
                 }
             }
         }
-        // Đảm bảo gọi `InvokeRequired` đúng cách khi thao tác với DataGridView hoặc các điều khiển UI từ luồng khác
+
         private void HandleReceivedSchedule(List<ProductionSchedule> schedules)
         {
             if (schedules == null || !schedules.Any())
@@ -381,16 +381,16 @@ namespace DigitalProduction
 
         private void ShowErrorNotification(string message)
         {
-            ShowMessage("Error", message, MessageBoxIcon.Error);
+        ShowMessage.ShowError(message);
         }
 
         private async void txtMasterWorkOrder_Leave(object sender, EventArgs e)
         {
-            string masterWorkOrder = txtMasterWorkOrder.Text.Trim();
+            string masterWorkOrder = txtSO.Text.Trim();
 
             if (string.IsNullOrEmpty(masterWorkOrder))
             {
-                ShowMessage("Input Error", "Please enter the Master Work Order.", MessageBoxIcon.Warning);
+                ShowMessage.ShowWarning("Input Error", "Please enter the Master Work Order.");
                 return;
             }
 
@@ -412,7 +412,7 @@ namespace DigitalProduction
 
         private void cbxPage_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string masterWorkOrder = txtMasterWorkOrder.Text.Trim();
+            string masterWorkOrder = txtSO.Text.Trim();
             string page = cbxPage.SelectedItem?.ToString() ?? string.Empty;
 
             if (!string.IsNullOrEmpty(masterWorkOrder))
@@ -492,7 +492,6 @@ namespace DigitalProduction
 
             return distributionData;
         }
-
         private async void SendDistributionDataToServer()
         {
             try
@@ -507,27 +506,7 @@ namespace DigitalProduction
 
                 string jsonRequestWrapper = JsonConvert.SerializeObject(request);
 
-                // Gửi yêu cầu và nhận phản hồi từ máy chủ
                 string jsonResponse = await _webSocketClient.SendAsync(jsonRequestWrapper);
-
-                if (!string.IsNullOrEmpty(jsonResponse))
-                {
-                    // Phân tích phản hồi JSON từ máy chủ
-                    var response = JsonConvert.DeserializeObject<Response>(jsonResponse);
-
-                    if (response != null && response.Status == "success")
-                    {
-                        MessageBox.Show("Distribution Data saved successfully!\nThank you!", "Saved Successfully", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Failed to save data. Message: " + response.Message, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("No response received from the server.");
-                }
             }
             catch (Exception ex)
             {
