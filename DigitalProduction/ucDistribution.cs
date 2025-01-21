@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
+using static DigitalProduction.frmMain;
 
 namespace DigitalProduction
 {
     public partial class ucDistribution : XtraUserControl
     {
         private DbHelper dbHelper;
-        private readonly DataTable scheduleDataTable;
         private WebSocketClient _webSocketClient;
+
         public ucDistribution()
         {
             dbHelper = new DbHelper();
             InitializeComponent();
-            scheduleDataTable = new DataTable();
-            InitializeScheduleDataTable();
-            InitializeDataGridViewColumns();
             txtMasterWorkOrder.Focus();
         }
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -30,22 +30,98 @@ namespace DigitalProduction
             _webSocketClient = WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }
-
-        private void InitializeScheduleDataTable()
+        private void HandleReceivedSchedule(List<ProductionSchedule> schedules)
         {
-            scheduleDataTable.Columns.Add("MasterWorkOrder");
-            scheduleDataTable.Columns.Add("Factory");
-            scheduleDataTable.Columns.Add("LastNo");
-            scheduleDataTable.Columns.Add("SO");
-            scheduleDataTable.Columns.Add("PO");
-            scheduleDataTable.Columns.Add("Model");
-            scheduleDataTable.Columns.Add("ART");
-            scheduleDataTable.Columns.Add("Size");
-            scheduleDataTable.Columns.Add("SizeQty", typeof(int));
-            scheduleDataTable.Columns.Add("PartId");
-            scheduleDataTable.Columns.Add("PartName");
-            scheduleDataTable.Columns.Add("MaterialsId");
-            scheduleDataTable.Columns.Add("MaterialsName");
+            if (schedules == null || !schedules.Any())
+            {
+                ShowErrorNotification("No schedule data received.");
+                return;
+            }
+
+            // Thực hiện trong luồng UI
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => HandleReceivedSchedule(schedules)));
+                return;
+            }
+
+            // Hiển thị các bảng điều khiển
+            pnlMaterial.Visible = true;
+            pnlSize.Visible = true;
+
+            var sizeDataList = new List<SizeData>();
+            var materialDataList = new List<MaterialData>();
+
+            // Lọc và sắp xếp các kích thước duy nhất
+            var uniqueSortedSizes = schedules
+                .Where(s => !string.IsNullOrEmpty(s.Size))
+                .Select(s => s.Size)
+                .Distinct()
+                .OrderBy(size => size)
+                .ToList();
+
+            // Thêm dữ liệu mới vào sizeDataList
+            foreach (var size in uniqueSortedSizes)
+            {
+                var sizeSchedule = schedules.FirstOrDefault(s => s.Size == size);
+                sizeDataList.Add(new SizeData
+                {
+                    Size = size,
+                    SizeQty = sizeSchedule?.SizeQty ?? 0,
+                    UnitUsage = sizeSchedule?.UnitUsage ?? 0
+                });
+            }
+
+            // Lọc và sắp xếp các phần duy nhất từ schedule
+            var uniqueParts = schedules
+                .GroupBy(s => s.PartName)
+                .Select(g => g.First())
+                .OrderBy(part => part.PartId)
+                .ToList();
+
+            // Duyệt qua các phần vật liệu và thêm vào materialDataList
+            foreach (var schedule in uniqueParts)
+            {
+                materialDataList.Add(new MaterialData
+                {
+                    PartId = schedule.PartId,
+                    PartName = schedule.PartName,
+                    MaterialsId = schedule.MaterialsId,
+                    MaterialsName = schedule.MaterialsName
+                });
+            }
+
+            // Cập nhật thông tin Header
+            string factoryName = schedules.FirstOrDefault()?.Factory ?? string.Empty;
+            switch (factoryName)
+            {
+                case "4001":
+                    factoryName = "APACHE FOOTWEAR";
+                    break;
+                case "4011":
+                    factoryName = "MEGA";
+                    break;
+                case "4021":
+                    factoryName = "TERA";
+                    break;
+                default:
+                    factoryName = "Unknown Factory";
+                    break;
+            }
+
+            lblFactory.Text = $"Factory: {factoryName}";
+            lblLastNo.Text = $"Last No: {schedules.FirstOrDefault()?.LastNo ?? string.Empty}";
+            lblMasterWorkOrder.Text = $"Master Work Order: {schedules.FirstOrDefault()?.MasterWorkOrder ?? string.Empty}";
+            lblSO.Text = $"SO: {schedules.FirstOrDefault()?.SO ?? string.Empty}";
+            lblPO.Text = $"PO: {schedules.FirstOrDefault()?.PO ?? string.Empty}";
+            lblModel.Text = $"Model: {schedules.FirstOrDefault()?.Model ?? string.Empty}";
+            lblArt.Text = $"ART: {schedules.FirstOrDefault()?.ART ?? string.Empty}";
+
+            // Bind the size data list to the gridControl_Size
+            gridControl_Size.DataSource = sizeDataList;
+
+            // Bind the material data list to the gridControl_Material
+            gridControl_Material.DataSource = materialDataList;
         }
 
         public void RefreshLanguage()
@@ -55,8 +131,9 @@ namespace DigitalProduction
 
         private void OnLanguageChanged()
         {
-            // Logic to refresh UI text for the current language
+            ApplyLocalization();
         }
+
 
         private void ShowMessage(string title, string message, MessageBoxIcon icon)
         {
@@ -123,7 +200,6 @@ namespace DigitalProduction
         {
             if (scheduleResponse.Status == "success")
             {
-                SaveScheduleDataToTable(scheduleResponse.Schedule);
                 HandleReceivedSchedule(scheduleResponse.Schedule);
             }
             else
@@ -179,203 +255,6 @@ namespace DigitalProduction
                 {
                     cbxPage.SelectedIndex = 0;
                 }
-            }
-        }
-        // Đảm bảo gọi `InvokeRequired` đúng cách khi thao tác với DataGridView hoặc các điều khiển UI từ luồng khác
-        private void HandleReceivedSchedule(List<ProductionSchedule> schedules)
-        {
-            if (schedules == null || !schedules.Any())
-            {
-                ShowErrorNotification("No schedule data received.");
-                return;
-            }
-
-            // Thực hiện trong luồng UI
-            if (InvokeRequired)
-            {
-                Invoke(new Action(() => HandleReceivedSchedule(schedules)));
-                return;
-            }
-
-            // Khởi tạo lại các cột cho DataGridView nếu chưa được khởi tạo
-            InitializeDataGridViewColumns();
-
-            // Hiển thị các bảng điều khiển
-            pnlMaterial.Visible = true;
-            pnlSize.Visible = true;
-            dgvSize.Rows.Clear();
-            dgvMaterial.Rows.Clear();
-            scheduleDataTable.Clear();
-
-            // Lọc và sắp xếp các kích thước duy nhất
-            var uniqueSortedSizes = schedules
-                .Where(s => !string.IsNullOrEmpty(s.Size))
-                .Select(s => s.Size)
-                .Distinct()
-                .OrderBy(size => size)
-                .ToList();
-
-            // Duyệt qua các kích thước duy nhất và thêm vào DataGridView
-            foreach (var size in uniqueSortedSizes)
-            {
-                int rowIndex = dgvSize.Rows.Add();
-                DataGridViewRow row = dgvSize.Rows[rowIndex];
-                row.Cells["Size"].Value = size;
-
-                // Tìm kiếm thông tin SizeQty và UnitUsage của kích thước
-                var sizeSchedule = schedules.FirstOrDefault(s => s.Size == size);
-                var sizeQty = sizeSchedule?.SizeQty ?? 0;
-                var unitUsage = sizeSchedule?.UnitUsage ?? 0;
-
-                row.Cells["SizeQty"].Value = sizeQty;
-                row.Cells["UnitUsage"].Value = unitUsage;
-
-                // Tính TotalUsage
-                row.Cells["TotalUsage"].Value = sizeQty * unitUsage;
-
-                // Lưu dữ liệu vào DataTable
-                var dataRow = scheduleDataTable.NewRow();
-                dataRow["Size"] = size;
-                dataRow["SizeQty"] = sizeQty;
-                scheduleDataTable.Rows.Add(dataRow);
-            }
-
-            // Lọc và sắp xếp các phần duy nhất từ schedule
-            var uniqueParts = schedules
-                .GroupBy(s => s.PartName)
-                .Select(g => g.First())
-                .OrderBy(part => part.PartId)
-                .ToList();
-
-            // Cập nhật thông tin Header
-            string factoryName = schedules.FirstOrDefault()?.Factory ?? string.Empty;
-
-            switch (factoryName)
-            {
-                case "4001":
-                    factoryName = "APACHE FOOTWEAR";
-                    break;
-                case "4011":
-                    factoryName = "MEGA";
-                    break;
-                case "4021":
-                    factoryName = "TERA";
-                    break;
-                default:
-                    factoryName = "Unknown Factory";
-                    break;
-            }
-
-            lblFactory.Text = $"Factory: {factoryName}";
-            lblLastNo.Text = $"Last No: {schedules.FirstOrDefault()?.LastNo ?? string.Empty}";
-            lblMasterWorkOrder.Text = $"Master Work Order: {schedules.FirstOrDefault()?.MasterWorkOrder ?? string.Empty}";
-            lblSO.Text = $"SO: {schedules.FirstOrDefault()?.SO ?? string.Empty}";
-            lblPO.Text = $"PO: {schedules.FirstOrDefault()?.PO ?? string.Empty}";
-            lblModel.Text = $"Model: {schedules.FirstOrDefault()?.Model ?? string.Empty}";
-            lblArt.Text = $"ART: {schedules.FirstOrDefault()?.ART ?? string.Empty}";
-
-            // Duyệt qua các phần vật liệu
-            foreach (var schedule in uniqueParts)
-            {
-                int rowIndex = dgvMaterial.Rows.Add();
-                DataGridViewRow row = dgvMaterial.Rows[rowIndex];
-                row.Cells["PartId"].Value = schedule.PartId;
-                row.Cells["PartName"].Value = schedule.PartName;
-                row.Cells["MaterialsID"].Value = schedule.MaterialsId;
-                row.Cells["MaterialsName"].Value = schedule.MaterialsName;
-
-                // Lưu dữ liệu vào DataTable
-                var dataRow = scheduleDataTable.NewRow();
-                dataRow["PartId"] = schedule.PartId;
-                dataRow["PartName"] = schedule.PartName;
-                dataRow["MaterialsId"] = schedule.MaterialsId;
-                dataRow["MaterialsName"] = schedule.MaterialsName;
-                scheduleDataTable.Rows.Add(dataRow);
-            }
-
-            // Định dạng lại DataGridView
-            FormatDataGridView(dgvSize);
-            FormatDataGridView(dgvMaterial);
-        }
-        private void FormatDataGridView(DataGridView dgv)
-        {
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
-            dgv.EnableHeadersVisualStyles = false;
-            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.LightSteelBlue;
-            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
-            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Arial", 10, FontStyle.Bold);
-            dgv.AllowUserToAddRows = false;
-            dgv.BorderStyle = BorderStyle.None;
-            dgv.CellBorderStyle = DataGridViewCellBorderStyle.None;
-            dgv.RowHeadersVisible = false;
-            UpdateColumnWidthPercentage(dgv);
-            dgv.CellFormatting += (sender, e) =>
-            {
-                if (e.RowIndex % 2 == 0)
-                {
-                    dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.AliceBlue;
-                }
-                else
-                {
-                    dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.White;
-                }
-            };
-        }
-        private void UpdateColumnWidthPercentage(DataGridView dgv)
-        {
-            if (dgv.Columns.Count == 0) return;  
-            float totalWidth = dgv.Width;
-            int columnCount = dgv.Columns.Count;
-            float[] columnPercentages = { 0.1f, 0.15f, 0.15f, 0.6f };
-
-            for (int i = 0; i < columnCount; i++)
-            {
-                dgv.Columns[i].Width = (i < columnPercentages.Length)
-                    ? (int)(totalWidth * columnPercentages[i])
-                    : 0;
-            }
-        }
-        private void InitializeDataGridViewColumns()
-        {
-            if (dgvSize.Columns.Count == 0)
-            {
-                dgvSize.Columns.Add("Size", "Size");
-                dgvSize.Columns.Add("SizeQty", "Size Quantity");
-                dgvSize.Columns.Add("UnitUsage", "Unit Usage");
-                dgvSize.Columns.Add("TotalUsage", "Total Usage");
-            }
-
-            if (dgvMaterial.Columns.Count == 0)
-            {
-                dgvMaterial.Columns.Add("PartId", "Part ID");
-                dgvMaterial.Columns.Add("PartName", "Part Name");
-                dgvMaterial.Columns.Add("MaterialsID", "Materials ID");
-                dgvMaterial.Columns.Add("MaterialsName", "Materials Name");
-            }
-        }
-
-        private void SaveScheduleDataToTable(List<ProductionSchedule> schedules)
-        {
-            scheduleDataTable.Clear();
-
-            foreach (var schedule in schedules)
-            {
-                var row = scheduleDataTable.NewRow();
-                row["MasterWorkOrder"] = schedule.MasterWorkOrder ?? string.Empty;
-                row["Factory"] = schedule.Factory ?? string.Empty;
-                row["LastNo"] = schedule.LastNo ?? string.Empty;
-                row["SO"] = schedule.SO ?? string.Empty;
-                row["PO"] = schedule.PO ?? string.Empty;
-                row["Model"] = schedule.Model ?? string.Empty;
-                row["ART"] = schedule.ART ?? string.Empty;
-                row["Size"] = schedule.Size ?? string.Empty;
-                row["SizeQty"] = schedule.SizeQty;
-                row["PartId"] = schedule.PartId ?? string.Empty;
-                row["PartName"] = schedule.PartName ?? string.Empty;
-                row["MaterialsId"] = schedule.MaterialsId ?? string.Empty;
-                row["MaterialsName"] = schedule.MaterialsName ?? string.Empty;
-
-                scheduleDataTable.Rows.Add(row);
             }
         }
 
@@ -455,42 +334,51 @@ namespace DigitalProduction
             };
 
             // Get SizeData from dgvSize
-            foreach (DataGridViewRow row in dgvSize.Rows)
-            {
-                if (row.IsNewRow) continue;
-                try
-                {
-                    distributionData.SizeData.Add(new SizeData
-                    {
-                        Size = row.Cells["Size"].Value?.ToString(),
-                        SizeQty = Convert.ToInt32(row.Cells["SizeQty"].Value),
-                    });
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error processing size data: " + ex.Message);
-                }
-            }
+            //foreach (DataGridViewRow row in gridView_Size.Rows)
+            //{
+            //    if (row.IsNewRow) continue;
+            //    try
+            //    {
+            //        distributionData.SizeData.Add(new SizeData
+            //        {
+            //            Size = row.Cells["Size"].Value?.ToString(),
+            //            SizeQty = Convert.ToInt32(row.Cells["SizeQty"].Value),
+            //        });
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        MessageBox.Show("Error processing size data: " + ex.Message);
+            //    }
+            //}
 
-            // Get MaterialData from dgvMaterial
-            foreach (DataGridViewRow row in dgvMaterial.Rows)
-            {
-                if (row.IsNewRow) continue;
-                try
-                {
-                    distributionData.MaterialData.Add(new MaterialData
-                    {
-                        PartName = row.Cells["PartName"].Value?.ToString(),
-                        MaterialsName = row.Cells["MaterialsName"].Value?.ToString()
-                    });
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error processing material data: " + ex.Message);
-                }
-            }
+            //// Get MaterialData from dgvMaterial
+            //foreach (DataGridViewRow row in dgvMaterial.Rows)
+            //{
+            //    if (row.IsNewRow) continue;
+            //    try
+            //    {
+            //        distributionData.MaterialData.Add(new MaterialData
+            //        {
+            //            PartName = row.Cells["PartName"].Value?.ToString(),
+            //            MaterialsName = row.Cells["MaterialsName"].Value?.ToString()
+            //        });
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        MessageBox.Show("Error processing material data: " + ex.Message);
+            //    }
+            //}
 
             return distributionData;
+        }
+        private void ApplyLocalization()
+        {
+            gridView_Size.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
+
+            gridView_Size.Columns["Size"].Caption = LocalizationManager.GetString("Size");
+            gridView_Size.Columns["SizeQty"].Caption = LocalizationManager.GetString("SizeQty");
+            gridView_Size.Columns["UnitUsage"].Caption = LocalizationManager.GetString("UnitUsage");
+            gridView_Size.Columns["TotalUsage"].Caption = LocalizationManager.GetString("TotalUsage");
         }
 
         private async void SendDistributionDataToServer()
@@ -512,7 +400,6 @@ namespace DigitalProduction
 
                 if (!string.IsNullOrEmpty(jsonResponse))
                 {
-                    // Phân tích phản hồi JSON từ máy chủ
                     var response = JsonConvert.DeserializeObject<Response>(jsonResponse);
 
                     if (response != null && response.Status == "success")

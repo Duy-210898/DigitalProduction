@@ -43,21 +43,18 @@ namespace DigitalProduction.Extensions
             // Handle button clicks
             _commandsEdit.ButtonClick += (s, ee) =>
             {
-                switch (ee.Button.Caption)
+                switch (ee.Button.Index)
                 {
-                    case "Add":
-                    case "Thêm": // Add button
+                    case 0: // Add button
                         ShowMessage.ShowInfo("You clicked Add");
                         break;
 
-                    case "Edit":
-                    case "Sửa": // Update button
+                    case 1: // Update button
                         gridView.CloseEditor();
                         gridView.ShowEditForm();
                         break;
 
-                    case "Delete":
-                    case "Xóa": // Delete button
+                    case 2: // Delete button
                         var fullname = gridView.GetFocusedDataRow()[filedName]?.ToString();
                         if (string.IsNullOrEmpty(fullname)) return;
 

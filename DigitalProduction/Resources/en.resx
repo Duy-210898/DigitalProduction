@@ -237,4 +237,169 @@
   <data name="Cancle" xml:space="preserve">
     <value>Cancle</value>
   </data>
+  <data name="Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="SizeQty" xml:space="preserve">
+    <value>Size Quantity</value>
+  </data>
+  <data name="TotalUsage" xml:space="preserve">
+    <value>Total Usage</value>
+  </data>
+  <data name="UnitUsage" xml:space="preserve">
+    <value>Unit Usage</value>
+  </data>
+	<data name="Add" xml:space="preserve">
+    <value>Add Device</value>
+  </data>
+	<data name="AlreadyConnectedTitle" xml:space="preserve">
+    <value>Reconnect</value>
+  </data>
+	<data name="ConfirmLogOut" xml:space="preserve">
+    <value>Are you sure you want to log out?</value>
+  </data>
+	<data name="Connect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+	<data name="Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+	<data name="ConnectionClosedMessage" xml:space="preserve">
+    <value>The connection to the server was closed.</value>
+  </data>
+	<data name="ConnectionClosedTitle" xml:space="preserve">
+    <value>Connection Closed</value>
+  </data>
+	<data name="ConnectionErrorMessage" xml:space="preserve">
+    <value>An error occurred while trying to reconnect: {0}</value>
+  </data>
+	<data name="ConnectionErrorTitle" xml:space="preserve">
+    <value>Reconnect Error</value>
+  </data>
+	<data name="ConnectionLostMessage" xml:space="preserve">
+    <value>The connection was lost. Would you like to reconnect?</value>
+  </data>
+	<data name="ConnectionLostTitle" xml:space="preserve">
+    <value>Connection Lost</value>
+  </data>
+	<data name="ConnectionStatus" xml:space="preserve">
+    <value>Connection Status</value>
+  </data>
+	<data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+	<data name="CuttingMachineManager" xml:space="preserve">
+    <value>Machine Management</value>
+  </data>
+	<data name="CuttingManager" xml:space="preserve">
+    <value>Machine Management</value>
+  </data>
+	<data name="DeviceManage" xml:space="preserve">
+    <value>Device Managerment</value>
+  </data>
+	<data name="DeviceManager" xml:space="preserve">
+    <value>Device Manager</value>
+  </data>
+	<data name="DeviceOutput" xml:space="preserve">
+    <value>Device Output</value>
+  </data>
+	<data name="Disconnect" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+	<data name="Disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+	<data name="Distribution" xml:space="preserve">
+    <value>PO Distribution</value>
+  </data>
+	<data name="Guest" xml:space="preserve">
+    <value>Guest User</value>
+  </data>
+	<data name="Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+	<data name="IPAddress" xml:space="preserve">
+    <value>IP Address</value>
+  </data>
+	<data name="Language" xml:space="preserve">
+    <value>English</value>
+  </data>
+	<data name="LogOut" xml:space="preserve">
+    <value>Log out</value>
+  </data>
+	<data name="MachineName" xml:space="preserve">
+    <value>Machine Name</value>
+  </data>
+	<data name="MonthlyPlan" xml:space="preserve">
+    <value>Monthly Plan</value>
+  </data>
+	<data name="Plant" xml:space="preserve">
+    <value>Plant</value>
+  </data>
+	<data name="PODistribution" xml:space="preserve">
+    <value>PO Distribution</value>
+  </data>
+	<data name="ProductionSchedule" xml:space="preserve">
+    <value>Production Schedule</value>
+  </data>
+	<data name="Progress" xml:space="preserve">
+    <value>Cutting Progress</value>
+  </data>
+	<data name="ReadData" xml:space="preserve">
+    <value>Read Data</value>
+  </data>
+	<data name="Reconnecting" xml:space="preserve">
+    <value>Reconnecting...</value>
+  </data>
+	<data name="ReconnectingMessage" xml:space="preserve">
+    <value>Reconnecting...</value>
+  </data>
+	<data name="ReconnectInProgressMessage" xml:space="preserve">
+    <value>Reconnect attempt is already in progress.</value>
+  </data>
+	<data name="ReconnectInProgressTitle" xml:space="preserve">
+    <value>Reconnect</value>
+  </data>
+	<data name="ReconnectionAttemptMessage" xml:space="preserve">
+    <value>Attempting to reconnect...</value>
+  </data>
+	<data name="ReconnectionFailedMessage" xml:space="preserve">
+    <value>Failed to reconnect. Would you like to try again?</value>
+  </data>
+	<data name="ReconnectionFailedTitle" xml:space="preserve">
+    <value>Reconnection Failed</value>
+  </data>
+	<data name="Select" xml:space="preserve">
+    <value>Select Device:</value>
+  </data>
+	<data name="Send" xml:space="preserve">
+    <value>Send Distribution</value>
+  </data>
+	<data name="Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+	<data name="SizeQty" xml:space="preserve">
+    <value>Size Quantity</value>
+  </data>
+	<data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+	<data name="SystemManagerment" xml:space="preserve">
+    <value>System Managerment</value>
+  </data>
+	<data name="Total Usage" xml:space="preserve">
+    <value>Total Usage</value>
+  </data>
+	<data name="UnitUsage" xml:space="preserve">
+    <value>Unit Usage</value>
+  </data>
+	<data name="UserManager" xml:space="preserve">
+    <value>User Manager</value>
+  </data>
+	<data name="WebSocketErrorMessage" xml:space="preserve">
+    <value>WebSocket error: {0}</value>
+  </data>
+	<data name="WriteData" xml:space="preserve">
+    <value>Write Data</value>
+  </data>
 </root>

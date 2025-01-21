@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Resources;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraBars;
 using DevExpress.XtraBars.FluentDesignSystem;
@@ -64,19 +65,19 @@ namespace DigitalProduction
         {
             if (isReconnecting)
             {
-                statusItem.Caption = resourceManager.GetString("Reconnecting");
+                statusItem.Caption = LocalizationManager.GetString("Reconnecting");
                 statusItem.Appearance.ForeColor = Color.Orange;
             }
             else
             {
                 if (ConnectionManager.Instance.IsConnected)
                 {
-                    statusItem.Caption = resourceManager.GetString("Connected");
+                    statusItem.Caption = LocalizationManager.GetString("Connected");
                     statusItem.Appearance.ForeColor = Color.Green;
                 }
                 else
                 {
-                    statusItem.Caption = resourceManager.GetString("Disconnected");
+                    statusItem.Caption = LocalizationManager.GetString("Disconnected");
                     statusItem.Appearance.ForeColor = Color.Red;
                 }
             }
@@ -86,12 +87,12 @@ namespace DigitalProduction
         {
             if (isConnected)
             {
-                statusItem.Caption = resourceManager.GetString("Connected");
+                statusItem.Caption = LocalizationManager.GetString("Connected");
                 statusItem.Appearance.ForeColor = Color.Green;
             }
             else
             {
-                statusItem.Caption = resourceManager.GetString("Disconnected");
+                statusItem.Caption = LocalizationManager.GetString("Disconnected");
                 statusItem.Appearance.ForeColor = Color.Red;
             }
         }
@@ -99,7 +100,7 @@ namespace DigitalProduction
         private void InitializeLogOutButton()
         {
             btnLogOut = new BarButtonItem();
-            btnLogOut.Caption = resourceManager.GetString("LogOut");
+            btnLogOut.Caption = LocalizationManager.GetString("LogOut");
             btnLogOut.ItemClick += BtnLogOut_ItemClick;
 
             barSubItem1.AddItem(btnLogOut);
@@ -112,7 +113,7 @@ namespace DigitalProduction
                 Application.Exit();
             }
 
-            DialogResult result = MessageBox.Show(resourceManager.GetString("ConfirmLogOut"), resourceManager.GetString("LogOut"), MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show(LocalizationManager.GetString("ConfirmLogOut"), LocalizationManager.GetString("LogOut"), MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
                 this.Hide();
@@ -222,7 +223,7 @@ namespace DigitalProduction
         {
             if (string.IsNullOrEmpty(Global.Username))
             {
-                barSubItem1.Caption = resourceManager.GetString("Guest");
+                barSubItem1.Caption = LocalizationManager.GetString("Guest");
             }
             else
             {
@@ -237,47 +238,53 @@ namespace DigitalProduction
         {
             statusMapping = new Dictionary<string, string>
             {
-                { "DeviceManagerStatus", resourceManager.GetString("DeviceManagerStatus") },
-                { "UserManagerStatus", resourceManager.GetString("UserManagerStatus") },
-                { "ProductionScheduleStatus", resourceManager.GetString("ProductionSchedule") },
-                { "CuttingMachineManagerStatus", resourceManager.GetString("CuttingMachineManager") },
-                { "PODistributionStatus", resourceManager.GetString("PODistribution") }
+                { "DeviceManagerStatus", LocalizationManager.GetString("DeviceManagerStatus") },
+                { "UserManagerStatus", LocalizationManager.GetString("UserManagerStatus") },
+                { "ProductionScheduleStatus", LocalizationManager.GetString("ProductionSchedule") },
+                { "CuttingMachineManagerStatus", LocalizationManager.GetString("CuttingMachineManager") },
+                { "PODistributionStatus", LocalizationManager.GetString("PODistribution") }
             };
         }
 
         private void UpdateFormTexts()
         {
-            btnLogOut.Caption = resourceManager.GetString("LogOut");
-            Language.Caption = resourceManager.GetString("Language");
-            this.Text = resourceManager.GetString("Home");
-            accordionControlElement1.Text = resourceManager.GetString("ProductionSchedule");
-            accordionControlElement4.Text = resourceManager.GetString("CuttingManager");
-            accordionControlElement3.Text = resourceManager.GetString("SystemManagerment");
-            barSubItem1.Caption = resourceManager.GetString("Guest");
+            btnLogOut.Caption = LocalizationManager.GetString("LogOut");
+            Language.Caption = LocalizationManager.GetString("Language");
+            this.Text = LocalizationManager.GetString("Home");
+            accordionControlElement1.Text = LocalizationManager.GetString("ProductionSchedule");
+            accordionControlElement4.Text = LocalizationManager.GetString("CuttingManager");
+            accordionControlElement3.Text = LocalizationManager.GetString("SystemManagerment");
+            barSubItem1.Caption = LocalizationManager.GetString("Guest");
 
-            btnDeviceManager.Text = resourceManager.GetString("DeviceManager");
-            btnMonthlyPlan.Text = resourceManager.GetString("MonthlyPlan");
-            btnDistribution.Text = resourceManager.GetString("Distribution");
-            btnUserManager.Text = resourceManager.GetString("UserManager");
-            btnDeviceOutput.Text = resourceManager.GetString("DeviceOutput");
+            btnDeviceManager.Text = LocalizationManager.GetString("DeviceManager");
+            btnMonthlyPlan.Text = LocalizationManager.GetString("MonthlyPlan");
+            btnDistribution.Text = LocalizationManager.GetString("Distribution");
+            btnUserManager.Text = LocalizationManager.GetString("UserManager");
+            btnDeviceOutput.Text = LocalizationManager.GetString("DeviceOutput");
         }
 
 
         private void toggleLanguage_CheckedChanged(object sender, ItemClickEventArgs e)
         {
+            Cursor.Current = Cursors.WaitCursor;
+
             bool isChecked = toggleLanguage.Checked;
             string selectedLanguage = isChecked ? "vi" : "en";
-            LanguageSettings.ChangeLanguage(selectedLanguage);
 
+            LanguageSettings.ChangeLanguage(selectedLanguage);
             LocalizationManager.SetLanguage(selectedLanguage);
             resourceManager = new ResourceManager($"DigitalProduction.{LanguageSettings.CurrentLanguage}", typeof(frmMain).Assembly);
+
             UpdateFormTexts();
 
-            // Update the status item captions to the new language
+            UpdateConnectionStatus(ConnectionManager.Instance.IsConnected);
             UpdateConnectionStatus(ConnectionManager.Instance.IsConnected);
             UpdateReconnectStatus(ConnectionManager.Instance.IsReconnecting);
 
             RefreshControlsLanguage(selectedLanguage);
+
+            // Khôi phục lại con trỏ chuột về trạng thái ban đầu (thường là con trỏ mặc định)
+            Cursor.Current = Cursors.Default;
         }
 
         private void RefreshControlsLanguage(string selectedLanguage)

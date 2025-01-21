@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dgvSize = new System.Windows.Forms.DataGridView();
+            DevExpress.XtraGrid.GridLevelNode gridLevelNode1 = new DevExpress.XtraGrid.GridLevelNode();
             this.panel2 = new System.Windows.Forms.Panel();
             this.cbxDevice = new System.Windows.Forms.ComboBox();
             this.lblSelect = new System.Windows.Forms.Label();
@@ -52,31 +52,25 @@
             this.lblMasterWorkOrder = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.pnlMaterial = new System.Windows.Forms.Panel();
-            this.dgvMaterial = new System.Windows.Forms.DataGridView();
+            this.gridControl_Material = new DevExpress.XtraGrid.GridControl();
+            this.gridView_Material = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.pnlSize = new System.Windows.Forms.Panel();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvSize)).BeginInit();
+            this.gridControl_Size = new DevExpress.XtraGrid.GridControl();
+            this.gridView_Size = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.panel2.SuspendLayout();
             this.tbl.SuspendLayout();
             this.panel1.SuspendLayout();
             this.pnlMaterial.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvMaterial)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Material)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView_Material)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.pnlSize.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Size)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView_Size)).BeginInit();
             this.SuspendLayout();
-            // 
-            // dgvSize
-            // 
-            this.dgvSize.BackgroundColor = System.Drawing.Color.White;
-            this.dgvSize.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvSize.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvSize.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSize.Location = new System.Drawing.Point(20, 0);
-            this.dgvSize.Name = "dgvSize";
-            this.dgvSize.Size = new System.Drawing.Size(925, 157);
-            this.dgvSize.TabIndex = 0;
             // 
             // panel2
             // 
@@ -313,7 +307,7 @@
             // 
             // pnlMaterial
             // 
-            this.pnlMaterial.Controls.Add(this.dgvMaterial);
+            this.pnlMaterial.Controls.Add(this.gridControl_Material);
             this.pnlMaterial.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlMaterial.Location = new System.Drawing.Point(3, 306);
             this.pnlMaterial.Name = "pnlMaterial";
@@ -322,16 +316,21 @@
             this.pnlMaterial.TabIndex = 2;
             this.pnlMaterial.Visible = false;
             // 
-            // dgvMaterial
+            // gridControl_Material
             // 
-            this.dgvMaterial.BackgroundColor = System.Drawing.Color.White;
-            this.dgvMaterial.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvMaterial.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvMaterial.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvMaterial.Location = new System.Drawing.Point(20, 0);
-            this.dgvMaterial.Name = "dgvMaterial";
-            this.dgvMaterial.Size = new System.Drawing.Size(925, 285);
-            this.dgvMaterial.TabIndex = 0;
+            this.gridControl_Material.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridControl_Material.Location = new System.Drawing.Point(20, 0);
+            this.gridControl_Material.MainView = this.gridView_Material;
+            this.gridControl_Material.Name = "gridControl_Material";
+            this.gridControl_Material.Size = new System.Drawing.Size(925, 285);
+            this.gridControl_Material.TabIndex = 0;
+            this.gridControl_Material.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gridView_Material});
+            // 
+            // gridView_Material
+            // 
+            this.gridView_Material.GridControl = this.gridControl_Material;
+            this.gridView_Material.Name = "gridView_Material";
             // 
             // tableLayoutPanel2
             // 
@@ -392,7 +391,7 @@
             // 
             // pnlSize
             // 
-            this.pnlSize.Controls.Add(this.dgvSize);
+            this.pnlSize.Controls.Add(this.gridControl_Size);
             this.pnlSize.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlSize.Location = new System.Drawing.Point(3, 143);
             this.pnlSize.Name = "pnlSize";
@@ -400,6 +399,25 @@
             this.pnlSize.Size = new System.Drawing.Size(965, 157);
             this.pnlSize.TabIndex = 1;
             this.pnlSize.Visible = false;
+            // 
+            // gridControl_Size
+            // 
+            this.gridControl_Size.Dock = System.Windows.Forms.DockStyle.Fill;
+            gridLevelNode1.RelationName = "Level1";
+            this.gridControl_Size.LevelTree.Nodes.AddRange(new DevExpress.XtraGrid.GridLevelNode[] {
+            gridLevelNode1});
+            this.gridControl_Size.Location = new System.Drawing.Point(20, 0);
+            this.gridControl_Size.MainView = this.gridView_Size;
+            this.gridControl_Size.Name = "gridControl_Size";
+            this.gridControl_Size.Size = new System.Drawing.Size(925, 157);
+            this.gridControl_Size.TabIndex = 0;
+            this.gridControl_Size.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gridView_Size});
+            // 
+            // gridView_Size
+            // 
+            this.gridView_Size.GridControl = this.gridControl_Size;
+            this.gridView_Size.Name = "gridView_Size";
             // 
             // ucDistribution
             // 
@@ -409,23 +427,23 @@
             this.Name = "ucDistribution";
             this.Size = new System.Drawing.Size(971, 736);
             this.Load += new System.EventHandler(this.ucDistribution_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvSize)).EndInit();
             this.panel2.ResumeLayout(false);
             this.tbl.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.pnlMaterial.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvMaterial)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Material)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView_Material)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.pnlSize.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Size)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView_Size)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.DataGridView dgvSize;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ComboBox cbxDevice;
         private System.Windows.Forms.Label lblSelect;
@@ -449,9 +467,12 @@
         private System.Windows.Forms.Label lblMasterWorkOrder;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel pnlMaterial;
-        private System.Windows.Forms.DataGridView dgvMaterial;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel pnlSize;
+        private DevExpress.XtraGrid.GridControl gridControl_Size;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView_Size;
+        private DevExpress.XtraGrid.GridControl gridControl_Material;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView_Material;
     }
 }

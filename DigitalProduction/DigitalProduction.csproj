@@ -135,7 +135,6 @@
       <DependentUpon>ucUserManagement.cs</DependentUpon>
     </Compile>
     <Compile Include="WebSocketClient.cs" />
-    <EmbeddedResource Include="en.resx" />
     <EmbeddedResource Include="frmLogin.resx">
       <DependentUpon>frmLogin.cs</DependentUpon>
     </EmbeddedResource>
@@ -179,7 +178,6 @@
     <EmbeddedResource Include="ucUserManagement.resx">
       <DependentUpon>ucUserManagement.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="vi.resx" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

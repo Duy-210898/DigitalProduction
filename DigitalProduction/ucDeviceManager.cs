@@ -25,7 +25,6 @@ namespace DigitalProduction
         public ucDeviceManager()
         {
             InitializeComponent();
-            LanguageSettings.LanguageChanged += OnLanguageChanged;
             deviceDataTable = new DataTable();
             gridView_Device.ShowFindPanel();
             gridView_Device.OptionsFind.ShowFindButton = false;

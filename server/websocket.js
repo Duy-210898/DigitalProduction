@@ -193,9 +193,6 @@ async function handleGetDevices(ws) {
       devices: devicesResponse
     }));
 
-    // Thông báo cho tất cả các client với danh sách thiết bị mới
-    notifyClients(devicesResponse);
-
   } catch (error) {
     console.error('Error getting device list:', error);
 

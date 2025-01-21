@@ -162,4 +162,175 @@
   <data name="Cancle" xml:space="preserve">
     <value>Hủy</value>
   </data>
+  <data name="Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="SizeQty" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+  <data name="TotalUsage" xml:space="preserve">
+    <value>Tổng dung lượng</value>
+  </data>
+  <data name="UnitUsage" xml:space="preserve">
+    <value>Dung lượng</value>
+  </data>
+	  <data name="Add" xml:space="preserve">
+    <value>Thêm thiết bị</value>
+  </data>
+	  <data name="AlreadyConnectedMessage" xml:space="preserve">
+    <value>WebSocket đã được kết nối.</value>
+  </data>
+	  <data name="AlreadyConnectedTitle" xml:space="preserve">
+    <value>Kết nối lại</value>
+  </data>
+	  <data name="ConfirmLogOut" xml:space="preserve">
+    <value>Bạn có chắc chắn muốn đăng xuất?</value>
+  </data>
+	  <data name="Connect" xml:space="preserve">
+    <value>Kết nối</value>
+  </data>
+	  <data name="Connected" xml:space="preserve">
+    <value>Đã kết nối</value>
+  </data>
+	  <data name="ConnectionClosedMessage" xml:space="preserve">
+    <value>Kết nối tới máy chủ đã bị đóng.</value>
+  </data>
+	  <data name="ConnectionClosedTitle" xml:space="preserve">
+    <value>Kết nối đã đóng</value>
+  </data>
+	  <data name="ConnectionErrorMessage" xml:space="preserve">
+    <value>Đã xảy ra lỗi khi cố gắng kết nối lại: {0}</value>
+  </data>
+	  <data name="ConnectionErrorTitle" xml:space="preserve">
+    <value>Lỗi kết nối lại</value>
+  </data>
+	  <data name="ConnectionLostMessage" xml:space="preserve">
+    <value>Kết nối bị mất. Bạn có muốn kết nối lại không?</value>
+  </data>
+	  <data name="ConnectionLostTitle" xml:space="preserve">
+    <value>Mất kết nối</value>
+  </data>
+	  <data name="ConnectionStatus" xml:space="preserve">
+    <value>Trạng thái kết nối</value>
+  </data>
+	  <data name="Create" xml:space="preserve">
+    <value>Tạo</value>
+  </data>
+	  <data name="CuttingMachineManager" xml:space="preserve">
+    <value>Quản lý máy chặt</value>
+  </data>
+	  <data name="CuttingManager" xml:space="preserve">
+    <value>Quản lý máy chặt</value>
+  </data>
+	  <data name="DeviceManage" xml:space="preserve">
+    <value>Quản lý thiết bị</value>
+  </data>
+	  <data name="DeviceManager" xml:space="preserve">
+    <value>Quản lý thiết bị</value>
+  </data>
+	  <data name="DeviceOutput" xml:space="preserve">
+    <value>Sản lượng máy chặt</value>
+  </data>
+	  <data name="Disconnect" xml:space="preserve">
+    <value>Ngắt kết nối</value>
+  </data>
+	  <data name="Disconnected" xml:space="preserve">
+    <value>Ngắt kết nối</value>
+  </data>
+	  <data name="Distribution" xml:space="preserve">
+    <value>Phân phối đơn</value>
+  </data>
+	  <data name="Guest" xml:space="preserve">
+    <value>Tài khoản khách</value>
+  </data>
+	  <data name="Home" xml:space="preserve">
+    <value>Trang chủ</value>
+  </data>
+	  <data name="IPAddress" xml:space="preserve">
+    <value>Địa chỉ IP</value>
+  </data>
+	  <data name="Language" xml:space="preserve">
+    <value>Tiếng việt</value>
+  </data>
+	  <data name="LogOut" xml:space="preserve">
+    <value>Đăng xuất</value>
+  </data>
+	  <data name="MachineName" xml:space="preserve">
+    <value>Tên thiết bị</value>
+  </data>
+	  <data name="MonthlyPlan" xml:space="preserve">
+    <value>Kế hoạch hằng tháng</value>
+  </data>
+	  <data name="Plant" xml:space="preserve">
+    <value>Xưởng</value>
+  </data>
+	  <data name="PODistribution" xml:space="preserve">
+    <value>Phân phối đơn</value>
+  </data>
+	  <data name="ProductionSchedule" xml:space="preserve">
+    <value>Kế hoạch sản xuất</value>
+  </data>
+	  <data name="Progress" xml:space="preserve">
+    <value>Tiến độ chặt</value>
+  </data>
+	  <data name="ReadData" xml:space="preserve">
+    <value>Đọc dữ liệu</value>
+  </data>
+	  <data name="Reconnecting" xml:space="preserve">
+    <value>Kết nối lại...</value>
+  </data>
+	  <data name="ReconnectingMessage" xml:space="preserve">
+    <value>Đang kết nối lại..</value>
+  </data>
+	  <data name="ReconnectInProgressMessage" xml:space="preserve">
+    <value>Đã có một nỗ lực kết nối lại đang diễn ra.</value>
+  </data>
+	  <data name="ReconnectInProgressTitle" xml:space="preserve">
+    <value>Kết nối lại</value>
+  </data>
+	  <data name="ReconnectionAttemptMessage" xml:space="preserve">
+    <value>Đang thử kết nối lại...</value>
+  </data>
+	  <data name="ReconnectionFailedMessage" xml:space="preserve">
+    <value>Kết nối lại không thành công. Bạn có muốn thử lại không?</value>
+  </data>
+	  <data name="ReconnectionFailedTitle" xml:space="preserve">
+    <value>Thử kết nối lại không thành công</value>
+  </data>
+	  <data name="Select" xml:space="preserve">
+    <value>Chọn máy chặt:</value>
+  </data>
+	  <data name="Send" xml:space="preserve">
+    <value>Gửi phân phối đơn</value>
+  </data>
+	  <data name="Size" xml:space="preserve">
+    <value>Kích thước</value>
+  </data>
+	  <data name="SizeQty" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+	  <data name="Status" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+	  <data name="SystemManagerment" xml:space="preserve">
+    <value>Quản lý hệ thống</value>
+  </data>
+	  <data name="TotalUsage" xml:space="preserve">
+    <value>Tổng dung lượng</value>
+  </data>
+	  <data name="UnitUsage" xml:space="preserve">
+    <value>Dung lượng</value>
+  </data>
+	  <data name="UserManager" xml:space="preserve">
+    <value>Quản lý người dùng</value>
+  </data>
+	  <data name="WebSocketErrorMessage" xml:space="preserve">
+    <value>Lỗi WebSocket: {0}</value>
+  </data>
+	  <data name="WorkCenter" xml:space="preserve">
+    <value>Trung tâm làm việc</value>
+  </data>
+	  <data name="WriteData" xml:space="preserve">
+    <value>Ghi dữ liệu</value>
+  </data>
 </root>
