@@ -192,6 +192,7 @@ namespace DigitalProduction
 
         private void btnUserManager_Click(object sender, EventArgs e)
         {
+            ucRegisterUser register= new ucRegisterUser();
             ShowUserControl<ucUserManagement>();
         }
 

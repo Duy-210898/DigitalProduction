@@ -1,0 +1,250 @@
+-- Check if the database exists
+USE CuttingProjectData;
+GO
+-- Table: Department
+CREATE TABLE Department (
+    DepartmentID INT PRIMARY KEY IDENTITY(1,1),
+    DepartmentName VARCHAR(100),
+    IsActive BIT
+);
+GO
+CREATE TABLE Position (
+    PositionID INT PRIMARY KEY IDENTITY(1,1),
+    PositionName VARCHAR(100)
+);
+GO
+
+-- Table: Product
+CREATE TABLE Product (
+    ProductId INT PRIMARY KEY IDENTITY(1,1),
+    ART VARCHAR(255),
+    Model VARCHAR(255)
+);
+GO
+
+-- Table: Material
+CREATE TABLE Material (
+    MaterialID INT PRIMARY KEY IDENTITY(1,1),
+    MaterialCode VARCHAR(50),
+    MaterialName VARCHAR(1000),
+    Unit VARCHAR(20)
+);
+GO
+-- Table: Order
+CREATE TABLE ProductOrder (
+    OrderID INT PRIMARY KEY IDENTITY(1,1),
+    ProductId INT,
+    Factory VARCHAR(10),
+    SO VARCHAR(100),
+    PO VARCHAR(100),
+    MasterWorkOrder VARCHAR(100),
+    LastNo VARCHAR(20),
+    Process VARCHAR(20),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME
+);
+GO
+-- Table: Size
+CREATE TABLE Size (
+    SizeID INT PRIMARY KEY IDENTITY(1,1),
+    Size VARCHAR(10)
+);
+GO
+-- Table: Part
+CREATE TABLE Part (
+    PartId INT PRIMARY KEY IDENTITY(1,1),
+    SizeId INT,
+    PartName VARCHAR(255),
+    PartCode NVARCHAR(255)
+);
+GO
+
+-- Table: Users
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    DepartmentID INT,
+	PositionID INT,
+    Username VARCHAR(50),
+    Password VARCHAR(100),
+    EmployeeName NVARCHAR(100),
+    EmployeeID INT,
+    CreatedAt DATETIME,
+    UpdatedAt DATETIME,
+    IsActive BIT
+);
+GO
+
+-- Table: Operator
+CREATE TABLE Operator (
+    OperatorID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT,
+    DepartmentID INT,
+	PositionID INT,
+    OperatorName NVARCHAR(100),
+    EmployeeID INT,
+    IsActive BIT
+);
+GO
+
+-- Table: DeviceList
+CREATE TABLE DeviceList (
+    DeviceID INT PRIMARY KEY IDENTITY(1,1),
+    DepartmentID INT,
+    IpAddress VARCHAR(50),
+    MachineName VARCHAR(100),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 0,
+    ConnectionStatus BIT,
+);
+GO
+
+-- Table: DeviceOutput
+CREATE TABLE DeviceOutput (
+    OutputID INT PRIMARY KEY IDENTITY(1,1),
+    DeviceID INT,
+    PartID INT,
+    PiecesPerPair INT,
+    MaterialLayer INT,
+    CuttingDieQty INT,
+    ActualCut INT,
+    ActualPieces INT,
+    ActualSizeQty INT,
+    InventoryQty INT
+);
+GO
+
+-- Table: DistributionData
+CREATE TABLE DistributionData (
+    DistributionID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT,
+    DeviceID INT,
+    OrderID INT,
+    OperatorID INT,
+    InventoryQty INT,
+    Status VARCHAR(50) DEFAULT 'Pending',
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    IsLeather BIT,
+    IsDelete BIT
+);
+GO
+
+-- Table: ProductionSchedule
+CREATE TABLE ProductionSchedule (
+    ScheduleID INT PRIMARY KEY IDENTITY(1,1),
+    Factory VARCHAR(50),
+    ART VARCHAR(50),
+    Model VARCHAR(100),
+    PO VARCHAR(50),
+    SO VARCHAR(50),
+    MasterWorkOrder VARCHAR(50),
+    Size VARCHAR(10),
+    PartCode VARCHAR(50),
+    PartName VARCHAR(100),
+    MaterialCode VARCHAR(50),
+    MaterialName VARCHAR(1000),
+    SizeQty INT,
+    UNIT VARCHAR(10),
+    ProductionProcess VARCHAR(50),
+    Page VARCHAR(10),
+    LastNo VARCHAR(50),
+    UnitUsage FLOAT
+);
+GO
+
+-- Table: PartSizeOrder
+CREATE TABLE PartSizeOrder (
+    PartSizeOrderId INT PRIMARY KEY IDENTITY(1,1),
+    PartId INT,
+    SizeId INT,
+    OrderId INT,
+	SizeQty INT,
+	Unit VARCHAR(50),
+	UnitUsage FLOAT
+);
+GO
+
+-- Table: DefaultInfo
+CREATE TABLE DefaultInfo (
+    DefaultID INT PRIMARY KEY IDENTITY(1,1),
+    PartID INT,
+    ProductID INT,
+    PiecesPerPair INT,
+    CuttingDieQty INT,
+    MaterialLayer INT,
+    CreatedByID INT
+);
+GO
+
+-- Foreign Key Constraints
+ALTER TABLE DeviceOutput
+    ADD CONSTRAINT FK_DeviceOutput_Device FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID),
+	CONSTRAINT FK_DeviceOutput_Part FOREIGN KEY (PartId) REFERENCES Part(PartId);
+GO
+ALTER TABLE DefaultInfo
+    ADD CONSTRAINT FK_DefaultInfo_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+	CONSTRAINT FK_DefaultInfo_Part FOREIGN KEY (PartID) REFERENCES Part(PartId);
+GO
+ALTER TABLE DistributionData
+    ADD CONSTRAINT FK_DistributionData_Device FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID),
+    CONSTRAINT FK_DistributionData_User FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    CONSTRAINT FK_DistributionData_Order FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID),
+    CONSTRAINT FK_DistributionData_Operator FOREIGN KEY (OperatorID) REFERENCES Operator(OperatorID);
+GO
+ALTER TABLE Operator
+    ADD CONSTRAINT FK_Operator_User FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    CONSTRAINT FK_Operator_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
+	CONSTRAINT FK_Operator_Position FOREIGN KEY (PositionID) REFERENCES  Position(PositionID);
+GO
+ALTER TABLE Users
+    ADD CONSTRAINT FK_Users_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
+	CONSTRAINT FK_User_Position FOREIGN KEY (PositionID) REFERENCES  Position(PositionID);
+GO
+ALTER TABLE DeviceList
+    ADD CONSTRAINT FK_Size_Device FOREIGN KEY (DepartmentID) REFERENCES  Department(DepartmentID);
+GO
+/*ALTER TABLE Size
+    ADD CONSTRAINT FK_Size_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID);
+GO
+ALTER TABLE Part
+    ADD CONSTRAINT FK_Part_Size FOREIGN KEY (SizeId) REFERENCES Size(SizeID);
+GO */
+ALTER TABLE ProductOrder
+    ADD CONSTRAINT FK_Order_Product FOREIGN KEY (ProductId) REFERENCES Product(ProductId);
+GO
+ALTER TABLE PartSizeOrder
+    ADD CONSTRAINT FK_PartSizeOrder_Part FOREIGN KEY (PartId) REFERENCES Part(PartId),
+	CONSTRAINT FK_PartSizeOrder_Size FOREIGN KEY (SizeId) REFERENCES Size(SizeId),
+	CONSTRAINT FK_PartSizeOrder_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID),
+	CONSTRAINT FK_PartSizeOrder_Material FOREIGN KEY (MaterialId) REFERENCES Material(MaterialID);
+GO
+
+-- Strore Procuduce
+CREATE PROCEDURE sp_LoginUser
+    @Username VARCHAR(50),
+    @Password VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check for a matching user record (user must be active)
+    SELECT UserID, EmployeeName, PositionID, DepartmentID 
+    FROM Users 
+    WHERE Username = @Username 
+      AND Password = @Password 
+      AND IsActive = 1;
+END
+GO
+CREATE PROCEDURE RegisterUser
+    @Username VARCHAR(50),
+    @PasswordHash VARCHAR(64),  -- Hashed password
+    @EmployeeName NVARCHAR(100),
+	@EmployeeID INT,
+    @DepartmentID INT,
+    @Position NVARCHAR(100),
+    @IsActive BIT
+AS
+BEGIN
+    INSERT INTO Users (Username, Password, EmployeeName, EmployeeID, DepartmentID, Position, IsActive, CreatedAt)
+    VALUES (@Username, @PasswordHash, @EmployeeName, @EmployeeID, @DepartmentID, @Position, @IsActive, GETDATE());
+END;
+GO

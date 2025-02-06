@@ -48,6 +48,7 @@
             // gridView_UserManagement
             // 
             this.gridView_UserManagement.GridControl = this.gridControl_UserManagement;
+            this.gridView_UserManagement.GroupRowHeight = 2;
             this.gridView_UserManagement.Name = "gridView_UserManagement";
             this.gridView_UserManagement.OptionsView.ShowFooter = true;
             // 

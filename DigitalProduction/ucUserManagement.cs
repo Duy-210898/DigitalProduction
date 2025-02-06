@@ -1,23 +1,73 @@
-﻿using Newtonsoft.Json;
+﻿using System;
 using System.Collections.Generic;
-using System;
-using DigitalProduction.Models;
-using System.Threading.Tasks;
-using DevExpress.XtraGrid.Views.Base;
+using System.ComponentModel;
 using System.Drawing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using DevExpress.XtraEditors;
+using DevExpress.XtraExport.Helpers;
+using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Base;
+using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DigitalProduction.Extensions;
+using DigitalProduction.Models;
+using Newtonsoft.Json;
 
 namespace DigitalProduction
 {
     public partial class ucUserManagement : DevExpress.XtraEditors.XtraUserControl
     {
+        private static BindingList<Employee> employees = new BindingList<Employee>();
         private WebSocketClient _webSocketClient;
+        private PanelControl groupPanelButtonContainer;
+        private SimpleButton button;
+        private ucRegisterUser popup;
         public ucUserManagement()
         {
             InitializeComponent();
             LoadTextLable();
             gridView_UserManagement.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
+            CreateButtonContainer();
+            popup = new ucRegisterUser();
+            popup.Visible = false;
+            this.Controls.Add(popup);
+            popup.ExitClicked += RegisterControl_ExitClicked;
+
+        }
+        private void MainForm_Click(object sender, EventArgs e)
+        {
+            if (!popup.Bounds.Contains(PointToClient(MousePosition)))
+            {
+                popup.Visible = false;
+            }
+        }
+        private void showRegisterUser()
+        {
+            // Hide the GridView
+            gridControl_UserManagement.Visible = false;
+
+            // Show the user control
+            popup.Location = gridControl_UserManagement.Location;
+            popup.Size = gridControl_UserManagement.Size;
+            popup.Visible = true;
+            popup.BringToFront();
+        }
+        private void RegisterControl_ExitClicked(object sender, EventArgs e)
+        {
+            // Show the GridView
+            gridControl_UserManagement.Visible = true;
+
+            // Hide the user control
+            popup.Visible = false;
+        }
+        private void registerButton_Click(object sender, EventArgs e)
+        {
+            // Logic for user registration goes here...
+
+            // Show popup
+            MessageBox.Show("User registered successfully!", "Registration Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         private void gridView_CustomDrawGroupPanel(object sender, CustomDrawEventArgs e)
         {
@@ -53,12 +103,19 @@ namespace DigitalProduction
                 ResponseMessage<List<Employee>> response = ResponseMessage<List<Employee>>.FromJson(jsonData);
 
                 // Check if there are devices in the response
-                if (response?.Users != null)
+                if (response?.Users != null && response.Users.Count > 0)
                 {
-                    gridControl_UserManagement.DataSource = response?.Users;
+                    employees.Clear();
+                    foreach (var employee in response.Users)
+                    {
+                        employees.Add(employee);
+                    }
+                    gridView_UserManagement.SortInfo.Clear();
+                    gridControl_UserManagement.DataSource = employees;
                     ConfigureGridView();
                     gridView_UserManagement.EditFormPrepared += Extentions.GridView_EditFormPrepared;
                     Extentions.showEditModeCellGridView(gridControl_UserManagement, gridView_UserManagement, "Username");
+                    ApplyLocalization();
                 }
                 else
                 {
@@ -114,7 +171,62 @@ namespace DigitalProduction
         private void OnLanguageChanged()
         {
             LoadTextLable();
+            ApplyLocalization();
         }
 
+        private void CreateButtonContainer()
+        {
+            // Create a PanelControl to hold the button
+            groupPanelButtonContainer = new PanelControl()
+            {
+                Dock = DockStyle.Top,
+                Height = 50 // Adjust the height to suit your layout
+            };
+
+            // Add the PanelControl to the form
+            Controls.Add(groupPanelButtonContainer);
+
+            // Create the button
+            button = new SimpleButton()
+            {
+                Text = "Create user",
+                Size = new System.Drawing.Size(100, 40)
+            };
+
+            // Add the button to the PanelControl
+            groupPanelButtonContainer.Controls.Add(button);
+
+            // Handle the button click event
+            button.Click += Button_Click;
+
+            // Position the button inside the PanelControl (optional)
+            button.Location = new System.Drawing.Point(10, 5); // Adjust location as needed
+        }
+        private void Button_Click(object sender, EventArgs e)
+        {
+            showRegisterUser();
+        }
+        private void ApplyLocalization()
+        {
+            // grid view
+            gridControl_UserManagement.BeginUpdate();
+           
+            if (!gridView_UserManagement.Columns.Count.Equals(0))
+            {
+                gridView_UserManagement.Columns["Username"].Caption = LocalizationManager.GetString("Username");
+                gridView_UserManagement.Columns["EmployeeID"].Caption = LocalizationManager.GetString("EmployeeID");
+                gridView_UserManagement.Columns["EmployeeName"].Caption = LocalizationManager.GetString("EmployeeName");
+                gridView_UserManagement.Columns["CreatedAt"].Caption = LocalizationManager.GetString("CreatedAt");
+                gridView_UserManagement.Columns["UpdatedAt"].Caption = LocalizationManager.GetString("UpdatedAt");
+                gridView_UserManagement.Columns["IsActive"].Caption = LocalizationManager.GetString("IsActive");
+                gridView_UserManagement.Columns["Department"].Caption = LocalizationManager.GetString("Department");
+                gridView_UserManagement.Columns["Action"].Caption = LocalizationManager.GetString("Action");
+
+                gridControl_UserManagement.DataSource = null;
+                gridControl_UserManagement.DataSource = employees;
+                gridView_UserManagement.SortInfo.Clear();
+            }
+            gridControl_UserManagement.EndUpdate();
+        }
     }
 }

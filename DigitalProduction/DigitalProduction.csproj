@@ -90,7 +90,14 @@
     <Compile Include="NotificationManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ucRegisterUser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucRegisterUser.Designer.cs">
+      <DependentUpon>ucRegisterUser.cs</DependentUpon>
+    </Compile>
     <Compile Include="ResponseMessage.cs" />
+    <Compile Include="SecurityHelper.cs" />
     <Compile Include="ShowMessage.cs" />
     <Compile Include="ucDeviceManager.cs">
       <SubType>UserControl</SubType>
@@ -150,7 +157,11 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="ucRegisterUser.resx">
+      <DependentUpon>ucRegisterUser.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\en.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -189,6 +200,33 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\apache-logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_user.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\rounded_btn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_Pwd.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_Username.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\btn_login.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_eye.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_eye_close.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

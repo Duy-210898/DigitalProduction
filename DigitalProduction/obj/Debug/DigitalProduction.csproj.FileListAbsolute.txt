@@ -79,7 +79,6 @@ D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.RichEdit.v24.2.
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraTreeList.v24.2.xml
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.Office.v24.2.Core.xml
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.csproj.AssemblyReference.cache
-D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.en.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.frmLogin.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.frmMain.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Properties.Resources.resources
@@ -90,7 +89,6 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucProgre
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucProgressManagement.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucSchedule.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucUserManagement.resources
-D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.vi.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.csproj.GenerateResource.cache
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.csproj.CoreCompileInputs.cache
@@ -160,3 +158,4 @@ D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.csproj.CoreCo
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalP.A2EA8899.Up2Date
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.pdb
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucRegisterUser.resources
