@@ -1,4 +1,7 @@
-﻿using System;
+﻿using DevExpress.LookAndFeel;
+using DevExpress.Skins;
+using DevExpress.UserSkins;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -20,7 +23,7 @@ namespace DigitalProduction
             {
                 try
                 {
-                    await WebSocketClient.Instance.Connect("ws://10.30.4.106:8000");
+                    await WebSocketClient.Instance.Connect("ws://10.30.4.121:8000");
                     Console.WriteLine("Connected to WebSocket server successfully.");
                 }
                 catch (Exception ex)
