@@ -32,7 +32,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.cbxDevice = new System.Windows.Forms.ComboBox();
             this.lblSelect = new System.Windows.Forms.Label();
-            this.txtMasterWorkOrder = new System.Windows.Forms.TextBox();
+            this.txtSO = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.lblWorkCenter = new System.Windows.Forms.Label();
             this.lblProductionDate = new System.Windows.Forms.Label();
@@ -47,29 +47,28 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.tbl = new System.Windows.Forms.TableLayoutPanel();
             this.lblSO = new System.Windows.Forms.Label();
-            this.cbxPage = new System.Windows.Forms.ComboBox();
-            this.label13 = new System.Windows.Forms.Label();
             this.lblMasterWorkOrder = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.pnlMaterial = new System.Windows.Forms.Panel();
-            this.gridControl_Material = new DevExpress.XtraGrid.GridControl();
-            this.gridView_Material = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.pnlSize = new System.Windows.Forms.Panel();
             this.gridControl_Size = new DevExpress.XtraGrid.GridControl();
             this.gridView_Size = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.cbxPart = new DevExpress.XtraEditors.LookUpEdit();
+            this.gridLookUpEdit1 = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.panel2.SuspendLayout();
             this.tbl.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.pnlMaterial.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Material)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView_Material)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.pnlSize.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl_Size)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView_Size)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxPart.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             this.SuspendLayout();
             // 
             // panel2
@@ -80,7 +79,7 @@
             this.panel2.Location = new System.Drawing.Point(695, 3);
             this.panel2.Margin = new System.Windows.Forms.Padding(3, 3, 20, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(250, 64);
+            this.panel2.Size = new System.Drawing.Size(250, 160);
             this.panel2.TabIndex = 6;
             // 
             // cbxDevice
@@ -104,16 +103,16 @@
             this.lblSelect.Text = "Select Machine";
             this.lblSelect.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // txtMasterWorkOrder
+            // txtSO
             // 
-            this.txtMasterWorkOrder.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtMasterWorkOrder.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtMasterWorkOrder.Location = new System.Drawing.Point(235, 10);
-            this.txtMasterWorkOrder.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
-            this.txtMasterWorkOrder.Name = "txtMasterWorkOrder";
-            this.txtMasterWorkOrder.Size = new System.Drawing.Size(226, 23);
-            this.txtMasterWorkOrder.TabIndex = 0;
-            this.txtMasterWorkOrder.Leave += new System.EventHandler(this.txtMasterWorkOrder_Leave);
+            this.txtSO.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtSO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtSO.Location = new System.Drawing.Point(235, 10);
+            this.txtSO.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
+            this.txtSO.Name = "txtSO";
+            this.txtSO.Size = new System.Drawing.Size(226, 23);
+            this.txtSO.TabIndex = 0;
+            this.txtSO.Leave += new System.EventHandler(this.txtSO_Leave);
             // 
             // label1
             // 
@@ -124,16 +123,16 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(145, 23);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Input Master Work Order:";
+            this.label1.Text = "Input SO:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblWorkCenter
             // 
             this.lblWorkCenter.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblWorkCenter.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblWorkCenter.Location = new System.Drawing.Point(3, 53);
+            this.lblWorkCenter.Location = new System.Drawing.Point(3, 45);
             this.lblWorkCenter.Name = "lblWorkCenter";
-            this.lblWorkCenter.Size = new System.Drawing.Size(226, 26);
+            this.lblWorkCenter.Size = new System.Drawing.Size(226, 23);
             this.lblWorkCenter.TabIndex = 2;
             this.lblWorkCenter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -141,9 +140,9 @@
             // 
             this.lblProductionDate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblProductionDate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblProductionDate.Location = new System.Drawing.Point(235, 53);
+            this.lblProductionDate.Location = new System.Drawing.Point(235, 45);
             this.lblProductionDate.Name = "lblProductionDate";
-            this.lblProductionDate.Size = new System.Drawing.Size(226, 26);
+            this.lblProductionDate.Size = new System.Drawing.Size(226, 23);
             this.lblProductionDate.TabIndex = 2;
             this.lblProductionDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -151,9 +150,9 @@
             // 
             this.lblCreatedDate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblCreatedDate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCreatedDate.Location = new System.Drawing.Point(467, 53);
+            this.lblCreatedDate.Location = new System.Drawing.Point(467, 45);
             this.lblCreatedDate.Name = "lblCreatedDate";
-            this.lblCreatedDate.Size = new System.Drawing.Size(234, 26);
+            this.lblCreatedDate.Size = new System.Drawing.Size(234, 23);
             this.lblCreatedDate.TabIndex = 2;
             this.lblCreatedDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -161,9 +160,9 @@
             // 
             this.lblFactory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblFactory.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFactory.Location = new System.Drawing.Point(707, 53);
+            this.lblFactory.Location = new System.Drawing.Point(707, 45);
             this.lblFactory.Name = "lblFactory";
-            this.lblFactory.Size = new System.Drawing.Size(221, 26);
+            this.lblFactory.Size = new System.Drawing.Size(221, 23);
             this.lblFactory.TabIndex = 2;
             this.lblFactory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -171,9 +170,9 @@
             // 
             this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label6.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(707, 79);
+            this.label6.Location = new System.Drawing.Point(707, 68);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(221, 26);
+            this.label6.Size = new System.Drawing.Size(221, 23);
             this.label6.TabIndex = 2;
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -181,9 +180,9 @@
             // 
             this.lblLastNo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblLastNo.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLastNo.Location = new System.Drawing.Point(467, 79);
+            this.lblLastNo.Location = new System.Drawing.Point(467, 68);
             this.lblLastNo.Name = "lblLastNo";
-            this.lblLastNo.Size = new System.Drawing.Size(234, 26);
+            this.lblLastNo.Size = new System.Drawing.Size(234, 23);
             this.lblLastNo.TabIndex = 2;
             this.lblLastNo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -191,9 +190,9 @@
             // 
             this.lblArt.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblArt.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblArt.Location = new System.Drawing.Point(235, 79);
+            this.lblArt.Location = new System.Drawing.Point(235, 68);
             this.lblArt.Name = "lblArt";
-            this.lblArt.Size = new System.Drawing.Size(226, 26);
+            this.lblArt.Size = new System.Drawing.Size(226, 23);
             this.lblArt.TabIndex = 2;
             this.lblArt.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -201,9 +200,9 @@
             // 
             this.lblModel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblModel.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblModel.Location = new System.Drawing.Point(3, 79);
+            this.lblModel.Location = new System.Drawing.Point(3, 68);
             this.lblModel.Name = "lblModel";
-            this.lblModel.Size = new System.Drawing.Size(226, 26);
+            this.lblModel.Size = new System.Drawing.Size(226, 23);
             this.lblModel.TabIndex = 2;
             this.lblModel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -211,9 +210,9 @@
             // 
             this.lblPO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPO.Location = new System.Drawing.Point(3, 105);
+            this.lblPO.Location = new System.Drawing.Point(3, 91);
             this.lblPO.Name = "lblPO";
-            this.lblPO.Size = new System.Drawing.Size(226, 29);
+            this.lblPO.Size = new System.Drawing.Size(226, 26);
             this.lblPO.TabIndex = 2;
             this.lblPO.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -221,7 +220,7 @@
             // 
             this.btnSend.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSend.Appearance.Options.UseFont = true;
-            this.btnSend.Location = new System.Drawing.Point(742, 73);
+            this.btnSend.Location = new System.Drawing.Point(742, 169);
             this.btnSend.LookAndFeel.SkinName = "Dark Side";
             this.btnSend.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnSend.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
@@ -236,7 +235,7 @@
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(3, 3);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(686, 64);
+            this.panel3.Size = new System.Drawing.Size(686, 160);
             this.panel3.TabIndex = 7;
             // 
             // tbl
@@ -248,89 +247,54 @@
             this.tbl.Controls.Add(this.btnSend, 1, 1);
             this.tbl.Controls.Add(this.panel3, 0, 0);
             this.tbl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbl.Location = new System.Drawing.Point(3, 597);
+            this.tbl.Location = new System.Drawing.Point(3, 412);
             this.tbl.Name = "tbl";
             this.tbl.RowCount = 2;
             this.tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51.9685F));
             this.tbl.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 48.0315F));
-            this.tbl.Size = new System.Drawing.Size(965, 136);
+            this.tbl.Size = new System.Drawing.Size(965, 321);
             this.tbl.TabIndex = 3;
             // 
             // lblSO
             // 
             this.lblSO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSO.Location = new System.Drawing.Point(235, 105);
+            this.lblSO.Location = new System.Drawing.Point(235, 91);
             this.lblSO.Name = "lblSO";
-            this.lblSO.Size = new System.Drawing.Size(226, 29);
+            this.lblSO.Size = new System.Drawing.Size(226, 26);
             this.lblSO.TabIndex = 2;
             this.lblSO.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // cbxPage
-            // 
-            this.cbxPage.FormattingEnabled = true;
-            this.cbxPage.Location = new System.Drawing.Point(59, 7);
-            this.cbxPage.Name = "cbxPage";
-            this.cbxPage.Size = new System.Drawing.Size(170, 24);
-            this.cbxPage.TabIndex = 4;
-            this.cbxPage.SelectedIndexChanged += new System.EventHandler(this.cbxPage_SelectedIndexChanged);
-            // 
-            // label13
-            // 
-            this.label13.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.Location = new System.Drawing.Point(3, 6);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(53, 24);
-            this.label13.TabIndex = 3;
-            this.label13.Text = "Page:";
-            this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblMasterWorkOrder
             // 
             this.lblMasterWorkOrder.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMasterWorkOrder.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMasterWorkOrder.Location = new System.Drawing.Point(467, 105);
+            this.lblMasterWorkOrder.Location = new System.Drawing.Point(467, 91);
             this.lblMasterWorkOrder.Name = "lblMasterWorkOrder";
-            this.lblMasterWorkOrder.Size = new System.Drawing.Size(234, 29);
+            this.lblMasterWorkOrder.Size = new System.Drawing.Size(234, 26);
             this.lblMasterWorkOrder.TabIndex = 2;
             this.lblMasterWorkOrder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.cbxPage);
-            this.panel1.Controls.Add(this.label13);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(467, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(234, 34);
+            this.panel1.Size = new System.Drawing.Size(234, 28);
             this.panel1.TabIndex = 3;
             // 
             // pnlMaterial
             // 
-            this.pnlMaterial.Controls.Add(this.gridControl_Material);
+            this.pnlMaterial.BackColor = System.Drawing.Color.IndianRed;
+            this.pnlMaterial.Controls.Add(this.gridLookUpEdit1);
+            this.pnlMaterial.Controls.Add(this.cbxPart);
             this.pnlMaterial.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlMaterial.Location = new System.Drawing.Point(3, 306);
+            this.pnlMaterial.Location = new System.Drawing.Point(3, 126);
             this.pnlMaterial.Name = "pnlMaterial";
             this.pnlMaterial.Padding = new System.Windows.Forms.Padding(20, 0, 20, 0);
-            this.pnlMaterial.Size = new System.Drawing.Size(965, 285);
+            this.pnlMaterial.Size = new System.Drawing.Size(965, 142);
             this.pnlMaterial.TabIndex = 2;
             this.pnlMaterial.Visible = false;
-            // 
-            // gridControl_Material
-            // 
-            this.gridControl_Material.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridControl_Material.Location = new System.Drawing.Point(20, 0);
-            this.gridControl_Material.MainView = this.gridView_Material;
-            this.gridControl_Material.Name = "gridControl_Material";
-            this.gridControl_Material.Size = new System.Drawing.Size(925, 285);
-            this.gridControl_Material.TabIndex = 0;
-            this.gridControl_Material.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
-            this.gridView_Material});
-            // 
-            // gridView_Material
-            // 
-            this.gridView_Material.GridControl = this.gridControl_Material;
-            this.gridView_Material.Name = "gridView_Material";
             // 
             // tableLayoutPanel2
             // 
@@ -340,7 +304,7 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.88614F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 24.27497F));
-            this.tableLayoutPanel2.Controls.Add(this.txtMasterWorkOrder, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.txtSO, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.lblWorkCenter, 0, 2);
             this.tableLayoutPanel2.Controls.Add(this.lblProductionDate, 1, 2);
@@ -364,7 +328,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(931, 134);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(931, 117);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // tableLayoutPanel1
@@ -372,31 +336,31 @@
             this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Controls.Add(this.pnlMaterial, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.pnlSize, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.pnlSize, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.tbl, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.pnlMaterial, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 19.16426F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 22.33429F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 39.76945F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 19.02017F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 27.4776F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 148F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 138F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 72.5224F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(971, 736);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // pnlSize
             // 
+            this.pnlSize.BackColor = System.Drawing.Color.LightGray;
             this.pnlSize.Controls.Add(this.gridControl_Size);
             this.pnlSize.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlSize.Location = new System.Drawing.Point(3, 143);
+            this.pnlSize.Location = new System.Drawing.Point(3, 274);
             this.pnlSize.Name = "pnlSize";
             this.pnlSize.Padding = new System.Windows.Forms.Padding(20, 0, 20, 0);
-            this.pnlSize.Size = new System.Drawing.Size(965, 157);
+            this.pnlSize.Size = new System.Drawing.Size(965, 132);
             this.pnlSize.TabIndex = 1;
             this.pnlSize.Visible = false;
             // 
@@ -409,7 +373,7 @@
             this.gridControl_Size.Location = new System.Drawing.Point(20, 0);
             this.gridControl_Size.MainView = this.gridView_Size;
             this.gridControl_Size.Name = "gridControl_Size";
-            this.gridControl_Size.Size = new System.Drawing.Size(925, 157);
+            this.gridControl_Size.Size = new System.Drawing.Size(925, 132);
             this.gridControl_Size.TabIndex = 0;
             this.gridControl_Size.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView_Size});
@@ -417,7 +381,40 @@
             // gridView_Size
             // 
             this.gridView_Size.GridControl = this.gridControl_Size;
+            this.gridView_Size.GroupPanelText = " ";
             this.gridView_Size.Name = "gridView_Size";
+            this.gridView_Size.OptionsFilter.AllowFilterEditor = false;
+            this.gridView_Size.OptionsFind.AllowFindPanel = false;
+            this.gridView_Size.OptionsPrint.EnableAppearanceEvenRow = true;
+            this.gridView_Size.OptionsPrint.PrintFilterInfo = true;
+            this.gridView_Size.OptionsPrint.PrintGroupFooter = false;
+            this.gridView_Size.OptionsPrint.PrintSelectedRowsOnly = true;
+            // 
+            // cbxPart
+            // 
+            this.cbxPart.Location = new System.Drawing.Point(3, 3);
+            this.cbxPart.Name = "cbxPart";
+            this.cbxPart.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cbxPart.Size = new System.Drawing.Size(962, 20);
+            this.cbxPart.TabIndex = 0;
+            // 
+            // gridLookUpEdit1
+            // 
+            this.gridLookUpEdit1.Location = new System.Drawing.Point(3, 55);
+            this.gridLookUpEdit1.Name = "gridLookUpEdit1";
+            this.gridLookUpEdit1.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpEdit1.Properties.PopupView = this.gridLookUpEdit1View;
+            this.gridLookUpEdit1.Size = new System.Drawing.Size(945, 20);
+            this.gridLookUpEdit1.TabIndex = 1;
+            // 
+            // gridLookUpEdit1View
+            // 
+            this.gridLookUpEdit1View.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridLookUpEdit1View.Name = "gridLookUpEdit1View";
+            this.gridLookUpEdit1View.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridLookUpEdit1View.OptionsView.ShowGroupPanel = false;
             // 
             // ucDistribution
             // 
@@ -429,16 +426,16 @@
             this.Load += new System.EventHandler(this.ucDistribution_Load);
             this.panel2.ResumeLayout(false);
             this.tbl.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
             this.pnlMaterial.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Material)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView_Material)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.pnlSize.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridControl_Size)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView_Size)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxPart.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -447,7 +444,7 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ComboBox cbxDevice;
         private System.Windows.Forms.Label lblSelect;
-        private System.Windows.Forms.TextBox txtMasterWorkOrder;
+        private System.Windows.Forms.TextBox txtSO;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblWorkCenter;
         private System.Windows.Forms.Label lblProductionDate;
@@ -462,8 +459,6 @@
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.TableLayoutPanel tbl;
         private System.Windows.Forms.Label lblSO;
-        private System.Windows.Forms.ComboBox cbxPage;
-        private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label lblMasterWorkOrder;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel pnlMaterial;
@@ -472,7 +467,8 @@
         private System.Windows.Forms.Panel pnlSize;
         private DevExpress.XtraGrid.GridControl gridControl_Size;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView_Size;
-        private DevExpress.XtraGrid.GridControl gridControl_Material;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridView_Material;
+        private DevExpress.XtraEditors.LookUpEdit cbxPart;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpEdit1;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View;
     }
 }

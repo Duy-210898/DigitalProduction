@@ -18,17 +18,18 @@ namespace DigitalProduction.Models
     public class SizeData
     {
         public string Size { get; set; }
-        public int SizeQty { get; set; }
+        public int SizeQty { get; set; } 
         public float UnitUsage { get; set; }
         public float TotalUsage => SizeQty * UnitUsage;
     }
 
     public class MaterialData
     {
-        public string PartId { get; set; }
+        public string PartCode { get; set; }
         public string PartName { get; set; }
-        public string MaterialsId { get; set; }
-        public string MaterialsName { get; set; }
+        public string MaterialCode { get; set; }
+        public string MaterialName { get; set; }
+        public string Unit { get; set; }
     }
 
 

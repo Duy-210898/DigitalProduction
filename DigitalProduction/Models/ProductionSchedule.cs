@@ -4,10 +4,11 @@
     {
         private ProductionSchedule() { }
         public string MasterWorkOrder { get; set; }
-        public string PartId { get; set; }
+        public string PartCode { get; set; }
         public string PartName { get; set; }
-        public string MaterialsId { get; set; }
-        public string MaterialsName { get; set; }
+        public string MaterialCode { get; set; } 
+        public string MaterialName { get; set; }
+        public string Unit { get; set; }
         public int SizeQty { get; set; }
         public string Factory { get; set; }
         public string ART { get; set; }

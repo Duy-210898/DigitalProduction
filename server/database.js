@@ -5,7 +5,7 @@ const dbConfig = {
   user: 'sa',
   password: '12345',
   server: '10.30.0.116',
-  database: 'CuttingData',
+  database: 'CuttingProjectData',
   options: {
     encrypt: false,
     trustServerCertificate: true,
@@ -609,14 +609,45 @@ async function updateDeviceConnectionStatus(ipAddress, status) {
   ];
   return await executeQuery(query, inputs);
 }
-// Lấy phân phối đơn từ Master Work Order
-async function getProductionSchedule(masterWorkOrder, page) {
+// Lấy phân phối đơn từ SO
+async function getProductionSchedule(so) {
   try {
     if (!pool) await initDatabase(); 
     const result = await pool.request()
-      .input('MasterWorkOrder', sql.NVarChar, masterWorkOrder)
-      .input('Page', sql.NVarChar, page)
-      .query('SELECT * FROM [CuttingData] WHERE MasterWorkOrder = @MasterWorkOrder AND Page = @Page');
+      .input('SO', sql.NVarChar, so)
+      .query(`
+        SELECT 
+            po.OrderID,
+            po.Factory,
+            po.SO,
+            po.PO,
+            po.MasterWorkOrder,
+            po.LastNo,
+            po.Process,
+            s.Size,
+            p.ART,
+            p.Model,
+            pso.SizeQty,
+            pso.Unit AS PartSizeUnit,
+            pso.UnitUsage,
+            m.MaterialID,
+            m.MaterialCode,
+            m.MaterialName,
+            m.Unit AS MaterialUnit,
+            pa.PartId,
+            pa.PartName,
+            pa.PartCode,
+            po.CreatedAt,
+            po.UpdatedAt
+        FROM Product p
+        JOIN ProductOrder po ON p.ProductId = po.ProductId
+        JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+        JOIN Part pa ON pso.PartId = pa.PartId
+        JOIN Material m ON pso.MaterialID = m.MaterialID
+        JOIN Size s ON pso.SizeId = s.SizeID
+        WHERE po.SO = @SO
+      `);
+
     return result.recordset;
   } catch (err) {
     console.error('Lỗi khi truy cập cơ sở dữ liệu:', err.message);

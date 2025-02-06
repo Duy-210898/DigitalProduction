@@ -4,7 +4,7 @@ const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAll
 const { setClients } = require('./notifications'); 
 
 let clients = [];
-const modbusClients = {};
+const modusClients = {};
 
 // Thiết lập WebSocket server
 function setupWebSocket(server) {
@@ -32,62 +32,90 @@ function setupWebSocket(server) {
     // Khi client ngắt kết nối
     ws.on('close', () => {
       console.log('Client disconnected');
-      clients = clients.filter(client => client !== ws); // Loại bỏ client khỏi danh sách
+      clients = clients.filter(client => client !== ws); // Loại bỏ client khỏi danh sch
       setClients(clients); // Cập nhật danh sách client khi có kết nối bị ngắt
     });
   });
 }
 
-// Hàm xử lý yêu cầu từ client
 async function handleClientMessage(ws, message) {
   try {
     const request = JSON.parse(message);
-    const { action } = request;
+    const { app, action } = request;
 
-    switch (action) {
-      case 'getDevices':
-        await handleGetDevices(ws);
-        break;
-      case 'connectDevice':
-        await handleConnectDevice(ws, request);
-        break;
-      case 'getDistributionOfDevice':
-        await handleGetDistributionOfDevice(ws, request);
-        break;
-      case 'getActualData':
-        await handleGetActualData(ws, request);
-        break;
-      case 'disconnectDevice':
-        await handleDisconnectDevice(ws, request);
-        break;
-      case 'getPlants':
-        await handleGetPlant(ws);
-        break;
-      case 'addDevice':
-        await handleAddDevice(ws, request);
-        break;
-      case 'getSchedule':
-        await handleGetSchedule(ws, request);
-        break;
-      case 'getUniquePages':
-        await handleGetUniquePages(ws, request);
-        break;
-      case 'saveDistributionData':
-        await handleSaveDistributionData(ws, request);
-        break;
-      case 'getUsers':
-        await handleGetUsers(ws, request);
-        break;
-      default:
-        console.log('Unknown action:', action);
-        ws.send(JSON.stringify({ error: 'Unknown action' }));
-        break;
+    if (!app) {
+      console.log('Missing app field');
+      ws.send(JSON.stringify({ error: 'Missing app field' }));
+      return;
+    }
+
+    if (app === "CuttingProject") {
+      switch (action) {
+        case 'getDevices':
+          await handleGetDevices(ws);
+          break;
+        case 'connectDevice':
+          await handleConnectDevice(ws, request);
+          break;
+        case 'getDistributionOfDevice':
+          await handleGetDistributionOfDevice(ws, request);
+          break;
+        case 'getActualData':
+          await handleGetActualData(ws, request);
+          break;
+        case 'disconnectDevice':
+          await handleDisconnectDevice(ws, request);
+          break;
+        case 'getPlants':
+          await handleGetPlant(ws);
+          break;
+        case 'addDevice':
+          await handleAddDevice(ws, request);
+          break;
+        case 'getSchedule':
+          await handleGetSchedule(ws, request);
+          break;
+        case 'getUniquePages':
+          await handleGetUniquePages(ws, request);
+          break;
+        case 'saveDistributionData':
+          await handleSaveDistributionData(ws, request);
+          break;
+        case 'getUsers':
+          await handleGetUsers(ws, request);
+          break;
+        default:
+          console.log('Unknown action for CuttingProject:', action);
+          ws.send(JSON.stringify({ error: 'Unknown action' }));
+          break;
+      }
+    } else if (app === "KPIReport") {
+      switch (action) {
+        case 'generateReport':
+          await handleGenerateReport(ws, request);
+          break;
+        case 'getKPIData':
+          await handleGetKPIData(ws, request);
+          break;
+        case 'sendReport':
+          await handleSendReport(ws, request);
+          break;
+        default:
+          console.log('Unknown action for KPIReport:', action);
+          ws.send(JSON.stringify({ error: 'Unknown action' }));
+          break;
+      }
+    } else {
+      console.log('Unknown app:', app);
+      ws.send(JSON.stringify({ error: 'Unknown app' }));
     }
   } catch (error) {
     console.error('Error processing message:', error);
     ws.send(JSON.stringify({ error: 'Invalid message format' }));
   }
 }
+
+
 // Hàm xử lý yêu cầu lấy dữ liệu sản lượng thực tế
 async function handleGetActualData(ws, request) {
   const { orderId, masterWorkOrder } = request;
@@ -300,14 +328,14 @@ async function handleAddDevice(ws, request) {
 
 // Xử lý yêu cầu lấy lịch trình sản xuất
 async function handleGetSchedule(ws, request) {
-  const { masterWorkOrder, page } = request;
+  const { so } = request;
 
-  if (!masterWorkOrder) {
-    return ws.send(JSON.stringify({ action: 'getSchedule', status: 'error', message: 'Missing masterWorkOrder parameter' }));
+  if (!so) {
+    return ws.send(JSON.stringify({ action: 'getSchedule', status: 'error', message: 'Missing SO parameter' }));
   }
 
   try {
-    const schedule = await getProductionSchedule(masterWorkOrder, page);
+    const schedule = await getProductionSchedule(so);
     ws.send(JSON.stringify({ action: 'getSchedule', status: 'success', schedule }));
   } catch (error) {
     console.error('Error fetching production schedule:', error);

@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Resources;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Repository;
+using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
-using static DigitalProduction.frmMain;
 
 namespace DigitalProduction
 {
@@ -23,13 +22,97 @@ namespace DigitalProduction
         {
             dbHelper = new DbHelper();
             InitializeComponent();
-            txtMasterWorkOrder.Focus();
+            txtSO.Focus();
         }
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
             _webSocketClient = WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }
+        private DataTable TransformSizeData(DataTable originalTable)
+        {
+            DataTable transformedTable = new DataTable();
+
+            transformedTable.Columns.Add("Field");
+
+            foreach (DataRow row in originalTable.Rows)
+            {
+                transformedTable.Columns.Add(row["Size"].ToString());
+            }
+
+            // Lấy danh sách các tiêu đề cột (bỏ qua cột "Size")
+            var columnNames = originalTable.Columns.Cast<DataColumn>()
+                               .Where(c => c.ColumnName != "Size")
+                               .Select(c => c.ColumnName)
+                               .ToList();
+
+            // Thêm dữ liệu vào bảng mới
+            foreach (var columnName in columnNames)
+            {
+                DataRow newRow = transformedTable.NewRow();
+                newRow["Field"] = columnName;
+
+                foreach (DataRow row in originalTable.Rows)
+                {
+                    newRow[row["Size"].ToString()] = row[columnName];
+                }
+
+                transformedTable.Rows.Add(newRow);
+            }
+
+            return transformedTable;
+        }
+        private DataTable ConvertSizeDataToDataTable(List<SizeData> sizeDataList)
+        {
+            DataTable table = new DataTable();
+
+            table.Columns.Add("Size", typeof(string));
+            table.Columns.Add("SizeQty", typeof(int));
+            table.Columns.Add("UnitUsage", typeof(decimal));
+            table.Columns.Add("TotalUsage", typeof(decimal));
+            table.Columns.Add("SelectSize", typeof(bool));
+
+            foreach (var data in sizeDataList)
+            {
+                table.Rows.Add(data.Size, data.SizeQty, data.UnitUsage, data.TotalUsage, false);
+            }
+
+            return table;
+        }
+        private void ConfigureGridViewSize()
+        {
+            gridView_Size.OptionsView.ShowGroupPanel = false;
+            gridView_Size.OptionsView.EnableAppearanceEvenRow = true;
+
+            gridView_Size.OptionsSelection.MultiSelect = true;
+            gridView_Size.OptionsCustomization.AllowSort = false;
+
+            gridView_Size.OptionsCustomization.AllowRowSizing = false;
+
+            gridView_Size.OptionsBehavior.Editable = true; 
+
+            gridView_Size.Appearance.HeaderPanel.BackColor = Color.LightSteelBlue;
+            gridView_Size.Appearance.HeaderPanel.ForeColor = Color.Black;
+            gridView_Size.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            gridView_Size.Appearance.HeaderPanel.Font = new Font("Arial", 10, FontStyle.Bold);
+
+            gridView_Size.Columns["Field"].Caption = "Size";
+
+            RepositoryItemCheckEdit checkEdit = new RepositoryItemCheckEdit();
+            gridControl_Size.RepositoryItems.Add(checkEdit);
+
+            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridView_Size.Columns)
+            {
+                column.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            }
+
+            int gridHeight = gridControl_Size.Height;
+            int rowHeight = gridHeight / 6;
+            gridView_Size.RowHeight = rowHeight;
+
+            gridView_Size.BestFitColumns();
+        }
+
         private void HandleReceivedSchedule(List<ProductionSchedule> schedules)
         {
             if (schedules == null || !schedules.Any())
@@ -38,14 +121,12 @@ namespace DigitalProduction
                 return;
             }
 
-            // Thực hiện trong luồng UI
             if (InvokeRequired)
             {
                 Invoke(new Action(() => HandleReceivedSchedule(schedules)));
                 return;
             }
 
-            // Hiển thị các bảng điều khiển
             pnlMaterial.Visible = true;
             pnlSize.Visible = true;
 
@@ -60,7 +141,6 @@ namespace DigitalProduction
                 .OrderBy(size => size)
                 .ToList();
 
-            // Thêm dữ liệu mới vào sizeDataList
             foreach (var size in uniqueSortedSizes)
             {
                 var sizeSchedule = schedules.FirstOrDefault(s => s.Size == size);
@@ -70,24 +150,31 @@ namespace DigitalProduction
                     SizeQty = sizeSchedule?.SizeQty ?? 0,
                     UnitUsage = sizeSchedule?.UnitUsage ?? 0
                 });
-            }
-
+            }   
             // Lọc và sắp xếp các phần duy nhất từ schedule
             var uniqueParts = schedules
                 .GroupBy(s => s.PartName)
                 .Select(g => g.First())
-                .OrderBy(part => part.PartId)
+                .OrderBy(part => part.PartCode)
                 .ToList();
+            // Chuyển đổi dữ liệu sang DataTable
+            DataTable originalTable = ConvertSizeDataToDataTable(sizeDataList);
+            DataTable transformedTable = TransformSizeData(originalTable);
+            // Gán dữ liệu vào gridControl_Size
+            gridControl_Size.DataSource = transformedTable;
 
+            // Cấu hình hiển thị của gridView_Size
+            ConfigureGridViewSize();
             // Duyệt qua các phần vật liệu và thêm vào materialDataList
             foreach (var schedule in uniqueParts)
             {
                 materialDataList.Add(new MaterialData
                 {
-                    PartId = schedule.PartId,
-                    PartName = schedule.PartName,
-                    MaterialsId = schedule.MaterialsId,
-                    MaterialsName = schedule.MaterialsName
+                    PartCode = schedule.PartCode,
+                    PartName = schedule.PartName, 
+                    MaterialCode = schedule.MaterialCode,
+                    MaterialName = schedule.MaterialName,
+                    Unit = schedule.Unit
                 });
             }
 
@@ -117,11 +204,25 @@ namespace DigitalProduction
             lblModel.Text = $"Model: {schedules.FirstOrDefault()?.Model ?? string.Empty}";
             lblArt.Text = $"ART: {schedules.FirstOrDefault()?.ART ?? string.Empty}";
 
-            // Bind the size data list to the gridControl_Size
-            gridControl_Size.DataSource = sizeDataList;
-
             // Bind the material data list to the gridControl_Material
-            gridControl_Material.DataSource = materialDataList;
+            //gridControl_Material.DataSource = materialDataList;
+            cbxPart.Properties.DataSource = materialDataList;
+            gridLookUpEdit1.Properties.DataSource = materialDataList; 
+
+            FormatGridLookUpEdit();
+        }
+
+        private void FormatGridLookUpEdit()
+        {
+            gridLookUpEdit1.Properties.DisplayMember = "PartName";
+            gridLookUpEdit1.Properties.ValueMember = "PartId"; 
+
+            GridView view = gridLookUpEdit1.Properties.View;
+            view.Columns.AddVisible("PartCode", "Part Code");
+            view.Columns.AddVisible("PartName", "Part Name");
+            view.Columns.AddVisible("MaterialCode", "Material Code");
+            view.Columns.AddVisible("MaterialName", "Material Name");
+            gridLookUpEdit1.Properties.PopupView = view;
         }
 
         public void RefreshLanguage()
@@ -167,10 +268,6 @@ namespace DigitalProduction
                                 Console.WriteLine("Suscess");
                                 break;
 
-                            case "getUniquePages":
-                                HandleGetUniquePagesResponse(scheduleResponse);
-                                break;
-
                             default:
                                 ShowErrorNotification($"Unsupported action: {scheduleResponse.Action}");
                                 break;
@@ -208,72 +305,19 @@ namespace DigitalProduction
             }
         }
 
-        private void HandleGetUniquePagesResponse(ScheduleResponse scheduleResponse)
-        {
-            if (scheduleResponse.Status == "success")
-            {
-                HandleReceivedUniquePages(scheduleResponse.Pages);
-            }
-            else
-            {
-                ShowErrorNotification(scheduleResponse.Message);
-            }
-        }
-        private void HandleReceivedUniquePages(List<int> uniquePages)
-        {
-            if (uniquePages == null || !uniquePages.Any())
-            {
-                ShowErrorNotification("No pages data received.");
-                return;
-            }
-
-            if (cbxPage.InvokeRequired)
-            {
-                cbxPage.Invoke(new Action(() =>
-                {
-                    cbxPage.Items.Clear();
-                    foreach (var page in uniquePages)
-                    {
-                        cbxPage.Items.Add(page.ToString());
-                    }
-
-                    if (cbxPage.Items.Count > 0)
-                    {
-                        cbxPage.SelectedIndex = 0;
-                    }
-                }));
-            }
-            else
-            {
-                cbxPage.Items.Clear();
-                foreach (var page in uniquePages)
-                {
-                    cbxPage.Items.Add(page.ToString());
-                }
-
-                if (cbxPage.Items.Count > 0)
-                {
-                    cbxPage.SelectedIndex = 0;
-                }
-            }
-        }
-
         private void ShowErrorNotification(string message)
         {
             ShowMessage("Error", message, MessageBoxIcon.Error);
         }
 
-        private async void txtMasterWorkOrder_Leave(object sender, EventArgs e)
+        private void txtSO_Leave(object sender, EventArgs e)
         {
-            string masterWorkOrder = txtMasterWorkOrder.Text.Trim();
+            string so = txtSO.Text.Trim();
 
-            if (string.IsNullOrEmpty(masterWorkOrder))
+            if (!string.IsNullOrEmpty(so))
             {
-                ShowMessage("Input Error", "Please enter the Master Work Order.", MessageBoxIcon.Warning);
-                return;
+                SendGetScheduleRequestAsync(so);
             }
-
-            await SendGetUniquePagesRequestAsync(masterWorkOrder);
         }
 
         private async Task SendGetDevicesRequestAsync()
@@ -282,29 +326,11 @@ namespace DigitalProduction
                 await _webSocketClient.SendAsync(request);
         }
 
-        private async Task SendGetUniquePagesRequestAsync(string masterWorkOrder)
+        private async void SendGetScheduleRequestAsync(string so)
         {
-            var request = new { action = "getUniquePages", masterWorkOrder };
-            string jsonRequest = JsonConvert.SerializeObject(request);
-            await _webSocketClient.SendAsync(jsonRequest);
-        }
-
-        private void cbxPage_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string masterWorkOrder = txtMasterWorkOrder.Text.Trim();
-            string page = cbxPage.SelectedItem?.ToString() ?? string.Empty;
-
-            if (!string.IsNullOrEmpty(masterWorkOrder))
-            {
-                SendGetScheduleRequestAsync(masterWorkOrder, page);
-            }
-        }
-
-        private async void SendGetScheduleRequestAsync(string masterWorkOrder, string page)
-        {
-            var workOrderInfo = new { action = "getSchedule", masterWorkOrder, page };
-            string jsonRequest = JsonConvert.SerializeObject(workOrderInfo);
-            await _webSocketClient.SendAsync(jsonRequest);
+            var soInfo = new { app = Global.App , action = "getSchedule", so };
+            string jsonRequest = JsonConvert.SerializeObject(soInfo);
+            await _webSocketClient.SendAsync(jsonRequest); 
         }
         private void ucDistribution_Load(object sender, EventArgs e)
         {

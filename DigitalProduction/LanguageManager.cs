@@ -6,6 +6,7 @@ using System.IO;
 public static class Global
 {
     public static string Username { get; set; }
+    public static string App = "CuttingProject";
 }
 
 public class LanguageManager

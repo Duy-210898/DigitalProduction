@@ -88,7 +88,6 @@
             // 
             this.accordionControlElement1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnMonthlyPlan});
-            this.accordionControlElement1.Expanded = true;
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Text = "Production Schedule";
             // 
@@ -104,7 +103,6 @@
             this.accordionControlElement3.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnDistribution,
             this.btnDeviceOutput});
-            this.accordionControlElement3.Expanded = true;
             this.accordionControlElement3.Name = "accordionControlElement3";
             this.accordionControlElement3.Text = "PO Distribution";
             // 
@@ -127,7 +125,6 @@
             this.accordionControlElement4.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnDeviceManager,
             this.btnUserManager});
-            this.accordionControlElement4.Expanded = true;
             this.accordionControlElement4.Name = "accordionControlElement4";
             this.accordionControlElement4.Text = "System Management";
             // 

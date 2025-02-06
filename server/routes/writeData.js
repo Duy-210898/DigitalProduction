@@ -2,7 +2,7 @@ const { writeDataToDevice } = require('../modbusClient');
 
 module.exports = async (req, res) => {
   const ip = req.params.ip;
-  const value = req.body.value; // Giá trị cần ghi
+  const value = req.body.value; 
   try {
     await writeDataToDevice(ip, value);
     res.send('Data written successfully');
