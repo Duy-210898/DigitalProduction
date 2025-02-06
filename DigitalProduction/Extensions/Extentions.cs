@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using DevExpress.Utils.Html;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Repository;
@@ -17,15 +18,13 @@ namespace DigitalProduction.Extensions
             // Create the RepositoryItemButtonEdit for the action buttons
             RepositoryItemButtonEdit _commandsEdit = new RepositoryItemButtonEdit { AutoHeight = false, Name = "CommandsEdit", TextEditStyle = TextEditStyles.HideTextEditor };
             _commandsEdit.Buttons.Clear();
-
             // Add buttons with localized captions
             _commandsEdit.Buttons.AddRange(new EditorButton[]
             {
-                new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Add"), -1, true, true, false, ImageLocation.MiddleLeft, null),
+                //new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Add"), -1, true, true, false, ImageLocation.MiddleLeft, null),
                 new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Edit"), -1, true, true, false, ImageLocation.MiddleLeft, null),
                 new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Delete"), -1, true, true, false, ImageLocation.MiddleLeft, null)
             });
-
             // Add "Action" column to GridView if not already present
             GridColumn _commandsColumn = gridView.Columns["Action"];
             if (_commandsColumn == null)
@@ -45,16 +44,12 @@ namespace DigitalProduction.Extensions
             {
                 switch (ee.Button.Index)
                 {
-                    case 0: // Add button
-                        ShowMessage.ShowInfo("You clicked Add");
-                        break;
-
-                    case 1: // Update button
+                    case 0: // Update button
                         gridView.CloseEditor();
-                        gridView.ShowEditForm();
+                        gridView.ShowPopupEditForm();
                         break;
 
-                    case 2: // Delete button
+                    case 1: // Delete button
                         var fullname = gridView.GetFocusedDataRow()[filedName]?.ToString();
                         if (string.IsNullOrEmpty(fullname)) return;
 
@@ -70,9 +65,8 @@ namespace DigitalProduction.Extensions
             {
                 LocalizationManager.SetLanguage(LanguageSettings.CurrentLanguage);
                 // Ensure the buttons are updated with new captions
-                _commandsEdit.Buttons[0].Caption = LocalizationManager.GetString("Add");
-                _commandsEdit.Buttons[1].Caption = LocalizationManager.GetString("Edit");
-                _commandsEdit.Buttons[2].Caption = LocalizationManager.GetString("Delete");
+                _commandsEdit.Buttons[0].Caption = LocalizationManager.GetString("Edit");
+                _commandsEdit.Buttons[1].Caption = LocalizationManager.GetString("Delete");
             };
 
             // Ensure that the "Action" column is editable in the grid
@@ -104,18 +98,28 @@ namespace DigitalProduction.Extensions
         public static void GridView_EditFormPrepared(object sender, EditFormPreparedEventArgs e)
         {
             // Update the "Update" and "Cancel" button captions in the Edit Form
-            Control ctrl = MyExtenstions.FindControl(e.Panel, "Update");
-            if (ctrl != null)
+            Control ctrl_Update = MyExtenstions.FindControl(e.Panel, "Update");
+            if (ctrl_Update != null)
             {
-                ctrl.Text = "Cập nhật";
-                (ctrl as SimpleButton).ImageOptions.Image = null;
+                LanguageSettings.LanguageChanged += () =>
+                {
+                    LocalizationManager.SetLanguage(LanguageSettings.CurrentLanguage);
+                    ctrl_Update.Text = LocalizationManager.GetString("Update");
+                };
+                ctrl_Update.Text = LocalizationManager.GetString("Update");
+                (ctrl_Update as SimpleButton).ImageOptions.Image = null;
             }
 
-            ctrl = MyExtenstions.FindControl(e.Panel, "Cancel");
-            if (ctrl != null)
+            Control ctrl_Cancel = MyExtenstions.FindControl(e.Panel, "Cancel");
+            if (ctrl_Cancel != null)
             {
-                (ctrl as SimpleButton).ImageOptions.Image = null;
-                ctrl.Text = "Đóng";
+                LanguageSettings.LanguageChanged += () =>
+                {
+                    LocalizationManager.SetLanguage(LanguageSettings.CurrentLanguage);
+                    ctrl_Cancel.Text = LocalizationManager.GetString("Cancel");
+                };
+                ctrl_Cancel.Text = LocalizationManager.GetString("Cancel");
+                (ctrl_Cancel as SimpleButton).ImageOptions.Image = null;
             }
         }
     }

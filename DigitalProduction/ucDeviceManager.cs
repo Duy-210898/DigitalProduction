@@ -4,10 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Threading.Tasks;
 using DevExpress.XtraEditors;
-using DevExpress.XtraEditors.Controls;
-using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Views.Base;
-using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -90,12 +87,12 @@ namespace DigitalProduction
             // Clear existing data
             deviceDataTable.Rows.Clear();
 
-            // Add rows to the DataTable
+            // Add rows to the DataTable                                                                 
             foreach (var device in devices)
             {
                 string de = device.Plant;
                 deviceDataTable.Rows.Add(
-                    device.IpAddress,
+                    device.IpAddress,  
                     device.MachineName,
                     device.Plant,
                     device.ConnectionStatus
@@ -104,9 +101,13 @@ namespace DigitalProduction
 
             gridView_Device.EditFormPrepared += Extentions.GridView_EditFormPrepared;
             Extentions.showEditModeCellGridView(gridControl_Devices, gridView_Device, "Machine Name");
+            LanguageSettings.LanguageChanged += () =>
+            {
+                LocalizationManager.SetLanguage(LanguageSettings.CurrentLanguage);
+                gridView_Device.EditFormPrepared += Extentions.GridView_EditFormPrepared;
+                Extentions.showEditModeCellGridView(gridControl_Devices, gridView_Device, "Machine Name");
+            };
 
-            // Ensure localization is applied after data is refreshed
-            ApplyLocalization();
 
             // Apply custom styles to column headers
             gridView_Device.Appearance.HeaderPanel.BackColor = Color.LightSteelBlue;
