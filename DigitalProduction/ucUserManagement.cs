@@ -5,12 +5,8 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
-using DevExpress.XtraExport.Helpers;
-using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
-using DevExpress.XtraGrid.Views.Grid;
-using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -19,29 +15,36 @@ namespace DigitalProduction
 {
     public partial class ucUserManagement : DevExpress.XtraEditors.XtraUserControl
     {
-        private static BindingList<Employee> employees = new BindingList<Employee>();
+        public BindingList<Employee> employees = new BindingList<Employee>();
         private WebSocketClient _webSocketClient;
         private PanelControl groupPanelButtonContainer;
         private SimpleButton button;
-        private ucRegisterUser popup;
+        private ucRegisterUser frmRegister;
         public ucUserManagement()
         {
             InitializeComponent();
             LoadTextLable();
             gridView_UserManagement.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
             CreateButtonContainer();
-            popup = new ucRegisterUser();
-            popup.Visible = false;
-            this.Controls.Add(popup);
-            popup.ExitClicked += RegisterControl_ExitClicked;
+            frmRegister = new ucRegisterUser();
+            frmRegister.Visible = false;
+            this.Controls.Add(frmRegister);
+            frmRegister.ExitClicked += RegisterControl_ExitClicked;
+            frmRegister.UserCreated += RegisterForm_UserCreated;
 
         }
         private void MainForm_Click(object sender, EventArgs e)
         {
-            if (!popup.Bounds.Contains(PointToClient(MousePosition)))
+            if (!frmRegister.Bounds.Contains(PointToClient(MousePosition)))
             {
-                popup.Visible = false;
+                frmRegister.Visible = false;
             }
+        }
+        // Event handler to refresh the grid when a user is created
+        private void RegisterForm_UserCreated(object sender, Employee newUser)
+        {
+            employees.Insert(0, newUser); // GridView will automatically refresh
+            gridView_UserManagement.FocusedRowHandle = 0;
         }
         private void showRegisterUser()
         {
@@ -49,10 +52,10 @@ namespace DigitalProduction
             gridControl_UserManagement.Visible = false;
 
             // Show the user control
-            popup.Location = gridControl_UserManagement.Location;
-            popup.Size = gridControl_UserManagement.Size;
-            popup.Visible = true;
-            popup.BringToFront();
+            frmRegister.Location = gridControl_UserManagement.Location;
+            frmRegister.Size = gridControl_UserManagement.Size;
+            frmRegister.Visible = true;
+            frmRegister.BringToFront();
         }
         private void RegisterControl_ExitClicked(object sender, EventArgs e)
         {
@@ -60,7 +63,7 @@ namespace DigitalProduction
             gridControl_UserManagement.Visible = true;
 
             // Hide the user control
-            popup.Visible = false;
+            frmRegister.Visible = false;
         }
         private void registerButton_Click(object sender, EventArgs e)
         {

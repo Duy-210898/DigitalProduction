@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
 
@@ -19,31 +18,11 @@ namespace DigitalProduction
         private bool _isPasswordVisible = false;
         private void frmLogin_Load(object sender, EventArgs e)
         {
-            removeBackGroundImage(txtIcon_user, icon_username);
-            removeBackGroundImage(txtIcon_pwd, icon_pwd);
-            removeBackGroundImage(txtIcon_pwd, icon_eye);
             txt_username.Enter += txt_User_Pwd_Enter;
             txt_username.Leave += txt_User_Pwd_Leave;
             txt_pwd.Enter += txt_User_Pwd_Enter;
             txt_pwd.Leave += txt_User_Pwd_Leave;
         }
-
-        private void removeBackGroundImage(PictureBox pb, PictureBox pb2)
-        {
-            // Get pb2's screen position.
-            Point screenPos = pb2.PointToScreen(Point.Empty);
-
-            // Option A: When reparenting to pb.
-            Point newPos = pb.PointToClient(screenPos);
-
-            // Reparent and adjust
-            pb2.Parent = pb;
-            pb2.Location = newPos;
-            pb2.Visible = true;
-            pb2.BringToFront();
-            pb2.BackColor = Color.Transparent;
-        }
-
 
         private void btn_Close_Click(object sender, EventArgs e)
         {
@@ -110,6 +89,21 @@ namespace DigitalProduction
             else {
                 MessageBox.Show("Invalid username or password, or account is inactive.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void lblExit_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void lblExit_MouseEnter(object sender, EventArgs e)
+        {
+            lblExit.ForeColor = System.Drawing.Color.Red;
+        }
+
+        private void lblExit_MouseLeave(object sender, EventArgs e)
+        {
+            lblExit.ForeColor=System.Drawing.Color.Black;
         }
     }
 }

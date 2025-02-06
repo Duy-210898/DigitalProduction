@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using DevExpress.Utils.Html.Internal;
-using DevExpress.XtraEditors;
-using DevExpress.XtraEditors.Repository;
+using DigitalProduction.Models;
 
 namespace DigitalProduction
 {
     public partial class ucRegisterUser : DevExpress.XtraEditors.XtraUserControl
     {
         public event EventHandler ExitClicked;
+        public event EventHandler<Employee> UserCreated;
         public ucRegisterUser()
         {
             InitializeComponent();
@@ -47,6 +46,7 @@ namespace DigitalProduction
             {
                 MessageBox.Show("Registration successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ExitClicked.Invoke(this, EventArgs.Empty);
+                UserCreated.Invoke(this, new Employee(employeeID, username, hashedPassword, employeeName, departmentID, DateTime.Now, null, true));
             }
             else
             {
