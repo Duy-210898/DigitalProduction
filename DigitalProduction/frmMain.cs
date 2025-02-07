@@ -192,7 +192,7 @@ namespace DigitalProduction
 
         private void btnUserManager_Click(object sender, EventArgs e)
         {
-            ucRegisterUser register= new ucRegisterUser();
+            ucRegisterUser register = new ucRegisterUser();
             ShowUserControl<ucUserManagement>();
         }
 
@@ -250,7 +250,6 @@ namespace DigitalProduction
         private void UpdateFormTexts()
         {
             btnLogOut.Caption = LocalizationManager.GetString("LogOut");
-            Language.Caption = LocalizationManager.GetString("Language");
             this.Text = LocalizationManager.GetString("Home");
             accordionControlElement1.Text = LocalizationManager.GetString("ProductionSchedule");
             accordionControlElement4.Text = LocalizationManager.GetString("CuttingManager");
@@ -264,57 +263,6 @@ namespace DigitalProduction
             btnDeviceOutput.Text = LocalizationManager.GetString("DeviceOutput");
         }
 
-
-        private void toggleLanguage_CheckedChanged(object sender, ItemClickEventArgs e)
-        {
-            Cursor.Current = Cursors.WaitCursor;
-
-            bool isChecked = toggleLanguage.Checked;
-            string selectedLanguage = isChecked ? "vi" : "en";
-
-            LanguageSettings.ChangeLanguage(selectedLanguage);
-            LocalizationManager.SetLanguage(selectedLanguage);
-            resourceManager = new ResourceManager($"DigitalProduction.{LanguageSettings.CurrentLanguage}", typeof(frmMain).Assembly);
-
-            UpdateFormTexts();
-
-            UpdateConnectionStatus(ConnectionManager.Instance.IsConnected);
-            UpdateConnectionStatus(ConnectionManager.Instance.IsConnected);
-            UpdateReconnectStatus(ConnectionManager.Instance.IsReconnecting);
-
-            RefreshControlsLanguage(selectedLanguage);
-
-            // Khôi phục lại con trỏ chuột về trạng thái ban đầu (thường là con trỏ mặc định)
-            Cursor.Current = Cursors.Default;
-        }
-
-        private void RefreshControlsLanguage(string selectedLanguage)
-        {
-            foreach (Control control in pnlControl.Controls)
-            {
-                switch (control)
-                {
-                    case ucDeviceManager deviceManager:
-                        deviceManager.RefreshLanguage();
-                        break;
-                    case ucUserManagement userManager:
-                        userManager.RefreshLanguage();
-                        break;
-                    case ucSchedule scheduleManager:
-                        scheduleManager.RefreshLanguage();
-                        break;
-                    case ucProgress progress:
-                        progress.RefreshLanguage();
-                        break;
-                    case ucDistribution distribution:
-                        distribution.RefreshLanguage();
-                        break;
-                    case ucProgressManagement deviceManagerment:
-                        deviceManagerment.RefreshLanguage();
-                        break;
-                }
-            }
-        }
 
         public static class LanguageSettings
         {

@@ -49,7 +49,7 @@ namespace DigitalProduction
         // Send request to WebSocket or API and load data
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new { action = "getDevices" };  
+            var request = new { action = "getDevices" };
             string jsonRequest = JsonConvert.SerializeObject(request);
 
             await _webSocketClient.SendAsync(jsonRequest);
@@ -92,7 +92,7 @@ namespace DigitalProduction
             {
                 string de = device.Plant;
                 deviceDataTable.Rows.Add(
-                    device.IpAddress,  
+                    device.IpAddress,
                     device.MachineName,
                     device.Plant,
                     device.ConnectionStatus
@@ -136,7 +136,8 @@ namespace DigitalProduction
         {
             ApplyLocalization();
         }
-        private void ApplyLocalization() {
+        private void ApplyLocalization()
+        {
             gridView_Device.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
             gridView_Device.GroupPanelText = LocalizationManager.GetString("ListOfDevice");
 

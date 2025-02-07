@@ -50,25 +50,23 @@
             this.lblMasterWorkOrder = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.pnlMaterial = new System.Windows.Forms.Panel();
+            this.cbxPart = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.pnlSize = new System.Windows.Forms.Panel();
             this.gridControl_Size = new DevExpress.XtraGrid.GridControl();
             this.gridView_Size = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.cbxPart = new DevExpress.XtraEditors.LookUpEdit();
-            this.gridLookUpEdit1 = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.panel2.SuspendLayout();
             this.tbl.SuspendLayout();
             this.pnlMaterial.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxPart.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.pnlSize.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl_Size)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView_Size)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cbxPart.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             this.SuspendLayout();
             // 
             // panel2
@@ -286,7 +284,6 @@
             // pnlMaterial
             // 
             this.pnlMaterial.BackColor = System.Drawing.Color.IndianRed;
-            this.pnlMaterial.Controls.Add(this.gridLookUpEdit1);
             this.pnlMaterial.Controls.Add(this.cbxPart);
             this.pnlMaterial.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlMaterial.Location = new System.Drawing.Point(3, 126);
@@ -295,6 +292,25 @@
             this.pnlMaterial.Size = new System.Drawing.Size(965, 142);
             this.pnlMaterial.TabIndex = 2;
             this.pnlMaterial.Visible = false;
+            // 
+            // cbxPart
+            // 
+            this.cbxPart.Location = new System.Drawing.Point(3, 3);
+            this.cbxPart.Name = "cbxPart";
+            this.cbxPart.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxPart.Properties.Appearance.Options.UseFont = true;
+            this.cbxPart.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cbxPart.Properties.PopupView = this.gridLookUpEdit1View;
+            this.cbxPart.Size = new System.Drawing.Size(270, 22);
+            this.cbxPart.TabIndex = 1;
+            // 
+            // gridLookUpEdit1View
+            // 
+            this.gridLookUpEdit1View.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridLookUpEdit1View.Name = "gridLookUpEdit1View";
+            this.gridLookUpEdit1View.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridLookUpEdit1View.OptionsView.ShowGroupPanel = false;
             // 
             // tableLayoutPanel2
             // 
@@ -390,32 +406,6 @@
             this.gridView_Size.OptionsPrint.PrintGroupFooter = false;
             this.gridView_Size.OptionsPrint.PrintSelectedRowsOnly = true;
             // 
-            // cbxPart
-            // 
-            this.cbxPart.Location = new System.Drawing.Point(3, 3);
-            this.cbxPart.Name = "cbxPart";
-            this.cbxPart.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.cbxPart.Size = new System.Drawing.Size(962, 20);
-            this.cbxPart.TabIndex = 0;
-            // 
-            // gridLookUpEdit1
-            // 
-            this.gridLookUpEdit1.Location = new System.Drawing.Point(3, 55);
-            this.gridLookUpEdit1.Name = "gridLookUpEdit1";
-            this.gridLookUpEdit1.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.gridLookUpEdit1.Properties.PopupView = this.gridLookUpEdit1View;
-            this.gridLookUpEdit1.Size = new System.Drawing.Size(945, 20);
-            this.gridLookUpEdit1.TabIndex = 1;
-            // 
-            // gridLookUpEdit1View
-            // 
-            this.gridLookUpEdit1View.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridLookUpEdit1View.Name = "gridLookUpEdit1View";
-            this.gridLookUpEdit1View.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridLookUpEdit1View.OptionsView.ShowGroupPanel = false;
-            // 
             // ucDistribution
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -427,15 +417,14 @@
             this.panel2.ResumeLayout(false);
             this.tbl.ResumeLayout(false);
             this.pnlMaterial.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.cbxPart.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.pnlSize.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridControl_Size)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView_Size)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cbxPart.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -467,8 +456,7 @@
         private System.Windows.Forms.Panel pnlSize;
         private DevExpress.XtraGrid.GridControl gridControl_Size;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView_Size;
-        private DevExpress.XtraEditors.LookUpEdit cbxPart;
-        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpEdit1;
+        private DevExpress.XtraEditors.GridLookUpEdit cbxPart;
         private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View;
     }
 }

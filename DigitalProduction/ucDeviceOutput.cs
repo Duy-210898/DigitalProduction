@@ -18,7 +18,6 @@ namespace DigitalProduction
         public ucDeviceOutput() 
         {
             InitializeComponent();
-            LanguageSettings.LanguageChanged += OnLanguageChanged;
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)

@@ -32,7 +32,7 @@ namespace DigitalProduction
                 }
             }).Wait();
 
-            Application.Run(new frmMain());
+            Application.Run(new frmLogin());
         }
     }
 }

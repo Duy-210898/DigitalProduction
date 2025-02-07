@@ -22,6 +22,8 @@ namespace DigitalProduction
         {
             dbHelper = new DbHelper();
             InitializeComponent();
+            ApplyLocalization();
+
             txtSO.Focus();
         }
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -89,7 +91,7 @@ namespace DigitalProduction
 
             gridView_Size.OptionsCustomization.AllowRowSizing = false;
 
-            gridView_Size.OptionsBehavior.Editable = true; 
+            gridView_Size.OptionsBehavior.Editable = true;
 
             gridView_Size.Appearance.HeaderPanel.BackColor = Color.LightSteelBlue;
             gridView_Size.Appearance.HeaderPanel.ForeColor = Color.Black;
@@ -150,7 +152,7 @@ namespace DigitalProduction
                     SizeQty = sizeSchedule?.SizeQty ?? 0,
                     UnitUsage = sizeSchedule?.UnitUsage ?? 0
                 });
-            }   
+            }
             // Lọc và sắp xếp các phần duy nhất từ schedule
             var uniqueParts = schedules
                 .GroupBy(s => s.PartName)
@@ -171,7 +173,7 @@ namespace DigitalProduction
                 materialDataList.Add(new MaterialData
                 {
                     PartCode = schedule.PartCode,
-                    PartName = schedule.PartName, 
+                    PartName = schedule.PartName,
                     MaterialCode = schedule.MaterialCode,
                     MaterialName = schedule.MaterialName,
                     Unit = schedule.Unit
@@ -207,32 +209,21 @@ namespace DigitalProduction
             // Bind the material data list to the gridControl_Material
             //gridControl_Material.DataSource = materialDataList;
             cbxPart.Properties.DataSource = materialDataList;
-            gridLookUpEdit1.Properties.DataSource = materialDataList; 
 
             FormatGridLookUpEdit();
         }
 
         private void FormatGridLookUpEdit()
         {
-            gridLookUpEdit1.Properties.DisplayMember = "PartName";
-            gridLookUpEdit1.Properties.ValueMember = "PartId"; 
+            cbxPart.Properties.DisplayMember = "PartName";
+            cbxPart.Properties.ValueMember = "PartId";
 
-            GridView view = gridLookUpEdit1.Properties.View;
+            GridView view = cbxPart.Properties.View;
             view.Columns.AddVisible("PartCode", "Part Code");
             view.Columns.AddVisible("PartName", "Part Name");
             view.Columns.AddVisible("MaterialCode", "Material Code");
             view.Columns.AddVisible("MaterialName", "Material Name");
-            gridLookUpEdit1.Properties.PopupView = view;
-        }
-
-        public void RefreshLanguage()
-        {
-            OnLanguageChanged();
-        }
-
-        private void OnLanguageChanged()
-        {
-            ApplyLocalization();
+            cbxPart.Properties.PopupView = view;
         }
 
 
@@ -322,15 +313,15 @@ namespace DigitalProduction
 
         private async Task SendGetDevicesRequestAsync()
         {
-                var request = JsonConvert.SerializeObject(new { action = "getDevices" });
-                await _webSocketClient.SendAsync(request);
+            var request = JsonConvert.SerializeObject(new { action = "getDevices" });
+            await _webSocketClient.SendAsync(request);
         }
 
         private async void SendGetScheduleRequestAsync(string so)
         {
-            var soInfo = new { app = Global.App , action = "getSchedule", so };
+            var soInfo = new { app = Global.App, action = "getSchedule", so };
             string jsonRequest = JsonConvert.SerializeObject(soInfo);
-            await _webSocketClient.SendAsync(jsonRequest); 
+            await _webSocketClient.SendAsync(jsonRequest);
         }
         private void ucDistribution_Load(object sender, EventArgs e)
         {
@@ -397,14 +388,27 @@ namespace DigitalProduction
 
             return distributionData;
         }
+
         private void ApplyLocalization()
         {
-            gridView_Size.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
+            lblFactory.Text = LocalizationManager.GetString("Factory") + ": " + lblFactory.Text.Split(':').Last().Trim();
+            lblLastNo.Text = LocalizationManager.GetString("LastNo") + ": " + lblLastNo.Text.Split(':').Last().Trim();
+            lblMasterWorkOrder.Text = LocalizationManager.GetString("MasterWorkOrder") + ": " + lblMasterWorkOrder.Text.Split(':').Last().Trim();
+            lblSO.Text = LocalizationManager.GetString("SO") + ": " + lblSO.Text.Split(':').Last().Trim();
+            lblPO.Text = LocalizationManager.GetString("PO") + ": " + lblPO.Text.Split(':').Last().Trim();
+            lblModel.Text = LocalizationManager.GetString("Model") + ": " + lblModel.Text.Split(':').Last().Trim();
+            lblArt.Text = LocalizationManager.GetString("ART") + ": " + lblArt.Text.Split(':').Last().Trim();
 
-            gridView_Size.Columns["Size"].Caption = LocalizationManager.GetString("Size");
-            gridView_Size.Columns["SizeQty"].Caption = LocalizationManager.GetString("SizeQty");
-            gridView_Size.Columns["UnitUsage"].Caption = LocalizationManager.GetString("UnitUsage");
-            gridView_Size.Columns["TotalUsage"].Caption = LocalizationManager.GetString("TotalUsage");
+            // Cập nhật nút bấm và combobox
+            btnSend.Text = LocalizationManager.GetString("Send");
+            cbxDevice.Text = LocalizationManager.GetString("SelectDevice");
+
+            // Nếu có GroupControl hoặc PanelControl thì cập nhật tiêu đề
+            if (pnlMaterial != null) pnlMaterial.Text = LocalizationManager.GetString("Material");
+            if (pnlSize != null) pnlSize.Text = LocalizationManager.GetString("SizeDistribution");
+
+            // Nếu có GridLookUpEdit thì cập nhật tiêu đề popup
+            cbxPart.Properties.NullText = LocalizationManager.GetString("SelectPart");
         }
 
         private async void SendDistributionDataToServer()

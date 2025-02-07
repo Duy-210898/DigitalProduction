@@ -10,8 +10,8 @@ namespace DigitalProduction
 
         public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
 
-        public event Action<bool> ConnectionStatusChanged; // Event to handle Connection Status changed
-        public event Action<bool> ReconnectionStatusChanged; // Event to handle Reconnection Status changed
+        public event Action<bool> ConnectionStatusChanged;
+        public event Action<bool> ReconnectionStatusChanged; 
 
         public bool IsConnected
         {

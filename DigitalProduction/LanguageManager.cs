@@ -7,8 +7,9 @@ public static class Global
 {
     public static string Username { get; set; }
     public static string App = "CuttingProject";
+    public static string Language { get; set; }
 }
-
+ 
 public class LanguageManager
 {
     private Dictionary<string, string> _translations;

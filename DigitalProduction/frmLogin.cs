@@ -1,27 +1,34 @@
 ﻿using System;
+using System.Resources;
 using System.Windows.Forms;
+using DevExpress.XtraBars;
 using DevExpress.XtraEditors;
+using static DigitalProduction.frmMain;
 
 namespace DigitalProduction
 {
     public partial class frmLogin : DevExpress.XtraEditors.XtraForm
     {
+        private ResourceManager resourceManager;
+
         public frmLogin()
         {
             InitializeComponent();
-            // event handler and hide pwd 
+            resourceManager = new ResourceManager("DigitalProduction.Resource", typeof(frmMain).Assembly);
             txt_pwd.Properties.UseSystemPasswordChar = true;
-            icon_eye.Click += PicEye_Click;
+            toggleLanguage.Properties.OnText = LocalizationManager.GetString("  Tiếng Việt");
+            toggleLanguage.Properties.OffText = LocalizationManager.GetString("  English");
+            picEye.Click += PicEye_Click;
+            UpdateUI();
         }
 
         // Flag to track password visibility
         private bool _isPasswordVisible = false;
+
         private void frmLogin_Load(object sender, EventArgs e)
         {
             txt_username.Enter += txt_User_Pwd_Enter;
-            txt_username.Leave += txt_User_Pwd_Leave;
             txt_pwd.Enter += txt_User_Pwd_Enter;
-            txt_pwd.Leave += txt_User_Pwd_Leave;
         }
 
         private void btn_Close_Click(object sender, EventArgs e)
@@ -33,32 +40,16 @@ namespace DigitalProduction
         {
             TextEdit txtBox = sender as TextEdit;
 
-            if (txtBox == null) return; //return if null
+            if (txtBox == null) return; // Return if null
 
             // Clear the TextBox if it contains placeholder text
-            if (txtBox.Text == "User Name" || txtBox.Text == "Password")  // Replace with your placeholder text
+            if (txtBox.Text == LocalizationManager.GetString("InputUser") || txtBox.Text == LocalizationManager.GetString("InputPassword"))
             {
                 txtBox.Text = "";
                 txtBox.ForeColor = System.Drawing.Color.Black;  // Change text color to black for actual input
             }
         }
-        private void txt_User_Pwd_Leave(object sender, EventArgs e)
-        {
-            TextEdit txtBox = sender as TextEdit;
 
-            if (txtBox == null) return; //return if null
-
-            if (string.IsNullOrEmpty(txtBox.Text))
-            {
-                txtBox.Text = "User Name";  // Set placeholder text
-                txtBox.ForeColor = System.Drawing.Color.Gray;
-            }
-            if (txtBox.Text == "Password")
-            {
-                txtBox.Text = "*********";  // Set placeholder text
-                txtBox.ForeColor = System.Drawing.Color.Gray;
-            }
-        }
         private void PicEye_Click(object sender, EventArgs e)
         {
             // Toggle the password visibility flag
@@ -68,15 +59,7 @@ namespace DigitalProduction
             txt_pwd.Properties.UseSystemPasswordChar = !_isPasswordVisible;
 
             // Change the PictureBox image accordingly
-            if (_isPasswordVisible)
-            {
-                txt_pwd.Properties.PasswordChar = '\0';
-                icon_eye.Image = Properties.Resources.icon_eye;
-            }
-            else
-            {
-                icon_eye.Image = Properties.Resources.icon_eye_close;
-            }
+            picEye.Image = _isPasswordVisible ? Properties.Resources.icon_eye : Properties.Resources.icon_eye_close;
         }
 
         private void btn_Login_Click(object sender, EventArgs e)
@@ -84,10 +67,12 @@ namespace DigitalProduction
             bool checkLogin = DbHelper.loginUser(txt_username.Text, SecurityHelper.HashPassword(txt_pwd.Text));
             if (checkLogin)
             {
-                MessageBox.Show("Login Successful! Welcome", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                frmMain formMain = new frmMain();
+                formMain.Show();
             }
-            else {
-                MessageBox.Show("Invalid username or password, or account is inactive.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else
+            {
+                MessageBox.Show(LocalizationManager.GetString("LoginFailedMessage"), LocalizationManager.GetString("LoginFailedTitle"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -103,7 +88,39 @@ namespace DigitalProduction
 
         private void lblExit_MouseLeave(object sender, EventArgs e)
         {
-            lblExit.ForeColor=System.Drawing.Color.Black;
+            lblExit.ForeColor = System.Drawing.Color.Black;
+        }
+
+        private void toggleLanguage_Toggled(object sender, EventArgs e)
+        {
+            try
+            {
+                Cursor.Current = Cursors.WaitCursor;
+
+                bool isChecked = toggleLanguage.IsOn;
+                string selectedLanguage = isChecked ? "vi" : "en";
+
+                LanguageSettings.ChangeLanguage(selectedLanguage);
+                LocalizationManager.SetLanguage(selectedLanguage);
+
+                UpdateUI();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error changing language: {ex.Message}", LocalizationManager.GetString("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+        }
+
+        private void UpdateUI()
+        {
+            this.Text = LocalizationManager.GetString("frmLogin_Title");
+            btn_Login.Text = LocalizationManager.GetString("Login");
+            lblExit.Text = LocalizationManager.GetString("Exit");
+            lblChangePassword.Text = LocalizationManager.GetString("ChangePassword");
         }
     }
 }

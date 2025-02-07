@@ -159,3 +159,4 @@ D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalP.A2EA8899.Up2Date
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.pdb
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucRegisterUser.resources
+D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucRegisterUser.resources

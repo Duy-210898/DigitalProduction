@@ -327,4 +327,28 @@
   <data name="UpdatedAt" xml:space="preserve">
     <value>Ngày cập nhật</value>
   </data>
+  <data name="Factory" xml:space="preserve">
+    <value>Nhà máy</value>
+  </data>
+  <data name="SelectPart" xml:space="preserve">
+    <value>Vui lòng chọn bộ vị...</value>
+  </data>
+  <data name="Unit" xml:space="preserve">
+    <value>Đơn vị tính</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Đổi mật khẩu</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Thoát</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Đăng nhập</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Mật khẩu:</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Tên đăng nhập:</value>
+  </data>
 </root>

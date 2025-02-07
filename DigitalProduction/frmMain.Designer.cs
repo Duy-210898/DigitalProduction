@@ -41,9 +41,10 @@
             this.accordionControlElement4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnUserManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement6 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnLanguage = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.fluentDesignFormControl1 = new DevExpress.XtraBars.FluentDesignSystem.FluentDesignFormControl();
-            this.toggleLanguage = new DevExpress.XtraBars.BarToggleSwitchItem();
-            this.Language = new DevExpress.XtraBars.BarStaticItem();
             this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
             this.statusItem = new DevExpress.XtraBars.BarStaticItem();
             this.pnlControl = new System.Windows.Forms.Panel();
@@ -73,7 +74,9 @@
             this.accordionControl1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.accordionControlElement1,
             this.accordionControlElement3,
-            this.accordionControlElement4});
+            this.accordionControlElement4,
+            this.accordionControlElement6,
+            this.accordionControlElement2});
             this.accordionControl1.Location = new System.Drawing.Point(0, 31);
             this.accordionControl1.LookAndFeel.SkinMaskColor = System.Drawing.Color.DeepSkyBlue;
             this.accordionControl1.LookAndFeel.SkinName = "Office 2019 Colorful";
@@ -142,12 +145,29 @@
             this.btnUserManager.Text = "User Management";
             this.btnUserManager.Click += new System.EventHandler(this.btnUserManager_Click);
             // 
+            // accordionControlElement6
+            // 
+            this.accordionControlElement6.Name = "accordionControlElement6";
+            this.accordionControlElement6.Text = "Report";
+            // 
+            // accordionControlElement2
+            // 
+            this.accordionControlElement2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.btnLanguage});
+            this.accordionControlElement2.Name = "accordionControlElement2";
+            this.accordionControlElement2.Text = "Setting";
+            // 
+            // btnLanguage
+            // 
+            this.btnLanguage.Name = "btnLanguage";
+            this.btnLanguage.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnLanguage.Text = "Language";
+            
+            // 
             // fluentDesignFormControl1
             // 
             this.fluentDesignFormControl1.FluentDesignForm = this;
             this.fluentDesignFormControl1.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
-            this.toggleLanguage,
-            this.Language,
             this.barSubItem1,
             this.statusItem});
             this.fluentDesignFormControl1.Location = new System.Drawing.Point(0, 0);
@@ -158,22 +178,8 @@
             this.fluentDesignFormControl1.Size = new System.Drawing.Size(1200, 31);
             this.fluentDesignFormControl1.TabIndex = 2;
             this.fluentDesignFormControl1.TabStop = false;
-            this.fluentDesignFormControl1.TitleItemLinks.Add(this.toggleLanguage);
-            this.fluentDesignFormControl1.TitleItemLinks.Add(this.Language);
             this.fluentDesignFormControl1.TitleItemLinks.Add(this.barSubItem1);
             this.fluentDesignFormControl1.TitleItemLinks.Add(this.statusItem);
-            // 
-            // toggleLanguage
-            // 
-            this.toggleLanguage.Id = 0;
-            this.toggleLanguage.Name = "toggleLanguage";
-            this.toggleLanguage.CheckedChanged += new DevExpress.XtraBars.ItemClickEventHandler(this.toggleLanguage_CheckedChanged);
-            // 
-            // Language
-            // 
-            this.Language.Caption = "barStaticItem1";
-            this.Language.Id = 1;
-            this.Language.Name = "Language";
             // 
             // barSubItem1
             // 
@@ -185,7 +191,7 @@
             // statusItem
             // 
             this.statusItem.Caption = "barStaticItem1";
-            this.statusItem.Id = 2;
+            this.statusItem.Id = 1;
             this.statusItem.Name = "statusItem";
             // 
             // pnlControl
@@ -226,17 +232,18 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement3;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement4;
         private System.Windows.Forms.Panel pnlControl;
-        private DevExpress.XtraBars.BarToggleSwitchItem toggleLanguage;
-        private DevExpress.XtraBars.BarStaticItem Language;
         private DevExpress.XtraBars.BarSubItem barSubItem1;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnMonthlyPlan;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnDistribution;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnDeviceOutput;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnDeviceManager;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnUserManager;
-        private DevExpress.XtraBars.BarStaticItem statusItem;
         private DevExpress.XtraEditors.Repository.RepositoryItemTextEdit repositoryItemTextEdit1;
         private DevExpress.XtraEditors.Repository.RepositoryItemProgressBar repositoryItemProgressBar1;
+        private DevExpress.XtraBars.BarStaticItem statusItem;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement6;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement2;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnLanguage;
     }
 }
 

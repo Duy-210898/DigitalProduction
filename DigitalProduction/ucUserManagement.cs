@@ -164,7 +164,7 @@ namespace DigitalProduction
         }
 
         private void LoadTextLable()
-        { 
+        {
             gridView_UserManagement.GroupPanelText = LocalizationManager.GetString("ListOfUser");
         }
         public void RefreshLanguage()
@@ -213,7 +213,7 @@ namespace DigitalProduction
         {
             // grid view
             gridControl_UserManagement.BeginUpdate();
-           
+
             if (!gridView_UserManagement.Columns.Count.Equals(0))
             {
                 gridView_UserManagement.Columns["Username"].Caption = LocalizationManager.GetString("Username");

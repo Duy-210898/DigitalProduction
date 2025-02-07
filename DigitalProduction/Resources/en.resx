@@ -324,4 +324,16 @@
   <data name="UpdatedAt" xml:space="preserve">
     <value>Updated At</value>
   </data>
+  <data name="SelectPart" xml:space="preserve">
+    <value>Please select Part...</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Change password</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Username:</value>
+  </data>
 </root>
