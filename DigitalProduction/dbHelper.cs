@@ -61,11 +61,13 @@ namespace DigitalProduction
                             if (reader.HasRows)
                             {
                                 reader.Read();
-                                // Assuming UserID, EmployeeName, PositionID, and DepartmentID are returned in the query
-                                //int userID = reader.GetInt32(0);
-                                //string employeeName = reader.GetString(1);
-                                //int positionID = reader.GetInt32(2);
-                                //int departmentID = reader.GetInt32(3);
+                                // Assuming EmployeeName, PositionID, and DepartmentID are returned in the query
+                                string employeeName = reader.GetString(1);
+                                int positionID = reader.GetInt32(2);
+                                int departmentID = reader.GetInt32(3);
+                                string role = determineUserRole(positionID, departmentID);
+                                // Set the global user
+                                Global.SetUser(employeeName, positionID, departmentID, role);
 
                                 return true;
                                 // You can now use the userID, positionID, departmentID, etc., for further actions
@@ -81,6 +83,19 @@ namespace DigitalProduction
             }
             return false;
         }
+        private static string determineUserRole(int positionID, int departmentID)
+        {
+            // the role based on position
+            if (positionID == 3)
+            {
+                return "Manager";
+            }
+            else
+            {
+                return "Employee";
+            }
+        }
+
         // create user
         public static bool createUser(string username, string hashedPassword, string employeeName, int employeeID, int departmentID, int positionID)
         {
@@ -112,6 +127,106 @@ namespace DigitalProduction
             }
             return false;
         }
+        //update user
+        public static bool updateUser(string username, string employeeName, int employeeID, int departmentID, int positionID, bool isActive)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand("sp_UpdateUser", conn))
+                {
+                    conn.Open();
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    // Add parameters
+                    cmd.Parameters.AddWithValue("@Username", username);
+                    cmd.Parameters.AddWithValue("@NewEmployeeID", employeeID);
+                    cmd.Parameters.AddWithValue("@NewEmployeeName", employeeName);
+                    cmd.Parameters.AddWithValue("@NewDepartmentID", departmentID);
+                    cmd.Parameters.AddWithValue("@NewPositionID", positionID);
+                    cmd.Parameters.AddWithValue("@NewIsActive", isActive);
+
+                    // Add OUTPUT parameter to capture success/failure
+                    SqlParameter outputParam = new SqlParameter("@UpdateStatus", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    cmd.Parameters.Add(outputParam);
+
+                    cmd.ExecuteNonQuery();
+
+                    // Retrieve output parameter value
+                    int updateStatus = (int)cmd.Parameters["@UpdateStatus"].Value;
+
+                    if (updateStatus == 1)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error updating user: " + ex.Message);
+                return false;
+            }
+        }
+        // delete user
+        public static bool DeleteUser(string username)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    // SQL DELETE query
+                    string query = "DELETE FROM Users WHERE Username = @Username";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Username", username);
+
+                        int rowsAffected = cmd.ExecuteNonQuery(); // Execute the query
+
+                        if (rowsAffected > 0)
+                        {
+                            Console.WriteLine($"User '{username}' deleted successfully.");
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting user: " + ex.Message);
+                return false;
+            }
+        }
+        // get list plant
+        public static DataTable getPlants()
+        {
+            DataTable dt = new DataTable();
+            SqlConnection con = new SqlConnection(connectionString);
+            try
+            {
+                string query = "SELECT PlantID, PlantName FROM Plant";
+                SqlCommand cmd = new SqlCommand(query, con);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
+            return dt;
+        }
         // get list department
         public static DataTable getDepartments()
         {
@@ -131,6 +246,43 @@ namespace DigitalProduction
                     Console.WriteLine("Error: " + ex.Message);
                 }
                 return dt;
+            }
+        }
+        public static bool dddNewDevice(int departmentId, int plantId, string ipAddress, string machineName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                // Check if IP Address already exists
+                string checkQuery = "SELECT COUNT(*) FROM DeviceList WHERE IpAddress = @IpAddress";
+                using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
+                {
+                    checkCmd.Parameters.AddWithValue("@IpAddress", ipAddress);
+                    int count = (int)checkCmd.ExecuteScalar();
+
+                    if (count > 0)
+                    {
+                        return false; // IP already exists, return false
+                    }
+                }
+
+                // Insert new device if IP is unique
+                string insertQuery = @"INSERT INTO DeviceList (DepartmentID, PlantID, IpAddress, MachineName, IsActive, ConnectionStatus) 
+                           VALUES (@DepartmentID, @PlantID, @IpAddress, @MachineName, @IsActive, @ConnectionStatus);";
+
+                using (SqlCommand insertCmd = new SqlCommand(insertQuery, conn))
+                {
+                    insertCmd.Parameters.AddWithValue("@DepartmentID", departmentId);
+                    insertCmd.Parameters.AddWithValue("@PlantID", plantId);
+                    insertCmd.Parameters.AddWithValue("@IpAddress", ipAddress);
+                    insertCmd.Parameters.AddWithValue("@MachineName", machineName);
+                    insertCmd.Parameters.AddWithValue("@IsActive", true);
+                    insertCmd.Parameters.AddWithValue("@ConnectionStatus", true);
+
+                    int rowsAffected = insertCmd.ExecuteNonQuery();
+                    return rowsAffected > 0; // Return true if inserted successfully, otherwise false
+                }
             }
         }
         public static List<string> GetSOList()

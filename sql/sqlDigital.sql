@@ -77,7 +77,6 @@ GO
 -- Table: Operator
 CREATE TABLE Operator (
     OperatorID INT PRIMARY KEY IDENTITY(1,1),
-    UserID INT,
     DepartmentID INT,
 	PositionID INT,
     OperatorName NVARCHAR(100),
@@ -90,6 +89,7 @@ GO
 CREATE TABLE DeviceList (
     DeviceID INT PRIMARY KEY IDENTITY(1,1),
     DepartmentID INT,
+	PlantID INT,
     IpAddress VARCHAR(50),
     MachineName VARCHAR(100),
     CreatedAt DATETIME DEFAULT GETDATE(),
@@ -97,7 +97,11 @@ CREATE TABLE DeviceList (
     ConnectionStatus BIT,
 );
 GO
-
+CREATE TABLE Plant (
+    PlantID INT PRIMARY KEY IDENTITY(1,1),
+    PlantName NVARCHAR(100) NOT NULL
+);
+GO
 -- Table: DeviceOutput
 CREATE TABLE DeviceOutput (
     OutputID INT PRIMARY KEY IDENTITY(1,1),
@@ -191,8 +195,7 @@ ALTER TABLE DistributionData
     CONSTRAINT FK_DistributionData_Operator FOREIGN KEY (OperatorID) REFERENCES Operator(OperatorID);
 GO
 ALTER TABLE Operator
-    ADD CONSTRAINT FK_Operator_User FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    CONSTRAINT FK_Operator_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
+    ADD CONSTRAINT FK_Operator_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
 	CONSTRAINT FK_Operator_Position FOREIGN KEY (PositionID) REFERENCES  Position(PositionID);
 GO
 ALTER TABLE Users
@@ -200,7 +203,8 @@ ALTER TABLE Users
 	CONSTRAINT FK_User_Position FOREIGN KEY (PositionID) REFERENCES  Position(PositionID);
 GO
 ALTER TABLE DeviceList
-    ADD CONSTRAINT FK_Size_Device FOREIGN KEY (DepartmentID) REFERENCES  Department(DepartmentID);
+    ADD CONSTRAINT FK_Size_Device FOREIGN KEY (DepartmentID) REFERENCES  Department(DepartmentID),
+	CONSTRAINT FK_DeviceList_Plant FOREIGN KEY (PlantID) REFERENCES Plant(PlantID) ON DELETE CASCADE;
 GO
 /*ALTER TABLE Size
     ADD CONSTRAINT FK_Size_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID);
@@ -248,3 +252,42 @@ BEGIN
     VALUES (@Username, @PasswordHash, @EmployeeName, @EmployeeID, @DepartmentID, @Position, @IsActive, GETDATE());
 END;
 GO
+CREATE PROCEDURE sp_UpdateUser
+    @Username VARCHAR(50),  
+    @NewEmployeeID INT,
+    @NewEmployeeName NVARCHAR(100),
+    @NewDepartmentID INT,
+    @NewPositionID INT,
+    @NewIsActive BIT,
+    @UpdateStatus INT OUTPUT -- Added OUTPUT parameter
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if the employee exists before updating
+    IF EXISTS (SELECT 1 FROM Users WHERE Username = @Username)
+    BEGIN
+        -- Perform the update
+        UPDATE Users
+        SET 
+            EmployeeID = @NewEmployeeID,
+            EmployeeName = @NewEmployeeName,
+            DepartmentID = @NewDepartmentID,
+            PositionID = @NewPositionID,
+            IsActive = @NewIsActive,
+            UpdatedAt = GETDATE()
+        WHERE Username = @Username;
+
+        -- Set success status
+        SET @UpdateStatus = 1;
+    END
+    ELSE
+    BEGIN
+        -- If the username does not exist, set failure status
+        SET @UpdateStatus = 0;
+    END
+END;
+
+SELECT * FROM Users WHERE Username = 'nhatboy'
+SELECT * FROM DeviceList WHERE IsActive = 1
+SELECT PlantID, PlantName FROM Plant

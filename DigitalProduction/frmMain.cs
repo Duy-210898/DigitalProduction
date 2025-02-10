@@ -116,6 +116,7 @@ namespace DigitalProduction
             DialogResult result = MessageBox.Show(LocalizationManager.GetString("ConfirmLogOut"), LocalizationManager.GetString("LogOut"), MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
+                Global.ResetUser();
                 this.Hide();
                 frmLogin loginForm = new frmLogin();
                 loginForm.Show();
@@ -222,13 +223,13 @@ namespace DigitalProduction
         }
         private void frmMain_Load(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(Global.Username))
+            if (Global.CurrentUser == null)
             {
                 barSubItem1.Caption = LocalizationManager.GetString("Guest");
             }
             else
             {
-                barSubItem1.Caption = Global.Username;
+                barSubItem1.Caption = Global.CurrentUser.EmployeeName;
             }
 
             UpdateConnectionStatus(ConnectionManager.Instance.IsConnected);

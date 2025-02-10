@@ -128,6 +128,7 @@
             this.accordionControlElement4.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnDeviceManager,
             this.btnUserManager});
+            this.accordionControlElement4.Expanded = true;
             this.accordionControlElement4.Name = "accordionControlElement4";
             this.accordionControlElement4.Text = "System Management";
             // 
@@ -140,6 +141,11 @@
             // 
             // btnUserManager
             // 
+            this.btnUserManager.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.btnUserManager.Name = "btnUserManager";
             this.btnUserManager.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnUserManager.Text = "User Management";
@@ -147,6 +153,7 @@
             // 
             // accordionControlElement6
             // 
+            this.accordionControlElement6.Expanded = true;
             this.accordionControlElement6.Name = "accordionControlElement6";
             this.accordionControlElement6.Text = "Report";
             // 
@@ -154,6 +161,7 @@
             // 
             this.accordionControlElement2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnLanguage});
+            this.accordionControlElement2.Expanded = true;
             this.accordionControlElement2.Name = "accordionControlElement2";
             this.accordionControlElement2.Text = "Setting";
             // 
@@ -162,7 +170,6 @@
             this.btnLanguage.Name = "btnLanguage";
             this.btnLanguage.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnLanguage.Text = "Language";
-            
             // 
             // fluentDesignFormControl1
             // 

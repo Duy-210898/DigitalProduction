@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Base;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
-using static DigitalProduction.frmMain;
 
 namespace DigitalProduction
 {
@@ -17,7 +17,9 @@ namespace DigitalProduction
         private WebSocketClient _webSocketClient;
         private List<Device> currentDeviceStatuses = new List<Device>();
         private readonly DataTable deviceDataTable;
-
+        private PanelControl groupPanelButtonContainer;
+        private SimpleButton button;
+        private ucRegisterDevice frmRegister;
 
         public ucDeviceManager()
         {
@@ -28,6 +30,14 @@ namespace DigitalProduction
             gridControl_Devices.DataSource = InitializeDeviceDataTable();
             gridView_Device.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
             gridView_Device.BestFitColumns();
+            CreateButtonContainer();
+
+            // show add new device
+            frmRegister = new ucRegisterDevice();
+            frmRegister.Visible = false;
+            this.Controls.Add(frmRegister);
+            frmRegister.ExitClicked += RegisterControl_ExitClicked;
+            frmRegister.DeviceCreated += RegisterForm_DeviceCreated;
         }
         private void gridView_CustomDrawGroupPanel(object sender, CustomDrawEventArgs e)
         {
@@ -49,7 +59,7 @@ namespace DigitalProduction
         // Send request to WebSocket or API and load data
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new { action = "getDevices" };
+            var request = new {app = Global.App, action = "getDevices" };
             string jsonRequest = JsonConvert.SerializeObject(request);
 
             await _webSocketClient.SendAsync(jsonRequest);
@@ -64,7 +74,10 @@ namespace DigitalProduction
                 // Check if there are devices in the response
                 if (response?.Devices != null)
                 {
+                    gridView_Device.EditFormPrepared += Extentions.GridView_EditFormPrepared;
+                    Extentions.showEditModeCellGridView(gridControl_Devices, gridView_Device, "ucDevice");
                     PopulateDeviceDataTable(response.Devices);
+                    ApplyLocalization();
                 }
                 else
                 {
@@ -90,24 +103,14 @@ namespace DigitalProduction
             // Add rows to the DataTable                                                                 
             foreach (var device in devices)
             {
-                string de = device.Plant;
                 deviceDataTable.Rows.Add(
                     device.IpAddress,
                     device.MachineName,
-                    device.Plant,
-                    device.ConnectionStatus
+                    device.PlantName,
+                    device.DepartmentName,
+                    device.IsActive
                 );
             }
-
-            gridView_Device.EditFormPrepared += Extentions.GridView_EditFormPrepared;
-            Extentions.showEditModeCellGridView(gridControl_Devices, gridView_Device, "Machine Name");
-            LanguageSettings.LanguageChanged += () =>
-            {
-                LocalizationManager.SetLanguage(LanguageSettings.CurrentLanguage);
-                gridView_Device.EditFormPrepared += Extentions.GridView_EditFormPrepared;
-                Extentions.showEditModeCellGridView(gridControl_Devices, gridView_Device, "Machine Name");
-            };
-
 
             // Apply custom styles to column headers
             gridView_Device.Appearance.HeaderPanel.BackColor = Color.LightSteelBlue;
@@ -123,19 +126,12 @@ namespace DigitalProduction
             deviceDataTable.Columns.Add("Address", typeof(string));
             deviceDataTable.Columns.Add("Machine Name", typeof(string));
             deviceDataTable.Columns.Add("Plant Name", typeof(string));
-            deviceDataTable.Columns.Add("ConnectionStatus", typeof(bool));
+            deviceDataTable.Columns.Add("Department Name", typeof(string));
+            deviceDataTable.Columns.Add("IsActive", typeof(bool));
             return deviceDataTable;
         }
 
-        public void RefreshLanguage()
-        {
-            OnLanguageChanged();
-        }
 
-        private void OnLanguageChanged()
-        {
-            ApplyLocalization();
-        }
         private void ApplyLocalization()
         {
             gridView_Device.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
@@ -145,8 +141,72 @@ namespace DigitalProduction
             gridView_Device.Columns["Address"].Caption = LocalizationManager.GetString("Address");
             gridView_Device.Columns["Machine Name"].Caption = LocalizationManager.GetString("MachineName");
             gridView_Device.Columns["Plant Name"].Caption = LocalizationManager.GetString("PlantName");
-            gridView_Device.Columns["ConnectionStatus"].Caption = LocalizationManager.GetString("ConnectionStatus");
+            gridView_Device.Columns["Department Name"].Caption = LocalizationManager.GetString("DepartmentName");
+            gridView_Device.Columns["IsActive"].Caption = LocalizationManager.GetString("Status");
             gridView_Device.Columns["Action"].Caption = LocalizationManager.GetString("Action");
+        }
+        private void CreateButtonContainer()
+        {
+            // Create a PanelControl to hold the button
+            groupPanelButtonContainer = new PanelControl()
+            {
+                Dock = DockStyle.Top,
+                Height = 50
+            };
+
+            // Add the PanelControl to the form
+            Controls.Add(groupPanelButtonContainer);
+
+            // Create the button
+            button = new SimpleButton()
+            {
+                Text = "Add new device",
+                Size = new System.Drawing.Size(100, 40)
+            };
+
+            // Add the button to the PanelControl
+            groupPanelButtonContainer.Controls.Add(button);
+
+            // Handle the button click event
+            button.Click += Button_Click;
+
+            // Position the button inside the PanelControl (optional)
+            button.Location = new System.Drawing.Point(10, 5); // Adjust location as needed
+        }
+        private void Button_Click(object sender, EventArgs e)
+        {
+            showRegisterDevice();
+        }
+        private void showRegisterDevice()
+        {
+            // Hide the GridView
+            gridControl_Devices.Visible = false;
+
+            // Show the user control
+            frmRegister.Location = gridControl_Devices.Location;
+            frmRegister.Size = gridControl_Devices.Size;
+            frmRegister.Visible = true;
+            frmRegister.BringToFront();
+        }
+        private void RegisterControl_ExitClicked(object sender, EventArgs e)
+        {
+            // Show the GridView
+            gridControl_Devices.Visible = true;
+
+            // Hide the user control
+            frmRegister.Visible = false;
+        }
+        private void RegisterForm_DeviceCreated(object sender, Device newDevice)
+        {
+            // GridView will automatically refresh
+            deviceDataTable.Rows.Add(
+                   newDevice.IpAddress,
+                   newDevice.MachineName,
+                   newDevice.PlantName,
+                   newDevice.DepartmentName,
+                   newDevice.IsActive
+               );
+            gridView_Device.FocusedRowHandle = 0;
         }
     }
 }

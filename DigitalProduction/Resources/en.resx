@@ -304,7 +304,7 @@
     <value>WebSocket error: {0}</value>
   </data>
   <data name="Username" xml:space="preserve">
-    <value>Username</value>
+    <value>User Name</value>
   </data>
   <data name="CreatedAt" xml:space="preserve">
     <value>Created At</value>
@@ -335,5 +335,8 @@
   </data>
   <data name="User" xml:space="preserve">
     <value>Username:</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Position</value>
   </data>
 </root>

@@ -458,7 +458,7 @@ namespace DigitalProduction
         }
         private DistributionData GetDistributionDataFromControls()
         {
-            string user = Global.Username;
+            string user = Global.CurrentUser.EmployeeName;
             string machineName = cbxDevice.SelectedItem.ToString();
             string ipAddress = dbHelper.GetIpAddress(machineName);
 

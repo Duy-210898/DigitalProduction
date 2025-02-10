@@ -44,13 +44,13 @@ namespace DigitalProduction
             checkRegisteruser = DbHelper.createUser(username, hashedPassword, employeeName, employeeID, departmentID, positionID);
             if (checkRegisteruser)
             {
-                MessageBox.Show("Registration successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ShowMessage.ShowInfo($"Registration successful with {username}!", "Success");
                 ExitClicked.Invoke(this, EventArgs.Empty);
-                UserCreated.Invoke(this, new Employee(employeeID, username, hashedPassword, employeeName, departmentID, DateTime.Now, null, true));
+                UserCreated.Invoke(this, new Employee(employeeID, username, hashedPassword, employeeName, positionID, departmentID, DateTime.Now, null, true));
             }
             else
             {
-                MessageBox.Show("Registration failed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowMessage.ShowError($"Registration failed with {username}!");
             }
         }
         private void LoadDepartments()

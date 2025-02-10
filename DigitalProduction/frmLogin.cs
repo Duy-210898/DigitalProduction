@@ -69,6 +69,7 @@ namespace DigitalProduction
             {
                 frmMain formMain = new frmMain();
                 formMain.Show();
+                this.Hide();
             }
             else
             {

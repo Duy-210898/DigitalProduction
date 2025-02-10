@@ -1,15 +1,31 @@
-﻿using DevExpress.XtraPrinting.Native.WebClientUIControl;
-using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using DigitalProduction.Models;
+using Newtonsoft.Json;
 
 public static class Global
 {
-    public static string Username { get; set; }
+    private static UserRole currentUser;
+    public static UserRole CurrentUser
+    {
+        get { return currentUser; }
+        set { currentUser = value; }
+    }
     public static string App = "CuttingProject";
     public static string Language { get; set; }
+    public static void SetUser(string employeeName, int positionID, int departmentID, string role)
+    {
+        currentUser = new UserRole(employeeName, positionID, departmentID, role);
+    }
+
+    // Method to reset the current user (e.g., for logout)
+    public static void ResetUser()
+    {
+        currentUser = null;
+    }
+
 }
- 
+
 public class LanguageManager
 {
     private Dictionary<string, string> _translations;

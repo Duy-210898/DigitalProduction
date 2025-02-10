@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Windows.Forms;
-using DevExpress.Utils.Html;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Repository;
+using DevExpress.XtraExport.Helpers;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
-using static DigitalProduction.frmMain;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace DigitalProduction.Extensions
 {
     public static class Extentions
     {
-        public static void showEditModeCellGridView(GridControl gridControl, GridView gridView, string filedName)
+        private static GridView cloneGridView;
+        public static void showEditModeCellGridView(GridControl gridControl, GridView gridView, string control)
         {
             // Create the RepositoryItemButtonEdit for the action buttons
             RepositoryItemButtonEdit _commandsEdit = new RepositoryItemButtonEdit { AutoHeight = false, Name = "CommandsEdit", TextEditStyle = TextEditStyles.HideTextEditor };
@@ -39,36 +40,95 @@ namespace DigitalProduction.Extensions
             // Set the RepositoryItemButtonEdit for the "Action" column
             _commandsColumn.ColumnEdit = _commandsEdit;
 
+
             // Handle button clicks
             _commandsEdit.ButtonClick += (s, ee) =>
             {
                 switch (ee.Button.Index)
                 {
                     case 0: // Update button
-                        gridView.CloseEditor();
+                        if (control.Equals("ucManagement"))
+                        {
+                            gridView.CloseEditor();
+                            gridView.OptionsEditForm.ShowUpdateCancelPanel = DevExpress.Utils.DefaultBoolean.True;
+                            gridView.OptionsEditForm.FormCaptionFormat = LocalizationManager.GetString("Edit");
+                            //gridView.Columns["DepartmentName"].OptionsEditForm.Visible = DevExpress.Utils.DefaultBoolean.False;
+                            gridView.Columns["EmployeeName"].OptionsEditForm.Caption = LocalizationManager.GetString("EmployeeName");
+                            gridView.Columns["EmployeeID"].OptionsEditForm.Caption = LocalizationManager.GetString("EmployeeID");
+                            gridView.Columns["Username"].OptionsEditForm.Caption = LocalizationManager.GetString("Username");
+                            gridView.Columns["Username"].OptionsColumn.ReadOnly = true;
+                            gridView.Columns["IsActive"].OptionsEditForm.Caption = LocalizationManager.GetString("IsActive");
+                            setupDepartmentLookup(gridView, gridControl);
+                            setupPositionLookup(gridView, gridControl);
+                        }
                         gridView.ShowPopupEditForm();
+
                         break;
 
                     case 1: // Delete button
-                        var fullname = gridView.GetFocusedDataRow()[filedName]?.ToString();
-                        if (string.IsNullOrEmpty(fullname)) return;
+                       // var dlg = XtraMessageBox.Show($"Bạn có chắc chắn muốn xóa ?", "Cảnh báo", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        if (control.Equals("ucManagement"))
+                        {
+                            string userName = gridView.GetRowCellValue(gridView.FocusedRowHandle, "Username").ToString().Trim();
+                            DialogResult result = MessageBox.Show($"Are you sure you want to delete this user {userName}?", "Confirm Delete", MessageBoxButtons.YesNo);
+                            if (result == DialogResult.Yes)
+                            {
+                                // Call the delete function and pass the UserID
+                                bool statusDelete = DbHelper.DeleteUser(userName);
 
-                        var dlg = XtraMessageBox.Show($"Bạn có chắc chắn muốn xóa {fullname} ?", "Cảnh báo", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                        if (dlg == DialogResult.Yes)
-                            gridControl.BeginInvoke(new MethodInvoker(() => gridView.DeleteRow(gridView.FocusedRowHandle)));
+                                // Provide feedback to the user based on the deletion result
+                                if (statusDelete)
+                                {
+                                    ShowMessage.ShowInfo($"User deleted successfully with {userName}");
+                                    gridControl.BeginInvoke(new MethodInvoker(() => gridView.DeleteRow(gridView.FocusedRowHandle)));
+                                }
+                                else
+                                {
+                                    ShowMessage.ShowError($"Error deleting user {userName}");
+                                }
+                            }
+                        }
                         break;
                 }
             };
 
-            // Update captions based on language change
-            LanguageSettings.LanguageChanged += () =>
-            {
-                LocalizationManager.SetLanguage(LanguageSettings.CurrentLanguage);
-                // Ensure the buttons are updated with new captions
-                _commandsEdit.Buttons[0].Caption = LocalizationManager.GetString("Edit");
-                _commandsEdit.Buttons[1].Caption = LocalizationManager.GetString("Delete");
-            };
+            //int oldEmployeeID = 0;
+            //gridView.FocusedRowChanged += (s, e) =>
+            //{ 
+            //    if (e.FocusedRowHandle >= 0)
+            //    {
+            //        oldEmployeeID = Convert.ToInt32(gridView.GetRowCellValue(e.FocusedRowHandle, "EmployeeID"));
+            //    }
+            //};
 
+            gridView.RowUpdated += (s, e) =>
+            {
+                if (control.Equals("ucManagement"))
+                {
+                    if (e.RowHandle >= 0) // Ensure it's a valid row
+                    {
+                        // Retrieve the new updated values from the grid
+                        string username = gridView.GetRowCellValue(e.RowHandle, "Username")?.ToString();
+                        int newEmployeeID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "EmployeeID"));
+                        int newDepartmentID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "DepartmentID"));
+                        int newPositionID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "PositionID"));
+                        string newEmployeeName = gridView.GetRowCellValue(e.RowHandle, "EmployeeName").ToString();
+                        bool newIsActive = Convert.ToBoolean(gridView.GetRowCellValue(e.RowHandle, "IsActive"));
+                        if (!string.IsNullOrWhiteSpace(username))
+                        {
+                            bool statusUpdate = DbHelper.updateUser(username, newEmployeeName, newEmployeeID, newDepartmentID, newPositionID, newIsActive);
+                            if (statusUpdate)
+                            {
+                                ShowMessage.ShowInfo($"Update success with user: {username}");
+                            }
+                            else
+                            {
+                                ShowMessage.ShowError($"Can't update with user {username}");
+                            }
+                        }
+                    }
+                }
+            };
             // Ensure that the "Action" column is editable in the grid
             gridView.CustomRowCellEdit += (s, ee) =>
             {
@@ -95,29 +155,66 @@ namespace DigitalProduction.Extensions
             gridView.OptionsBehavior.EditingMode = GridEditingMode.EditFormInplace;
         }
 
+        private static void setupDepartmentLookup(GridView gridView, GridControl gridControl)
+        {
+            // Create LookUpEdit repository item
+            RepositoryItemLookUpEdit lookupEdit = new RepositoryItemLookUpEdit();
+
+            // Load department data from database
+            lookupEdit.DataSource = DbHelper.getDepartments();
+            lookupEdit.DisplayMember = "DepartmentName";  
+            lookupEdit.ValueMember = "DepartmentName";
+            lookupEdit.SearchMode = SearchMode.AutoFilter;
+
+            if (!gridControl.RepositoryItems.Contains(lookupEdit))
+                gridControl.RepositoryItems.Add(lookupEdit);
+
+            // Handle to apply LookUpEdit only for the current row
+            gridView.CustomRowCellEditForEditing += (s, e) =>
+            {
+                if (e.Column.FieldName == "DepartmentName")
+                {
+                    e.RepositoryItem = lookupEdit;
+                }
+            };
+        }
+        private static void setupPositionLookup(GridView gridView, GridControl gridControl)
+        {
+            // Create LookUpEdit repository item
+            RepositoryItemLookUpEdit lookupEdit = new RepositoryItemLookUpEdit();
+
+            // Load pos data from database
+            lookupEdit.DataSource = DbHelper.getPositions();
+            lookupEdit.DisplayMember = "PositionName";
+            lookupEdit.ValueMember = "PositionName";
+            lookupEdit.SearchMode = SearchMode.AutoFilter;
+
+            if (!gridControl.RepositoryItems.Contains(lookupEdit))
+                gridControl.RepositoryItems.Add(lookupEdit);
+
+            // Handle to apply LookUpEdit only for the current row
+            gridView.CustomRowCellEditForEditing += (s, e) =>
+            {
+                if (e.Column.FieldName == "PositionName")
+                {
+                    e.RepositoryItem = lookupEdit;
+                }
+            };
+        }
+
         public static void GridView_EditFormPrepared(object sender, EditFormPreparedEventArgs e)
         {
             // Update the "Update" and "Cancel" button captions in the Edit Form
             Control ctrl_Update = MyExtenstions.FindControl(e.Panel, "Update");
             if (ctrl_Update != null)
             {
-                LanguageSettings.LanguageChanged += () =>
-                {
-                    LocalizationManager.SetLanguage(LanguageSettings.CurrentLanguage);
-                    ctrl_Update.Text = LocalizationManager.GetString("Update");
-                };
-                ctrl_Update.Text = LocalizationManager.GetString("Update");
+                 ctrl_Update.Text = LocalizationManager.GetString("Update");
                 (ctrl_Update as SimpleButton).ImageOptions.Image = null;
             }
 
             Control ctrl_Cancel = MyExtenstions.FindControl(e.Panel, "Cancel");
             if (ctrl_Cancel != null)
             {
-                LanguageSettings.LanguageChanged += () =>
-                {
-                    LocalizationManager.SetLanguage(LanguageSettings.CurrentLanguage);
-                    ctrl_Cancel.Text = LocalizationManager.GetString("Cancel");
-                };
                 ctrl_Cancel.Text = LocalizationManager.GetString("Cancel");
                 (ctrl_Cancel as SimpleButton).ImageOptions.Image = null;
             }
