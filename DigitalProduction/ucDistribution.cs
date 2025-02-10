@@ -5,9 +5,12 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -23,13 +26,51 @@ namespace DigitalProduction
             dbHelper = new DbHelper();
             InitializeComponent();
             ApplyLocalization();
-
-            txtSO.Focus();
+            SetupSearchSOLookup();
+            cbxSO.Focus();
         }
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
             _webSocketClient = WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
+        }
+
+        private List<string> soList = new List<string>();
+
+        private void SetupSearchSOLookup()
+        {
+            soList = DbHelper.GetSOList();
+
+            cbxSO.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            cbxSO.Properties.ImmediatePopup = true;
+            cbxSO.Properties.Items.AddRange(soList); 
+
+            cbxSO.EditValueChanged += CbxSO_EditValueChanged;
+        }
+
+        private void CbxSO_EditValueChanged(object sender, EventArgs e)
+        {
+            ComboBoxEdit combo = sender as ComboBoxEdit;
+            if (combo == null) return;
+
+            string inputText = combo.Text.Trim();
+
+            if (string.IsNullOrEmpty(inputText))
+            {
+                combo.Properties.Items.Clear();
+                combo.Properties.Items.AddRange(soList);
+                return;
+            }
+
+            var filteredList = soList.Where(so => so.StartsWith(inputText, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            combo.Properties.Items.Clear();
+            combo.Properties.Items.AddRange(filteredList); 
+
+            if (filteredList.Count > 0)
+                combo.ShowPopup();
+            else
+                combo.ClosePopup();
         }
         private DataTable TransformSizeData(DataTable originalTable)
         {
@@ -129,7 +170,6 @@ namespace DigitalProduction
                 return;
             }
 
-            pnlMaterial.Visible = true;
             pnlSize.Visible = true;
 
             var sizeDataList = new List<SizeData>();
@@ -174,6 +214,7 @@ namespace DigitalProduction
                 {
                     PartCode = schedule.PartCode,
                     PartName = schedule.PartName,
+                    VietnameseName = schedule.VietnameseName,
                     MaterialCode = schedule.MaterialCode,
                     MaterialName = schedule.MaterialName,
                     Unit = schedule.Unit
@@ -205,9 +246,8 @@ namespace DigitalProduction
             lblPO.Text = $"PO: {schedules.FirstOrDefault()?.PO ?? string.Empty}";
             lblModel.Text = $"Model: {schedules.FirstOrDefault()?.Model ?? string.Empty}";
             lblArt.Text = $"ART: {schedules.FirstOrDefault()?.ART ?? string.Empty}";
+            cbxPart.Properties.NullText = LocalizationManager.GetString("SelectPart");
 
-            // Bind the material data list to the gridControl_Material
-            //gridControl_Material.DataSource = materialDataList;
             cbxPart.Properties.DataSource = materialDataList;
 
             FormatGridLookUpEdit();
@@ -219,11 +259,95 @@ namespace DigitalProduction
             cbxPart.Properties.ValueMember = "PartId";
 
             GridView view = cbxPart.Properties.View;
+            view.Columns.Clear();
+
+            // Thêm các cột
             view.Columns.AddVisible("PartCode", "Part Code");
             view.Columns.AddVisible("PartName", "Part Name");
+            view.Columns.AddVisible("VietnameseName", "Vietnamese Name");
             view.Columns.AddVisible("MaterialCode", "Material Code");
             view.Columns.AddVisible("MaterialName", "Material Name");
+
+            // 🔹 Định dạng tiêu đề cột (Header)
+            foreach (GridColumn col in view.Columns)
+            {
+                col.AppearanceHeader.Font = new Font("Tahoma", 9F, FontStyle.Bold);
+                col.AppearanceHeader.Options.UseFont = true;
+                col.AppearanceHeader.Options.UseTextOptions = true;
+                col.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+
+                // Không cho chỉnh sửa nội dung
+                col.OptionsColumn.AllowEdit = false;
+                col.OptionsColumn.ReadOnly = true;
+            }
+
+            // 🔹 Bật chọn từng ô riêng lẻ bằng chuột
+            view.OptionsSelection.MultiSelect = true;
+            view.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CheckBoxRowSelect;
+            view.OptionsSelection.EnableAppearanceFocusedCell = true;
+            view.FocusRectStyle = DrawFocusRectStyle.CellFocus;
+
+            // 🔹 Giữ chế độ chọn dòng bằng checkbox nhưng cho phép chọn ô riêng lẻ
+            view.OptionsBehavior.Editable = false;
+            view.OptionsBehavior.AllowIncrementalSearch = true;
+
+            // 🔹 Cho phép chọn nội dung khi double-click
+            view.DoubleClick += (s, e) =>
+            {
+                GridView gridView = s as GridView;
+                GridHitInfo hitInfo = gridView.CalcHitInfo(gridView.GridControl.PointToClient(Control.MousePosition));
+
+                if (hitInfo.InRowCell)
+                {
+                    gridView.OptionsBehavior.Editable = true; // Cho phép edit tạm thời
+                    gridView.FocusedColumn.OptionsColumn.AllowEdit = true;
+                    gridView.ShowEditor();
+                    TextEdit editor = gridView.ActiveEditor as TextEdit;
+                    if (editor != null)
+                    {
+                        editor.Properties.ReadOnly = false;
+                        editor.SelectAll(); // Tự động chọn hết nội dung để copy
+                    }
+                }
+            };
+
+            // 🔹 Bật filter tìm kiếm
+            view.OptionsView.ShowAutoFilterRow = true;
+
+            // 🔹 Highlight hàng khi di chuột
+            view.Appearance.FocusedRow.BackColor = Color.LightSkyBlue;
+            view.Appearance.FocusedRow.Options.UseBackColor = true;
+
+            // 🔹 Bật chế độ auto-fit cho cột
+            view.OptionsView.ColumnAutoWidth = false;
+
+            // Đặt chiều rộng popup bằng với kích thước control chứa nó
+            int popupWidth = this.Width - 50;
+            cbxPart.Properties.PopupFormSize = new Size(popupWidth, 300);
+
+            // 🔹 Tô màu xen kẽ các dòng
+            view.OptionsView.EnableAppearanceEvenRow = true;
+            view.OptionsView.EnableAppearanceOddRow = true;
+            view.Appearance.OddRow.BackColor = Color.AliceBlue;
+            view.Appearance.EvenRow.BackColor = Color.White;
+
+            // 🔹 Đặt tỷ lệ % cho từng cột
+            view.Columns["PartCode"].Width = (int)(popupWidth * 0.08);
+            view.Columns["PartName"].Width = (int)(popupWidth * 0.14);
+            view.Columns["VietnameseName"].Width = (int)(popupWidth * 0.15);
+            view.Columns["MaterialCode"].Width = (int)(popupWidth * 0.08);
+            view.Columns["MaterialName"].Width = (int)(popupWidth * 0.45);
+
+            // 🔹 Định dạng lại cột checkbox để nhỏ lại
+            view.Columns[0].Width = 30; // Thu nhỏ cột chứa checkbox
+
+            // Áp dụng view vào GridLookUpEdit
             cbxPart.Properties.PopupView = view;
+        }
+
+        private void tableLayoutPanel1_SizeChanged(object sender, EventArgs e)
+        {
+            cbxPart.Properties.PopupFormSize = new Size(this.Width - 50, 300);
         }
 
 
@@ -300,10 +424,10 @@ namespace DigitalProduction
         {
             ShowMessage("Error", message, MessageBoxIcon.Error);
         }
-
-        private void txtSO_Leave(object sender, EventArgs e)
+         
+        private void cbxSO_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string so = txtSO.Text.Trim();
+            string so = cbxSO.SelectedItem.ToString();
 
             if (!string.IsNullOrEmpty(so))
             {
@@ -391,24 +515,27 @@ namespace DigitalProduction
 
         private void ApplyLocalization()
         {
-            lblFactory.Text = LocalizationManager.GetString("Factory") + ": " + lblFactory.Text.Split(':').Last().Trim();
-            lblLastNo.Text = LocalizationManager.GetString("LastNo") + ": " + lblLastNo.Text.Split(':').Last().Trim();
-            lblMasterWorkOrder.Text = LocalizationManager.GetString("MasterWorkOrder") + ": " + lblMasterWorkOrder.Text.Split(':').Last().Trim();
-            lblSO.Text = LocalizationManager.GetString("SO") + ": " + lblSO.Text.Split(':').Last().Trim();
-            lblPO.Text = LocalizationManager.GetString("PO") + ": " + lblPO.Text.Split(':').Last().Trim();
-            lblModel.Text = LocalizationManager.GetString("Model") + ": " + lblModel.Text.Split(':').Last().Trim();
-            lblArt.Text = LocalizationManager.GetString("ART") + ": " + lblArt.Text.Split(':').Last().Trim();
+            var controls = new Dictionary<Control, string>
+    {
+        { lblFactory, "Factory" },
+        { lblLastNo, "LastNo" },
+        { lblMasterWorkOrder, "MasterWorkOrder" },
+        { lblSO, "SO" },
+        { lblPO, "PO" },
+        { lblModel, "Model" },
+        { lblArt, "ART" },
+        { btnSend, "Send" }
+    };
 
-            // Cập nhật nút bấm và combobox
-            btnSend.Text = LocalizationManager.GetString("Send");
+            foreach (var control in controls)
+            {
+                control.Key.Text = LocalizationManager.GetString(control.Value) + (control.Key is Label ? ":" : "");
+            }
+
             cbxDevice.Text = LocalizationManager.GetString("SelectDevice");
-
-            // Nếu có GroupControl hoặc PanelControl thì cập nhật tiêu đề
-            if (pnlMaterial != null) pnlMaterial.Text = LocalizationManager.GetString("Material");
-            if (pnlSize != null) pnlSize.Text = LocalizationManager.GetString("SizeDistribution");
-
-            // Nếu có GridLookUpEdit thì cập nhật tiêu đề popup
             cbxPart.Properties.NullText = LocalizationManager.GetString("SelectPart");
+            rdLeather.Text = LocalizationManager.GetString("Leather");
+            rdRawMaterial.Text = LocalizationManager.GetString("RawMaterial");
         }
 
         private async void SendDistributionDataToServer()

@@ -636,6 +636,7 @@ async function getProductionSchedule(so) {
             m.Unit AS MaterialUnit,
             pa.PartId,
             pa.PartName,
+            pa.VietnameseName,
             pa.PartCode,
             po.CreatedAt,
             po.UpdatedAt

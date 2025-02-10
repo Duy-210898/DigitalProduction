@@ -351,4 +351,19 @@
   <data name="User" xml:space="preserve">
     <value>Tên đăng nhập:</value>
   </data>
+  <data name="ART" xml:space="preserve">
+    <value>Article</value>
+  </data>
+  <data name="LastNo" xml:space="preserve">
+    <value>Số đuôi</value>
+  </data>
+  <data name="MasterWorkOrder" xml:space="preserve">
+    <value>Mã đơn chính</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Hình thể</value>
+  </data>
+  <data name="SelectDevice" xml:space="preserve">
+    <value>Chọn thiết bị</value>
+  </data>
 </root>

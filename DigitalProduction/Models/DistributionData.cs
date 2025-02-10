@@ -29,7 +29,8 @@ namespace DigitalProduction.Models
         public string PartName { get; set; }
         public string MaterialCode { get; set; }
         public string MaterialName { get; set; }
-        public string Unit { get; set; }
+        public string VietnameseName { get; set; }
+        public string Unit { get; set; } 
     }
 
 

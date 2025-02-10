@@ -5,7 +5,8 @@
         private ProductionSchedule() { }
         public string MasterWorkOrder { get; set; }
         public string PartCode { get; set; }
-        public string PartName { get; set; }
+        public string PartName { get; set; } 
+        public string VietnameseName { get; set; }
         public string MaterialCode { get; set; } 
         public string MaterialName { get; set; }
         public string Unit { get; set; }

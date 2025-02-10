@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const { connectToDevice } = require('./modbusClient');
 const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList } = require('./database');
 const { setClients } = require('./notifications'); 
+const { Time } = require('mssql');
 
 let clients = [];
 const modusClients = {};
@@ -19,20 +20,24 @@ function setupWebSocket(server) {
 
   // Khi có client kết nối
   wss.on('connection', (ws) => {
-    console.log('Client connected');
+    const time = new Date().toLocaleTimeString(); // Lấy giờ:phút:giây
+    console.log(`Client connected at ${time}`);
+    
     clients.push(ws);
     setClients(clients); // Cập nhật danh sách client khi có kết nối mới
 
     // Xử lý thông điệp từ client
     ws.on('message', (message) => {
-      console.log(`Received message: ${message}`);
-      handleClientMessage(ws, message);
+        const time = new Date().toLocaleTimeString();
+        console.log(`[${time}] Received message: ${message}`);
+        handleClientMessage(ws, message);
     });
-
     // Khi client ngắt kết nối
     ws.on('close', () => {
-      console.log('Client disconnected');
-      clients = clients.filter(client => client !== ws); // Loại bỏ client khỏi danh sch
+      const time = new Date().toLocaleTimeString();
+      console.log(`Client disconnected at ${time}`);
+      
+      clients = clients.filter(client => client !== ws); // Loại bỏ client khỏi danh sách
       setClients(clients); // Cập nhật danh sách client khi có kết nối bị ngắt
     });
   });

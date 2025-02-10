@@ -116,46 +116,68 @@ namespace DigitalProduction
         public static DataTable getDepartments()
         {
             DataTable dt = new DataTable();
-            SqlConnection con = new SqlConnection(connectionString);
-            try
+            using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT DepartmentID, DepartmentName FROM Department WHERE IsActive = 1";
-                SqlCommand cmd = new SqlCommand(query, con);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(dt);
-                
+                try
+                {
+                    string query = "SELECT DepartmentID, DepartmentName FROM Department WHERE IsActive = 1";
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(dt);
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+                return dt;
             }
-            catch (Exception ex)
+        }
+        public static List<string> GetSOList()
+        {
+            List<string> soList = new List<string>(); 
+
+            using (SqlConnection con = new SqlConnection(connectionString))
             {
-                Console.WriteLine("Error: " + ex.Message);
+                try
+                {
+                    con.Open();
+                    string query = "SELECT DISTINCT SO FROM PRODUCTORDER";
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        soList.Add(reader["SO"].ToString());
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
             }
-            finally
-            {
-                con.Close();
-            }
-            return dt;
+            return soList;
         }
 
         //get list position
         public static DataTable getPositions()
         {
             DataTable dt = new DataTable();
-            SqlConnection con = new SqlConnection(connectionString);
-            try
+            using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT PositionID, PositionName FROM Position";
-                SqlCommand cmd = new SqlCommand(query, con);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(dt);
+                try
+                {
+                    string query = "SELECT PositionID, PositionName FROM Position";
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(dt);
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
-            }
-            finally
-            {
-                con.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
             }
             return dt;
         }
@@ -187,7 +209,6 @@ namespace DigitalProduction
             {
                 Console.WriteLine("Lỗi: " + ex.Message);
             }
-
             return ipAddress;
         }
         // Phương thức để lấy danh sách các MachineName từ bảng DeviceList
