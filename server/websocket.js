@@ -1,11 +1,11 @@
 const WebSocket = require('ws');
-const { connectToDevice } = require('./modbusClient');
-const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList } = require('./database');
+const { connectToDevice, isHostReachable, modbusClients } = require('./modbusClient');
+const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList, getOperatorList, getAllProductionSchedule, getDistributions, getOperatorDistribution } = require('./database');
 const { setClients } = require('./notifications'); 
 const { Time } = require('mssql');
 
 let clients = [];
-const modusClients = {};
+//const modusClients = {};
 
 // Thiết lập WebSocket server
 function setupWebSocket(server) {
@@ -65,6 +65,9 @@ async function handleClientMessage(ws, message) {
         case 'getDistributionOfDevice':
           await handleGetDistributionOfDevice(ws, request);
           break;
+        case 'getDistributions':
+          await handleGetDistributions(ws, request);
+          break;
         case 'getActualData':
           await handleGetActualData(ws, request);
           break;
@@ -88,6 +91,12 @@ async function handleClientMessage(ws, message) {
           break;
         case 'getUsers':
           await handleGetUsers(ws, request);
+          break;
+        case 'getOperators':
+          await handleGetOperators(ws, request);
+          break;
+        case 'getOperatorDistribution':
+          await handleGetOperatorDistribution(ws, request);
           break;
         default:
           console.log('Unknown action for CuttingProject:', action);
@@ -172,7 +181,36 @@ async function handleGetActualData(ws, request) {
     console.log('Client disconnected. Stopping data requests.');
   });
 }
+// Xử lý yêu cầu lấy thông tin phân phối của thiết bị
+async function handleGetDistributions(ws) {
+  try {
+    // Gọi hàm getDistributionByDevice từ database.js để lấy dữ liệu phân phối
+    const distributionData = await getDistributions();
 
+    if (!distributionData) {
+      return ws.send(JSON.stringify({
+        action: 'getDistributions',
+        status: 'error',
+        message: 'No distribution data found'
+      }));
+    }
+
+    // Gửi phản hồi thành công với dữ liệu phân phối
+    ws.send(JSON.stringify({
+      action: 'getDistributions',
+      status: 'success',
+      distributionData: distributionData
+    }));
+
+  } catch (error) {
+    console.error(`Error getting distribution data for device :  ${error.message}`);
+    ws.send(JSON.stringify({
+      action: 'getDistributions',
+      status: 'error',
+      message: `Failed to get distribution data : ${error.message}`
+    }));
+  }
+}
 // Xử lý yêu cầu lấy thông tin phân phối của thiết bị
 async function handleGetDistributionOfDevice(ws, request) {
   const { ipAddress } = request;
@@ -260,16 +298,16 @@ async function handleConnectDevice(ws, request) {
       }));
     }
 
-    await connectToDevice(ipAddress);
-    await updateDeviceConnectionStatus(ipAddress, true);
-    ws.send(JSON.stringify({
+    //await connectToDevice(ipAddress);
+    //await updateDeviceConnectionStatus(ipAddress, true);
+    return ws.send(JSON.stringify({
       action: 'connectDevice',
       ipAddress,
       status: 'connected'
     }));
 
     // Cập nhật danh sách thiết bị cho tất cả client
-    notifyClients(await getAllDeviceData());
+   // notifyClients(await getAllDeviceData());
   } catch (error) {
     console.error(`Error connecting to device ${ipAddress}:`, error);
     ws.send(JSON.stringify({
@@ -333,20 +371,24 @@ async function handleAddDevice(ws, request) {
 
 // Xử lý yêu cầu lấy lịch trình sản xuất
 async function handleGetSchedule(ws, request) {
-  const { so } = request;
-
-  if (!so) {
-    return ws.send(JSON.stringify({ action: 'getSchedule', status: 'error', message: 'Missing SO parameter' }));
-  }
-
   try {
-    const schedule = await getProductionSchedule(so);
+    let schedule;
+    
+    if (request.so) {
+      // Get schedule for a specific SO
+      schedule = await getProductionSchedule(request.so);
+    } else {
+      // Get all schedules if no SO is provided
+      schedule = await getAllProductionSchedule();
+    }
+
     ws.send(JSON.stringify({ action: 'getSchedule', status: 'success', schedule }));
   } catch (error) {
     console.error('Error fetching production schedule:', error);
     ws.send(JSON.stringify({ action: 'getSchedule', status: 'error', message: 'Failed to retrieve production schedule' }));
   }
 }
+
 
 // Xử lý yêu cầu lấy các trang duy nhất
 async function handleGetUniquePages(ws, request) {
@@ -381,8 +423,40 @@ async function handleGetUniquePages(ws, request) {
   }
 }
 
-// Xử lý yêu cầu lưu trữ dữ liệu phân phối vào Modbus
+// Function to insert data into the database
 async function handleSaveDistributionData(ws, request) {
+  const { data } = request;
+
+  if (!data) {
+    return ws.send(JSON.stringify({
+      action: 'saveDistributionData',
+      status: 'error',
+      message: 'Missing required data'
+    }));
+  }
+
+  try {
+
+    // Lưu dữ liệu vào cơ sở dữ liệu
+    await saveDistributionDataToDB(data);
+
+    // Gửi phản hồi thành công
+    ws.send(JSON.stringify({
+      action: 'saveDistributionData',
+      status: 'success',
+      message: 'Distribution data saved and sent to Modbus successfully'
+    }));
+  } catch (error) {
+    console.error('Error saving distribution data:', error);
+    ws.send(JSON.stringify({
+      action: 'saveDistributionData',
+      status: 'error',
+      message: `Failed to save distribution data: ${error.message}`
+    }));
+  }
+}
+// Xử lý yêu cầu lưu trữ dữ liệu phân phối vào Modbus
+async function handleSaveDistributionDatas(ws, request) {
   const { data } = request;
   const { IpAddress } = data;
 
@@ -439,6 +513,37 @@ async function handleGetUsers(ws) {
   }
 }
 
+// Xử lý yêu cầu lấy thông tin users
+async function handleGetOperators(ws, request) {
+  const { departmentID } = request;
+  if (!departmentID) {
+    return ws.send(JSON.stringify({ action: 'getOperators', status: 'error', message: 'Missing departmentID parameter' }));
+  }
+
+  try {
+    const usersResponse = await getOperatorList(departmentID);
+    ws.send(JSON.stringify({ action: 'getOperators', users: usersResponse }));
+  } catch (error) {
+    console.error('Error getting users:', error);
+    ws.send(JSON.stringify({ error: 'Failed to retrieve operators' }));
+  }
+}
+// Xử lý yêu cầu lấy thông tin operator from HMI
+async function handleGetOperatorDistribution(ws, request) {
+  const { IpAddress } = request;
+  if (!IpAddress) {
+    return ws.send(JSON.stringify({ action: 'getOperatorDistribution', status: 'error', message: 'Missing IpAddress parameter' }));
+  }
+  try {
+    const operatorID = modbusClients[IpAddress]?.operatorID;
+    console.log(`getOperatorID on ipAddress:${IpAddress} ${operatorID}`);
+    const usersResponse = await getOperatorDistribution(operatorID);
+    ws.send(JSON.stringify({ action: 'getOperatorDistribution', employee: usersResponse }));
+  } catch (error) {
+    console.error('Error getting getOperatorDistribution:', error);
+    ws.send(JSON.stringify({ error: 'Failed to retrieve operatorID' }));
+  }
+}
 // Hàm gửi thông báo cho tất cả client
 function notifyClients(devicesResponse) {
   clients.forEach(client => {

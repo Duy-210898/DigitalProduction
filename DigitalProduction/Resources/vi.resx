@@ -366,4 +366,16 @@
   <data name="SelectDevice" xml:space="preserve">
     <value>Chọn thiết bị</value>
   </data>
+  <data name="Position" xml:space="preserve">
+    <value>Vị trí</value>
+  </data>
+  <data name="OperatorManager" xml:space="preserve">
+    <value>Quản lý người vận hành</value>
+  </data>
+  <data name="ListOfDistributions" xml:space="preserve">
+    <value>Danh sách phân phát</value>
+  </data>
+  <data name="Report" xml:space="preserve">
+    <value>Báo cáo</value>
+  </data>
 </root>

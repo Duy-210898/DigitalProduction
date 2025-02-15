@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -15,33 +15,32 @@ using Newtonsoft.Json;
 
 namespace DigitalProduction
 {
-    public partial class ucUserManagement : DevExpress.XtraEditors.XtraUserControl
+    public partial class ucOperatorManagement : UserControl
     {
         public BindingList<Employee> employees = new BindingList<Employee>();
         private WebSocketClient _webSocketClient;
         private PanelControl groupPanelButtonContainer;
         private SimpleButton button;
-        private ucRegisterUser frmRegister;
+        private ucRegisterOperator frmRegister;
         private PanelControl paginationPanel;
         private LabelControl lblPageInfo;
-        public ucUserManagement()
+        public ucOperatorManagement()
         {
             InitializeComponent();
+            //SettingGridControls();
             LoadTextLable();
-            gridView_UserManagement.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
-           // gridView_OperatorManagement.ShowFindPanel();
-            gridView_UserManagement.OptionsFind.ShowFindButton = false;
-            gridView_UserManagement.RowHeight = 50;
+            gridView_OperatorManagement.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
+            gridView_OperatorManagement.ShowFindPanel();
+            gridView_OperatorManagement.OptionsFind.ShowFindButton = false;
+            gridView_OperatorManagement.RowHeight = 50;
             CreateButtonContainer();
-
             // show add new user
-            frmRegister = new ucRegisterUser();
+            frmRegister = new ucRegisterOperator();
             frmRegister.Visible = false;
             this.Controls.Add(frmRegister);
             frmRegister.ExitClicked += RegisterControl_ExitClicked;
             frmRegister.UserCreated += RegisterForm_UserCreated;
         }
-
         private void CreatelabelTotalControls()
         {
             // Remove any existing panel to prevent duplication
@@ -69,14 +68,15 @@ namespace DigitalProduction
                 AutoSizeMode = LabelAutoSizeMode.None,
                 Location = new Point(20, 10)
             };
-            //lblPageInfo.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+
             // Create a "Refresh" Button
             SimpleButton refreshButton = new SimpleButton()
             {
                 Text = "Refresh",
-                Size = new Size(80, 30),
+                Size = new Size(100, 30), // Adjusted size for consistency
                 Location = new Point(250, 10) // Adjust positioning
             };
+
             // Style the Refresh Button
             refreshButton.Appearance.BackColor = Color.LightBlue; // Change background color
             refreshButton.Appearance.Font = new Font("Arial", 9f, FontStyle.Bold);
@@ -105,12 +105,6 @@ namespace DigitalProduction
             this.Controls.SetChildIndex(paginationPanel, 0); // Ensures it appears at the bottom
         }
 
-        // Event to handle refresh button click
-        private void RefreshButton_Click(object sender, EventArgs e)
-        {
-            _ = GetDataAndLoadToGridAsync();
-        }
-
 
         private void MainForm_Click(object sender, EventArgs e)
         {
@@ -122,34 +116,27 @@ namespace DigitalProduction
         // Event handler to refresh the grid when a user is created
         private void RegisterForm_UserCreated(object sender, Employee newUser)
         {
-            employees.Insert(0, newUser); // GridView will automatically refresh
-            gridView_UserManagement.FocusedRowHandle = 0;
+            employees.Insert(0, newUser);
+            gridView_OperatorManagement.FocusedRowHandle = 0;
         }
         private void showRegisterUser()
         {
             // Hide the GridView
-            gridControl_UserManagement.Visible = false;
+            gridControl_OperatorManagement.Visible = false;
 
             // Show the user control
-            frmRegister.Location = gridControl_UserManagement.Location;
-            frmRegister.Size = gridControl_UserManagement.Size;
+            frmRegister.Location = gridControl_OperatorManagement.Location;
+            frmRegister.Size = gridControl_OperatorManagement.Size;
             frmRegister.Visible = true;
             frmRegister.BringToFront();
         }
         private void RegisterControl_ExitClicked(object sender, EventArgs e)
         {
             // Show the GridView
-            gridControl_UserManagement.Visible = true;
+            gridControl_OperatorManagement.Visible = true;
 
             // Hide the user control
             frmRegister.Visible = false;
-        }
-        private void registerButton_Click(object sender, EventArgs e)
-        {
-            // Logic for user registration goes here...
-
-            // Show popup
-            MessageBox.Show("User registered successfully!", "Registration Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         private void gridView_CustomDrawGroupPanel(object sender, CustomDrawEventArgs e)
         {
@@ -173,7 +160,9 @@ namespace DigitalProduction
         // Send request to WebSocket or API and load data
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new { app = Global.App, action = "getUsers" };
+            if (Global.CurrentUser == null) { return; }
+            int departmentID = Global.CurrentUser.DepartmentID;
+            var request = new { app = Global.App, action = "getOperators", departmentID};
             string jsonRequest = JsonConvert.SerializeObject(request);
 
             await _webSocketClient.SendAsync(jsonRequest);
@@ -182,66 +171,33 @@ namespace DigitalProduction
         {
             try
             {
-                // Assuming the response
                 ResponseMessage<List<Employee>> response = ResponseMessage<List<Employee>>.FromJson(jsonData);
 
-                // Check if there are devices in the response
                 if (response?.Users != null && response.Users.Count > 0)
                 {
-                    // Clear current employees list
                     employees.Clear();
-
-                    // Retrieve departments from the database as a DataTable
-                    DataTable departmentTable = DbHelper.getDepartments();
-                    DataTable positionTable = DbHelper.getPositions();
-
-                    foreach (var employee in response.Users)
-                    {
-                        // Find the department name by DepartmentID
-                        var departmentRow = departmentTable.AsEnumerable()
-                                                           .FirstOrDefault(row => row.Field<int>("DepartmentID") == employee.DepartmentID);
-                        var positionRow = positionTable.AsEnumerable()
-                                                           .FirstOrDefault(row => row.Field<int>("PositionID") == employee.PositionID);
-
-                        // If the department is found, assign the DepartmentName to the employee
-                        if (departmentRow != null)
-                        {
-                            employee.DepartmentName = departmentRow.Field<string>("DepartmentName");
-                        }
-                        else
-                        {
-                            employee.DepartmentName = "Unknown";
-                        }
-
-                        if (positionRow != null)
-                        {
-                            employee.PositionName = positionRow.Field<string>("PositionName");
-                        }
-                        else
-                        {
-                            employee.PositionName = "Unknown";
-                        }
-                        // Add the employee to the list
-                        employees.Add(employee);
-                    }
-                    CreatelabelTotalControls();
-
-                    // Refresh the grid control with the new employee data
-                    gridView_UserManagement.SortInfo.Clear();
-                    gridControl_UserManagement.DataSource = employees.OrderBy(e => e.EmployeeName.Split(' ').Last()).ToList();
-
-                    // Configure grid columns and apply the edit mode
-                    ConfigureGridView();
-                    gridView_UserManagement.EditFormPrepared += Extentions.GridView_EditFormPrepared;
-                    Extentions.showEditModeCellGridView(gridControl_UserManagement, gridView_UserManagement, "ucManagement");
-
-                    // Apply localization for the grid
-                    ApplyLocalization();
+                    UpdateEmployees(response.Users);
                 }
                 else
                 {
                     ShowMessage.ShowInfo("No Data Found");
                 }
+
+                Invoke(new Action(() =>
+                {
+                    gridControl_OperatorManagement.DataSource = null;
+                    gridControl_OperatorManagement.DataSource = employees;
+                    gridControl_OperatorManagement.RefreshDataSource();
+
+                    ConfigureGridView(); // Reconfigure columns
+
+                    if (gridView_OperatorManagement.RowCount > 0) { 
+                        gridView_OperatorManagement.FocusedRowHandle = 0;
+                    }
+                    gridView_OperatorManagement.EditFormPrepared += Extentions.GridView_EditFormPrepared;
+                    Extentions.showEditModeCellGridView(gridControl_OperatorManagement, gridView_OperatorManagement, "ucOperator");
+                    ApplyLocalization();
+                }));
             }
             catch (JsonSerializationException jsonEx)
             {
@@ -253,45 +209,82 @@ namespace DigitalProduction
             }
         }
 
+
+        private void UpdateEmployees(List<Employee> newEmployees)
+        {
+            foreach (var employee in newEmployees)
+            {
+                // Assume there is a method to set the Department and Position name based on IDs
+                SetEmployeeDepartmentAndPosition(employee);
+                employees.Add(employee);
+            }
+            CreatelabelTotalControls();
+        }
+
+        private void SetEmployeeDepartmentAndPosition(Employee employee)
+        {
+            // Logic to set DepartmentName and PositionName from their respective Datatables
+            DataTable departmentTable = DbHelper.getDepartments();
+            DataTable positionTable = DbHelper.getPositions();
+
+            // Find and assign department and position
+            employee.DepartmentName = FindDepartmentName(employee.DepartmentID, departmentTable);
+            employee.PositionName = FindPositionName(employee.PositionID, positionTable);
+        }
+
+        private string FindDepartmentName(int departmentId, DataTable departmentTable)
+        {
+            return departmentTable.AsEnumerable()
+                .Where(row => row.Field<int>("DepartmentID") == departmentId)
+                .Select(row => row.Field<string>("DepartmentName"))
+                .FirstOrDefault() ?? "Unknown";
+        }
+
+        private string FindPositionName(int positionId, DataTable positionTable)
+        {
+            return positionTable.AsEnumerable()
+                .Where(row => row.Field<int>("PositionID") == positionId)
+                .Select(row => row.Field<string>("PositionName"))
+                .FirstOrDefault() ?? "Unknown";
+        }
+
         private void ConfigureGridView()
         {
-            gridView_UserManagement.BestFitColumns();
-            // Hide sensitive data like Password and deparmentID
-            gridView_UserManagement.Columns["Password"].Visible = false;
-            gridView_UserManagement.Columns["DepartmentID"].Visible = false;
-            gridView_UserManagement.Columns["OperatorName"].Visible = false;
-            gridView_UserManagement.Columns["PositionID"].Visible = false;
-            gridView_UserManagement.Columns["CreatedAt"].Visible = false;
-            gridView_UserManagement.Columns["UpdatedAt"].Visible = false;
-
+            gridView_OperatorManagement.BestFitColumns();
+            gridView_OperatorManagement.Columns["Password"].Visible = false;
+            gridView_OperatorManagement.Columns["DepartmentID"].Visible = false;
+            gridView_OperatorManagement.Columns["Username"].Visible = false;
+            gridView_OperatorManagement.Columns["EmployeeName"].Visible = false;
+            gridView_OperatorManagement.Columns["PositionID"].Visible = false;
+            gridView_OperatorManagement.Columns["CreatedAt"].Visible = false;
+            gridView_OperatorManagement.Columns["UpdatedAt"].Visible = false;
             // Format the DateTime columns
-       /*     gridView_UserManagement.Columns["CreatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
-            gridView_UserManagement.Columns["CreatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy hh:ss";
-            gridView_UserManagement.Columns["UpdatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
-            gridView_UserManagement.Columns["UpdatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy hh:ss";*/
+            /*     gridView_UserManagement.Columns["CreatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+                 gridView_UserManagement.Columns["CreatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy hh:ss";
+                 gridView_UserManagement.Columns["UpdatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+                 gridView_UserManagement.Columns["UpdatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy hh:ss";*/
 
             // Apply sorting by Username in ascending order when the grid loads
-            gridView_UserManagement.SortInfo.Clear();
-            gridView_UserManagement.SortInfo.Add(new GridColumnSortInfo(gridView_UserManagement.Columns["EmployeeName"], DevExpress.Data.ColumnSortOrder.Ascending));
+            gridView_OperatorManagement.SortInfo.Clear();
+            gridView_OperatorManagement.SortInfo.Add(new GridColumnSortInfo(gridView_OperatorManagement.Columns["OperatorName"], DevExpress.Data.ColumnSortOrder.Ascending));
 
             // Set custom column captions
-            gridView_UserManagement.Columns["EmployeeName"].Caption = "Full Name";
-            gridView_UserManagement.Columns["Username"].Caption = "Username";
-            gridView_UserManagement.Columns["DepartmentID"].Caption = "Department Name";
-            gridView_UserManagement.Columns["PositionID"].Caption = "Position Name";
+            gridView_OperatorManagement.Columns["OperatorName"].Caption = "Full Name";
+            gridView_OperatorManagement.Columns["DepartmentID"].Caption = "Department Name";
+            gridView_OperatorManagement.Columns["PositionID"].Caption = "Position Name";
 
             // Optionally, format the IsActive column to display checkboxes
-            gridView_UserManagement.Columns["IsActive"].ColumnEdit = new DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit();
+            gridView_OperatorManagement.Columns["IsActive"].ColumnEdit = new DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit();
             // Apply custom styles to column headers
-            gridView_UserManagement.Appearance.HeaderPanel.BorderColor = Color.LightSteelBlue;
-            gridView_UserManagement.Appearance.HeaderPanel.ForeColor = Color.Black;
-            gridView_UserManagement.Appearance.HeaderPanel.Font = new Font("Arial", 10, FontStyle.Bold);
+            gridView_OperatorManagement.Appearance.HeaderPanel.BorderColor = Color.LightSteelBlue;
+            gridView_OperatorManagement.Appearance.HeaderPanel.ForeColor = Color.Black;
+            gridView_OperatorManagement.Appearance.HeaderPanel.Font = new Font("Arial", 10, FontStyle.Bold);
         }
 
         private void LoadTextLable()
         {
-            gridView_UserManagement.GroupPanelText = LocalizationManager.GetString("ListOfUser");
-            gridView_UserManagement.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
+            gridView_OperatorManagement.GroupPanelText = LocalizationManager.GetString("ListOfUser");
+            gridView_OperatorManagement.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
         }
 
         private void CreateButtonContainer()
@@ -329,23 +322,19 @@ namespace DigitalProduction
         private void ApplyLocalization()
         {
             // grid view
-            gridControl_UserManagement.BeginUpdate();
+            gridControl_OperatorManagement.BeginUpdate();
 
-            if (!gridView_UserManagement.Columns.Count.Equals(0))
+            if (!gridView_OperatorManagement.Columns.Count.Equals(0))
             {
-                gridView_UserManagement.Columns["Username"].Caption = LocalizationManager.GetString("Username");
-                gridView_UserManagement.Columns["EmployeeID"].Caption = LocalizationManager.GetString("EmployeeID");
-                gridView_UserManagement.Columns["EmployeeName"].Caption = LocalizationManager.GetString("EmployeeName");
-                gridView_UserManagement.Columns["IsActive"].Caption = LocalizationManager.GetString("IsActive");
-                gridView_UserManagement.Columns["DepartmentName"].Caption = LocalizationManager.GetString("Department");
-                gridView_UserManagement.Columns["PositionName"].Caption = LocalizationManager.GetString("Position");
-                gridView_UserManagement.Columns["Action"].Caption = LocalizationManager.GetString("Action");
-
-                //gridControl_UserManagement.DataSource = null;
-                //gridControl_UserManagement.DataSource = employees;
-                gridView_UserManagement.SortInfo.Clear();
+                gridView_OperatorManagement.Columns["EmployeeID"].Caption = LocalizationManager.GetString("EmployeeID");
+                gridView_OperatorManagement.Columns["OperatorName"].Caption = LocalizationManager.GetString("EmployeeName");
+                gridView_OperatorManagement.Columns["IsActive"].Caption = LocalizationManager.GetString("IsActive");
+                gridView_OperatorManagement.Columns["DepartmentName"].Caption = LocalizationManager.GetString("Department");
+                gridView_OperatorManagement.Columns["PositionName"].Caption = LocalizationManager.GetString("Position");
+                gridView_OperatorManagement.Columns["Action"].Caption = LocalizationManager.GetString("Action");
+                gridView_OperatorManagement.SortInfo.Clear();
             }
-            gridControl_UserManagement.EndUpdate();
+            gridView_OperatorManagement.EndUpdate();
         }
     }
 }

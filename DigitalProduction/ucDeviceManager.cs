@@ -20,15 +20,18 @@ namespace DigitalProduction
         private PanelControl groupPanelButtonContainer;
         private SimpleButton button;
         private ucRegisterDevice frmRegister;
+        private PanelControl paginationPanel;
+        private LabelControl lblPageInfo;
 
         public ucDeviceManager()
         {
             InitializeComponent();
             deviceDataTable = new DataTable();
-            gridView_Device.ShowFindPanel();
+           // gridView_Device.ShowFindPanel();
             gridView_Device.OptionsFind.ShowFindButton = false;
             gridControl_Devices.DataSource = InitializeDeviceDataTable();
             gridView_Device.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
+            gridView_Device.RowHeight = 50;
             gridView_Device.BestFitColumns();
             CreateButtonContainer();
 
@@ -68,20 +71,27 @@ namespace DigitalProduction
         {
             try
             {
-                // Assuming the response
-                ResponseMessage<List<Device>> response = ResponseMessage<List<Device>>.FromJson(jsonData);
+                var item = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonData);
+                string action = item.ContainsKey("action") ? item["action"].ToString() : null;
 
-                // Check if there are devices in the response
-                if (response?.Devices != null)
+                if (action.Equals("getDevices"))
                 {
-                    gridView_Device.EditFormPrepared += Extentions.GridView_EditFormPrepared;
-                    Extentions.showEditModeCellGridView(gridControl_Devices, gridView_Device, "ucDevice");
-                    PopulateDeviceDataTable(response.Devices);
-                    ApplyLocalization();
-                }
-                else
-                {
-                    ShowMessage.ShowInfo("No Data Found");
+                    // Assuming the response
+                    ResponseMessage<List<Device>> response = ResponseMessage<List<Device>>.FromJson(jsonData);
+
+                    // Check if there are devices in the response
+                    if (response?.Devices != null)
+                    {
+                        gridView_Device.EditFormPrepared += Extentions.GridView_EditFormPrepared;
+                        Extentions.showEditModeCellGridView(gridControl_Devices, gridView_Device, "ucDevice");
+                        PopulateDeviceDataTable(response.Devices);
+                        CreatelabelTotalControls(response.Devices);
+                        ApplyLocalization();
+                    }
+                    else
+                    {
+                        ShowMessage.ShowInfo("No Data Found");
+                    }
                 }
             }
             catch (JsonSerializationException jsonEx)
@@ -108,7 +118,8 @@ namespace DigitalProduction
                     device.MachineName,
                     device.PlantName,
                     device.DepartmentName,
-                    device.IsActive
+                    device.IsActive,
+                    device.ConnectionStatus
                 );
             }
 
@@ -128,6 +139,7 @@ namespace DigitalProduction
             deviceDataTable.Columns.Add("Plant Name", typeof(string));
             deviceDataTable.Columns.Add("Department Name", typeof(string));
             deviceDataTable.Columns.Add("IsActive", typeof(bool));
+            deviceDataTable.Columns.Add("ConnectionStatus", typeof(bool));
             return deviceDataTable;
         }
 
@@ -142,9 +154,14 @@ namespace DigitalProduction
             gridView_Device.Columns["Machine Name"].Caption = LocalizationManager.GetString("MachineName");
             gridView_Device.Columns["Plant Name"].Caption = LocalizationManager.GetString("PlantName");
             gridView_Device.Columns["Department Name"].Caption = LocalizationManager.GetString("DepartmentName");
-            gridView_Device.Columns["IsActive"].Caption = LocalizationManager.GetString("Status");
+            gridView_Device.Columns["ConnectionStatus"].Caption = LocalizationManager.GetString("Status");
             gridView_Device.Columns["Action"].Caption = LocalizationManager.GetString("Action");
         }
+        private void RefreshButton_Click(object sender, EventArgs e)
+        {
+            _ = GetDataAndLoadToGridAsync();
+        }
+
         private void CreateButtonContainer()
         {
             // Create a PanelControl to hold the button
@@ -187,6 +204,8 @@ namespace DigitalProduction
             frmRegister.Size = gridControl_Devices.Size;
             frmRegister.Visible = true;
             frmRegister.BringToFront();
+            _webSocketClient = WebSocketClient.Instance;
+            frmRegister.SetWebSocketClient(_webSocketClient);
         }
         private void RegisterControl_ExitClicked(object sender, EventArgs e)
         {
@@ -207,6 +226,68 @@ namespace DigitalProduction
                    newDevice.IsActive
                );
             gridView_Device.FocusedRowHandle = 0;
+        }
+        private void CreatelabelTotalControls(List<Device> devices)
+        {
+            // Remove any existing panel to prevent duplication
+            if (paginationPanel != null)
+            {
+                this.Controls.Remove(paginationPanel);
+                paginationPanel.Dispose();
+            }
+
+            // Create a new PanelControl for pagination at the bottom
+            paginationPanel = new PanelControl()
+            {
+                Dock = DockStyle.Bottom,
+                Height = 50, // Adjust height
+                Padding = new Padding(10)
+            };
+
+            // Create Label for page info (Total Records)
+            lblPageInfo = new LabelControl()
+            {
+                Text = $"Total Records: {devices.Count}",
+                Size = new Size(200, 30),
+                ForeColor = Color.Green,
+                Font = new Font("Arial", 10, FontStyle.Bold),
+                AutoSizeMode = LabelAutoSizeMode.None,
+                Location = new Point(20, 10)
+            };
+            //lblPageInfo.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            // Create a "Refresh" Button
+            SimpleButton refreshButton = new SimpleButton()
+            {
+                Text = "Refresh",
+                Size = new Size(80, 30),
+                Location = new Point(250, 10) // Adjust positioning
+            };
+            // Style the Refresh Button
+            refreshButton.Appearance.BackColor = Color.LightBlue; // Change background color
+            refreshButton.Appearance.Font = new Font("Arial", 9f, FontStyle.Bold);
+            refreshButton.Appearance.Options.UseBackColor = true;
+
+            // Add click event to refresh the data
+            refreshButton.Click += async (sender, e) =>
+            {
+                // Disable the button while loading
+                refreshButton.Enabled = false;
+                refreshButton.Text = "Loading..."; // Provide user feedback
+
+                await GetDataAndLoadToGridAsync(); // Load the data
+
+                // Re-enable the button after data is loaded
+                refreshButton.Enabled = true;
+                refreshButton.Text = "Refresh"; // Reset button text
+            };
+
+            // Add components to the panel
+            paginationPanel.Controls.Add(lblPageInfo);
+            paginationPanel.Controls.Add(refreshButton);
+
+            // Add the panel to the form (make sure it's added correctly)
+            this.Controls.Add(paginationPanel);
+            this.Controls.SetChildIndex(paginationPanel, 0); // Ensures it appears at the bottom
         }
     }
 }

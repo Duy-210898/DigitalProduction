@@ -4,7 +4,7 @@ namespace DigitalProduction.Models
 {
     public class Device
     {
-        private Device() { }
+        public Device() { }
         private int deviceID;
         private string ipAddress;
         private string machineName;

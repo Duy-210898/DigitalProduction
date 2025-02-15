@@ -1,11 +1,10 @@
 ﻿using System;
-using DevExpress.XtraSpellChecker.Parser;
 
 namespace DigitalProduction.Models
 {
     public class Employee
     {
-        private Employee() { }
+        public Employee() { }
 
         public Employee(int employeeID, string username, string password, string employeeName, int positionID, int departmentID, DateTime? createdAt, DateTime? updatedAt, bool isActive)
         {
@@ -20,10 +19,20 @@ namespace DigitalProduction.Models
             IsActive = isActive;
         }
 
+        public Employee(string employeeName, int employeeID, string positionName, string departmentName, bool isActive)
+        {
+            EmployeeID = employeeID;
+            OperatorName = employeeName;
+            DepartmentName = departmentName;
+            PositionName = positionName;
+            IsActive = isActive;
+        }
+        public int OperatorID { get; set; }
         public int EmployeeID { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string EmployeeName { get; set; }
+        public string OperatorName { get; set; }
         public int DepartmentID { get; set; }
         public int PositionID { get; set; }
         public string PositionName { get; set; }

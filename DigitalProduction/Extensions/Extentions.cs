@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Data;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Repository;
-using DevExpress.XtraExport.Helpers;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
@@ -13,19 +15,30 @@ namespace DigitalProduction.Extensions
 {
     public static class Extentions
     {
-        private static GridView cloneGridView;
+        private static string cloneControl = String.Empty;
         public static void showEditModeCellGridView(GridControl gridControl, GridView gridView, string control)
         {
+            cloneControl = control.Trim();
             // Create the RepositoryItemButtonEdit for the action buttons
             RepositoryItemButtonEdit _commandsEdit = new RepositoryItemButtonEdit { AutoHeight = false, Name = "CommandsEdit", TextEditStyle = TextEditStyles.HideTextEditor };
             _commandsEdit.Buttons.Clear();
-            // Add buttons with localized captions
-            _commandsEdit.Buttons.AddRange(new EditorButton[]
+            if (control.Equals("ucProgress"))
             {
+                _commandsEdit.Buttons.AddRange(new EditorButton[]
+               {
+                    new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Delete"), -1, true, true, false, ImageLocation.MiddleLeft, null)
+               });
+            }
+            else
+            {
+                // Add buttons with localized captions
+                _commandsEdit.Buttons.AddRange(new EditorButton[]
+                {
                 //new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Add"), -1, true, true, false, ImageLocation.MiddleLeft, null),
                 new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Edit"), -1, true, true, false, ImageLocation.MiddleLeft, null),
-                new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Delete"), -1, true, true, false, ImageLocation.MiddleLeft, null)
-            });
+                    // new EditorButton(ButtonPredefines.Glyph, LocalizationManager.GetString("Delete"), -1, true, true, false, ImageLocation.MiddleLeft, null)
+                });
+            }
             // Add "Action" column to GridView if not already present
             GridColumn _commandsColumn = gridView.Columns["Action"];
             if (_commandsColumn == null)
@@ -60,10 +73,29 @@ namespace DigitalProduction.Extensions
                             gridView.Columns["IsActive"].OptionsEditForm.Caption = LocalizationManager.GetString("IsActive");
                             setupDepartmentLookup(gridView, gridControl);
                             setupPositionLookup(gridView, gridControl);
+                            // Subscribe to the RowUpdated event in your setup or form initialization
+                            gridView.RowUpdated += GridView_RowUpdated;
+                            gridView.ShowPopupEditForm();
                         }
-                        gridView.ShowPopupEditForm();
-
-                        break;
+                        if (control.Equals("ucProgress"))
+                        {
+                            int distributionID = 0;
+                            DialogResult result = MessageBox.Show($"Are you sure you want to delete this distribution?", "Confirm Delete", MessageBoxButtons.YesNo);
+                            if (result == DialogResult.Yes)
+                            {
+                                distributionID = (int)gridView.GetRowCellValue(gridView.FocusedRowHandle, "DistributionID");
+                                bool statusDelete = DbHelper.deleteDistribution(distributionID);
+                                if (statusDelete) {
+                                    ShowMessage.ShowInfo($"Distribution deleted successfully with {distributionID}");
+                                    gridControl.BeginInvoke(new MethodInvoker(() => gridView.DeleteRow(gridView.FocusedRowHandle)));
+                                }
+                                else
+                                {
+                                    ShowMessage.ShowError($"Error deleting distribution: {distributionID}");
+                                }
+                            }
+                        }
+                            break;
 
                     case 1: // Delete button
                        // var dlg = XtraMessageBox.Show($"Bạn có chắc chắn muốn xóa ?", "Cảnh báo", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -100,35 +132,6 @@ namespace DigitalProduction.Extensions
             //        oldEmployeeID = Convert.ToInt32(gridView.GetRowCellValue(e.FocusedRowHandle, "EmployeeID"));
             //    }
             //};
-
-            gridView.RowUpdated += (s, e) =>
-            {
-                if (control.Equals("ucManagement"))
-                {
-                    if (e.RowHandle >= 0) // Ensure it's a valid row
-                    {
-                        // Retrieve the new updated values from the grid
-                        string username = gridView.GetRowCellValue(e.RowHandle, "Username")?.ToString();
-                        int newEmployeeID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "EmployeeID"));
-                        int newDepartmentID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "DepartmentID"));
-                        int newPositionID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "PositionID"));
-                        string newEmployeeName = gridView.GetRowCellValue(e.RowHandle, "EmployeeName").ToString();
-                        bool newIsActive = Convert.ToBoolean(gridView.GetRowCellValue(e.RowHandle, "IsActive"));
-                        if (!string.IsNullOrWhiteSpace(username))
-                        {
-                            bool statusUpdate = DbHelper.updateUser(username, newEmployeeName, newEmployeeID, newDepartmentID, newPositionID, newIsActive);
-                            if (statusUpdate)
-                            {
-                                ShowMessage.ShowInfo($"Update success with user: {username}");
-                            }
-                            else
-                            {
-                                ShowMessage.ShowError($"Can't update with user {username}");
-                            }
-                        }
-                    }
-                }
-            };
             // Ensure that the "Action" column is editable in the grid
             gridView.CustomRowCellEdit += (s, ee) =>
             {
@@ -155,14 +158,54 @@ namespace DigitalProduction.Extensions
             gridView.OptionsBehavior.EditingMode = GridEditingMode.EditFormInplace;
         }
 
+        private static void GridView_RowUpdated(object sender, RowObjectEventArgs e)
+        {
+            GridView gridView = sender as GridView;  // Get the GridView from sender
+            if (gridView == null) return;
+            if (cloneControl.Equals("ucManagement"))
+            {
+                try
+                {
+                    // Your update logic goes here
+                    string username = gridView.GetRowCellValue(e.RowHandle, "Username")?.ToString();
+                    int newEmployeeID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "EmployeeID"));
+                    int newDepartmentID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "DepartmentID"));
+                    int newPositionID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "PositionID"));
+                    string newEmployeeName = gridView.GetRowCellValue(e.RowHandle, "EmployeeName").ToString();
+                    bool newIsActive = Convert.ToBoolean(gridView.GetRowCellValue(e.RowHandle, "IsActive"));
+
+                    // Call your update function
+                    bool statusUpdate = DbHelper.updateUser(username, newEmployeeName, newEmployeeID, newDepartmentID, newPositionID, newIsActive);
+
+                    if (statusUpdate)
+                    {
+                        ShowMessage.ShowInfo($"Update success for user: {username}");
+                    }
+                    else
+                    {
+                        ShowMessage.ShowError($"Failed to update user: {username}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage.ShowError($"Error updating row: {ex.Message}");
+                }
+                finally
+                {
+                    // Re-subscribe after the update logic is complete
+                    gridView.RowUpdated -= GridView_RowUpdated;
+                }
+            }
+        }
         private static void setupDepartmentLookup(GridView gridView, GridControl gridControl)
         {
             // Create LookUpEdit repository item
             RepositoryItemLookUpEdit lookupEdit = new RepositoryItemLookUpEdit();
 
+            DataTable departments = DbHelper.getDepartments();
             // Load department data from database
-            lookupEdit.DataSource = DbHelper.getDepartments();
-            lookupEdit.DisplayMember = "DepartmentName";  
+            lookupEdit.DataSource = departments;
+            lookupEdit.DisplayMember = "DepartmentName";
             lookupEdit.ValueMember = "DepartmentName";
             lookupEdit.SearchMode = SearchMode.AutoFilter;
 
@@ -177,14 +220,16 @@ namespace DigitalProduction.Extensions
                     e.RepositoryItem = lookupEdit;
                 }
             };
+            getIdFromDataTable(gridView, lookupEdit, departments, "DepartmentID", "DepartmentName");
         }
+
         private static void setupPositionLookup(GridView gridView, GridControl gridControl)
         {
             // Create LookUpEdit repository item
             RepositoryItemLookUpEdit lookupEdit = new RepositoryItemLookUpEdit();
-
+            DataTable positions = DbHelper.getPositions();
             // Load pos data from database
-            lookupEdit.DataSource = DbHelper.getPositions();
+            lookupEdit.DataSource = positions;
             lookupEdit.DisplayMember = "PositionName";
             lookupEdit.ValueMember = "PositionName";
             lookupEdit.SearchMode = SearchMode.AutoFilter;
@@ -200,6 +245,45 @@ namespace DigitalProduction.Extensions
                     e.RepositoryItem = lookupEdit;
                 }
             };
+            getIdFromDataTable(gridView, lookupEdit, positions, "PositionID", "PositionName");
+        }
+        private static void getIdFromDataTable(GridView gridView, RepositoryItemLookUpEdit lookupEdit, DataTable dt, string Id, string Name)
+        {
+            // Handle value change event
+            lookupEdit.EditValueChanged += (s, e) =>
+            {
+                LookUpEdit editor = s as LookUpEdit;
+                if (editor != null)
+                {
+                    string selectedDepartmentName = editor.EditValue as string;
+                    if (!string.IsNullOrEmpty(selectedDepartmentName))
+                    {
+                        // Get DepartmentID from DataTable based on selected DepartmentName
+                        DataRow[] rows = dt.Select($"{Name} = '{selectedDepartmentName}'");
+                        if (rows.Length > 0)
+                        {
+                            int departmentID = Convert.ToInt32(rows[0][$"{Id}"]);
+
+                            // Update DepartmentID field in the GridView
+                            gridView.SetFocusedRowCellValue($"{Id}", departmentID);
+                        }
+                    }
+                }
+            };
+        }
+
+        public static string getNameFromDataTable(DataTable dt, int value, string id, string name)
+        {
+            DataRow[] rows = dt.Select($"[{id}] = '{value}'");
+
+            if (rows.Length > 0)  // Found a match
+            {
+                return rows[0][name].ToString();
+            }
+            else  // No match found
+            {
+                return string.Empty;
+            }
         }
 
         public static void GridView_EditFormPrepared(object sender, EditFormPreparedEventArgs e)

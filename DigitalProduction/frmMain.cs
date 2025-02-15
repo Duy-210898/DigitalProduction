@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Resources;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.Utils.CodedUISupport;
 using DevExpress.XtraBars;
 using DevExpress.XtraBars.FluentDesignSystem;
 using DevExpress.XtraBars.Navigation;
-using DevExpress.XtraEditors;
-using static DevExpress.Utils.Frames.FrameHelper;
 
 namespace DigitalProduction
 {
@@ -221,6 +219,14 @@ namespace DigitalProduction
         {
             ShowUserControl<ucDeviceOutput>();
         }
+        private void btnOperator_Click(object sender, EventArgs e)
+        {
+            ShowUserControl<ucOperatorManagement>();
+        }
+        private void btnProgressDistribution_Click(object sender, EventArgs e)
+        {
+            ShowUserControl<ucProgress>();
+        }
         private void frmMain_Load(object sender, EventArgs e)
         {
             if (Global.CurrentUser == null)
@@ -256,12 +262,15 @@ namespace DigitalProduction
             accordionControlElement4.Text = LocalizationManager.GetString("CuttingManager");
             accordionControlElement3.Text = LocalizationManager.GetString("SystemManagerment");
             barSubItem1.Caption = LocalizationManager.GetString("Guest");
+            accordionControlElement6.Text = LocalizationManager.GetString("Report");
 
             btnDeviceManager.Text = LocalizationManager.GetString("DeviceManager");
             btnMonthlyPlan.Text = LocalizationManager.GetString("MonthlyPlan");
             btnDistribution.Text = LocalizationManager.GetString("Distribution");
             btnUserManager.Text = LocalizationManager.GetString("UserManager");
             btnDeviceOutput.Text = LocalizationManager.GetString("DeviceOutput");
+            btnOperator.Text = LocalizationManager.GetString("OperatorManager");
+            btnProgressDistribution.Text = LocalizationManager.GetString("Progress");
         }
 
 

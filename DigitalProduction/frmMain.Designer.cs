@@ -37,13 +37,13 @@
             this.btnMonthlyPlan = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnProgressDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceOutput = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnUserManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnOperator = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement6 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.btnLanguage = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.fluentDesignFormControl1 = new DevExpress.XtraBars.FluentDesignSystem.FluentDesignFormControl();
             this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
             this.statusItem = new DevExpress.XtraBars.BarStaticItem();
@@ -75,8 +75,7 @@
             this.accordionControlElement1,
             this.accordionControlElement3,
             this.accordionControlElement4,
-            this.accordionControlElement6,
-            this.accordionControlElement2});
+            this.accordionControlElement6});
             this.accordionControl1.Location = new System.Drawing.Point(0, 31);
             this.accordionControl1.LookAndFeel.SkinMaskColor = System.Drawing.Color.DeepSkyBlue;
             this.accordionControl1.LookAndFeel.SkinName = "Office 2019 Colorful";
@@ -91,6 +90,7 @@
             // 
             this.accordionControlElement1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnMonthlyPlan});
+            this.accordionControlElement1.Expanded = true;
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Text = "Production Schedule";
             // 
@@ -105,7 +105,14 @@
             // 
             this.accordionControlElement3.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnDistribution,
+            this.btnProgressDistribution,
             this.btnDeviceOutput});
+            this.accordionControlElement3.Expanded = true;
+            this.accordionControlElement3.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.accordionControlElement3.Name = "accordionControlElement3";
             this.accordionControlElement3.Text = "PO Distribution";
             // 
@@ -115,6 +122,13 @@
             this.btnDistribution.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnDistribution.Text = "PO Distribution";
             this.btnDistribution.Click += new System.EventHandler(this.btnDistribution_Click);
+            // 
+            // btnProgressDistribution
+            // 
+            this.btnProgressDistribution.Name = "btnProgressDistribution";
+            this.btnProgressDistribution.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnProgressDistribution.Text = "Progress";
+            this.btnProgressDistribution.Click += new System.EventHandler(this.btnProgressDistribution_Click);
             // 
             // btnDeviceOutput
             // 
@@ -127,7 +141,8 @@
             // 
             this.accordionControlElement4.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnDeviceManager,
-            this.btnUserManager});
+            this.btnUserManager,
+            this.btnOperator});
             this.accordionControlElement4.Expanded = true;
             this.accordionControlElement4.Name = "accordionControlElement4";
             this.accordionControlElement4.Text = "System Management";
@@ -151,25 +166,18 @@
             this.btnUserManager.Text = "User Management";
             this.btnUserManager.Click += new System.EventHandler(this.btnUserManager_Click);
             // 
+            // btnOperator
+            // 
+            this.btnOperator.Name = "btnOperator";
+            this.btnOperator.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnOperator.Text = "Operator Managment";
+            this.btnOperator.Click += new System.EventHandler(this.btnOperator_Click);
+            // 
             // accordionControlElement6
             // 
             this.accordionControlElement6.Expanded = true;
             this.accordionControlElement6.Name = "accordionControlElement6";
             this.accordionControlElement6.Text = "Report";
-            // 
-            // accordionControlElement2
-            // 
-            this.accordionControlElement2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.btnLanguage});
-            this.accordionControlElement2.Expanded = true;
-            this.accordionControlElement2.Name = "accordionControlElement2";
-            this.accordionControlElement2.Text = "Setting";
-            // 
-            // btnLanguage
-            // 
-            this.btnLanguage.Name = "btnLanguage";
-            this.btnLanguage.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.btnLanguage.Text = "Language";
             // 
             // fluentDesignFormControl1
             // 
@@ -249,8 +257,8 @@
         private DevExpress.XtraEditors.Repository.RepositoryItemProgressBar repositoryItemProgressBar1;
         private DevExpress.XtraBars.BarStaticItem statusItem;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement6;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement2;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement btnLanguage;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnOperator;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnProgressDistribution;
     }
 }
 

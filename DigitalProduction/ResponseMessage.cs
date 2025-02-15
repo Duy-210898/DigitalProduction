@@ -13,6 +13,12 @@ namespace DigitalProduction
         [JsonProperty("users", NullValueHandling = NullValueHandling.Ignore)]
         public T Users { get; set; }
 
+        [JsonProperty("schedule", NullValueHandling = NullValueHandling.Ignore)]
+        public T Schedule { get; set; }
+
+        [JsonProperty("distributionData", NullValueHandling = NullValueHandling.Ignore)]
+        public T DistributionData { get; set; }
+
         // Method to serialize the object into JSON string
         public string ToJson()
         {

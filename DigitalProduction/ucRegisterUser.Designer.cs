@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.cb_position = new DevExpress.XtraEditors.LookUpEdit();
+            this.cb_department = new DevExpress.XtraEditors.LookUpEdit();
             this.labelControl6 = new DevExpress.XtraEditors.LabelControl();
             this.btn_close = new DevExpress.XtraEditors.SimpleButton();
             this.btn_submit = new DevExpress.XtraEditors.SimpleButton();
@@ -41,20 +43,19 @@
             this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.txt_username = new DevExpress.XtraEditors.TextEdit();
             this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
-            this.cb_department = new DevExpress.XtraEditors.LookUpEdit();
-            this.cb_position = new DevExpress.XtraEditors.LookUpEdit();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cb_position.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cb_department.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_employeeID.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_employeeName.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_pwd.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_username.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cb_department.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cb_position.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // groupControl1
             // 
+            this.groupControl1.CaptionLocation = DevExpress.Utils.Locations.Top;
             this.groupControl1.Controls.Add(this.cb_position);
             this.groupControl1.Controls.Add(this.cb_department);
             this.groupControl1.Controls.Add(this.labelControl6);
@@ -75,6 +76,30 @@
             this.groupControl1.Size = new System.Drawing.Size(536, 354);
             this.groupControl1.TabIndex = 0;
             this.groupControl1.Text = "Register User";
+            // 
+            // cb_position
+            // 
+            this.cb_position.Location = new System.Drawing.Point(160, 259);
+            this.cb_position.Name = "cb_position";
+            this.cb_position.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11F);
+            this.cb_position.Properties.Appearance.Options.UseFont = true;
+            this.cb_position.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cb_position.Properties.NullText = "Select";
+            this.cb_position.Size = new System.Drawing.Size(171, 24);
+            this.cb_position.TabIndex = 6;
+            // 
+            // cb_department
+            // 
+            this.cb_department.Location = new System.Drawing.Point(160, 216);
+            this.cb_department.Name = "cb_department";
+            this.cb_department.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11F);
+            this.cb_department.Properties.Appearance.Options.UseFont = true;
+            this.cb_department.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cb_department.Properties.NullText = "Select";
+            this.cb_department.Size = new System.Drawing.Size(171, 24);
+            this.cb_department.TabIndex = 5;
             // 
             // labelControl6
             // 
@@ -99,7 +124,7 @@
             // 
             this.btn_submit.Location = new System.Drawing.Point(160, 305);
             this.btn_submit.Name = "btn_submit";
-            this.btn_submit.Size = new System.Drawing.Size(75, 23);
+            this.btn_submit.Size = new System.Drawing.Size(74, 23);
             this.btn_submit.TabIndex = 7;
             this.btn_submit.Text = "Submit";
             this.btn_submit.Click += new System.EventHandler(this.btn_submit_Click);
@@ -158,6 +183,7 @@
             this.txt_pwd.Name = "txt_pwd";
             this.txt_pwd.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
             this.txt_pwd.Properties.Appearance.Options.UseFont = true;
+            this.txt_pwd.Properties.UseSystemPasswordChar = true;
             this.txt_pwd.Size = new System.Drawing.Size(171, 26);
             this.txt_pwd.TabIndex = 2;
             // 
@@ -190,30 +216,6 @@
             this.labelControl1.TabIndex = 0;
             this.labelControl1.Text = "User name: ";
             // 
-            // cb_department
-            // 
-            this.cb_department.Location = new System.Drawing.Point(160, 216);
-            this.cb_department.Name = "cb_department";
-            this.cb_department.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11F);
-            this.cb_department.Properties.Appearance.Options.UseFont = true;
-            this.cb_department.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.cb_department.Properties.NullText = "Select";
-            this.cb_department.Size = new System.Drawing.Size(171, 24);
-            this.cb_department.TabIndex = 5;
-            // 
-            // cb_position
-            // 
-            this.cb_position.Location = new System.Drawing.Point(160, 259);
-            this.cb_position.Name = "cb_position";
-            this.cb_position.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11F);
-            this.cb_position.Properties.Appearance.Options.UseFont = true;
-            this.cb_position.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.cb_position.Properties.NullText = "Select";
-            this.cb_position.Size = new System.Drawing.Size(171, 24);
-            this.cb_position.TabIndex = 6;
-            // 
             // ucRegisterUser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -225,12 +227,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
             this.groupControl1.ResumeLayout(false);
             this.groupControl1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cb_position.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cb_department.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_employeeID.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_employeeName.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_pwd.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_username.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cb_department.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cb_position.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }

@@ -5,14 +5,14 @@ const ping = require('ping');
 const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setOrderIsComplete } = require('./database');
 const { notifyClientsToDeleteOrder } = require('./notifications');
 
-let previousRegister6507Value = null; 
+let previousRegister6507Value = null;
 let previousRegister1034 = null;
-let previousRegister1032 = null; 
+let previousRegister1032 = null;
 let previousRegister6510 = null;
-let isDataSentToModbus = false; 
+let isDataSentToModbus = false;
 
 let modbusClients = {};
-let counter = 0; 
+let counter = 0;
 const successLogPath = './success_log.txt';
 const errorLogPath = './error_log.txt';
 
@@ -44,10 +44,10 @@ async function pingHost(ipAddress) {
 async function performActionForBit(client, bitIndex) {
   const ipAddress = client.socket.remoteAddress;
   let previousBitIndex = -1;
-  const baseRead = 560; 
+  const baseRead = 560;
 
   // Tính toán địa chỉ đọc dựa trên bitIndex
-  const read = baseRead + bitIndex * 20; 
+  const read = baseRead + bitIndex * 20;
   console.log(`Địa chỉ đọc được tính toán: ${read}`);
 
   // Lấy partName từ Modbus trước
@@ -80,7 +80,7 @@ async function performActionForBit(client, bitIndex) {
   }
 }
 
-const previousData = {}; 
+const previousData = {};
 
 async function getPartNameFromModbus(client, startAddress) {
   try {
@@ -91,12 +91,12 @@ async function getPartNameFromModbus(client, startAddress) {
     for (let i = 0; i < partNameData.response._body.values.length; i++) {
       const registerValue = partNameData.response._body.values[i];
 
-      const lowByte = registerValue & 0xFF; 
-      const highByte = (registerValue >> 8) & 0xFF; 
+      const lowByte = registerValue & 0xFF;
+      const highByte = (registerValue >> 8) & 0xFF;
 
-      partName += String.fromCharCode(lowByte); 
-      if (highByte !== 0) { 
-        partName += String.fromCharCode(highByte); 
+      partName += String.fromCharCode(lowByte);
+      if (highByte !== 0) {
+        partName += String.fromCharCode(highByte);
       }
     }
     console.log(`Part Name getPartName: ${partName}`);
@@ -105,7 +105,7 @@ async function getPartNameFromModbus(client, startAddress) {
   } catch (err) {
     console.error(`Error reading PartName from Modbus: ${err.message}`);
     logToFile(errorLogPath, `Error reading PartName from Modbus: ${err.message}`);
-    throw err; 
+    throw err;
   }
 }
 
@@ -145,6 +145,9 @@ async function connectToDevice(ipAddress, retries = 0) {
     });
     return;
   }
+  else {
+
+  }
 
   if (modbusClient && modbusClient.isConnected) {
     return modbusClient;
@@ -157,9 +160,9 @@ async function connectToDevice(ipAddress, retries = 0) {
   socket.connect(options, async function () {
     console.log(`Connected to device at ${ipAddress}`);
     logToFile(successLogPath, `Connected to device at ${ipAddress}`);
-    
+
     modbusClients[ipAddress] = { client, socket, isConnected: true, isDisconnected: false };
-  
+
     try {
       await updateDeviceConnectionStatus(ipAddress, true).catch((err) => {
         console.error(`Error updating device connection status: ${err.message}`);
@@ -168,9 +171,9 @@ async function connectToDevice(ipAddress, retries = 0) {
       console.error(`Error updating device connection status for ${ipAddress}: ${err.message}`);
       logToFile(errorLogPath, `Error updating device connection status for ${ipAddress}: ${err.message}`);
     }
-  
+
     startReadingRegisters(client, ipAddress);
-  
+
     try {
       writeToModbusRegister(client).catch((err) => {
         console.error(`Error writing to Modbus register for ${ipAddress}: ${err.message}`);
@@ -179,19 +182,19 @@ async function connectToDevice(ipAddress, retries = 0) {
       console.error(`Error writing to Modbus register for ${ipAddress}: ${err.message}`);
       logToFile(errorLogPath, `Error writing to Modbus register for ${ipAddress}: ${err.message}`);
     }
-  
+
   });
-  
+
   socket.on('error', async function (error) {
     console.error(`Unable to connect to device at ${ipAddress}: ${error.message}`);
     logToFile(errorLogPath, `Unable to connect to device at ${ipAddress}: ${error.message}`);
-  
+
     if (modbusClient) {
       modbusClient.isDisconnected = true;
     }
-  
-    await handleDisconnection(ipAddress); 
-  
+
+    await handleDisconnection(ipAddress);
+
     if (retries < 3) {
       console.log(`Retrying connection to ${ipAddress} (${retries + 1}/3)`);
       setTimeout(() => connectToDevice(ipAddress, retries + 1), 10000);
@@ -202,225 +205,282 @@ async function connectToDevice(ipAddress, retries = 0) {
       });
     }
   });
-  
+
   socket.on('close', async function () {
     console.log(`Connection closed to device at ${ipAddress}`);
     logToFile(successLogPath, `Connection closed to device at ${ipAddress}`);
-  
+
     if (modbusClient) {
       modbusClient.isDisconnected = true;
     }
-  
+
     await handleDisconnection(ipAddress);
   });
-  
-  return modbusClients[ipAddress];
-  }
-  
 
-  async function startReadingRegisters(client, ipAddress) {
-    setInterval(() => {
-      readAndCheckBits(client, ipAddress);
-      readAndProcessID(client, ipAddress); 
-      readActualData(client, ipAddress)
-    }, 1000);
+  return modbusClients[ipAddress];
+}
+
+
+async function startReadingRegisters(client, ipAddress) {
+  setInterval(() => {
+
+    //readAndCheckBits(client, ipAddress);
+    readOperatorID(client, ipAddress);
+    readAndProcessID(client, ipAddress);
+    // readActualData(client, ipAddress);
+  }, 1000);
+}
+
+async function readAndCheckBits(client, ipAddress) {
+  try {
+    const registers = await Promise.all([
+      client.readHoldingRegisters(1034, 1),
+      client.readHoldingRegisters(1032, 1),
+      client.readHoldingRegisters(6510, 1)
+    ]);
+
+    const register1034 = registers[0].response._body.values[0];
+    const register1032 = registers[1].response._body.values[0];
+    const register6510 = registers[2].response._body.values[0];
+
+    processRegister1034(register1034, client);
+    processRegister1032(register1032, client, ipAddress);
+    processRegister6510(register6510, client, ipAddress);
+
+  } catch (err) {
+    console.error(`Error reading or processing Modbus registers: ${err.message}`);
+    logToFile(errorLogPath, `Error reading or processing Modbus registers: ${err.message}`);
   }
-  
-  async function readAndCheckBits(client, ipAddress) {
-    try {
-      const registers = await Promise.all([
-        client.readHoldingRegisters(1034, 1),
-        client.readHoldingRegisters(1032, 1),
-        client.readHoldingRegisters(6510, 1)
-      ]);
-  
-      const register1034 = registers[0].response._body.values[0];
-      const register1032 = registers[1].response._body.values[0];
-      const register6510 = registers[2].response._body.values[0];
-  
-      processRegister1034(register1034, client);
-      processRegister1032(register1032, client, ipAddress);
-      processRegister6510(register6510, client, ipAddress);
-  
-    } catch (err) {
-      console.error(`Error reading or processing Modbus registers: ${err.message}`);
-      logToFile(errorLogPath, `Error reading or processing Modbus registers: ${err.message}`);
-    }
+}
+
+function processRegister1034(register1034, client) {
+  let bitString1034 = '';
+  for (let i = 0; i < 16; i++) {
+    const bitValue = (register1034 >> i) & 1;
+    bitString1034 = bitValue + bitString1034;
   }
-    
-  function processRegister1034(register1034, client) {
-    let bitString1034 = '';
-    for (let i = 0; i < 16; i++) {
+
+  if (previousRegister1034 === null || previousRegister1034 !== register1034) {
+    console.log(`Thanh ghi chọn PartName: ${bitString1034}`);
+    previousRegister1034 = register1034;
+    for (let i = 0; i <= 12; i++) {
       const bitValue = (register1034 >> i) & 1;
-      bitString1034 = bitValue + bitString1034;
-    }
-  
-    if (previousRegister1034 === null || previousRegister1034 !== register1034) {
-      console.log(`Thanh ghi chọn PartName: ${bitString1034}`);
-      previousRegister1034 = register1034;
-      for (let i = 0; i <= 12; i++) {
-        const bitValue = (register1034 >> i) & 1;
-        if (bitValue === 1) {
-          performActionForBit(client, i); 
-        }
+      if (bitValue === 1) {
+        performActionForBit(client, i);
       }
     }
   }
-  
-  async function processRegister1032(register1032, client, ipAddress) {
-    let bitString1032 = '';
-    for (let i = 0; i < 16; i++) {
-        const bitValue = (register1032 >> i) & 1;
-        bitString1032 = bitValue + bitString1032;
-    }
+}
 
-    if (previousRegister1032 === null || previousRegister1032 !== register1032) {
-        previousRegister1032 = register1032;
-        console.log(`Thanh ghi yêu cầu xóa đơn: ${bitString1032}`);
+async function processRegister1032(register1032, client, ipAddress) {
+  let bitString1032 = '';
+  for (let i = 0; i < 16; i++) {
+    const bitValue = (register1032 >> i) & 1;
+    bitString1032 = bitValue + bitString1032;
+  }
 
-        const bitValue1 = (register1032 >> 0) & 1;
-        if (bitValue1 === 1) {
+  if (previousRegister1032 === null || previousRegister1032 !== register1032) {
+    previousRegister1032 = register1032;
+    console.log(`Thanh ghi yêu cầu xóa đơn: ${bitString1032}`);
+
+    const bitValue1 = (register1032 >> 0) & 1;
+    if (bitValue1 === 1) {
+      try {
+        if (client && typeof client.writeSingleRegister === 'function') {
+          // Ensure to get the client associated with the ipAddress
+          const modbusClient = modbusClients[ipAddress];
+
+          // Kiểm tra kết nối trước khi thực hiện ghi
+          if (modbusClient && modbusClient.isConnected) {
             try {
-                if (client && typeof client.writeSingleRegister === 'function') {
-                    // Ensure to get the client associated with the ipAddress
-                    const modbusClient = modbusClients[ipAddress];
+              const OrderID = modbusClients[ipAddress]?.orderID;
 
-                    // Kiểm tra kết nối trước khi thực hiện ghi
-                    if (modbusClient && modbusClient.isConnected) {
-                        try {
-                            const OrderID = modbusClients[ipAddress]?.orderID;
+              await setOrderIsComplete(OrderID);
 
-                            await setOrderIsComplete(OrderID);
+              // Đọc giá trị hiện tại của thanh ghi
+              const data = await client.readHoldingRegisters(1032, 1);
+              let registerValue = data.response._body.values[0];
 
-                            // Đọc giá trị hiện tại của thanh ghi
-                            const data = await client.readHoldingRegisters(1032, 1);
-                            let registerValue = data.response._body.values[0];
+              registerValue |= (1 << 1);
 
-                            registerValue |= (1 << 1);
-
-                            await client.writeSingleRegister(1032, registerValue);
-                            console.log(`Written ${registerValue} to register 1032`);
-                            logToFile(successLogPath, `Written ${registerValue} to register 1032`);
-                        } catch (err) {
-                            console.error(`Error writing to Modbus register: ${err.message}`);
-                            logToFile(errorLogPath, `Error writing to Modbus register: ${err.message}`);
-                        }
-                    } else {
-                        console.error(`Client is not connected.`);
-                    }
-                } else {
-                    console.error('Client does not have writeSingleRegister method or is invalid');
-                }
-            } catch (error) {
-                console.error("Lỗi trong quá trình xử lý yêu cầu xóa đơn:", error);
-                logToFile(errorLogPath, `Lỗi trong quá trình xử lý yêu cầu xóa đơn: ${error.message}`);
+              await client.writeSingleRegister(1032, registerValue);
+              console.log(`Written ${registerValue} to register 1032`);
+              logToFile(successLogPath, `Written ${registerValue} to register 1032`);
+            } catch (err) {
+              console.error(`Error writing to Modbus register: ${err.message}`);
+              logToFile(errorLogPath, `Error writing to Modbus register: ${err.message}`);
             }
+          } else {
+            console.error(`Client is not connected.`);
+          }
+        } else {
+          console.error('Client does not have writeSingleRegister method or is invalid');
         }
+      } catch (error) {
+        console.error("Lỗi trong quá trình xử lý yêu cầu xóa đơn:", error);
+        logToFile(errorLogPath, `Lỗi trong quá trình xử lý yêu cầu xóa đơn: ${error.message}`);
+      }
     }
+  }
 }
 
 async function processRegister6510(register6510, client, ipAddress) {
-    let bitString6510 = '';
-    for (let i = 0; i < 16; i++) {
-      const bitValue = (register6510 >> i) & 1;
-      bitString6510 = bitValue + bitString6510;
-    }
-  
-    if (previousRegister6510 === null || previousRegister6510 !== register6510) {
-      previousRegister6510 = register6510;
-      console.log(`Thanh ghi gửi lại dữ liệu: ${bitString6510}`);
-      
-      const bitValue1 = (register6510 >> 0) & 1;
-      if (bitValue1 === 1 && !isDataSentToModbus[ipAddress]) {
-        const distributionData = await getDistributionDataFromDb(ipAddress);
-        console.log(`${ipAddress}`);
-        console.log('Distribution Data:', distributionData);
-  
-        if (distributionData) {
-          await saveDistributionDataToModbus(ipAddress, distributionData);
-          await writeSizeDataToModbus(client)
-          isDataSentToModbus[ipAddress] = true;
-        } else {
-          console.log('No distribution data found for this IP address.');
-        }
-      }
-    }
+  let bitString6510 = '';
+  for (let i = 0; i < 16; i++) {
+    const bitValue = (register6510 >> i) & 1;
+    bitString6510 = bitValue + bitString6510;
   }
-  async function readAndProcessID(client, ipAddress) {
-    try {
-      const data = await client.readHoldingRegisters(6507, 1);
-      const register6507 = data.response._body.values[0];
-      
-      if (register6507 === 0) {
-        const distributionData = await getDistributionDataFromDb(ipAddress);
-        
-        if (distributionData) {
-          await delay(1000);
-          console.log('Saving distribution data to Modbus:', distributionData);
-          await saveDistributionDataToModbus(ipAddress, distributionData);
-        } else {
-        }
+
+  if (previousRegister6510 === null || previousRegister6510 !== register6510) {
+    previousRegister6510 = register6510;
+    console.log(`Thanh ghi gửi lại dữ liệu: ${bitString6510}`);
+
+    const bitValue1 = (register6510 >> 0) & 1;
+    if (bitValue1 === 1 && !isDataSentToModbus[ipAddress]) {
+      const distributionData = await getDistributionDataFromDb(ipAddress);
+      console.log(`${ipAddress}`);
+      console.log('Distribution Data:', distributionData);
+
+      if (distributionData) {
+        await saveDistributionDataToModbus(ipAddress, distributionData);
+        await writeSizeDataToModbus(client)
+        isDataSentToModbus[ipAddress] = true;
       } else {
-        if (!modbusClients[ipAddress]) {
-          modbusClients[ipAddress] = {};  
-        }
-        
-        modbusClients[ipAddress].orderID = register6507;
+        console.log('No distribution data found for this IP address.');
       }
-    } catch (error) {
-      const errorMsg = `Error reading register 6507 for IP ${ipAddress}: ${error.message}`;
-      console.error(errorMsg);
-      logToFile(errorLogPath, errorMsg);
     }
   }
-  
-  function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-        
-  async function readActualData(client, ipAddress) {
-    try {
-      const sizeLabels = [
-        "10K", "10.5K", "11K", "11.5K", "12K", "12.5K", "13K", "13.5K",
-        "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "5.5",
-        "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5",
-        "11", "11.5", "12", "12.5", "13", "13.5", "14", "14.5"
-      ];
-  
-      const currentData = {};
-  
-      // Đọc OrderID từ thanh ghi 6507
-      const orderIDData = await client.readHoldingRegisters(6507, 1);
-      if (!orderIDData || !orderIDData.response || !orderIDData.response._body) {
-        throw new Error('Không thể đọc OrderID từ thanh ghi 6507');
+}
+async function readAndProcessID(client, ipAddress) {
+  try {
+    const data = await client.readHoldingRegisters(1000, 1);
+    const register1000 = data.response._body.values[0];
+
+    if (register1000 !== 0) {
+      const distributionData = await getDistributionDataFromDb(ipAddress);
+      if (distributionData) {
+        await delay(1000);
+        console.log('Saving distribution data to Modbus:', distributionData);
+        await saveDistributionDataToModbus(ipAddress, distributionData);
+      } else {
       }
-      const OrderID = orderIDData.response._body.values[0];
-  
-      // Lấy PartName từ đối tượng modbusClients
-      const partName = modbusClients[ipAddress]?.partName;
-      console.log(`PartName on readActualData: ${partName}`);
-  
-      const promises = sizeLabels.map((label, i) => {
-        const baseAddress = 6003 + i * 14;
-        return Promise.all([ // Đọc nhiều thanh ghi
-          client.readHoldingRegisters(baseAddress + 2, 1),  // PiecesPerPair
-          client.readHoldingRegisters(baseAddress + 4, 1),  // MaterialLayer
-          client.readHoldingRegisters(baseAddress + 6, 1),  // CuttingDieQty
-          client.readHoldingRegisters(baseAddress + 8, 1),  // ActualCut
-          client.readHoldingRegisters(baseAddress + 10, 1), // ActualPieces
-          client.readHoldingRegisters(baseAddress + 12, 1)  // ActualSizeQty
-        ]).then(async ([piecesPerPairData, materialLayerData, cuttingDieQtyData, actualCutData, actualPiecesData, actualSizeQtyData]) => {
-      
-          // Kiểm tra và xử lý dữ liệu từ Modbus cho mỗi thanh ghi
-          const piecesPerPair = piecesPerPairData?.response?._body?.values[0] ?? 0;
-          const materialLayer = materialLayerData?.response?._body?.values[0] ?? 0;
-          const cuttingDieQty = cuttingDieQtyData?.response?._body?.values[0] ?? 0;
-          const actualCut = actualCutData?.response?._body?.values[0] ?? 0;
-          const actualPieces = actualPiecesData?.response?._body?.values[0] ?? 0;
-          const actualSizeQty = actualSizeQtyData?.response?._body?.values[0] ?? 0;
-  
-          // Lưu dữ liệu vào currentData
-          currentData[label] = {
+    } else {
+      if (!modbusClients[ipAddress]) {
+        modbusClients[ipAddress] = {};
+      }
+
+      modbusClients[ipAddress].orderID = register1000;
+    }
+  } catch (error) {
+    const errorMsg = `Error reading register 1000 for IP ${ipAddress}: ${error.message}`;
+    console.error(errorMsg);
+    logToFile(errorLogPath, errorMsg);
+  }
+}
+
+async function readOperatorID(client, ipAddress) {
+  try {
+    const data = await client.readHoldingRegisters(3105, 2);
+    const lowRegister = data.response._body.values[0];  // Low register (16 bits)
+    const highRegister = data.response._body.values[1]; // High register (16 bits)
+
+    // Combine the two 16-bit
+    const operatorID = (highRegister << 16) | lowRegister;
+    modbusClients[ipAddress].operatorID = operatorID;
+    console.info(`OperatorID: ${operatorID} IP: ${ipAddress}`);
+  } catch (error) {
+    const errorMsg = `Error reading register 3105 for IP ${ipAddress}: ${error.message}`;
+    console.error(errorMsg);
+    logToFile(errorLogPath, errorMsg);
+  }
+}
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function readActualData(client, ipAddress) {
+  try {
+    const sizeLabels = [
+      "10K", "10.5K", "11K", "11.5K", "12K", "12.5K", "13K", "13.5K",
+      "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "5.5",
+      "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5",
+      "11", "11.5", "12", "12.5", "13", "13.5", "14", "14.5"
+    ];
+
+    const currentData = {};
+
+    // Đọc OrderID từ thanh ghi 6507
+    const orderIDData = await client.readHoldingRegisters(6507, 1);
+    if (!orderIDData || !orderIDData.response || !orderIDData.response._body) {
+      throw new Error('Không thể đọc OrderID từ thanh ghi 6507');
+    }
+    const OrderID = orderIDData.response._body.values[0];
+
+    // Lấy PartName từ đối tượng modbusClients
+    const partName = modbusClients[ipAddress]?.partName;
+    console.log(`PartName on readActualData: ${partName}`);
+
+    const promises = sizeLabels.map((label, i) => {
+      const baseAddress = 6003 + i * 14;
+      return Promise.all([ // Đọc nhiều thanh ghi
+        client.readHoldingRegisters(baseAddress + 2, 1),  // PiecesPerPair
+        client.readHoldingRegisters(baseAddress + 4, 1),  // MaterialLayer
+        client.readHoldingRegisters(baseAddress + 6, 1),  // CuttingDieQty
+        client.readHoldingRegisters(baseAddress + 8, 1),  // ActualCut
+        client.readHoldingRegisters(baseAddress + 10, 1), // ActualPieces
+        client.readHoldingRegisters(baseAddress + 12, 1)  // ActualSizeQty
+      ]).then(async ([piecesPerPairData, materialLayerData, cuttingDieQtyData, actualCutData, actualPiecesData, actualSizeQtyData]) => {
+
+        // Kiểm tra và xử lý dữ liệu từ Modbus cho mỗi thanh ghi
+        const piecesPerPair = piecesPerPairData?.response?._body?.values[0] ?? 0;
+        const materialLayer = materialLayerData?.response?._body?.values[0] ?? 0;
+        const cuttingDieQty = cuttingDieQtyData?.response?._body?.values[0] ?? 0;
+        const actualCut = actualCutData?.response?._body?.values[0] ?? 0;
+        const actualPieces = actualPiecesData?.response?._body?.values[0] ?? 0;
+        const actualSizeQty = actualSizeQtyData?.response?._body?.values[0] ?? 0;
+
+        // Lưu dữ liệu vào currentData
+        currentData[label] = {
+          PiecesPerPair: piecesPerPair,
+          MaterialLayer: materialLayer,
+          CuttingDieQty: cuttingDieQty,
+          ActualCut: actualCut,
+          ActualPieces: actualPieces,
+          ActualSizeQty: actualSizeQty
+        };
+
+        // Kiểm tra sự thay đổi và chỉ lưu nếu có sự thay đổi
+        const prevData = previousData ? previousData[label] : null;
+        let hasChanges = !prevData || (
+          piecesPerPair !== prevData.PiecesPerPair ||
+          materialLayer !== prevData.MaterialLayer ||
+          cuttingDieQty !== prevData.CuttingDieQty ||
+          actualCut !== prevData.ActualCut ||
+          actualPieces !== prevData.ActualPieces ||
+          actualSizeQty !== prevData.ActualSizeQty
+        );
+
+        if (hasChanges) {
+          if (piecesPerPair !== 0 || materialLayer !== 0 ||
+            cuttingDieQty !== 0 || actualCut !== 0 || actualPieces !== 0 || actualSizeQty !== 0) {
+
+            console.log(`${label} =`, currentData[label]);
+
+            await saveActualDataToDB({
+              OrderID: OrderID,
+              SizeData: [{
+                Size: label,
+                PiecesPerPair: piecesPerPair,
+                MaterialLayer: materialLayer,
+                CuttingDieQty: cuttingDieQty,
+                ActualCut: actualCut,
+                ActualPieces: actualPieces,
+                ActualSizeQty: actualSizeQty
+              }],
+            }, partName);
+          }
+
+          previousData[label] = {
             PiecesPerPair: piecesPerPair,
             MaterialLayer: materialLayer,
             CuttingDieQty: cuttingDieQty,
@@ -428,66 +488,26 @@ async function processRegister6510(register6510, client, ipAddress) {
             ActualPieces: actualPieces,
             ActualSizeQty: actualSizeQty
           };
-  
-          // Kiểm tra sự thay đổi và chỉ lưu nếu có sự thay đổi
-          const prevData = previousData ? previousData[label] : null;
-          let hasChanges = !prevData || (
-            piecesPerPair !== prevData.PiecesPerPair ||
-            materialLayer !== prevData.MaterialLayer ||
-            cuttingDieQty !== prevData.CuttingDieQty ||
-            actualCut !== prevData.ActualCut ||
-            actualPieces !== prevData.ActualPieces ||
-            actualSizeQty !== prevData.ActualSizeQty
-          );
-  
-          if (hasChanges) {
-            if (piecesPerPair !== 0 || materialLayer !== 0 ||
-              cuttingDieQty !== 0 || actualCut !== 0 || actualPieces !== 0 || actualSizeQty !== 0) {
-              
-              console.log(`${label} =`, currentData[label]);
-      
-              await saveActualDataToDB({
-                OrderID: OrderID,
-                SizeData: [{
-                  Size: label,
-                  PiecesPerPair: piecesPerPair,
-                  MaterialLayer: materialLayer,
-                  CuttingDieQty: cuttingDieQty,
-                  ActualCut: actualCut,
-                  ActualPieces: actualPieces,
-                  ActualSizeQty: actualSizeQty
-                }],
-              }, partName); 
-            }
-      
-            previousData[label] = {
-              PiecesPerPair: piecesPerPair,
-              MaterialLayer: materialLayer,
-              CuttingDieQty: cuttingDieQty,
-              ActualCut: actualCut,
-              ActualPieces: actualPieces,
-              ActualSizeQty: actualSizeQty
-            };
-          }
-        });
+        }
       });
-      
-      await Promise.all(promises);
-      
-    } catch (error) {
-      console.error(`Error reading actual data: ${error.message}`);
-      logToFile(errorLogPath, `Error reading actual data: ${error.message}`);
-    }
-  }  
-  async function writeToModbusRegister(client) {
+    });
+
+    await Promise.all(promises);
+
+  } catch (error) {
+    console.error(`Error reading actual data: ${error.message}`);
+    logToFile(errorLogPath, `Error reading actual data: ${error.message}`);
+  }
+}
+async function writeToModbusRegister(client) {
   try {
     setInterval(async () => {
-      counter++; 
-      await client.writeSingleRegister(5999, counter).catch((err) => {
+      counter++;
+      await client.writeSingleRegister(8000, counter).catch((err) => {
         console.error(`Error writing to Modbus register: ${err.message}`);
         logToFile(errorLogPath, `Error writing to Modbus register: ${err.message}`);
       });
-    }, 1000); 
+    }, 1000);
   } catch (error) {
     console.error(`Error writing to Modbus register: ${error.message}`);
     logToFile(errorLogPath, `Error writing to Modbus register: ${error.message}`);
@@ -501,7 +521,7 @@ function startMonitoring() {
       if (client && client.isConnected) {
       }
     }
-  }, 5000);  
+  }, 5000);
 }
 
 function stringTo16BitArrayLittleEndian(str) {
@@ -509,7 +529,7 @@ function stringTo16BitArrayLittleEndian(str) {
   for (let i = 0; i < str.length; i += 2) {
     const low = str.charCodeAt(i);
     const high = i + 1 < str.length ? str.charCodeAt(i + 1) : 0;
-    result.push((high << 8) | low); 
+    result.push((high << 8) | low);
   }
   return result;
 }
@@ -532,7 +552,7 @@ async function writeSizeDataToModbus(client) {
 
     // Đọc dữ liệu OrderID từ Modbus
     const [orderIdData] = await Promise.all([client.readHoldingRegisters(6507, 1)]);
-    const partName = modbusClients[ipAddress]?.partName; 
+    const partName = modbusClients[ipAddress]?.partName;
     console.log(`PartName on write: ${partName}`);
 
     // Kiểm tra OrderID hợp lệ
@@ -610,13 +630,13 @@ async function saveDistributionDataToModbus(ipAddress, data) {
       await connectToDevice(ipAddress);
     }
 
-    // Ghi thông tin đơn hàng (Model, ART, SO, MasterWorkOrder)
+    // Ghi thông tin đơn hàng (Model, ART, SO, MasterWorkOrder, MaterialsName)
     const orderInfo = [data.Model, data.ART, data.SO, data.MasterWorkOrder];
     const orderInfoAddresses = [
-      { start: 505, maxRegisters: 25 },
-      { start: 530, maxRegisters: 10 },
-      { start: 540, maxRegisters: 10 },
-      { start: 550, maxRegisters: 10 }
+      { start: 0, maxRegisters: 25 },
+      { start: 25, maxRegisters: 10 },
+      { start: 35, maxRegisters: 10 },
+      { start: 45, maxRegisters: 10}
     ];
 
     const orderInfoPromises = orderInfo.map(async (info, index) => {
@@ -631,32 +651,51 @@ async function saveDistributionDataToModbus(ipAddress, data) {
 
     await Promise.all(orderInfoPromises);
 
-    const partNameStartRegister = 560;
-    const partNamePromises = data.MaterialData.slice(0, 12).map(async (material, i) => {
+
+    // Add the Leather data write operation
+      const leatherDataPromise = (async () => {
+        const leatherData = parseInt(data.Leather);
+        const startRegister = 1001;
+        await client.writeSingleRegister(startRegister, leatherData);
+    })();
+    
+    await leatherDataPromise;
+  
+
+    // const materialStartRegister = 55;
+    // const materialNamePromises = data.MaterialData.slice(0, 20).map(async (material, i) => {
+    //   const materialName = material.MaterialsName;
+    //   const startRegister = materialStartRegister + (i * 210);
+    //   let registerData = stringTo16BitArrayLittleEndian(materialName).slice(0, 210 * 2);
+    //   registerData = registerData.map(value => Math.min(value, 65535));
+    //   for (let j = 0; j < registerData.length; j++) {
+    //     await client.writeSingleRegister(startRegister + j, registerData[j]);
+    //   }
+    // });
+
+    // await Promise.all(materialNamePromises);
+
+    const materialRegisterAddress = 720;
+    const materialIDPromises = data.MaterialData.slice(0, 20).map(async (material) => {
+      const materialID = parseInt(material.MaterialID, 10);
+    
+      await client.writeSingleRegister(materialRegisterAddress, materialID);
+    });
+    
+    await Promise.all(materialIDPromises);
+    
+    const partNameStartRegister = 320;
+    const partNamePromises = data.MaterialData.slice(0, 20).map(async (material, i) => {
       const partName = material.PartName;
-      const startRegister = partNameStartRegister + (i * 20); 
-      let registerData = stringTo16BitArrayLittleEndian(partName).slice(0, 10 * 2); 
+      const startRegister = partNameStartRegister + (i * 20);
+      let registerData = stringTo16BitArrayLittleEndian(partName).slice(0, 10 * 2);
       for (let j = 0; j < registerData.length; j++) {
         await client.writeSingleRegister(startRegister + j, registerData[j]);
       }
     });
 
     await Promise.all(partNamePromises);
-
-    const materialStartRegister = 1046;
-    const materialNamePromises = data.MaterialData.slice(0, 12).map(async (material, i) => {
-      const materialName = material.MaterialsName;
-      const startRegister = materialStartRegister + (i * 210); 
-      let registerData = stringTo16BitArrayLittleEndian(materialName).slice(0, 210 * 2);
-      registerData = registerData.map(value => Math.min(value, 65535)); 
-      for (let j = 0; j < registerData.length; j++) {
-        await client.writeSingleRegister(startRegister + j, registerData[j]);
-      }
-    });
-
-    await Promise.all(materialNamePromises);
-
-    await client.writeSingleRegister(6507, data.OrderID);
+    await client.writeSingleRegister(1000, data.OrderID);
 
     console.log('Data successfully saved to Modbus');
   } catch (error) {
@@ -692,6 +731,30 @@ async function setIpAddresses(ipAddresses) {
     logToFile(errorLogPath, `Error setting IP addresses: ${error.message}`);
   }
 }
+async function isHostReachable(ipAddress, port = 502) { // Default Modbus port
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+
+    socket.setTimeout(1000); // 1-second timeout
+
+    socket.on('connect', () => {
+      socket.destroy();
+      resolve(true); // Host is reachable
+    });
+
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve(false); // Timeout reached
+    });
+
+    socket.on('error', () => {
+      resolve(false); // Error means not reachable
+    });
+
+    socket.connect(port, ipAddress);
+  });
+}
+
 startMonitoring();
 module.exports = {
   connectToDevice,
@@ -702,4 +765,6 @@ module.exports = {
   closeAllConnections,
   setIpAddresses,
   startReadingRegisters,
+  isHostReachable,
+  modbusClients,
 };

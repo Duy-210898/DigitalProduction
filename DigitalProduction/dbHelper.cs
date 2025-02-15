@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.Data.Filtering;
+using DigitalProduction.Models;
 
 namespace DigitalProduction
 {
@@ -204,6 +206,49 @@ namespace DigitalProduction
                 return false;
             }
         }
+        // create operator
+        public static bool createOperator(string employeeName, int employeeID, int departmentID, int positionID)
+        {
+            string query = "INSERT INTO Operator (OperatorName, EmployeeID, DepartmentID, PositionID, IsActive) " +
+                  "VALUES (@OperatorName, @EmployeeID, @DepartmentID, @PositionID, @IsActive)";
+
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        // Correctly set the command type to Text
+                        cmd.CommandType = CommandType.Text;
+
+                        // Add parameters
+                        cmd.Parameters.AddWithValue("@OperatorName", employeeName);
+                        cmd.Parameters.AddWithValue("@EmployeeID", employeeID);
+                        cmd.Parameters.AddWithValue("@DepartmentID", departmentID);
+                        cmd.Parameters.AddWithValue("@PositionID", positionID);
+                        cmd.Parameters.AddWithValue("@IsActive", true);
+
+                        // Open the connection
+                        con.Open();
+
+                        // Execute the query and check for affected rows
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine($"SQL Error: {ex.Message}");
+                return false; // Indicate an error occurred
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return false; // Indicate an error occurred
+            }
+        }
         // get list plant
         public static DataTable getPlants()
         {
@@ -364,23 +409,28 @@ namespace DigitalProduction
             return ipAddress;
         }
         // Phương thức để lấy danh sách các MachineName từ bảng DeviceList
-        public List<string> GetMachineNames()
+        public List<Device> getlistMachines()
         {
-            List<string> machineNames = new List<string>();
+            List<Device> machines = new List<Device>();
 
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    string query = "SELECT MachineName FROM DeviceList";
+                    string query = "SELECT MachineName, DeviceID FROM DeviceList where IsActive = 1 AND ConnectionStatus = 1";
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
                             {
-                                machineNames.Add(reader["MachineName"].ToString());
+                                Device device = new Device
+                                {
+                                    DeviceID = (int)reader["DeviceID"],
+                                    MachineName = reader["MachineName"].ToString()
+                                };
+                                machines.Add(device);
                             }
                         }
                     }
@@ -391,7 +441,148 @@ namespace DigitalProduction
                 Console.WriteLine("Lỗi: " + ex.Message);
             }
 
-            return machineNames;
+            return machines;
+        }
+        // Get IPaddress from device
+        public async Task<string> GetIPAddressByDeviceIDAsync(int deviceID)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                await conn.OpenAsync();
+
+                string query = "SELECT IPAddress FROM DeviceList WHERE IsActive = 1 AND DeviceID = @DeviceID";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.Add("@DeviceID", SqlDbType.Int).Value = deviceID;
+
+                    object result = await cmd.ExecuteScalarAsync(); // Chờ kết quả
+                    return result?.ToString(); // Trả về IP nếu có, nếu không thì null
+                }
+            }
+        }
+
+        public List<Employee> getOperatorsByDepartment(int departmentID)
+        {
+            List<Employee> operators = new List<Employee>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Define the query with the parameter
+                string query = "SELECT * FROM [CuttingProjectData].[dbo].[Operator] WHERE DepartmentID = @DepartmentID";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    // Add the parameter and set its value
+                    command.Parameters.AddWithValue("@DepartmentID", departmentID);
+
+                    // Execute the query and read the data
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // Create a new Operator object and populate it
+                            Employee operatorData = new Employee
+                            {
+                                EmployeeID = (int)reader["OperatorID"],
+                                OperatorName = reader["OperatorName"].ToString()
+                            };
+
+                            // Add the operator to the list
+                            operators.Add(operatorData);
+                        }
+                    }
+                }
+            }
+
+            return operators;
+        }
+        // Method to get the PartSizeOrderId based on some condition (for example, PartId, SizeId, or OrderId)
+        public int getPartSizeOrderId(int partId, int sizeId, int orderId)
+        {
+            int partSizeOrderId = -1;  // Default value if no match is found
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Define the query to retrieve PartSizeOrderId
+                string query = "SELECT PartSizeOrderId FROM PartSizeOrder WHERE PartId = @PartId AND SizeId = @SizeId AND OrderId = @OrderId";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    // Add parameters to the query
+                    command.Parameters.AddWithValue("@PartId", partId);
+                    command.Parameters.AddWithValue("@SizeId", sizeId);
+                    command.Parameters.AddWithValue("@OrderId", orderId);
+
+                    // Execute the query and retrieve the PartSizeOrderId
+                    var result = command.ExecuteScalar();
+
+                    // If result is not null, convert to integer
+                    if (result != DBNull.Value)
+                    {
+                        partSizeOrderId = Convert.ToInt32(result);
+                    }
+                }
+            }
+
+            return partSizeOrderId;
+        }
+        public int? GetPartSizeOrderId(int partId, int sizeId, int orderId)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "SELECT PartSizeOrderId FROM PartSizeOrder WHERE PartId = @PartId AND SizeId = @SizeId AND OrderId = @OrderId";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@PartId", partId);
+                    command.Parameters.AddWithValue("@SizeId", sizeId);
+                    command.Parameters.AddWithValue("@OrderId", orderId);
+
+                    connection.Open();
+                    object result = command.ExecuteScalar();
+
+                    return result != null ? (int?)result : null;
+                }
+            }
+        }
+        // Method to delete a record by DistributionID
+        public static bool deleteDistribution(int distributionID)
+        {
+            // SQL DELETE query
+            string query = "DELETE FROM DistributionData WHERE DistributionID = @DistributionID;";
+            try
+            {
+                // Create a connection to the database
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    // Open the connection
+                    connection.Open();
+
+                    // Create a SqlCommand with the DELETE query
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        // Add the parameter for DistributionID
+                        command.Parameters.Add(new SqlParameter("@DistributionID", SqlDbType.Int));
+                        command.Parameters["@DistributionID"].Value = distributionID;
+
+                        // Execute the DELETE command
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        // Check if the record was deleted successfully
+                       return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return false;
+            }
         }
     }
 }

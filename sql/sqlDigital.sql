@@ -120,9 +120,8 @@ GO
 -- Table: DistributionData
 CREATE TABLE DistributionData (
     DistributionID INT PRIMARY KEY IDENTITY(1,1),
-    UserID INT,
     DeviceID INT,
-    OrderID INT,
+    PartSizeOrderId INT,
     OperatorID INT,
     InventoryQty INT,
     Status VARCHAR(50) DEFAULT 'Pending',
@@ -131,7 +130,6 @@ CREATE TABLE DistributionData (
     IsDelete BIT
 );
 GO
-
 -- Table: ProductionSchedule
 CREATE TABLE ProductionSchedule (
     ScheduleID INT PRIMARY KEY IDENTITY(1,1),
@@ -190,8 +188,7 @@ ALTER TABLE DefaultInfo
 GO
 ALTER TABLE DistributionData
     ADD CONSTRAINT FK_DistributionData_Device FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID),
-    CONSTRAINT FK_DistributionData_User FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    CONSTRAINT FK_DistributionData_Order FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID),
+    CONSTRAINT FK_DistributionData_PartSizeOrder FOREIGN KEY (PartSizeOrderId) REFERENCES PartSizeOrder(PartSizeOrderId),
     CONSTRAINT FK_DistributionData_Operator FOREIGN KEY (OperatorID) REFERENCES Operator(OperatorID);
 GO
 ALTER TABLE Operator
@@ -290,4 +287,39 @@ END;
 
 SELECT * FROM Users WHERE Username = 'nhatboy'
 SELECT * FROM DeviceList WHERE IsActive = 1
-SELECT PlantID, PlantName FROM Plant
+SELECT * FROM DistributionData
+SELECT * FROM PartSizeOrder
+SELECT * FROM ProductOrder
+SELECT * FROM Part
+SELECT * FROM Size
+
+
+SELECT PartSizeOrderId FROM PartSizeOrder WHERE PartId = 136 AND SizeId = 76 AND OrderId = 63;
+delete DistributionData
+
+SELECT 
+    dd.DistributionID,
+    d.IpAddress,
+	d.MachineName,
+    pa.PartName,
+	se.Size,
+    o.OperatorName,  
+    dd.InventoryQty,
+    dd.Status,
+    dd.CreatedAt,
+    dd.IsLeather,
+    dd.IsDelete
+FROM 
+    DistributionData dd
+JOIN 
+    DeviceList d ON dd.DeviceID = d.DeviceID 
+JOIN 
+    PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+JOIN 
+    Part pa ON pa.PartID = ps.PartID
+JOIN 
+    Size se ON se.SizeID= ps.SizeID
+JOIN 
+    Operator o ON dd.OperatorID = o.OperatorID  
+WHERE 
+    dd.IsDelete = 0;
