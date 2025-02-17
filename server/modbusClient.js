@@ -226,7 +226,7 @@ async function startReadingRegisters(client, ipAddress) {
 
     //readAndCheckBits(client, ipAddress);
     readOperatorID(client, ipAddress);
-    readAndProcessID(client, ipAddress);
+    readAndSaveDistribution(client, ipAddress);
     // readActualData(client, ipAddress);
   }, 1000);
 }
@@ -351,28 +351,43 @@ async function processRegister6510(register6510, client, ipAddress) {
     }
   }
 }
-async function readAndProcessID(client, ipAddress) {
+async function readAndSaveDistribution(client, ipAddress) {
   try {
-    const data = await client.readHoldingRegisters(1000, 1);
-    const register1000 = data.response._body.values[0];
+    // Read register 1000
+    let response = await client.readHoldingRegisters(1000, 1);
+    let orderID = response.response._body.values[0]; // Extract the actual value
 
-    if (register1000 !== 0) {
+    console.log(`Register 1000 value: ${orderID}`);
+
+    if (orderID === 0) {
+      console.log(`Register 1000 is 0. Fetching distribution data for IP: ${ipAddress}`);
+
+      // Fetch distribution data from DB
       const distributionData = await getDistributionDataFromDb(ipAddress);
+
       if (distributionData) {
+        console.log(`Fetched distribution data:`, distributionData);
+
+        // Write order ID to register 1000
+        await client.writeSingleRegister(1000, distributionData.orderID);
         await delay(1000);
-        console.log('Saving distribution data to Modbus:', distributionData);
+
+        console.log('Saving distribution data to Modbus...');
         await saveDistributionDataToModbus(ipAddress, distributionData);
       } else {
+        console.warn(`No distribution data found for IP ${ipAddress}. Skipping save.`);
       }
     } else {
+      console.log(`Register 1000 already has value ${orderID} for IP ${ipAddress}`);
+
+      // Store orderID in modbusClients
       if (!modbusClients[ipAddress]) {
         modbusClients[ipAddress] = {};
       }
-
-      modbusClients[ipAddress].orderID = register1000;
+      modbusClients[ipAddress].orderID = orderID;
     }
   } catch (error) {
-    const errorMsg = `Error reading register 1000 for IP ${ipAddress}: ${error.message}`;
+    const errorMsg = `❌ Error reading register 1000 for IP ${ipAddress}: ${error.message}`;
     console.error(errorMsg);
     logToFile(errorLogPath, errorMsg);
   }
@@ -569,7 +584,7 @@ async function writeSizeDataToModbus(client) {
       return;
     }
 
-    console.log(`Fetching size data with OrderID: ${orderID} and PartName: ${partName}`);
+    console.log(`Fetching size data with OrderID: ${orderID} and PartName: ${partName}`);   
 
     // Lấy dữ liệu kích thước từ cơ sở dữ liệu
     const sizeData = await getSizeDataFromDB(ipAddress, orderID, partName);
@@ -661,7 +676,6 @@ async function saveDistributionDataToModbus(ipAddress, data) {
     
     await leatherDataPromise;
   
-
     // const materialStartRegister = 55;
     // const materialNamePromises = data.MaterialData.slice(0, 20).map(async (material, i) => {
     //   const materialName = material.MaterialsName;
@@ -695,7 +709,7 @@ async function saveDistributionDataToModbus(ipAddress, data) {
     });
 
     await Promise.all(partNamePromises);
-    await client.writeSingleRegister(1000, data.OrderID);
+    await writeRegisterSizeData(client, data.SizeData, data.Leather)
 
     console.log('Data successfully saved to Modbus');
   } catch (error) {
@@ -703,6 +717,73 @@ async function saveDistributionDataToModbus(ipAddress, data) {
     throw new Error(`Failed to save distribution data: ${error.message}`);
   }
 }
+
+
+// Ghi size data vào thanh ghi 
+async function writeRegisterSizeData(client, sizeData, isLeather) {
+  // kiểm tra nếu null or > 6 size
+  if(Array.isArray(sizeData) && sizeData.length > 6) 
+    return;
+
+  let registerSize = [];
+  if (isLeather == 2 && sizeData.length <= 3) {
+    // size leather
+    // register number of size
+    await client.writeSingleRegister(sizeData.length, 1003);
+    registerSize = [
+      { SizeID: 900, Size: 906, SizeQty: 918, InventoryQty: 79 },
+      { SizeID: 902, Size: 910, SizeQty: 934, InventoryQty: 83 },
+      { SizeID: 904, Size: 914, SizeQty: 950, InventoryQty: 87 },
+    ];
+  } else {
+    // size Raw
+    await client.writeSingleRegister(sizeData.length, 1003);
+    registerSize = [
+      { SizeID: 750, Size: 762, SizeQty: 790, InventoryQty: 55 },
+      { SizeID: 752, Size: 766, SizeQty: 806, InventoryQty: 59 },
+      { SizeID: 754, Size: 770, SizeQty: 822, InventoryQty: 63 },
+      { SizeID: 756, Size: 774, SizeQty: 838, InventoryQty: 67 },
+      { SizeID: 758, Size: 778, SizeQty: 854, InventoryQty: 71 },
+      { SizeID: 760, Size: 782, SizeQty: 870, InventoryQty: 75 },
+    ];
+    await client.writeSingleRegister(sizeData.length, 1002);
+  }
+  for (let i = 0; i < sizeData.length; i++) {
+    const item = sizeData[i];
+
+    // Validate the values before writing
+    const isValidValue = (value) => typeof value === 'number' && value >= 0 && value <= 65535;
+
+    // Logging to debug the values
+    console.log(`Writing to Modbus: SizeID = ${item.SizeID}, Size = ${item.Size}, SizeQty = ${item.SizeQty}, InventoryQty = ${item.InventoryQty}`);
+
+    if (
+      !isValidValue(item.SizeID) ||
+      !isValidValue(item.SizeQty) ||
+      !isValidValue(item.InventoryQty)
+    ) {
+      console.error(`Invalid value detected for SizeID ${item.SizeID}: Values must be within the range 0-65535.`);
+      continue;  // Skip
+    }
+
+    try {
+      // Write SizeID, Size, SizeQty, and InventoryQty to the corresponding Modbus registers
+      let registerSizeData = stringTo16BitArrayLittleEndian(item.Size).slice(0, 10 * 2);
+      const startSizeRegister = registerSize[i].Size; 
+      await client.writeSingleRegister(registerSize[i].SizeID, item.SizeID);  
+      for (let j = 0; j < registerSizeData.length; j++) {
+        await client.writeSingleRegister(startSizeRegister + j, registerSizeData[j]);
+      }             
+      await client.writeSingleRegister(registerSize[i].SizeQty, item.SizeQty || 0);    
+      await client.writeSingleRegister(registerSize[i].InventoryQty, item.InventoryQty  || 0); 
+
+      console.log(`Successfully written to Modbus for SizeID ${item.SizeID}`);
+    } catch (error) {
+      console.error(`Error writing to Modbus for SizeID ${item.SizeID}:`, error);
+    }
+  }
+}
+
 
 async function closeAllConnections() {
   for (const ipAddress in modbusClients) {

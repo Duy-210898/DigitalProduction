@@ -604,11 +604,6 @@ async function getDistributionDataFromDb(ipAddress) {
           t => t.SizeID === value.SizeID && t.Size === value.Size && t.SizeQty === value.SizeQty && t.InventoryQty === value.InventoryQty
         )
       );
-      if (row.IsLeather) {
-      }
-      else {
-      }
-
       // Trả về dữ liệu theo cấu trúc yêu cầu
       return {
         OrderID: orderID,
