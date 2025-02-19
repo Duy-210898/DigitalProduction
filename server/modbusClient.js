@@ -351,25 +351,24 @@ async function processRegister6510(register6510, client, ipAddress) {
     }
   }
 }
+
 async function readAndSaveDistribution(client, ipAddress) {
   try {
     // Read register 1000
     let response = await client.readHoldingRegisters(1000, 1);
     let orderID = response.response._body.values[0]; // Extract the actual value
-
     console.log(`Register 1000 value: ${orderID}`);
 
-    if (orderID === 0) {
+    if (orderID !== 0) {
       console.log(`Register 1000 is 0. Fetching distribution data for IP: ${ipAddress}`);
 
       // Fetch distribution data from DB
       const distributionData = await getDistributionDataFromDb(ipAddress);
 
       if (distributionData) {
-        console.log(`Fetched distribution data:`, distributionData);
-
+    
         // Write order ID to register 1000
-        await client.writeSingleRegister(1000, distributionData.orderID);
+        await client.writeSingleRegister(1000, distributionData.OrderID);
         await delay(1000);
 
         console.log('Saving distribution data to Modbus...');
@@ -539,6 +538,29 @@ function startMonitoring() {
   }, 5000);
 }
 
+function convert16BitArrayToString(arr) {
+  let str = '';
+
+  // Iterate over the array of 16-bit values
+  for (let i = 0; i < arr.length; i++) {
+    const value = arr[i];
+
+    // Extract low and high bytes
+    const lowByte = value & 0xFF; // Get the lower 8 bits
+    const highByte = (value >> 8) & 0xFF; // Get the higher 8 bits
+
+    // Convert the low byte to a character
+    str += String.fromCharCode(lowByte);
+
+    // If the high byte is non-zero, convert it to a character as well
+    if (highByte !== 0) {
+      str += String.fromCharCode(highByte);
+    }
+  }
+
+  return str;
+}
+
 function stringTo16BitArrayLittleEndian(str) {
   const result = [];
   for (let i = 0; i < str.length; i += 2) {
@@ -630,7 +652,6 @@ async function writeSizeDataToModbus(client) {
   }
 }
 
-
 async function saveDistributionDataToModbus(ipAddress, data) {
   const modbusClient = await connectToDevice(ipAddress);
   const client = modbusClient.client;
@@ -645,13 +666,13 @@ async function saveDistributionDataToModbus(ipAddress, data) {
       await connectToDevice(ipAddress);
     }
 
-    // Ghi thông tin đơn hàng (Model, ART, SO, MasterWorkOrder, MaterialsName)
+    // Write Order Info
     const orderInfo = [data.Model, data.ART, data.SO, data.MasterWorkOrder];
     const orderInfoAddresses = [
       { start: 0, maxRegisters: 25 },
       { start: 25, maxRegisters: 10 },
       { start: 35, maxRegisters: 10 },
-      { start: 45, maxRegisters: 10}
+      { start: 45, maxRegisters: 10 }
     ];
 
     const orderInfoPromises = orderInfo.map(async (info, index) => {
@@ -660,56 +681,85 @@ async function saveDistributionDataToModbus(ipAddress, data) {
       registerData = registerData.slice(0, maxRegisters * 2);
       const startRegister = orderInfoAddresses[index].start;
       for (let j = 0; j < registerData.length; j++) {
-        await client.writeSingleRegister(startRegister + j, registerData[j]);
+        try {
+           console.log(`The covert text:  ${convert16BitArrayToString(registerData)} ${startRegister + j} ${ registerData[j]}`);
+          await client.writeSingleRegister(startRegister + j, registerData[j]);
+          console.log(`Successfully wrote to register ${startRegister + j}`);
+        } catch (error) {
+          console.error(`Error writing to register ${startRegister + j}: ${error.message}`);
+        }
       }
     });
 
     await Promise.all(orderInfoPromises);
 
-
-    // Add the Leather data write operation
-      const leatherDataPromise = (async () => {
+    // Write Leather Data
+    const leatherDataPromise = (async () => {
+      try {
         const leatherData = parseInt(data.Leather);
         const startRegister = 1001;
         await client.writeSingleRegister(startRegister, leatherData);
+        console.log(`Successfully wrote Leather data to register ${startRegister}`);
+      } catch (error) {
+        console.error(`Error writing Leather data: ${error.message}`);
+      }
     })();
-    
     await leatherDataPromise;
-  
-    // const materialStartRegister = 55;
-    // const materialNamePromises = data.MaterialData.slice(0, 20).map(async (material, i) => {
-    //   const materialName = material.MaterialsName;
-    //   const startRegister = materialStartRegister + (i * 210);
-    //   let registerData = stringTo16BitArrayLittleEndian(materialName).slice(0, 210 * 2);
-    //   registerData = registerData.map(value => Math.min(value, 65535));
-    //   for (let j = 0; j < registerData.length; j++) {
-    //     await client.writeSingleRegister(startRegister + j, registerData[j]);
+
+    // // Write Material Data
+    // const materialRegisterAddress = data.Leather == 2 ? 720 : 290;
+    // const materialIDPromises = data.MaterialData.slice(0, 20).map(async (material) => {
+    //   try {
+    //     const materialID = parseInt(material.MaterialID, 10);
+    //     await client.writeSingleRegister(materialRegisterAddress, materialID);
+    //     console.log(`Successfully wrote MaterialID ${materialID} to register ${materialRegisterAddress}`);
+    //   } catch (error) {
+    //     console.error(`Error writing MaterialID: ${error.message}`);
     //   }
     // });
+    // await Promise.all(materialIDPromises);
 
-    // await Promise.all(materialNamePromises);
+       // Write Material Data
+       const materialRegisterAddress = data.Leather == 2 ? 720 : 290;
+       const materialCodePromises = data.MaterialData.slice(0, 20).map(async (material) => {
+        try {
+          // Convert the material code to an array of 16-bit little-endian values
+          const materialCodeArray = stringTo16BitArrayLittleEndian(material.MaterialCode);
+          
+          // Write each 16-bit value to consecutive Modbus registers
+          for (let i = 0; i < materialCodeArray.length; i++) {
+            const registerAddress = materialRegisterAddress + i; // Increment register address for each 16-bit value
+            await client.writeSingleRegister(registerAddress, materialCodeArray[i]);
+            console.log(`Successfully wrote materialCode ${materialCodeArray[i]} to register ${registerAddress}`);
+          }
+        } catch (error) {
+          console.error(`Error writing materialCode: ${error.message}`);
+        }
+      });
+      
+      await Promise.all(materialCodePromises);
+      
 
-    const materialRegisterAddress = 720;
-    const materialIDPromises = data.MaterialData.slice(0, 20).map(async (material) => {
-      const materialID = parseInt(material.MaterialID, 10);
-    
-      await client.writeSingleRegister(materialRegisterAddress, materialID);
-    });
-    
-    await Promise.all(materialIDPromises);
-    
+    // Write Part Names
     const partNameStartRegister = 320;
     const partNamePromises = data.MaterialData.slice(0, 20).map(async (material, i) => {
-      const partName = material.PartName;
-      const startRegister = partNameStartRegister + (i * 20);
-      let registerData = stringTo16BitArrayLittleEndian(partName).slice(0, 10 * 2);
-      for (let j = 0; j < registerData.length; j++) {
-        await client.writeSingleRegister(startRegister + j, registerData[j]);
+      try {
+        const partName = material.PartName;
+        const startRegister = partNameStartRegister + (i * 20);
+        let registerData = stringTo16BitArrayLittleEndian(partName).slice(0, 10 * 2);
+        for (let j = 0; j < registerData.length; j++) {
+          await client.writeSingleRegister(startRegister + j, registerData[j]);
+          console.log(`Successfully wrote part name to register ${startRegister + j}`);
+        }
+      } catch (error) {
+        console.error(`Error writing part name: ${error.message}`);
       }
     });
 
     await Promise.all(partNamePromises);
-    await writeRegisterSizeData(client, data.SizeData, data.Leather)
+    // Write Size Data
+    await writeRegisterSizeData(client, data.SizeData, data.Leather);
+
 
     console.log('Data successfully saved to Modbus');
   } catch (error) {
@@ -757,6 +807,10 @@ async function writeRegisterSizeData(client, sizeData, isLeather) {
     // Logging to debug the values
     console.log(`Writing to Modbus: SizeID = ${item.SizeID}, Size = ${item.Size}, SizeQty = ${item.SizeQty}, InventoryQty = ${item.InventoryQty}`);
 
+    if (!item.Size || typeof item.Size !== 'string') {
+      console.error(`Invalid Size value: ${item.Size}`);
+      continue;
+    }
     if (
       !isValidValue(item.SizeID) ||
       !isValidValue(item.SizeQty) ||
@@ -772,18 +826,17 @@ async function writeRegisterSizeData(client, sizeData, isLeather) {
       const startSizeRegister = registerSize[i].Size; 
       await client.writeSingleRegister(registerSize[i].SizeID, item.SizeID);  
       for (let j = 0; j < registerSizeData.length; j++) {
+        console.log(`Writing to register ${startSizeRegister + j}, value: ${registerSizeData[j]}`);
         await client.writeSingleRegister(startSizeRegister + j, registerSizeData[j]);
       }             
       await client.writeSingleRegister(registerSize[i].SizeQty, item.SizeQty || 0);    
       await client.writeSingleRegister(registerSize[i].InventoryQty, item.InventoryQty  || 0); 
-
       console.log(`Successfully written to Modbus for SizeID ${item.SizeID}`);
     } catch (error) {
       console.error(`Error writing to Modbus for SizeID ${item.SizeID}:`, error);
     }
   }
 }
-
 
 async function closeAllConnections() {
   for (const ipAddress in modbusClients) {

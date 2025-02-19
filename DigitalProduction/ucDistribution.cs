@@ -33,8 +33,6 @@ namespace DigitalProduction
             ApplyLocalization();
             SetupSearchSOLookup();
             cbxSO.Focus();
-            rdLeather.CheckedChanged += rdLeather_CheckedChanged;
-            rdRawMaterial.CheckedChanged += rdRawMaterial_CheckedChanged;
             lbl_operatorName.Visible = false;
             // Subscribe to the CellValueChanged event
             gridView_Size.CellValueChanging += GridView_Size_CellValueChanging;
@@ -192,7 +190,7 @@ namespace DigitalProduction
             pnlSize.Visible = true;
 
             var sizeDataList = new List<SizeData>();
-            var materialDataList = new List<MaterialData>();
+            materialDataList = new List<MaterialData>();
 
             // Lọc và sắp xếp các kích thước duy nhất
             var uniqueSortedSizes = schedules
@@ -243,7 +241,7 @@ namespace DigitalProduction
                 });
             }
 
-            cbxPart.Properties.DataSource = materialDataList;
+           // cbxPart.Properties.DataSource = materialDataList;
             // Cập nhật thông tin Header
             string factoryName = schedules.FirstOrDefault()?.Factory ?? string.Empty;
             switch (factoryName)
@@ -398,8 +396,6 @@ namespace DigitalProduction
                 view.SelectionChanged -= (sender, ee) => { /* Your logic */ };
             };
         }
-
-
 
         private void tableLayoutPanel1_SizeChanged(object sender, EventArgs e)
         {
@@ -720,9 +716,13 @@ namespace DigitalProduction
             partIDs.Clear();
             if (rdLeather.Checked)
             {
+                if (cbxPart.Properties.DataSource != null)
+                {
+                    cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "FT2").ToList();
                 // Allow multi-selection for cbxPart
                 cbxPart.Properties.View.OptionsSelection.MultiSelect = true;
                 cbxPart.Properties.View.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CheckBoxRowSelect;
+                }
             }
         }
 
@@ -733,8 +733,12 @@ namespace DigitalProduction
             partIDs.Clear();
             if (rdRawMaterial.Checked)
             {
-                // Allow single selection for cbxPart
-                cbxPart.Properties.View.OptionsSelection.MultiSelect = false;
+                if (cbxPart.Properties.DataSource != null)
+                {
+                    cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "YD").ToList();
+                    // Allow single selection for cbxPart
+                    cbxPart.Properties.View.OptionsSelection.MultiSelect = false;
+                }
             }
         }
         private List<SizeData> ConvertDataTableToList(DataTable originalTable)

@@ -542,6 +542,7 @@ async function getDistributionDataFromDb(ipAddress) {
           p.ART,
           pa.PartID,
           pa.PartName,
+          m.MaterialCode,
           m.MaterialID,
           m.MaterialName,
           se.SizeID,
@@ -587,6 +588,7 @@ async function getDistributionDataFromDb(ipAddress) {
           PartID: r.PartID,
           PartName: r.PartName,
           MaterialID: r.MaterialID,
+          MaterialCode: r.MaterialCode,
           MaterialsName: r.MaterialName  // Giữ nguyên MaterialID mà không thay đổi
         }))
         .filter((value, index, self) => self.findIndex(t => t.PartID === value.PartID && t.PartName === value.PartName && t.MaterialID === value.MaterialID) === index);  // Loại bỏ trùng lặp PartID, PartName và MaterialID
