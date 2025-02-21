@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DevExpress.XtraBars.Customization;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Columns;
@@ -22,6 +23,10 @@ namespace DigitalProduction
         private int operatorID = 0;
         private int deviceID = 0;
         private int inventory = 0;
+        private int cuttingDieQty = 0;
+        private int piecesPerPair = 0;
+        private int materialLayer = 0;
+        private int totalPiecesPerPair = 0;
         private HashSet<int> sizeIDs = new HashSet<int>();
         private HashSet<int> partIDs = new HashSet<int>();
         private HashSet<int> partSizeOrderIDs = new HashSet<int>();
@@ -337,8 +342,8 @@ namespace DigitalProduction
             view.Appearance.EvenRow.BackColor = Color.White;
 
             // 🔹 Đặt tỷ lệ % cho từng cột
-            view.Columns["PartCode"].Width = (int)(popupWidth * 0.10);
-            view.Columns["PartName"].Width = (int)(popupWidth * 0.15);
+            view.Columns["PartCode"].Width = (int)(popupWidth * 0.05);
+            view.Columns["PartName"].Width = (int)(popupWidth * 0.20);
             view.Columns["VietnameseName"].Width = (int)(popupWidth * 0.25);
             view.Columns["MaterialCode"].Width = (int)(popupWidth * 0.05);
             view.Columns["MaterialName"].Width = (int)(popupWidth * 0.45);
@@ -387,7 +392,8 @@ namespace DigitalProduction
 
                 // Update ComboBox Display
                 string selectedParts = string.Join(", ", partIDs.Select(id => view.GetRowCellValue(view.LocateByValue("PartID", id), "PartName")));
-                cbxPart.Text = selectedParts;
+                lblPartValue.Text = selectedParts;
+                lblPartValue.ForeColor = Color.Green;
             };
 
             // Detach event handler when the popup closes
@@ -486,6 +492,14 @@ namespace DigitalProduction
             if (scheduleResponse.Status == "success")
             {
                 HandleReceivedSchedule(scheduleResponse.Schedule);
+                DefaultInfo defaultInfo = dbHelper.getDefaultValueFromART(lblArt.Text.Split(':')[1]);
+                if (defaultInfo != null)
+                {
+                    numPiecesPerPair.Text = defaultInfo.PiecesPerPair.ToString();
+                    numCuttingDieQty.Text = defaultInfo.CuttingDieQty.ToString();
+                    numMaterialLayer.Text = defaultInfo.MaterialLayer.ToString();
+                    numericTotalPeicesPerPair.Text = defaultInfo.TotalPiecesPerPair.ToString();
+                }
             }
             else
             {
@@ -533,6 +547,8 @@ namespace DigitalProduction
                 lbl_operatorName.Visible = true;
                 lbl_operatorID.Text = employee.OperatorID.ToString();
                 lbl_operatorName.Text = string.Join("-", employee.OperatorName, employee.EmployeeID);
+                lbl_operatorName.Font = new Font("Arial", 10, FontStyle.Bold);
+
             }
             else {
                 lbl_operatorName.Visible = false;
@@ -569,6 +585,11 @@ namespace DigitalProduction
             deviceID = int.Parse(cbxDevice.SelectedValue.ToString());
             operatorID = int.Parse(lbl_operatorID.Text);
             inventory = int.Parse(txtInventory.Text);
+            cuttingDieQty = int.Parse(numCuttingDieQty.Text);
+            piecesPerPair = int.Parse(numPiecesPerPair.Text);
+            materialLayer = int.Parse(numMaterialLayer.Text);
+            totalPiecesPerPair = int.Parse(numericTotalPeicesPerPair.Text);
+            int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
             bool isLeather = false;
             int partID;
 
@@ -601,8 +622,13 @@ namespace DigitalProduction
                 {
                     DeviceID = deviceID,
                     OperatorID = operatorID,
+                    ProductID = productId,
                     PartSizeOrderID = i,
+                    CuttingDieQty = cuttingDieQty,
+                    PiecesPerPair = piecesPerPair,
+                    MaterialLayer = materialLayer,
                     InventoryQty = inventory,
+                    TotalPiecesPerPair = totalPiecesPerPair,
                     IsLeather = isLeather,
                     CreatedAt = DateTime.Now,
                     IsDelete = false,
@@ -714,6 +740,8 @@ namespace DigitalProduction
             cbxPart.Properties.NullText = "Please select Part...";
             cbxPart.EditValue = null;
             partIDs.Clear();
+            setControlVisibility(false, numCuttingDieQty, numMaterialLayer, numPiecesPerPair, lblCuttingDie, lblMaterialLayer, lblPeicesPerPair);
+            setControlVisibility(true, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
             if (rdLeather.Checked)
             {
                 if (cbxPart.Properties.DataSource != null)
@@ -731,8 +759,11 @@ namespace DigitalProduction
             cbxPart.Properties.NullText = "Please select Part...";
             cbxPart.EditValue = null;
             partIDs.Clear();
+            setControlVisibility(false, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
+            setControlVisibility(true, numCuttingDieQty, numMaterialLayer, numPiecesPerPair, lblCuttingDie, lblMaterialLayer, lblPeicesPerPair);
             if (rdRawMaterial.Checked)
             {
+                lblPartValue.ResetText();
                 if (cbxPart.Properties.DataSource != null)
                 {
                     cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "YD").ToList();
@@ -773,15 +804,29 @@ namespace DigitalProduction
 
                 // You can get other column values by using GetRowCellValue
                 var sizeId = gridView_Size.GetRowCellValue(rowIndex, "SizeID");
-                if (sizeIDs.Count > 3)
+                bool isChecked = (bool)e.Value;
+                if (isChecked)
                 {
-                    gridView_Size.Columns[5].OptionsColumn.AllowEdit = false;
+                    if (sizeIDs.Count > 3)
+                    {
+                        gridView_Size.Columns[5].OptionsColumn.AllowEdit = false;
+                    }
+                    else
+                    {
+                        gridView_Size.Columns[5].OptionsColumn.AllowEdit = true;
+                        sizeIDs.Add((int)sizeId);
+                    }
                 }
-                else
-                {
-                    gridView_Size.Columns[5].OptionsColumn.AllowEdit = true;
-                    sizeIDs.Add((int)sizeId);
+                else {
+                    sizeIDs.Remove((int)sizeId);
                 }
+            }
+        }
+        private void setControlVisibility(bool isVisible, params Control[] controls)
+        {
+            foreach (var control in controls)
+            {
+                control.Visible = isVisible;
             }
         }
     }

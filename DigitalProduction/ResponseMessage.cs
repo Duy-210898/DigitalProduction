@@ -18,6 +18,8 @@ namespace DigitalProduction
 
         [JsonProperty("distributionData", NullValueHandling = NullValueHandling.Ignore)]
         public T DistributionData { get; set; }
+        [JsonProperty("deviceOutput", NullValueHandling = NullValueHandling.Ignore)]
+        public T DeviceOutput { get; set; }
 
         // Method to serialize the object into JSON string
         public string ToJson()

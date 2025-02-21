@@ -259,6 +259,7 @@ namespace DigitalProduction
             // Hide sensitive data like Password and deparmentID
             gridView_UserManagement.Columns["Password"].Visible = false;
             gridView_UserManagement.Columns["DepartmentID"].Visible = false;
+            gridView_UserManagement.Columns["OperatorID"].Visible = false;
             gridView_UserManagement.Columns["OperatorName"].Visible = false;
             gridView_UserManagement.Columns["PositionID"].Visible = false;
             gridView_UserManagement.Columns["CreatedAt"].Visible = false;

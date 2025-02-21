@@ -5,7 +5,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.Data.Filtering;
 using DigitalProduction.Models;
 
 namespace DigitalProduction
@@ -19,7 +18,6 @@ namespace DigitalProduction
             // Lấy chuỗi kết nối từ file cấu hình
             connectionString = ConfigurationManager.ConnectionStrings["strCon"].ConnectionString;
         }
-
         // Ví dụ về phương thức để thực hiện một câu lệnh SQL
         public void ExecuteQuery(string query)
         {
@@ -550,6 +548,66 @@ namespace DigitalProduction
                 }
             }
         }
+        public int getProductIdByArt(string art)
+        {
+            if (string.IsNullOrEmpty(art))
+            {
+                throw new ArgumentException("ART value cannot be null or empty.", nameof(art));
+            }
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT ProductId FROM Product WHERE LTRIM(RTRIM(ART)) = LTRIM(RTRIM(@ART))"; 
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ART", art.Trim());
+                    conn.Open();
+                    object result = cmd.ExecuteScalar();
+                    return (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : -1; 
+                }
+            }
+        }
+
+        public DefaultInfo getDefaultValueFromART(string art)
+        {
+            if (string.IsNullOrEmpty(art))
+            {
+                throw new ArgumentException("ART value cannot be null or empty.", nameof(art));
+            }
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"
+                                SELECT TOP 1 d.* 
+                                FROM DefaultInfo d 
+                                LEFT JOIN Product pr ON pr.ProductId = d.ProductId 
+                                WHERE pr.ART = @ART";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ART", art.Trim());
+                    conn.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new DefaultInfo
+                            {
+                                PiecesPerPair = reader.GetInt32(reader.GetOrdinal("PiecesPerPair")),
+                                CuttingDieQty = reader.GetInt32(reader.GetOrdinal("CuttingDieQty")),
+                                MaterialLayer = reader.GetInt32(reader.GetOrdinal("MaterialLayer")),
+                                TotalPiecesPerPair = reader.GetInt32(reader.GetOrdinal("TotalPiecesPerPair")),
+                            };
+                        }
+                    }
+                }
+            }
+
+            return null; // Return null if no data found
+        }
+
         // Method to delete a record by DistributionID
         public static bool deleteDistribution(int distributionID)
         {

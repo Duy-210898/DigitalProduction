@@ -90,49 +90,119 @@ async function getSizeDataFromDB(ipAddress, orderID, partName) {
 }
 
 // Hàm lấy dữ liệu OutputData từ cơ sở dữ liệu
-async function getActualOutputData(orderID, masterWorkOrder) {
+// async function getActualOutputData(orderID, masterWorkOrder) {
+//   const query = `
+//     SELECT 
+//       om.[OrderID],
+//       om.[PartName],
+//       om.[MaterialsName],
+//       do.[MasterWorkOrder],
+//       do.[SO],
+//       do.[Model],
+//       do.[ART],
+//       do.[UserName],
+//       os.[Size],
+//       os.[SizeQty],
+//       do2.[PiecesPerPair],
+//       do2.[MaterialLayer],
+//       do2.[CuttingDieQty],
+//       do2.[ActualCut],
+//       do2.[ActualSizeQty],
+//       do2.[ActualPieces]
+//     FROM 
+//       [CuttingData].[dbo].[OrderMaterials] om
+//     JOIN 
+//       [CuttingData].[dbo].[DistributionOrders] do ON om.[OrderID] = do.[OrderID]
+//     JOIN 
+//       [CuttingData].[dbo].[OrderSizes] os ON om.[MaterialID] = os.[MaterialID]
+//     JOIN 
+//       [CuttingData].[dbo].[DeviceOutput] do2 ON do.[OrderID] = do2.[OrderID] AND os.[SizeID] = do2.[SizeID] AND om.[MaterialID] = do2.[MaterialID]
+//     WHERE 
+//       do.[OrderID] = @OrderID
+//       AND do.[MasterWorkOrder] = @MasterWorkOrder;
+//   `;
+
+//   try {
+//     const request = (await initDatabase()).request();
+    
+//     // Đảm bảo OrderID là số nguyên hợp lệ trước khi truyền vào câu lệnh SQL
+//     if (isNaN(orderID) || orderID <= 0) {
+//       throw new Error('Invalid OrderID. It must be a positive integer.');
+//     }
+
+//     request.input('OrderID', sql.Int, orderID);
+//     request.input('MasterWorkOrder', sql.NVarChar, masterWorkOrder);
+
+//     const result = await request.query(query);
+
+//     if (result.recordset.length > 0) {
+//       const firstRecord = result.recordset[0];
+      
+//       const filteredOutputData = result.recordset.filter(record => record.SizeQty > 0).map(record => ({
+//         PartName: record.PartName, 
+//         MaterialsName: record.MaterialsName,
+//         Size: record.Size,
+//         SizeQty: record.SizeQty,
+//         PiecesPerPair: record.PiecesPerPair,
+//         MaterialLayer: record.MaterialLayer,
+//         CuttingDieQty: record.CuttingDieQty,
+//         ActualCut: record.ActualCut,
+//         ActualSizeQty: record.ActualSizeQty,
+//         ActualPieces: record.ActualPieces
+//       }));
+      
+//       return {
+//         OrderID: firstRecord.OrderID,
+//         MasterWorkOrder: firstRecord.MasterWorkOrder,
+//         SO: firstRecord.SO,
+//         Model: firstRecord.Model,
+//         UserName: firstRecord.UserName,
+//         OutputData: filteredOutputData 
+//       };
+//     } else {
+//       return null;
+//     }
+//   } catch (error) {
+//     console.error('Error fetching actual output data from database:', error.message);
+//     throw error;
+//   }
+// }
+async function getActualOutputData() {
   const query = `
-    SELECT 
-      om.[OrderID],
-      om.[PartName],
-      om.[MaterialsName],
-      do.[MasterWorkOrder],
-      do.[SO],
-      do.[Model],
-      do.[ART],
-      do.[UserName],
-      os.[Size],
-      os.[SizeQty],
-      do2.[PiecesPerPair],
-      do2.[MaterialLayer],
-      do2.[CuttingDieQty],
-      do2.[ActualCut],
-      do2.[ActualSizeQty],
-      do2.[ActualPieces]
-    FROM 
-      [CuttingData].[dbo].[OrderMaterials] om
-    JOIN 
-      [CuttingData].[dbo].[DistributionOrders] do ON om.[OrderID] = do.[OrderID]
-    JOIN 
-      [CuttingData].[dbo].[OrderSizes] os ON om.[MaterialID] = os.[MaterialID]
-    JOIN 
-      [CuttingData].[dbo].[DeviceOutput] do2 ON do.[OrderID] = do2.[OrderID] AND os.[SizeID] = do2.[SizeID] AND om.[MaterialID] = do2.[MaterialID]
-    WHERE 
-      do.[OrderID] = @OrderID
-      AND do.[MasterWorkOrder] = @MasterWorkOrder;
+      SELECT 
+        po.OrderID,
+        p.PartName,
+        m.MaterialName,
+        po.MasterWorkOrder,
+        po.SO,
+        pr.Model,
+        pr.ART,
+        o.OperatorName,
+        s.Size,
+        pso.SizeQty,
+        do.PiecesPerPair,
+        do.MaterialLayer,
+        do.CuttingDieQty,
+        do.ActualCut,
+        do.ActualSizeQty,
+        do.ActualPieces,
+        do.InventoryQty,
+        dd.InventoryQty AS DistInventoryQty
+    FROM ProductOrder po
+    JOIN Product pr ON po.ProductId = pr.ProductId
+    JOIN PartSizeOrder pso ON po.OrderID = pso.OrderId
+    JOIN Part p ON pso.PartId = p.PartId
+    JOIN Size s ON pso.SizeId = s.SizeID
+    JOIN Material m ON pso.MaterialID = m.MaterialID
+    JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID
+    JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId 
+    JOIN Operator o ON dd.OperatorID = o.OperatorID
+    WHERE dd.Status = 'Pending';
   `;
 
   try {
     const request = (await initDatabase()).request();
     
-    // Đảm bảo OrderID là số nguyên hợp lệ trước khi truyền vào câu lệnh SQL
-    if (isNaN(orderID) || orderID <= 0) {
-      throw new Error('Invalid OrderID. It must be a positive integer.');
-    }
-
-    request.input('OrderID', sql.Int, orderID);
-    request.input('MasterWorkOrder', sql.NVarChar, masterWorkOrder);
-
     const result = await request.query(query);
 
     if (result.recordset.length > 0) {
@@ -200,90 +270,66 @@ async function setOrderIsComplete(OrderID) {
   }
 }
 
-async function saveActualDataToDB(data, PartName) {
+async function saveActualDataToDB(data) {
   const { OrderID, SizeData } = data;
 
   // Kiểm tra OrderID và PartName trước khi tiếp tục
   if (!OrderID || OrderID === 0) {
     throw new Error('OrderID không hợp lệ');
   }
-
-  if (!PartName || typeof PartName !== 'string' || PartName.trim() === '') {
-    throw new Error('PartName không hợp lệ');
-  }
-
   try {
-    // Truy vấn MaterialID từ bảng OrderMaterials dựa trên PartName và OrderID
-    const materialIDQuery = `
-      SELECT MaterialID
-      FROM OrderMaterials
-      WHERE PartName = @PartName AND OrderID = @OrderID;
-    `;
-
-    const materialIDResult = await executeQuery(materialIDQuery, [
-      { name: 'PartName', type: sql.NVarChar, value: PartName },
-      { name: 'OrderID', type: sql.Int, value: OrderID }
-    ]);
-
-    // Kiểm tra xem materialIDResult có dữ liệu không
-    if (!materialIDResult || materialIDResult.length === 0) {
-      throw new Error(`Không tìm thấy MaterialID cho PartName: ${PartName}`);
-    }
-
-    const MaterialID = materialIDResult[0].MaterialID;
-
     for (const size of SizeData) {
-      if (!size.Size || typeof size.Size !== 'string') {
-        throw new Error(`Kích thước không hợp lệ: ${size.Size}`);
+      if (!size.SizeID || typeof size.SizeID === 'int') {
+        throw new Error(`Kích thước không hợp lệ: ${size.SizeID}`);
       }
 
-      if (!size.MaterialLayer || typeof size.MaterialLayer !== 'number') {
-        size.MaterialLayer = 0;
-      }
-
-      const sizeIDQuery = `
-        SELECT SizeID
-        FROM OrderSizes
-        WHERE Size = @Size AND MaterialID = @MaterialID;
+      const inputs = [
+        { name: 'OrderID', type: sql.Int, value: OrderID },
+        { name: 'SizeID', type: sql.Int, value: size.SizeID }
+      ];
+      const checkDeviceOutputQuery = `
+            SELECT COUNT(*) AS count FROM DeviceOutput 
+            WHERE OrderID = @OrderID AND SizeID = @SizeID
+      `;    
+      const DeviceOutputQuery = `
+        INSERT INTO DeviceOutput (
+            OrderID, SizeID, PiecesPerPair, MaterialLayer, CuttingDieQty, 
+            ActualCut, ActualPieces, ActualSizeQty, CreatedAt
+        ) VALUES (
+            @OrderID, @SizeID, @PiecesPerPair, @MaterialLayer, @CuttingDieQty, 
+            @ActualCut, @ActualPieces, @ActualSizeQty, GETDATE()
+        );
       `;
 
-      const sizeIDResult = await executeQuery(sizeIDQuery, [
-        { name: 'Size', type: sql.NVarChar, value: size.Size },
-        { name: 'MaterialID', type: sql.Int, value: MaterialID }
-      ]);
+      const DeviceOutputInputs = [ 
+        { name: 'OrderID', type: sql.Int, value: OrderID },
+        { name: 'SizeID', type: sql.Int, value: size.SizeID },
+        { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair },
+        { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer },
+        { name: 'CuttingDieQty', type: sql.Int, value: size.CuttingDieQty },
+        { name: 'ActualCut', type: sql.Int, value: size.ActualCut },
+        { name: 'ActualPieces', type: sql.Int, value: size.ActualPieces },
+        { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty }
+      ];
 
-      // Kiểm tra xem sizeIDResult có dữ liệu không
-      if (!sizeIDResult || sizeIDResult.length === 0) {
-        console.log(`Không tìm thấy SizeID cho Size: ${size.Size} và MaterialID: ${MaterialID}. Bỏ qua cập nhật.`);
-        continue;
-      }
-
-      for (const sizeIDRecord of sizeIDResult) {
-        const SizeID = sizeIDRecord.SizeID;
-
-        // Ghi nhật ký SizeID đang xử lý
-        console.log(`Đang cập nhật SizeID: ${SizeID} cho Size: ${size.Size}`);
-
-        const updateDeviceOutputQuery = `
-          UPDATE DeviceOutput
-          SET
-            PiecesPerPair = @PiecesPerPair,
-            MaterialLayer = @MaterialLayer,
-            CuttingDieQty = @CuttingDieQty,
-            ActualCut = @ActualCut,
-            ActualPieces = @ActualPieces,
-            ActualSizeQty = @ActualSizeQty,
-            UpdatedAt = GETDATE()
-          WHERE
-            OrderID = @OrderID
-            AND SizeID = @SizeID
-            AND MaterialID = @MaterialID;
-        `;
+      const updateDeviceOutputQuery = `
+        UPDATE DeviceOutput
+        SET
+          PiecesPerPair = @PiecesPerPair,
+          MaterialLayer = @MaterialLayer,
+          CuttingDieQty = @CuttingDieQty,
+          ActualCut = @ActualCut,
+          ActualPieces = @ActualPieces,
+          ActualSizeQty = @ActualSizeQty,
+          UpdatedAt = GETDATE()
+        WHERE
+          OrderID = @OrderID
+          AND SizeID = @SizeID
+      `;
 
         const updateDeviceOutputInputs = [
           { name: 'OrderID', type: sql.Int, value: OrderID },
-          { name: 'SizeID', type: sql.Int, value: SizeID },
-          { name: 'MaterialID', type: sql.Int, value: MaterialID },
+          { name: 'SizeID', type: sql.Int, value: size.SizeID },
           { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair },
           { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer },
           { name: 'CuttingDieQty', type: sql.Int, value: size.CuttingDieQty },
@@ -292,66 +338,221 @@ async function saveActualDataToDB(data, PartName) {
           { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty }
         ];
 
-        await executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
+      const result = await executeQuery(checkDeviceOutputQuery, inputs);
+      if (result[0].count === 0) {
+        // 🔄 Step 2: If exists, UPDATE
+        await executeQuery(DeviceOutputQuery, DeviceOutputInputs);
+        console.log(`✅ Updated DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
+      } else {
+        // ➕ Step 3: If not exists, INSERT
+        await  executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
+        console.log(`✅ Inserted new DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
       }
     }
 
-    console.log('Dữ liệu Actual đã được cập nhật thành công');
+    //console.log('Dữ liệu Actual đã được cập nhật thành công');
   } catch (error) {
     console.error('Lỗi khi cập nhật Actual data:', error.message);
     throw error;
   }
 }
+// async function saveActualDataToDB(data, PartName) {
+//   const { OrderID, SizeData } = data;
+
+//   // Kiểm tra OrderID và PartName trước khi tiếp tục
+//   if (!OrderID || OrderID === 0) {
+//     throw new Error('OrderID không hợp lệ');
+//   }
+
+//   if (!PartName || typeof PartName !== 'string' || PartName.trim() === '') {
+//     throw new Error('PartName không hợp lệ');
+//   }
+
+//   try {
+//     // Truy vấn MaterialID từ bảng OrderMaterials dựa trên PartName và OrderID
+//     const materialIDQuery = `
+//       SELECT MaterialID
+//       FROM OrderMaterials
+//       WHERE PartName = @PartName AND OrderID = @OrderID;
+//     `;
+
+//     const materialIDResult = await executeQuery(materialIDQuery, [
+//       { name: 'PartName', type: sql.NVarChar, value: PartName },
+//       { name: 'OrderID', type: sql.Int, value: OrderID }
+//     ]);
+
+//     // Kiểm tra xem materialIDResult có dữ liệu không
+//     if (!materialIDResult || materialIDResult.length === 0) {
+//       throw new Error(`Không tìm thấy MaterialID cho PartName: ${PartName}`);
+//     }
+
+//     const MaterialID = materialIDResult[0].MaterialID;
+
+//     for (const size of SizeData) {
+//       if (!size.Size || typeof size.Size !== 'string') {
+//         throw new Error(`Kích thước không hợp lệ: ${size.Size}`);
+//       }
+
+//       if (!size.MaterialLayer || typeof size.MaterialLayer !== 'number') {
+//         size.MaterialLayer = 0;
+//       }
+
+//       const sizeIDQuery = `
+//         SELECT SizeID
+//         FROM OrderSizes
+//         WHERE Size = @Size AND MaterialID = @MaterialID;
+//       `;
+
+//       const sizeIDResult = await executeQuery(sizeIDQuery, [
+//         { name: 'Size', type: sql.NVarChar, value: size.Size },
+//         { name: 'MaterialID', type: sql.Int, value: MaterialID }
+//       ]);
+
+//       // Kiểm tra xem sizeIDResult có dữ liệu không
+//       if (!sizeIDResult || sizeIDResult.length === 0) {
+//         console.log(`Không tìm thấy SizeID cho Size: ${size.Size} và MaterialID: ${MaterialID}. Bỏ qua cập nhật.`);
+//         continue;
+//       }
+
+//       for (const sizeIDRecord of sizeIDResult) {
+//         const SizeID = sizeIDRecord.SizeID;
+
+//         // Ghi nhật ký SizeID đang xử lý
+//         console.log(`Đang cập nhật SizeID: ${SizeID} cho Size: ${size.Size}`);
+
+//         const updateDeviceOutputQuery = `
+//           UPDATE DeviceOutput
+//           SET
+//             PiecesPerPair = @PiecesPerPair,
+//             MaterialLayer = @MaterialLayer,
+//             CuttingDieQty = @CuttingDieQty,
+//             ActualCut = @ActualCut,
+//             ActualPieces = @ActualPieces,
+//             ActualSizeQty = @ActualSizeQty,
+//             UpdatedAt = GETDATE()
+//           WHERE
+//             OrderID = @OrderID
+//             AND SizeID = @SizeID
+//             AND MaterialID = @MaterialID;
+//         `;
+
+//         const updateDeviceOutputInputs = [
+//           { name: 'OrderID', type: sql.Int, value: OrderID },
+//           { name: 'SizeID', type: sql.Int, value: SizeID },
+//           { name: 'MaterialID', type: sql.Int, value: MaterialID },
+//           { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair },
+//           { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer },
+//           { name: 'CuttingDieQty', type: sql.Int, value: size.CuttingDieQty },
+//           { name: 'ActualCut', type: sql.Int, value: size.ActualCut },
+//           { name: 'ActualPieces', type: sql.Int, value: size.ActualPieces },
+//           { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty }
+//         ];
+
+//         await executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
+//       }
+//     }
+
+//     console.log('Dữ liệu Actual đã được cập nhật thành công');
+//   } catch (error) {
+//     console.error('Lỗi khi cập nhật Actual data:', error.message);
+//     throw error;
+//   }
+// }
+// Function to save distribution data and default info
 async function saveDistributionDataToDB(dataList) {
+  let pool;
+
   try {
-    // Loop through the list of DistributionData objects
+    pool = await sql.connect(dbConfig);
+
     for (const data of dataList) {
-      // Prepare the parameters for the current data item
-      const distributionDataInputs = [
-        { name: 'DeviceID', type: sql.Int, value: data.DeviceID },
-        { name: 'PartSizeOrderID', type: sql.Int, value: data.PartSizeOrderID },
-        { name: 'OperatorID', type: sql.Int, value: data.OperatorID },
-        { name: 'InventoryQty', type: sql.Int, value: data.InventoryQty },
-        { name: 'Status', type: sql.NVarChar, value: data.Status || 'Pending' }, // Default to 'Pending'
-        { name: 'CreatedAt', type: sql.DateTime, value: data.CreatedAt || new Date() }, // Default to current date
-        { name: 'IsLeather', type: sql.Bit, value: data.IsLeather },
-        { name: 'IsDelete', type: sql.Bit, value: data.IsDelete || 0 } // Default to 0 if not provided
-      ];
+      const distributionConditions = {
+        DeviceID: { type: sql.Int, value: data.DeviceID },
+        PartSizeOrderID: { type: sql.Int, value: data.PartSizeOrderID }
+      };
 
-      // SQL query for inserting data into the DistributionData table
-      const distributionDataQuery = `
-        INSERT INTO DistributionData (
-          DeviceID, 
-          PartSizeOrderID, 
-          OperatorID, 
-          InventoryQty, 
-          Status, 
-          CreatedAt, 
-          IsLeather, 
-          IsDelete
-        )
-        VALUES (
-          @DeviceID, 
-          @PartSizeOrderID, 
-          @OperatorID, 
-          @InventoryQty, 
-          @Status, 
-          @CreatedAt, 
-          @IsLeather, 
-          @IsDelete
-        );
-      `;
+      const defaultInfoConditions = {
+        ProductID: { type: sql.Int, value: data.ProductID }
+      };
 
-      // Execute the insert query for each item in the list
-      await executeQuery(distributionDataQuery, distributionDataInputs);
+      // Check if record exists before inserting
+      const distributionExists = await recordExists("DistributionData", distributionConditions, pool);
+      const defaultInfoExists = await recordExists("DefaultInfo", defaultInfoConditions, pool);
+
+      if (!distributionExists) {
+        // Insert into DistributionData table
+        const distributionQuery = `
+          INSERT INTO DistributionData (
+            DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt, IsLeather, IsDelete
+          ) VALUES (
+            @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @IsLeather, @IsDelete
+          );
+        `;
+
+        let request = pool.request();
+        request.input('DeviceID', sql.Int, data.DeviceID);
+        request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
+        request.input('OperatorID', sql.Int, data.OperatorID);
+        request.input('InventoryQty', sql.Int, data.InventoryQty);
+        request.input('Status', sql.NVarChar, data.Status || 'Pending');
+        request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
+        request.input('IsLeather', sql.Bit, data.IsLeather);
+        request.input('IsDelete', sql.Bit, data.IsDelete || 0);
+
+        await request.query(distributionQuery);
+        console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
+      } else {
+        console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
+      }
+
+      if (!defaultInfoExists) {
+        // INSERT DefaultInfo nếu chưa tồn tại
+        const defaultInfoQuery = `
+          INSERT INTO DefaultInfo (
+            ProductID, PiecesPerPair, CuttingDieQty, MaterialLayer, TotalPiecesPerPair
+          ) VALUES (
+            @ProductID, @PiecesPerPair, @CuttingDieQty, @MaterialLayer, @TotalPiecesPerPair
+          );
+        `;
+
+        let request = pool.request();
+        request.input('ProductID', sql.Int, data.ProductID);
+        request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
+        request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
+        request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
+        request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
+
+        await request.query(defaultInfoQuery);
+        console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
+      } else {
+        // UPDATE DefaultInfo nếu đã tồn tại
+        const updateInfoQuery = `
+          UPDATE DefaultInfo 
+          SET PiecesPerPair = @PiecesPerPair, 
+              CuttingDieQty = @CuttingDieQty, 
+              MaterialLayer = @MaterialLayer, 
+              TotalPiecesPerPair = @TotalPiecesPerPair
+          WHERE ProductID = @ProductID;
+        `;
+
+        let request = pool.request();
+        request.input('ProductID', sql.Int, data.ProductID);
+        request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
+        request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
+        request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
+        request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
+
+        await request.query(updateInfoQuery);
+        console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
+      }
     }
 
-    console.log('All distribution data has been saved successfully.');
+    console.log('✅ All unique data processed successfully.');
   } catch (error) {
-    console.error('Error saving distribution data:', error.message);
-    throw error;
+    console.error('❌ Error saving data:', error.message);
   }
 }
+
 
 // async function saveDistributionDataToDBs(data) {
 //   const orderQuery = `
@@ -531,46 +732,54 @@ async function saveDistributionDataToDB(dataList) {
 async function getDistributionDataFromDb(ipAddress) {
   try {
     const query = `
-      SELECT  
-          pr.OrderID,
-          pr.MasterWorkOrder,
-          pr.SO,
-          d.IpAddress,
-		      dd.IsLeather,
-          p.Model,
-          o.OperatorName AS UserName,
-          p.ART,
-          pa.PartID,
-          pa.PartName,
-          m.MaterialCode,
-          m.MaterialID,
-          m.MaterialName,
-          se.SizeID,
-          se.Size,
-          ps.SizeQty,
-          dd.InventoryQty
-      FROM 
-          DistributionData AS dd
-      JOIN 
-          DeviceList AS d ON dd.DeviceID = d.DeviceID 
-      JOIN 
-          PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
-      JOIN 
-          Part AS pa ON pa.PartID = ps.PartID
-      JOIN 
-          Size AS se ON se.SizeID = ps.SizeID
-      JOIN 
-          Material AS m ON m.MaterialID = ps.MaterialID
-      JOIN 
-          Operator AS o ON dd.OperatorID = o.OperatorID  
-      JOIN 
-          ProductOrder AS pr ON ps.OrderId = pr.OrderID
-      JOIN 
-          Product AS p ON pr.ProductId = p.ProductId
-      WHERE 
-          dd.IsDelete = 0  AND d.IpAddress = @IpAddress AND dd.Status = 'Pending'
-      ORDER BY 
-          dd.CreatedAt ASC;
+        SELECT  
+            pr.OrderID,
+            pr.MasterWorkOrder,
+            pr.SO,
+            d.IpAddress,
+            dd.IsLeather,
+            p.Model,
+            o.OperatorName AS UserName,
+            p.ART,
+            pa.PartID,
+            pa.PartName,
+            m.MaterialCode,
+            m.MaterialID,
+            m.MaterialName,
+            se.SizeID,
+            se.Size,
+            ps.SizeQty,
+            dd.InventoryQty,
+            di.PiecesPerPair,
+            di.CuttingDieQty,
+            di.MaterialLayer,
+            di.TotalPiecesPerPair
+        FROM 
+            DistributionData AS dd
+        JOIN 
+            DeviceList AS d ON dd.DeviceID = d.DeviceID 
+        JOIN 
+            PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+        JOIN 
+            Part AS pa ON pa.PartID = ps.PartID
+        JOIN 
+            Size AS se ON se.SizeID = ps.SizeID
+        JOIN 
+            Material AS m ON m.MaterialID = ps.MaterialID
+        JOIN 
+            Operator AS o ON dd.OperatorID = o.OperatorID  
+        JOIN 
+            ProductOrder AS pr ON ps.OrderId = pr.OrderID
+        JOIN 
+            Product AS p ON pr.ProductId = p.ProductId
+        LEFT JOIN 
+            DefaultInfo AS di ON di.ProductID = p.ProductId
+        WHERE 
+            dd.IsDelete = 0  
+            AND d.IpAddress = @IpAddress
+            AND dd.Status = 'Pending'
+        ORDER BY 
+            dd.CreatedAt ASC;
     `;
     
     const request = new sql.Request();
@@ -606,6 +815,19 @@ async function getDistributionDataFromDb(ipAddress) {
           t => t.SizeID === value.SizeID && t.Size === value.Size && t.SizeQty === value.SizeQty && t.InventoryQty === value.InventoryQty
         )
       );
+      // Lấy thông tin DefaultValue
+      const defaultValue = result.recordset
+      .map(item => ({
+        PiecesPerPair: item.PiecesPerPair,
+        CuttingDieQty: item.CuttingDieQty,
+        MaterialLayer: item.MaterialLayer,
+        TotalPiecesPerPair: item.TotalPiecesPerPair
+      }))
+      .filter((value, index, self) =>
+        index === self.findIndex(
+          t => t.PiecesPerPair === value.PiecesPerPair && t.CuttingDieQty === value.CuttingDieQty && t.MaterialLayer === value.MaterialLayer && t.TotalPiecesPerPair === value.TotalPiecesPerPair
+        )
+      );
       // Trả về dữ liệu theo cấu trúc yêu cầu
       return {
         OrderID: orderID,
@@ -615,7 +837,8 @@ async function getDistributionDataFromDb(ipAddress) {
         Model: row.Model,
         ART: row.ART,
         MaterialData: materialData,
-        SizeData: sizeData
+        SizeData: sizeData,
+        DefaultValue: defaultValue
       };
     } else {
       return null; 
@@ -963,6 +1186,24 @@ async function getOperatorDistribution(employeeID) {
   }
 }
 
+
+// Function to check if a record already exists
+async function recordExists(tableName, conditions, pool) {
+  let query = `SELECT COUNT(*) AS count FROM ${tableName} WHERE `;
+  let conditionClauses = [];
+  let request = new sql.Request(pool);
+
+  // Dynamically generate conditions for the WHERE clause
+  Object.keys(conditions).forEach((key, index) => {
+    conditionClauses.push(`${key} = @${key}`);
+    request.input(key, conditions[key].type, conditions[key].value);
+  });
+
+  query += conditionClauses.join(" AND ");
+
+  const result = await request.query(query);
+  return result.recordset[0].count > 0; // Return true if record exists
+}
 
 
 module.exports = {

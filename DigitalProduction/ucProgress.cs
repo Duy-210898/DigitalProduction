@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
+using DevExpress.XtraGrid.Views.Grid.ViewInfo;
+using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Extensions;
 using Newtonsoft.Json;
 
@@ -26,6 +28,23 @@ namespace DigitalProduction
             gridView_ProgressManagement.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
             gridView_ProgressManagement.OptionsFind.ShowFindButton = false;
             gridView_ProgressManagement.RowHeight = 50;
+            gridView_ProgressManagement.RowCellStyle += gridView_ProgressManagement_RowCellStyle;
+        }
+
+        private void gridView_ProgressManagement_RowCellStyle(object sender, RowCellStyleEventArgs e)
+        {
+            GridView view = sender as GridView;
+            if (view == null) return;
+
+            // Get IsLeather value for the current row
+            bool isLeather = Convert.ToBoolean(view.GetRowCellValue(e.RowHandle, "IsLeather"));
+
+            // Apply custom style if IsLeather is true
+            if (isLeather)
+            {
+                e.Appearance.BackColor = Color.LightYellow; // Highlight cell
+                e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold); // Make it bold
+            }
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -163,6 +182,33 @@ namespace DigitalProduction
             gridView_ProgressManagement.Columns["CreatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
             gridView_ProgressManagement.Columns["CreatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy hh:mm";
             gridView_ProgressManagement.BestFitColumns();
+            groupDataRawOrLeather("MaterialName");
+        }
+
+        private void groupDataRawOrLeather(string name)
+        {
+            gridView_ProgressManagement.Columns[name].GroupIndex = 0; // Group by PartName
+            gridView_ProgressManagement.ExpandAllGroups();
+            gridView_ProgressManagement.CustomDrawGroupRow += (sender, e) =>
+            {
+                GridView view = sender as GridView;
+                GridGroupRowInfo groupInfo = e.Info as GridGroupRowInfo;
+
+                if (groupInfo.Column.FieldName == name) // Ensure correct grouping
+                {
+                    // Get name from the group
+                    object nameCol = view.GetGroupRowValue(e.RowHandle, groupInfo.Column);
+
+                    // Get IP Address from the first row in the group
+                    object ipAddress = view.GetRowCellValue(view.GetDataRowHandleByGroupRowHandle(e.RowHandle), "IpAddress");
+
+                    // Modify group row text
+                    groupInfo.GroupText = $"📦 {name}: {nameCol} - 🌐 IP: {ipAddress}";
+
+                    // Optional: Change group row text color
+                    e.Appearance.ForeColor = Color.Blue;
+                }
+            };
         }
 
         private void gridView_CustomDrawGroupPanel(object sender, CustomDrawEventArgs e)

@@ -132,17 +132,16 @@ async function handleClientMessage(ws, message) {
 
 // Hàm xử lý yêu cầu lấy dữ liệu sản lượng thực tế
 async function handleGetActualData(ws, request) {
-  const { orderId, masterWorkOrder } = request;
 
   let intervalId;
 
   try {
     // Function to fetch and send real-time data
-    const sendRealTimeData = async () => {
+    //const sendRealTimeData = async () => {
       try {
-        const realTimeData = await getActualOutputData(orderId, masterWorkOrder);
+        const realTimeData = await getActualOutputData();
 
-        if (realTimeData === null) {
+        if (!realTimeData) {
           ws.send(JSON.stringify({
             action: 'getActualData',
             status: 'error',
@@ -163,9 +162,11 @@ async function handleGetActualData(ws, request) {
           message: `Failed to get real-time data: ${error.message}`
         }));
       }
-    };
+   // };
 
-    intervalId = setInterval(sendRealTimeData, 2000);
+    // Send data immediately and then every 2 seconds
+    // await sendRealTimeData();
+    // intervalId = setInterval(sendRealTimeData, 2000);
 
   } catch (error) {
     console.error('Error handling the real-time data request:', error);
@@ -176,11 +177,15 @@ async function handleGetActualData(ws, request) {
     }));
   }
 
+  // Cleanup on WebSocket close
   ws.on('close', () => {
-    clearInterval(intervalId); 
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
     console.log('Client disconnected. Stopping data requests.');
   });
 }
+
 // Xử lý yêu cầu lấy thông tin phân phối của thiết bị
 async function handleGetDistributions(ws) {
   try {

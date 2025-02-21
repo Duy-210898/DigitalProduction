@@ -42,6 +42,7 @@ namespace DigitalProduction
             frmRegister.ExitClicked += RegisterControl_ExitClicked;
             frmRegister.DeviceCreated += RegisterForm_DeviceCreated;
         }
+
         private void gridView_CustomDrawGroupPanel(object sender, CustomDrawEventArgs e)
         {
             // Set the alignment of the GroupPanelText

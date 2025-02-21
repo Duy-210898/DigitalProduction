@@ -24,7 +24,17 @@ namespace DigitalProduction.Models
 
         public int OperatorID { get; set; }
 
+        public int ProductID { get; set; }
+
         public int InventoryQty { get; set; }
+
+        public int CuttingDieQty { get; set; }
+
+        public int PiecesPerPair { get; set; }
+
+        public int MaterialLayer { get; set; }
+
+        public int TotalPiecesPerPair { get; set; }
 
         public string Status { get; set; } = "Pending";
 

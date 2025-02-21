@@ -105,15 +105,18 @@ GO
 -- Table: DeviceOutput
 CREATE TABLE DeviceOutput (
     OutputID INT PRIMARY KEY IDENTITY(1,1),
-    DeviceID INT,
-    PartID INT,
+	SizeID INT,
+	OrderID INT,
     PiecesPerPair INT,
     MaterialLayer INT,
     CuttingDieQty INT,
     ActualCut INT,
     ActualPieces INT,
     ActualSizeQty INT,
-    InventoryQty INT
+    InventoryQty INT,
+	TotalPiecesPerPair INT,
+	CreatedAt DATETIME,
+    UpdatedAt DATETIME
 );
 GO
 
@@ -168,23 +171,21 @@ GO
 -- Table: DefaultInfo
 CREATE TABLE DefaultInfo (
     DefaultID INT PRIMARY KEY IDENTITY(1,1),
-    PartID INT,
     ProductID INT,
     PiecesPerPair INT,
+	TotalPiecesPerPair INT,
     CuttingDieQty INT,
-    MaterialLayer INT,
-    CreatedByID INT
+    MaterialLayer INT
 );
 GO
 
 -- Foreign Key Constraints
 ALTER TABLE DeviceOutput
-    ADD CONSTRAINT FK_DeviceOutput_Device FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID),
-	CONSTRAINT FK_DeviceOutput_Part FOREIGN KEY (PartId) REFERENCES Part(PartId);
+	ADD CONSTRAINT FK_DeviceOutput_Size FOREIGN KEY (SizeID) REFERENCES Size(SizeID),
+	  CONSTRAINT FK_DeviceOutput_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID);
 GO
 ALTER TABLE DefaultInfo
-    ADD CONSTRAINT FK_DefaultInfo_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
-	CONSTRAINT FK_DefaultInfo_Part FOREIGN KEY (PartID) REFERENCES Part(PartId);
+    ADD CONSTRAINT FK_DefaultInfo_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID);
 GO
 ALTER TABLE DistributionData
     ADD CONSTRAINT FK_DistributionData_Device FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID),

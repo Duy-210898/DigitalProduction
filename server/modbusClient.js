@@ -10,6 +10,7 @@ let previousRegister1034 = null;
 let previousRegister1032 = null;
 let previousRegister6510 = null;
 let isDataSentToModbus = false;
+let sizeDataInfo = {}; 
 
 let modbusClients = {};
 let counter = 0;
@@ -226,8 +227,8 @@ async function startReadingRegisters(client, ipAddress) {
 
     //readAndCheckBits(client, ipAddress);
     readOperatorID(client, ipAddress);
-    readAndSaveDistribution(client, ipAddress);
-    // readActualData(client, ipAddress);
+    //readAndSaveDistribution(client, ipAddress);
+    readActualData(client);
   }, 1000);
 }
 
@@ -411,108 +412,265 @@ async function readOperatorID(client, ipAddress) {
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-async function readActualData(client, ipAddress) {
+async function readActualData(client) {
   try {
-    const sizeLabels = [
-      "10K", "10.5K", "11K", "11.5K", "12K", "12.5K", "13K", "13.5K",
-      "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "5.5",
-      "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5",
-      "11", "11.5", "12", "12.5", "13", "13.5", "14", "14.5"
-    ];
-
     const currentData = {};
-
-    // Đọc OrderID từ thanh ghi 6507
-    const orderIDData = await client.readHoldingRegisters(6507, 1);
+    let sizeDataInfo = {
+      sizeID: [900],
+      isLeather: 2,
+      sizeCount: 1
+  };
+    
+    // Read OrderID from register 1000
+    const orderIDData = await client.readHoldingRegisters(1000, 1);
     if (!orderIDData || !orderIDData.response || !orderIDData.response._body) {
-      throw new Error('Không thể đọc OrderID từ thanh ghi 6507');
+      console.log('Không thể đọc OrderID từ thanh ghi 1000');
     }
+
+    const baseAddress = sizeDataInfo.isLeather == 1 ? 886 : 966;
+    const baseActul = sizeDataInfo.isLeather == 1 ? 794 : 922;
     const OrderID = orderIDData.response._body.values[0];
 
-    // Lấy PartName từ đối tượng modbusClients
-    const partName = modbusClients[ipAddress]?.partName;
-    console.log(`PartName on readActualData: ${partName}`);
-
-    const promises = sizeLabels.map((label, i) => {
-      const baseAddress = 6003 + i * 14;
-      return Promise.all([ // Đọc nhiều thanh ghi
-        client.readHoldingRegisters(baseAddress + 2, 1),  // PiecesPerPair
-        client.readHoldingRegisters(baseAddress + 4, 1),  // MaterialLayer
-        client.readHoldingRegisters(baseAddress + 6, 1),  // CuttingDieQty
-        client.readHoldingRegisters(baseAddress + 8, 1),  // ActualCut
-        client.readHoldingRegisters(baseAddress + 10, 1), // ActualPieces
-        client.readHoldingRegisters(baseAddress + 12, 1)  // ActualSizeQty
-      ]).then(async ([piecesPerPairData, materialLayerData, cuttingDieQtyData, actualCutData, actualPiecesData, actualSizeQtyData]) => {
-
-        // Kiểm tra và xử lý dữ liệu từ Modbus cho mỗi thanh ghi
-        const piecesPerPair = piecesPerPairData?.response?._body?.values[0] ?? 0;
-        const materialLayer = materialLayerData?.response?._body?.values[0] ?? 0;
-        const cuttingDieQty = cuttingDieQtyData?.response?._body?.values[0] ?? 0;
-        const actualCut = actualCutData?.response?._body?.values[0] ?? 0;
-        const actualPieces = actualPiecesData?.response?._body?.values[0] ?? 0;
-        const actualSizeQty = actualSizeQtyData?.response?._body?.values[0] ?? 0;
-
-        // Lưu dữ liệu vào currentData
-        currentData[label] = {
-          PiecesPerPair: piecesPerPair,
-          MaterialLayer: materialLayer,
-          CuttingDieQty: cuttingDieQty,
-          ActualCut: actualCut,
-          ActualPieces: actualPieces,
-          ActualSizeQty: actualSizeQty
-        };
-
-        // Kiểm tra sự thay đổi và chỉ lưu nếu có sự thay đổi
-        const prevData = previousData ? previousData[label] : null;
-        let hasChanges = !prevData || (
-          piecesPerPair !== prevData.PiecesPerPair ||
-          materialLayer !== prevData.MaterialLayer ||
-          cuttingDieQty !== prevData.CuttingDieQty ||
-          actualCut !== prevData.ActualCut ||
-          actualPieces !== prevData.ActualPieces ||
-          actualSizeQty !== prevData.ActualSizeQty
-        );
-
-        if (hasChanges) {
-          if (piecesPerPair !== 0 || materialLayer !== 0 ||
-            cuttingDieQty !== 0 || actualCut !== 0 || actualPieces !== 0 || actualSizeQty !== 0) {
-
-            console.log(`${label} =`, currentData[label]);
-
-            await saveActualDataToDB({
-              OrderID: OrderID,
-              SizeData: [{
-                Size: label,
-                PiecesPerPair: piecesPerPair,
-                MaterialLayer: materialLayer,
-                CuttingDieQty: cuttingDieQty,
-                ActualCut: actualCut,
-                ActualPieces: actualPieces,
-                ActualSizeQty: actualSizeQty
-              }],
-            }, partName);
+    // Use map instead of forEach to properly handle promises
+    const promises = sizeDataInfo.sizeID.map(async (sizeAdressID, index) => {
+      try {
+        // Function to safely read registers and handle errors
+        const safeRead = async (address) => {
+          try {
+            const response = await client.readHoldingRegisters(address, 1);
+            return response?.response?._body?.values[0] ?? 0; // Return value or default 0
+          } catch (err) {
+            console.error(`Error reading register ${address}:`, err.message);
+            return null; // Return null instead of breaking execution
           }
-
-          previousData[label] = {
-            PiecesPerPair: piecesPerPair,
-            MaterialLayer: materialLayer,
-            CuttingDieQty: cuttingDieQty,
-            ActualCut: actualCut,
-            ActualPieces: actualPieces,
-            ActualSizeQty: actualSizeQty
-          };
+        };
+    
+        // Read Modbus registers safely
+        const [
+          sizeID, piecesPerPair, materialLayer, cuttingDieQty, 
+          actualCut, actualPieces, actualSizeQty, totalPieces
+        ] = await Promise.all([
+          safeRead(sizeAdressID),  // Read sizeID safely
+          sizeDataInfo.isLeather == 1 ? safeRead(baseAddress) : Promise.resolve(null), // picesPer
+          sizeDataInfo.isLeather == 1 ? safeRead(baseAddress + 4) :  Promise.resolve(null), //material
+          sizeDataInfo.isLeather == 1 ? safeRead(baseAddress + 8) :  Promise.resolve(null), //cutting
+          safeRead(baseActul + (16 * index)), //actul Cut
+           safeRead(baseActul + 4 + (16 * index)), //actualpieces
+          safeRead(baseActul + 8 + (16 * index)), //actualSizeQty
+          sizeDataInfo.isLeather == 2 ? safeRead(baseAddress) : Promise.resolve(null) // totalPieces
+        ]);
+    
+        // If sizeID is null (error occurred), skip processing this sizeID
+        if (sizeID === null) {
+          console.warn(`Skipping sizeID ${sizeID} due to read failure`);
+          return;
         }
-      });
+    
+        // Leather condition check
+        let processedPiecesPerPair = null;
+        let processedMaterialLayer = null;
+        let processedCuttingDieQty = null;
+        let processedTotalPieces = null;
+    
+        if (sizeDataInfo.isLeather == 1) {
+          processedPiecesPerPair = piecesPerPair;
+          processedMaterialLayer = materialLayer;
+          processedCuttingDieQty = cuttingDieQty;
+        } else {
+          processedTotalPieces = totalPieces;
+        }
+    
+        console.log(`Processed Data for sizeID ${sizeID}:`, {
+          sizeID,
+          processedPiecesPerPair,
+          processedMaterialLayer,
+          processedCuttingDieQty,
+          actualCut,
+          actualPieces,
+          actualSizeQty
+        });
+        await saveActualDataToDB({ 
+          OrderID: OrderID,
+          SizeData: [{
+              SizeID: sizeID,
+              PiecesPerPair: piecesPerPair,
+              MaterialLayer: materialLayer,
+              CuttingDieQty: cuttingDieQty,
+              ActualCut: actualCut,
+              ActualPieces: actualPieces,
+              ActualSizeQty: actualSizeQty
+                }] 
+              });
+      } catch (error) {
+        console.error(`Error processing sizeID ${sizeID}:`, error.message);
+        return null; // Continue processing other IDs
+      }
     });
+    
+    // Wait for all promises to resolve
+    const results = await Promise.all(promises);
+    console.log("Final Results:", results.filter(Boolean)); // Remove failed reads
+    
 
-    await Promise.all(promises);
+        // Store the data
+        // currentData[label] = {
+        //   PiecesPerPair: piecesPerPair,
+        //   MaterialLayer: materialLayer,
+        //   CuttingDieQty: cuttingDieQty,
+        //   ActualCut: actualCut,
+        //   ActualPieces: actualPieces,
+        //   ActualSizeQty: actualSizeQty
+        // };
+
+        // Check for changes
+        // const prevData = previousData ? previousData[label] : null;
+        // const hasChanges = !prevData || (
+        //   piecesPerPair !== prevData?.PiecesPerPair ||
+        //   materialLayer !== prevData?.MaterialLayer ||
+        //   cuttingDieQty !== prevData?.CuttingDieQty ||
+        //   actualCut !== prevData?.ActualCut ||
+        //   actualPieces !== prevData?.ActualPieces ||
+        //   actualSizeQty !== prevData?.ActualSizeQty
+        // );
+
+        // if (hasChanges) {
+        //   if (piecesPerPair !== 0 || materialLayer !== 0 || cuttingDieQty !== 0 ||
+        //       actualCut !== 0 || actualPieces !== 0 || actualSizeQty !== 0) {
+
+        //     console.log(`${label} =`, currentData[label]);
+
+        //     await saveActualDataToDB({
+        //       OrderID: OrderID,
+        //       SizeData: [{
+        //         Size: label,
+        //         PiecesPerPair: piecesPerPair,
+        //         MaterialLayer: materialLayer,
+        //         CuttingDieQty: cuttingDieQty,
+        //         ActualCut: actualCut,
+        //         ActualPieces: actualPieces,
+        //         ActualSizeQty: actualSizeQty
+        //       }]
+        //     });
+        //   }
+
+      //    previousData[label] = { ...currentData[label] };
+        
+    //   }
+    //    catch (err) {
+    //     console.error(`Error processing sizeID ${sizeID}:`, err);
+    //   }
+    // });
+
+    // Wait for all promises to complete
+   // await Promise.all(promises);
 
   } catch (error) {
     console.error(`Error reading actual data: ${error.message}`);
     logToFile(errorLogPath, `Error reading actual data: ${error.message}`);
   }
 }
+
+// async function readActualData(client, ipAddress) {
+//   try {
+//     const sizeLabels = [
+//       "10K", "10.5K", "11K", "11.5K", "12K", "12.5K", "13K", "13.5K",
+//       "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "5.5",
+//       "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5",
+//       "11", "11.5", "12", "12.5", "13", "13.5", "14", "14.5"
+//     ];
+
+//     const currentData = {};
+
+//     // Đọc OrderID từ thanh ghi 6507
+//     const orderIDData = await client.readHoldingRegisters(6507, 1);
+//     if (!orderIDData || !orderIDData.response || !orderIDData.response._body) {
+//       throw new Error('Không thể đọc OrderID từ thanh ghi 6507');
+//     }
+//     const OrderID = orderIDData.response._body.values[0];
+
+//     // Lấy PartName từ đối tượng modbusClients
+//     const partName = modbusClients[ipAddress]?.partName;
+//     console.log(`PartName on readActualData: ${partName}`);
+
+//     const promises = sizeLabels.map((label, i) => {
+//       const baseAddress = 6003 + i * 14;
+//       return Promise.all([ // Đọc nhiều thanh ghi
+//         client.readHoldingRegisters(baseAddress + 2, 1),  // PiecesPerPair
+//         client.readHoldingRegisters(baseAddress + 4, 1),  // MaterialLayer
+//         client.readHoldingRegisters(baseAddress + 6, 1),  // CuttingDieQty
+//         client.readHoldingRegisters(baseAddress + 8, 1),  // ActualCut
+//         client.readHoldingRegisters(baseAddress + 10, 1), // ActualPieces
+//         client.readHoldingRegisters(baseAddress + 12, 1)  // ActualSizeQty
+//       ]).then(async ([piecesPerPairData, materialLayerData, cuttingDieQtyData, actualCutData, actualPiecesData, actualSizeQtyData]) => {
+
+//         // Kiểm tra và xử lý dữ liệu từ Modbus cho mỗi thanh ghi
+//         const piecesPerPair = piecesPerPairData?.response?._body?.values[0] ?? 0;
+//         const materialLayer = materialLayerData?.response?._body?.values[0] ?? 0;
+//         const cuttingDieQty = cuttingDieQtyData?.response?._body?.values[0] ?? 0;
+//         const actualCut = actualCutData?.response?._body?.values[0] ?? 0;
+//         const actualPieces = actualPiecesData?.response?._body?.values[0] ?? 0;
+//         const actualSizeQty = actualSizeQtyData?.response?._body?.values[0] ?? 0;
+
+//         // Lưu dữ liệu vào currentData
+//         currentData[label] = {
+//           PiecesPerPair: piecesPerPair,
+//           MaterialLayer: materialLayer,
+//           CuttingDieQty: cuttingDieQty,
+//           ActualCut: actualCut,
+//           ActualPieces: actualPieces,
+//           ActualSizeQty: actualSizeQty
+//         };
+
+//         // Kiểm tra sự thay đổi và chỉ lưu nếu có sự thay đổi
+//         const prevData = previousData ? previousData[label] : null;
+//         let hasChanges = !prevData || (
+//           piecesPerPair !== prevData.PiecesPerPair ||
+//           materialLayer !== prevData.MaterialLayer ||
+//           cuttingDieQty !== prevData.CuttingDieQty ||
+//           actualCut !== prevData.ActualCut ||
+//           actualPieces !== prevData.ActualPieces ||
+//           actualSizeQty !== prevData.ActualSizeQty
+//         );
+
+//         if (hasChanges) {
+//           if (piecesPerPair !== 0 || materialLayer !== 0 ||
+//             cuttingDieQty !== 0 || actualCut !== 0 || actualPieces !== 0 || actualSizeQty !== 0) {
+
+//             console.log(`${label} =`, currentData[label]);
+
+//             await saveActualDataToDB({
+//               OrderID: OrderID,
+//               SizeData: [{
+//                 Size: label,
+//                 PiecesPerPair: piecesPerPair,
+//                 MaterialLayer: materialLayer,
+//                 CuttingDieQty: cuttingDieQty,
+//                 ActualCut: actualCut,
+//                 ActualPieces: actualPieces,
+//                 ActualSizeQty: actualSizeQty
+//               }],
+//             }, partName);
+//           }
+
+//           previousData[label] = {
+//             PiecesPerPair: piecesPerPair,
+//             MaterialLayer: materialLayer,
+//             CuttingDieQty: cuttingDieQty,
+//             ActualCut: actualCut,
+//             ActualPieces: actualPieces,
+//             ActualSizeQty: actualSizeQty
+//           };
+//         }
+//       });
+//     });
+
+//     await Promise.all(promises);
+
+//   } catch (error) {
+//     console.error(`Error reading actual data: ${error.message}`);
+//     logToFile(errorLogPath, `Error reading actual data: ${error.message}`);
+//   }
+// }
 async function writeToModbusRegister(client) {
   try {
     setInterval(async () => {
@@ -706,42 +864,49 @@ async function saveDistributionDataToModbus(ipAddress, data) {
     })();
     await leatherDataPromise;
 
-    // // Write Material Data
-    // const materialRegisterAddress = data.Leather == 2 ? 720 : 290;
-    // const materialIDPromises = data.MaterialData.slice(0, 20).map(async (material) => {
-    //   try {
-    //     const materialID = parseInt(material.MaterialID, 10);
-    //     await client.writeSingleRegister(materialRegisterAddress, materialID);
-    //     console.log(`Successfully wrote MaterialID ${materialID} to register ${materialRegisterAddress}`);
-    //   } catch (error) {
-    //     console.error(`Error writing MaterialID: ${error.message}`);
-    //   }
-    // });
-    // await Promise.all(materialIDPromises);
+    // Write Material Data
+    const materialRegisterAddress = data.Leather == 2 ? 720 : 290;
+    const materialCodePromises = data.MaterialData.slice(0, 20).map(async (material) => {
+    try {
+      // Convert the material code to an array of 16-bit little-endian values
+      const materialCodeArray = stringTo16BitArrayLittleEndian(material.MaterialCode);
+      
+      // Write each 16-bit value to consecutive Modbus registers
+      for (let i = 0; i < materialCodeArray.length; i++) {
+        const registerAddress = materialRegisterAddress + i; // Increment register address for each 16-bit value
+        await client.writeSingleRegister(registerAddress, materialCodeArray[i]);
+        console.log(`Successfully wrote materialCode ${materialCodeArray[i]} to register ${registerAddress}`);
+      }
+    } catch (error) {
+      console.error(`Error writing materialCode: ${error.message}`);
+    }
+    });
 
-       // Write Material Data
-       const materialRegisterAddress = data.Leather == 2 ? 720 : 290;
-       const materialCodePromises = data.MaterialData.slice(0, 20).map(async (material) => {
-        try {
-          // Convert the material code to an array of 16-bit little-endian values
-          const materialCodeArray = stringTo16BitArrayLittleEndian(material.MaterialCode);
-          
-          // Write each 16-bit value to consecutive Modbus registers
-          for (let i = 0; i < materialCodeArray.length; i++) {
-            const registerAddress = materialRegisterAddress + i; // Increment register address for each 16-bit value
-            await client.writeSingleRegister(registerAddress, materialCodeArray[i]);
-            console.log(`Successfully wrote materialCode ${materialCodeArray[i]} to register ${registerAddress}`);
-          }
-        } catch (error) {
-          console.error(`Error writing materialCode: ${error.message}`);
+    await Promise.all(materialCodePromises);
+
+      // Write partID
+      const partIDRegisterAddress = data.Leather == 2 ? 730 : 300;
+      const partIDPromises = data.MaterialData.slice(0, 20).map(async (material) => {
+      try {
+        // Convert the material code to an array of 16-bit little-endian values
+        const partIDCodeArray = stringTo16BitArrayLittleEndian(material.PartID);
+        
+        // Write each 16-bit value to consecutive Modbus registers
+        for (let i = 0; i < partIDCodeArray.length; i++) {
+          const registerAddress = partIDRegisterAddress + i; // Increment register address for each 16-bit value
+          await client.writeSingleRegister(registerAddress, partIDCodeArray[i]);
+          console.log(`Successfully wrote partID ${partIDCodeArray[i]} to register ${registerAddress}`);
         }
+      } catch (error) {
+        console.error(`Error writing partID: ${error.message}`);
+      }
       });
-      
-      await Promise.all(materialCodePromises);
-      
+    
+    await Promise.all(partIDPromises);
+    
 
     // Write Part Names
-    const partNameStartRegister = 320;
+    const partNameStartRegister = data.Leather == 2 ? 320 : 270;
     const partNamePromises = data.MaterialData.slice(0, 20).map(async (material, i) => {
       try {
         const partName = material.PartName;
@@ -757,10 +922,37 @@ async function saveDistributionDataToModbus(ipAddress, data) {
     });
 
     await Promise.all(partNamePromises);
-    // Write Size Data
+    
+    // Write defaultValue
+    if (data.Leather == 1) {
+      const BASE_REGISTER = 886; 
+      const defaultValue = data.DefaultValue;
+    
+      for (const item of defaultValue) {
+        try {
+          await client.writeSingleRegister(BASE_REGISTER, item.PiecesPerPair);
+          await client.writeSingleRegister(BASE_REGISTER + 4, item.MaterialLayer);
+          await client.writeSingleRegister(BASE_REGISTER + 8, item.CuttingDieQty);
+          console.log("✅ Successfully wrote to Modbus registers (Leather == 1)");
+        } catch (error) {
+          console.error("❌ Error writing to Modbus registers (Leather == 1): ", error);
+        }
+      }
+    } else {
+      const BASE_REGISTER = 966;
+      const defaultValue = data.DefaultValue; // Đảm bảo có dữ liệu để lặp qua
+    
+      for (const item of defaultValue) {
+        try {
+          await client.writeSingleRegister(BASE_REGISTER, item.TotalPiecesPerPair);
+          console.log("✅ Successfully wrote to Modbus registers (Leather != 1)");
+        } catch (error) {
+          console.error("❌ Error writing to Modbus registers (Leather != 1): ", error);
+        }
+      }
+    }
+    // Write SizeData
     await writeRegisterSizeData(client, data.SizeData, data.Leather);
-
-
     console.log('Data successfully saved to Modbus');
   } catch (error) {
     console.error(`Error saving distribution data to Modbus: ${error.message}`);
@@ -775,11 +967,16 @@ async function writeRegisterSizeData(client, sizeData, isLeather) {
   if(Array.isArray(sizeData) && sizeData.length > 6) 
     return;
 
+  // push size of number and leather
+  sizeDataInfo.sizeCount = sizeData.length;
+  sizeDataInfo.isLeather = isLeather;
+  console.log(`[sizeDataInfo] Number of size ${sizeDataInfo.sizeCount} and isLeather ${isLeather}`)
+
   let registerSize = [];
   if (isLeather == 2 && sizeData.length <= 3) {
-    // size leather
     // register number of size
-    await client.writeSingleRegister(sizeData.length, 1003);
+    // size leather
+    await client.writeSingleRegister(1003, sizeData.length);
     registerSize = [
       { SizeID: 900, Size: 906, SizeQty: 918, InventoryQty: 79 },
       { SizeID: 902, Size: 910, SizeQty: 934, InventoryQty: 83 },
@@ -787,7 +984,7 @@ async function writeRegisterSizeData(client, sizeData, isLeather) {
     ];
   } else {
     // size Raw
-    await client.writeSingleRegister(sizeData.length, 1003);
+    await client.writeSingleRegister(1002, sizeData.length);
     registerSize = [
       { SizeID: 750, Size: 762, SizeQty: 790, InventoryQty: 55 },
       { SizeID: 752, Size: 766, SizeQty: 806, InventoryQty: 59 },
@@ -796,7 +993,6 @@ async function writeRegisterSizeData(client, sizeData, isLeather) {
       { SizeID: 758, Size: 778, SizeQty: 854, InventoryQty: 71 },
       { SizeID: 760, Size: 782, SizeQty: 870, InventoryQty: 75 },
     ];
-    await client.writeSingleRegister(sizeData.length, 1002);
   }
   for (let i = 0; i < sizeData.length; i++) {
     const item = sizeData[i];
@@ -824,11 +1020,24 @@ async function writeRegisterSizeData(client, sizeData, isLeather) {
       // Write SizeID, Size, SizeQty, and InventoryQty to the corresponding Modbus registers
       let registerSizeData = stringTo16BitArrayLittleEndian(item.Size).slice(0, 10 * 2);
       const startSizeRegister = registerSize[i].Size; 
-      await client.writeSingleRegister(registerSize[i].SizeID, item.SizeID);  
+      await client.writeSingleRegister(registerSize[i].SizeID, item.SizeID);
+
+      // push sizeID
+      if (!Array.isArray(sizeDataInfo.sizeID)) {
+        sizeDataInfo.sizeID = [];
+      }
+      sizeDataInfo.sizeID.push(registerSize[i].SizeID);
+      console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`)
+
+      console.log(`Writing to register ${registerSize[i].SizeID}, value: ${item.SizeID}`);
       for (let j = 0; j < registerSizeData.length; j++) {
         console.log(`Writing to register ${startSizeRegister + j}, value: ${registerSizeData[j]}`);
         await client.writeSingleRegister(startSizeRegister + j, registerSizeData[j]);
       }             
+
+      console.log(`Writing to register ${registerSize[i].SizeQty}, value: ${item.SizeQty}`);
+      console.log(`Writing to register ${registerSize[i].InventoryQty}, value: ${item.InventoryQty}`);
+
       await client.writeSingleRegister(registerSize[i].SizeQty, item.SizeQty || 0);    
       await client.writeSingleRegister(registerSize[i].InventoryQty, item.InventoryQty  || 0); 
       console.log(`Successfully written to Modbus for SizeID ${item.SizeID}`);
