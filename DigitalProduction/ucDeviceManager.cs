@@ -4,35 +4,30 @@ using System.Data;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Base;
-using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
 namespace DigitalProduction
 {
-    public partial class ucDeviceManager : XtraUserControl
+    public partial class ucDeviceManager : UserControl
     {
         private WebSocketClient _webSocketClient;
         private List<Device> currentDeviceStatuses = new List<Device>();
         private readonly DataTable deviceDataTable;
-        private PanelControl groupPanelButtonContainer;
-        private SimpleButton button;
+        private Panel groupPanelButtonContainer;
+        private Button button;
         private ucRegisterDevice frmRegister;
-        private PanelControl paginationPanel;
-        private LabelControl lblPageInfo;
+        private Panel paginationPanel;
+        private Label lblPageInfo;
+        private DataGridView dgvDevices;
+        private ComboBox departmentComboBox;
 
         public ucDeviceManager()
         {
             InitializeComponent();
             deviceDataTable = new DataTable();
-           // gridView_Device.ShowFindPanel();
-            gridView_Device.OptionsFind.ShowFindButton = false;
-            gridControl_Devices.DataSource = InitializeDeviceDataTable();
-            gridView_Device.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
-            gridView_Device.RowHeight = 50;
-            gridView_Device.BestFitColumns();
+            InitializeDataGridView();
+            dgvDevices.DataSource = InitializeDeviceDataTable();
             CreateButtonContainer();
 
             // show add new device
@@ -43,16 +38,157 @@ namespace DigitalProduction
             frmRegister.DeviceCreated += RegisterForm_DeviceCreated;
         }
 
-        private void gridView_CustomDrawGroupPanel(object sender, CustomDrawEventArgs e)
+        private void InitializeDataGridView()
         {
-            // Set the alignment of the GroupPanelText
-            e.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            e.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
+            dgvDevices = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AllowUserToAddRows = false,
+                ReadOnly = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                RowTemplate = { Height = 50 }
+            };
 
-            // Optional: You can also change the font and color if necessary
-            e.Appearance.Font = new Font("Tahoma", 13, FontStyle.Bold);
-            e.Appearance.ForeColor = Color.Blue;
+            this.Controls.Add(dgvDevices);
         }
+        private void ApplyLocalization()
+        {
+            dgvDevices.Columns["Address"].HeaderText = LocalizationManager.GetString("Address");
+            dgvDevices.Columns["Machine Name"].HeaderText = LocalizationManager.GetString("MachineName");
+            dgvDevices.Columns["Plant Name"].HeaderText = LocalizationManager.GetString("PlantName");
+            dgvDevices.Columns["Department Name"].HeaderText = LocalizationManager.GetString("DepartmentName");
+            dgvDevices.Columns["ConnectionStatus"].HeaderText = LocalizationManager.GetString("Status");
+
+            // ✅ Add Action Column if it does not exist
+            if (!dgvDevices.Columns.Contains("Action"))
+            {
+                DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn
+                {
+                    Name = "Action",
+                    HeaderText = "Action",
+                    UseColumnTextForButtonValue = false  // ✅ Set to false to allow dynamic text change
+                };
+                dgvDevices.Columns.Add(actionColumn);
+            }
+
+            // ✅ Set every row to be read-only at the start
+            foreach (DataGridViewRow row in dgvDevices.Rows)
+            {
+                row.Cells["Address"].ReadOnly = true;
+                row.Cells["Machine Name"].ReadOnly = true;
+                row.Cells["Plant Name"].ReadOnly = true;
+                row.Cells["Department Name"].ReadOnly = true;
+                row.Cells["IsActive"].ReadOnly = true;
+                row.Cells["ConnectionStatus"].ReadOnly = true;
+
+                row.Cells["Action"].Value = "Edit";
+            }
+
+            dgvDevices.CellClick += DgvDevices_CellClick; // Attach event
+        }
+
+        private void DgvDevices_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvDevices.Rows[e.RowIndex];
+
+                // Check if the clicked cell is in the "Action" column
+                if (dgvDevices.Columns[e.ColumnIndex].Name == "Action")
+                {
+                    if (row.Cells["Action"].Value.ToString() == "Edit")
+                    {
+                        // Enable Editing
+                        row.Cells["Address"].ReadOnly = false;
+                        row.Cells["Machine Name"].ReadOnly = false;
+                        row.Cells["Plant Name"].ReadOnly = false;
+                        row.Cells["Department Name"].ReadOnly = false;
+                        row.Cells["IsActive"].ReadOnly = false;
+
+                        // Change Background Color to Indicate Editable Mode
+                        row.Cells["Address"].Style.BackColor = Color.LightYellow;
+                        row.Cells["Machine Name"].Style.BackColor = Color.LightYellow;
+                        row.Cells["Plant Name"].Style.BackColor = Color.LightYellow;
+                        row.Cells["Department Name"].Style.BackColor = Color.LightYellow;
+                        row.Cells["IsActive"].Style.BackColor = Color.LightYellow;
+
+                        row.Cells["Action"].Value = "Update";  // Change button text to "Update"
+
+                        // Display ComboBox for "Department Name"
+                        departmentComboBox = new ComboBox
+                        {
+                            DataSource = new List<string> { "HR", "Engineering", "Sales", "Marketing" },  // Example department names
+                            Location = row.Cells["Department Name"].ContentBounds.Location,
+                            Size = row.Cells["Department Name"].ContentBounds.Size,
+                            DropDownStyle = ComboBoxStyle.DropDownList
+                        };
+                        departmentComboBox.SelectedItem = row.Cells["Department Name"].Value.ToString();
+                        departmentComboBox.Leave += (s, ev) => UpdateDepartmentName(row, departmentComboBox);
+
+                        dgvDevices.Controls.Add(departmentComboBox);
+                    }
+                    else if (row.Cells["Action"].Value.ToString() == "Update")
+                    {
+                        // Get Updated Data from Row
+                        string address = row.Cells["Address"].Value.ToString();
+                        string machineName = row.Cells["Machine Name"].Value.ToString();
+                        string plantName = row.Cells["Plant Name"].Value.ToString();
+                        string departmentName = row.Cells["Department Name"].Value.ToString();
+                        bool isActive = Convert.ToBoolean(row.Cells["IsActive"].Value);
+                        bool connectionStatus = Convert.ToBoolean(row.Cells["ConnectionStatus"].Value);
+
+                        // Update Device
+                        UpdateDevice(address, machineName, plantName, departmentName, isActive, connectionStatus);
+
+                        // Make ReadOnly Again
+                        row.Cells["Machine Name"].ReadOnly = true;
+                        row.Cells["Plant Name"].ReadOnly = true;
+                        row.Cells["Department Name"].ReadOnly = true;
+
+                        // Reset Background Color
+                        row.Cells["Machine Name"].Style.BackColor = Color.White;
+                        row.Cells["Plant Name"].Style.BackColor = Color.White;
+                        row.Cells["Department Name"].Style.BackColor = Color.White;
+
+                        row.Cells["Action"].Value = "Edit";  // Change button text back to "Edit"
+                    }
+                }
+            }
+        }
+
+        private void UpdateDepartmentName(DataGridViewRow row, ComboBox comboBox)
+        {
+            // Update the department name in the DataGridView cell
+            row.Cells["Department Name"].Value = comboBox.SelectedItem.ToString();
+
+            // Remove the ComboBox from the DataGridView controls
+            dgvDevices.Controls.Remove(comboBox);
+        }
+
+
+
+
+        private void UpdateDevice(string address, string machineName, string plantName, string departmentName, bool isActive, bool connectionStatus)
+        {
+            // Example: Update data in DataTable
+            foreach (DataRow row in deviceDataTable.Rows)
+            {
+                if (row["Address"].ToString() == address)
+                {
+                    row["Machine Name"] = machineName;
+                    row["Plant Name"] = plantName;
+                    row["Department Name"] = departmentName;
+                    row["IsActive"] = isActive;
+                    row["ConnectionStatus"] = connectionStatus;
+                    break;
+                }
+            }
+
+            dgvDevices.Refresh(); // Refresh UI after updating
+        }
+
+
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
@@ -60,14 +196,14 @@ namespace DigitalProduction
             _ = GetDataAndLoadToGridAsync();
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }
-        // Send request to WebSocket or API and load data
+
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new {app = Global.App, action = "getDevices" };
+            var request = new { app = Global.App, action = "getDevices" };
             string jsonRequest = JsonConvert.SerializeObject(request);
-
             await _webSocketClient.SendAsync(jsonRequest);
         }
+
         private void WebSocket_OnMessage(string jsonData)
         {
             try
@@ -77,41 +213,32 @@ namespace DigitalProduction
 
                 if (action.Equals("getDevices"))
                 {
-                    // Assuming the response
                     ResponseMessage<List<Device>> response = ResponseMessage<List<Device>>.FromJson(jsonData);
-
-                    // Check if there are devices in the response
                     if (response?.Devices != null)
                     {
-                        gridView_Device.EditFormPrepared += Extentions.GridView_EditFormPrepared;
-                        Extentions.showEditModeCellGridView(gridControl_Devices, gridView_Device, "ucDevice");
                         PopulateDeviceDataTable(response.Devices);
                         CreatelabelTotalControls(response.Devices);
                         ApplyLocalization();
                     }
                     else
                     {
-                        ShowMessage.ShowInfo("No Data Found");
+                        MessageBox.Show("No Data Found", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
             catch (JsonSerializationException jsonEx)
             {
-                ShowMessage.ShowError($"JSON Deserialization Error: {jsonEx.Message}");
+                MessageBox.Show($"JSON Deserialization Error: {jsonEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                ShowMessage.ShowError($"An error occurred: {ex.Message}");
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // Populate the DataTable with device data
         private void PopulateDeviceDataTable(List<Device> devices)
         {
-            // Clear existing data
             deviceDataTable.Rows.Clear();
-
-            // Add rows to the DataTable                                                                 
             foreach (var device in devices)
             {
                 deviceDataTable.Rows.Add(
@@ -123,16 +250,9 @@ namespace DigitalProduction
                     device.ConnectionStatus
                 );
             }
-
-            // Apply custom styles to column headers
-            gridView_Device.Appearance.HeaderPanel.BackColor = Color.LightSteelBlue;
-            gridView_Device.Appearance.HeaderPanel.ForeColor = Color.Black;
-            gridView_Device.Appearance.HeaderPanel.Font = new Font("Arial", 10, FontStyle.Bold);
-
-            // Refresh the GridControl to show the updated data
-            gridControl_Devices.RefreshDataSource();
-            gridControl_Devices.Refresh();
+            dgvDevices.Refresh();
         }
+
         public DataTable InitializeDeviceDataTable()
         {
             deviceDataTable.Columns.Add("Address", typeof(string));
@@ -141,23 +261,17 @@ namespace DigitalProduction
             deviceDataTable.Columns.Add("Department Name", typeof(string));
             deviceDataTable.Columns.Add("IsActive", typeof(bool));
             deviceDataTable.Columns.Add("ConnectionStatus", typeof(bool));
+
+            // ✅ Prevent binding issues by setting ReadOnly = false
+            foreach (DataColumn column in deviceDataTable.Columns)
+            {
+                column.ReadOnly = false;
+            }
+
             return deviceDataTable;
         }
 
 
-        private void ApplyLocalization()
-        {
-            gridView_Device.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
-            gridView_Device.GroupPanelText = LocalizationManager.GetString("ListOfDevice");
-
-            // grid view
-            gridView_Device.Columns["Address"].Caption = LocalizationManager.GetString("Address");
-            gridView_Device.Columns["Machine Name"].Caption = LocalizationManager.GetString("MachineName");
-            gridView_Device.Columns["Plant Name"].Caption = LocalizationManager.GetString("PlantName");
-            gridView_Device.Columns["Department Name"].Caption = LocalizationManager.GetString("DepartmentName");
-            gridView_Device.Columns["ConnectionStatus"].Caption = LocalizationManager.GetString("Status");
-            gridView_Device.Columns["Action"].Caption = LocalizationManager.GetString("Action");
-        }
         private void RefreshButton_Click(object sender, EventArgs e)
         {
             _ = GetDataAndLoadToGridAsync();
@@ -165,130 +279,75 @@ namespace DigitalProduction
 
         private void CreateButtonContainer()
         {
-            // Create a PanelControl to hold the button
-            groupPanelButtonContainer = new PanelControl()
-            {
-                Dock = DockStyle.Top,
-                Height = 50
-            };
-
-            // Add the PanelControl to the form
+            groupPanelButtonContainer = new Panel { Dock = DockStyle.Top, Height = 50 };
             Controls.Add(groupPanelButtonContainer);
 
-            // Create the button
-            button = new SimpleButton()
-            {
-                Text = "Add new device",
-                Size = new System.Drawing.Size(100, 40)
-            };
-
-            // Add the button to the PanelControl
+            button = new Button { Text = "Add new device", Size = new Size(100, 40), Location = new Point(10, 5) };
             groupPanelButtonContainer.Controls.Add(button);
-
-            // Handle the button click event
             button.Click += Button_Click;
-
-            // Position the button inside the PanelControl (optional)
-            button.Location = new System.Drawing.Point(10, 5); // Adjust location as needed
         }
+
         private void Button_Click(object sender, EventArgs e)
         {
             showRegisterDevice();
         }
+
         private void showRegisterDevice()
         {
-            // Hide the GridView
-            gridControl_Devices.Visible = false;
-
-            // Show the user control
-            frmRegister.Location = gridControl_Devices.Location;
-            frmRegister.Size = gridControl_Devices.Size;
+            dgvDevices.Visible = false;
+            frmRegister.Location = dgvDevices.Location;
+            frmRegister.Size = dgvDevices.Size;
             frmRegister.Visible = true;
             frmRegister.BringToFront();
             _webSocketClient = WebSocketClient.Instance;
             frmRegister.SetWebSocketClient(_webSocketClient);
         }
+
         private void RegisterControl_ExitClicked(object sender, EventArgs e)
         {
-            // Show the GridView
-            gridControl_Devices.Visible = true;
-
-            // Hide the user control
+            dgvDevices.Visible = true;
             frmRegister.Visible = false;
         }
+
         private void RegisterForm_DeviceCreated(object sender, Device newDevice)
         {
-            // GridView will automatically refresh
             deviceDataTable.Rows.Add(
-                   newDevice.IpAddress,
-                   newDevice.MachineName,
-                   newDevice.PlantName,
-                   newDevice.DepartmentName,
-                   newDevice.IsActive
-               );
-            gridView_Device.FocusedRowHandle = 0;
+                newDevice.IpAddress,
+                newDevice.MachineName,
+                newDevice.PlantName,
+                newDevice.DepartmentName,
+                newDevice.IsActive
+            );
+            dgvDevices.ClearSelection();
+            if (dgvDevices.Rows.Count > 0)
+                dgvDevices.Rows[0].Selected = true;
         }
+
         private void CreatelabelTotalControls(List<Device> devices)
         {
-            // Remove any existing panel to prevent duplication
             if (paginationPanel != null)
             {
                 this.Controls.Remove(paginationPanel);
                 paginationPanel.Dispose();
             }
 
-            // Create a new PanelControl for pagination at the bottom
-            paginationPanel = new PanelControl()
-            {
-                Dock = DockStyle.Bottom,
-                Height = 50, // Adjust height
-                Padding = new Padding(10)
-            };
-
-            // Create Label for page info (Total Records)
-            lblPageInfo = new LabelControl()
+            paginationPanel = new Panel { Dock = DockStyle.Bottom, Height = 50, Padding = new Padding(10) };
+            lblPageInfo = new Label
             {
                 Text = $"Total Records: {devices.Count}",
                 Size = new Size(200, 30),
                 ForeColor = Color.Green,
                 Font = new Font("Arial", 10, FontStyle.Bold),
-                AutoSizeMode = LabelAutoSizeMode.None,
                 Location = new Point(20, 10)
             };
-            //lblPageInfo.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            // Create a "Refresh" Button
-            SimpleButton refreshButton = new SimpleButton()
-            {
-                Text = "Refresh",
-                Size = new Size(80, 30),
-                Location = new Point(250, 10) // Adjust positioning
-            };
-            // Style the Refresh Button
-            refreshButton.Appearance.BackColor = Color.LightBlue; // Change background color
-            refreshButton.Appearance.Font = new Font("Arial", 9f, FontStyle.Bold);
-            refreshButton.Appearance.Options.UseBackColor = true;
 
-            // Add click event to refresh the data
-            refreshButton.Click += async (sender, e) =>
-            {
-                // Disable the button while loading
-                refreshButton.Enabled = false;
-                refreshButton.Text = "Loading..."; // Provide user feedback
+            Button refreshButton = new Button { Text = "Refresh", Size = new Size(80, 30), Location = new Point(250, 10) };
+            refreshButton.Click += async (sender, e) => await GetDataAndLoadToGridAsync();
 
-                await GetDataAndLoadToGridAsync(); // Load the data
-
-                // Re-enable the button after data is loaded
-                refreshButton.Enabled = true;
-                refreshButton.Text = "Refresh"; // Reset button text
-            };
-
-            // Add components to the panel
             paginationPanel.Controls.Add(lblPageInfo);
             paginationPanel.Controls.Add(refreshButton);
-
-            // Add the panel to the form (make sure it's added correctly)
             this.Controls.Add(paginationPanel);
-            this.Controls.SetChildIndex(paginationPanel, 0); // Ensures it appears at the bottom
+            this.Controls.SetChildIndex(paginationPanel, 0);
         }
     }
 }

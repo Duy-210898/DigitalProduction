@@ -40,8 +40,9 @@ namespace DigitalProduction
             cbxSO.Focus();
             lbl_operatorName.Visible = false;
             // Subscribe to the CellValueChanged event
-            gridView_Size.CellValueChanging += GridView_Size_CellValueChanging;
+            dgvSize.CellContentClick += dgvSize_CellContentClick;
         }
+
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
             _webSocketClient = WebSocketClient.Instance;
@@ -136,46 +137,65 @@ namespace DigitalProduction
 
             return table;
         }
-        private void ConfigureGridViewSize()
+        private void ConfigureDataGridView()
         {
-            gridView_Size.FocusedColumn = gridView_Size.Columns["SelectSize"];
-            gridView_Size.OptionsView.ShowGroupPanel = false;
-            gridView_Size.OptionsView.EnableAppearanceEvenRow = true;
+            // Set DataGridView properties similar to DevExpress GridView
+            dgvSize.AllowUserToAddRows = false;
+            dgvSize.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvSize.MultiSelect = true;
+            dgvSize.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvSize.ColumnHeadersHeight = 35;
 
-            gridView_Size.OptionsSelection.MultiSelect = true;
-            gridView_Size.OptionsCustomization.AllowSort = false;
-
-            gridView_Size.OptionsCustomization.AllowRowSizing = false;
-
-            gridView_Size.OptionsBehavior.Editable = true;
-
-            gridView_Size.Columns[0].Visible = false;
-            gridView_Size.Columns[1].OptionsColumn.AllowEdit = false;
-            gridView_Size.Columns[2].OptionsColumn.AllowEdit = false;
-            gridView_Size.Columns[3].OptionsColumn.AllowEdit = false;
-            gridView_Size.Columns[4].OptionsColumn.AllowEdit = false;
-
-            gridView_Size.Appearance.HeaderPanel.BackColor = Color.LightSteelBlue;
-            gridView_Size.Appearance.HeaderPanel.ForeColor = Color.Black;
-            gridView_Size.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            gridView_Size.Appearance.HeaderPanel.Font = new Font("Arial", 10, FontStyle.Bold);
-
-            // gridView_Size.Columns["Field"].Caption = "Size";
-
-            RepositoryItemCheckEdit checkEdit = new RepositoryItemCheckEdit();
-            gridControl_Size.RepositoryItems.Add(checkEdit);
-
-            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridView_Size.Columns)
+            // Header appearance
+            dgvSize.EnableHeadersVisualStyles = false;
+            dgvSize.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
             {
-                column.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+                //BackColor = Color.LightSteelBlue,
+                ForeColor = Color.Black,
+                Alignment = DataGridViewContentAlignment.MiddleCenter,
+                Font = new Font("Arial", 10, FontStyle.Bold)
+            };
+
+            // Center align text in all cells
+            foreach (DataGridViewColumn column in dgvSize.Columns)
+            {
+                column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
 
-            int gridHeight = gridControl_Size.Height;
-            int rowHeight = gridHeight / 6;
-            gridView_Size.RowHeight = rowHeight;
+            // Make specific columns read-only
+            if (dgvSize.Columns.Count > 4)
+            {
+                dgvSize.Columns[0].Visible = false;
+                dgvSize.Columns[1].ReadOnly = true;
+                dgvSize.Columns[2].ReadOnly = true;
+                dgvSize.Columns[3].ReadOnly = true;
+                dgvSize.Columns[4].ReadOnly = true;
+            }
 
-            gridView_Size.BestFitColumns();
+            // Set row height dynamically
+            int gridHeight = dgvSize.Height;
+            int rowHeight = gridHeight / 6;
+            dgvSize.RowTemplate.Height = rowHeight;
+
+            // Auto-size columns to fit content
+            dgvSize.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            // Add checkbox column (Equivalent to `RepositoryItemCheckEdit` in DevExpress)
+            DataGridViewCheckBoxColumn checkColumn = new DataGridViewCheckBoxColumn
+            {
+                Name = "SelectSize",
+                HeaderText = "Select",
+                Width = 50,
+                TrueValue = true,
+                FalseValue = false
+            };
+
+            if (dgvSize.Columns["SelectSize"] == null)
+            {
+                dgvSize.Columns.Insert(0, checkColumn);
+            }
         }
+
 
         private void HandleReceivedSchedule(List<ProductionSchedule> schedules)
         {
@@ -227,10 +247,10 @@ namespace DigitalProduction
             //  DataTable transformedTable = TransformSizeData(originalTable);
             // Gán dữ liệu vào gridControl_Size
 
-            gridControl_Size.DataSource = ConvertDataTableToList(originalTable); ;
+            dgvSize.DataSource = ConvertDataTableToList(originalTable); ;
 
             // Cấu hình hiển thị của gridView_Size
-            ConfigureGridViewSize();
+            ConfigureDataGridView();
             // Duyệt qua các phần vật liệu và thêm vào materialDataList
             foreach (var schedule in uniqueParts)
             {
@@ -796,32 +816,40 @@ namespace DigitalProduction
 
             return sizeDataList;
         }
-        private void GridView_Size_CellValueChanging(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
+        private void dgvSize_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.Column.FieldName == "SelectSize")
+            // Ensure the event fires only for the checkbox column
+            if (dgvSize.Columns[e.ColumnIndex].Name == "SelectSize" && e.RowIndex >= 0)
             {
-                int rowIndex = e.RowHandle;
+                DataGridViewCheckBoxCell checkBoxCell = (DataGridViewCheckBoxCell)dgvSize.Rows[e.RowIndex].Cells["SelectSize"];
+                bool isChecked = (bool)(checkBoxCell.Value ?? false); // Handle null values
 
-                // You can get other column values by using GetRowCellValue
-                var sizeId = gridView_Size.GetRowCellValue(rowIndex, "SizeID");
-                bool isChecked = (bool)e.Value;
-                if (isChecked)
+                // Get SizeID from the selected row
+                int sizeId = Convert.ToInt32(dgvSize.Rows[e.RowIndex].Cells["SizeID"].Value);
+
+                if (!isChecked) // If user is checking the box
                 {
-                    if (sizeIDs.Count > 3)
+                    if (sizeIDs.Count >= 3)
                     {
-                        gridView_Size.Columns[5].OptionsColumn.AllowEdit = false;
+                        MessageBox.Show("You can select a maximum of 3 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
                     }
-                    else
-                    {
-                        gridView_Size.Columns[5].OptionsColumn.AllowEdit = true;
-                        sizeIDs.Add((int)sizeId);
-                    }
+                    sizeIDs.Add(sizeId);
                 }
-                else {
-                    sizeIDs.Remove((int)sizeId);
+                else // If user is unchecking the box
+                {
+                    sizeIDs.Remove(sizeId);
                 }
+
+                // Toggle the checkbox manually since CellContentClick happens before the value is updated
+                checkBoxCell.Value = !isChecked;
+
+                // Refresh DataGridView to apply the change
+                dgvSize.Refresh();
             }
         }
+
+
         private void setControlVisibility(bool isVisible, params Control[] controls)
         {
             foreach (var control in controls)
@@ -829,5 +857,6 @@ namespace DigitalProduction
                 control.Visible = isVisible;
             }
         }
+
     }
 }

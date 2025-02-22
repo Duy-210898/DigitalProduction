@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DevExpress.XtraGrid.GridLevelNode gridLevelNode1 = new DevExpress.XtraGrid.GridLevelNode();
             this.label1 = new System.Windows.Forms.Label();
             this.lblProductionDate = new System.Windows.Forms.Label();
             this.lblCreatedDate = new System.Windows.Forms.Label();
@@ -74,9 +73,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.dataGrid_overviewDistribution = new System.Windows.Forms.DataGridView();
             this.pnlSize = new System.Windows.Forms.Panel();
-            this.gridControl_Size = new DevExpress.XtraGrid.GridControl();
-            this.gridView_Size = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.dgvSize = new System.Windows.Forms.DataGridView();
             this.tableLayoutPanel2.SuspendLayout();
             this.panel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cbxSO.Properties)).BeginInit();
@@ -96,9 +93,7 @@
             this.tableLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid_overviewDistribution)).BeginInit();
             this.pnlSize.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Size)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView_Size)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSize)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -631,7 +626,7 @@
             // pnlSize
             // 
             this.pnlSize.BackColor = System.Drawing.Color.LightGray;
-            this.pnlSize.Controls.Add(this.gridControl_Size);
+            this.pnlSize.Controls.Add(this.dgvSize);
             this.pnlSize.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlSize.Location = new System.Drawing.Point(3, 309);
             this.pnlSize.Name = "pnlSize";
@@ -640,37 +635,14 @@
             this.pnlSize.TabIndex = 1;
             this.pnlSize.Visible = false;
             // 
-            // gridControl_Size
+            // dgvSize
             // 
-            this.gridControl_Size.Dock = System.Windows.Forms.DockStyle.Fill;
-            gridLevelNode1.RelationName = "Level1";
-            this.gridControl_Size.LevelTree.Nodes.AddRange(new DevExpress.XtraGrid.GridLevelNode[] {
-            gridLevelNode1});
-            this.gridControl_Size.Location = new System.Drawing.Point(20, 0);
-            this.gridControl_Size.MainView = this.gridView_Size;
-            this.gridControl_Size.Name = "gridControl_Size";
-            this.gridControl_Size.Size = new System.Drawing.Size(925, 136);
-            this.gridControl_Size.TabIndex = 0;
-            this.gridControl_Size.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
-            this.gridView_Size,
-            this.gridView1});
-            // 
-            // gridView_Size
-            // 
-            this.gridView_Size.GridControl = this.gridControl_Size;
-            this.gridView_Size.GroupPanelText = " ";
-            this.gridView_Size.Name = "gridView_Size";
-            this.gridView_Size.OptionsFilter.AllowFilterEditor = false;
-            this.gridView_Size.OptionsFind.AllowFindPanel = false;
-            this.gridView_Size.OptionsPrint.EnableAppearanceEvenRow = true;
-            this.gridView_Size.OptionsPrint.PrintFilterInfo = true;
-            this.gridView_Size.OptionsPrint.PrintGroupFooter = false;
-            this.gridView_Size.OptionsPrint.PrintSelectedRowsOnly = true;
-            // 
-            // gridView1
-            // 
-            this.gridView1.GridControl = this.gridControl_Size;
-            this.gridView1.Name = "gridView1";
+            this.dgvSize.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvSize.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvSize.Location = new System.Drawing.Point(20, 0);
+            this.dgvSize.Name = "dgvSize";
+            this.dgvSize.Size = new System.Drawing.Size(925, 136);
+            this.dgvSize.TabIndex = 0;
             // 
             // ucDistribution
             // 
@@ -701,9 +673,7 @@
             this.tableLayoutPanel5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid_overviewDistribution)).EndInit();
             this.pnlSize.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridControl_Size)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView_Size)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSize)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -729,9 +699,6 @@
         private System.Windows.Forms.RadioButton rdLeather;
         private System.Windows.Forms.RadioButton rdRawMaterial;
         private System.Windows.Forms.Panel pnlSize;
-        private DevExpress.XtraGrid.GridControl gridControl_Size;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridView_Size;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
@@ -757,5 +724,6 @@
         private System.Windows.Forms.TextBox txtInventory;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
+        private System.Windows.Forms.DataGridView dgvSize;
     }
 }

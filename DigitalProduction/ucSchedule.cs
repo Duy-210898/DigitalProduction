@@ -4,44 +4,61 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
 namespace DigitalProduction
 {
-    public partial class ucSchedule : DevExpress.XtraEditors.XtraUserControl
+    public partial class ucSchedule : UserControl
     {
         private BindingList<ProductionSchedule> productionSchedules = new BindingList<ProductionSchedule>();
         private WebSocketClient _webSocketClient;
         private DateTime? selectedMonth; // Store selected filter month
-        private LabelControl lblTotalRecords; // Label to display total records
+        private Label lblTotalRecords; // Label to display total records
+        private DataGridView dataGridView_productionSchedule; // DataGridView for display
 
         public ucSchedule()
         {
             InitializeComponent();
-            SetupGridControl();
+            SetupDataGridView();
             InitializeTotalLabel();
             InitializeMonthFilter();
         }
 
-        private void SetupGridControl()
+        private void SetupDataGridView()
         {
-            gridControl_productionSchedule.DataSource = productionSchedules;
-            gridview_productionSchedule.OptionsView.ShowGroupPanel = false;
-            gridview_productionSchedule.BestFitColumns();
+            dataGridView_productionSchedule = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AllowUserToAddRows = false
+            };
+            var headerStyle = new DataGridViewCellStyle
+            {
+                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
+                Alignment = DataGridViewContentAlignment.MiddleCenter,
+                BackColor = System.Drawing.Color.AntiqueWhite,
+                ForeColor = System.Drawing.Color.Black
+            };
+            dataGridView_productionSchedule.ColumnHeadersHeight = 35;
+            dataGridView_productionSchedule.EnableHeadersVisualStyles = false; // Important: Disable default styles
+            dataGridView_productionSchedule.ColumnHeadersDefaultCellStyle = headerStyle;
+
+            // Optionally configure DataGridView styles and properties here
+
+            // Add DataGridView to the user control
+            Controls.Add(dataGridView_productionSchedule);
         }
 
         private void InitializeTotalLabel()
         {
             // Create and configure the total label
-            lblTotalRecords = new LabelControl
+            lblTotalRecords = new Label
             {
                 Dock = DockStyle.Bottom,
-                Appearance = { Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold) },
+                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
                 Text = "Total Records: 0",
-                BackColor = System.Drawing.Color.Transparent,
-                ForeColor = System.Drawing.Color.Transparent,
+                BackColor = System.Drawing.Color.Transparent
             };
 
             // Add label to the control
@@ -50,26 +67,23 @@ namespace DigitalProduction
 
         private void InitializeMonthFilter()
         {
-            // Create and configure the DateEdit control
-            DateEdit dateEdit = new DateEdit
+            // Create and configure the DateTimePicker control
+            DateTimePicker dateTimePicker = new DateTimePicker
             {
+                Format = DateTimePickerFormat.Custom,
+                CustomFormat = "MM/yyyy",
                 Dock = DockStyle.Top
             };
 
-            // Set calendar view and display format
-            dateEdit.Properties.CalendarView = DevExpress.XtraEditors.Repository.CalendarView.Vista;
-            dateEdit.Properties.DisplayFormat.FormatString = "MM/yyyy";
-            dateEdit.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
-
             // Handle value change
-            dateEdit.EditValueChanged += (sender, e) =>
+            dateTimePicker.ValueChanged += (sender, e) =>
             {
-                selectedMonth = dateEdit.DateTime;
+                selectedMonth = new DateTime(dateTimePicker.Value.Year, dateTimePicker.Value.Month, 1);
                 ApplyMonthFilter();
             };
 
-            // Add the DateEdit control to the form
-            Controls.Add(dateEdit);
+            // Add the DateTimePicker control to the form
+            Controls.Add(dateTimePicker);
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -116,7 +130,7 @@ namespace DigitalProduction
         {
             if (selectedMonth == null)
             {
-                gridControl_productionSchedule.DataSource = productionSchedules;
+                dataGridView_productionSchedule.DataSource = productionSchedules.ToList();
             }
             else
             {
@@ -124,17 +138,29 @@ namespace DigitalProduction
                     .Where(schedule => schedule.CreatedAt.Year == selectedMonth.Value.Year && schedule.CreatedAt.Month == selectedMonth.Value.Month)
                     .ToList();
 
-                gridControl_productionSchedule.DataSource = new BindingList<ProductionSchedule>(filteredData);
+                dataGridView_productionSchedule.DataSource = filteredData;
             }
 
-            gridControl_productionSchedule.RefreshDataSource();
             UpdateTotalLabel();
         }
 
         private void UpdateTotalLabel()
         {
-            int totalCount = ((BindingList<ProductionSchedule>)gridControl_productionSchedule.DataSource)?.Count ?? 0;
+            // Ensure DataSource is not null and count the number of items based on its type
+            int totalCount = 0;
+
+            if (dataGridView_productionSchedule.DataSource is BindingList<ProductionSchedule> bindingList)
+            {
+                totalCount = bindingList.Count;
+            }
+            else if (dataGridView_productionSchedule.DataSource is List<ProductionSchedule> list)
+            {
+                totalCount = list.Count;
+            }
+
             lblTotalRecords.Text = $"Total Records: {totalCount}";
+            lblTotalRecords.BackColor = System.Drawing.Color.AntiqueWhite;
+            lblTotalRecords.ForeColor = System.Drawing.Color.Green;
         }
     }
 }

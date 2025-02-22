@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.DocumentServices.ServiceModel.DataContracts;
 using DigitalProduction.Models;
 
 namespace DigitalProduction
@@ -642,6 +644,50 @@ namespace DigitalProduction
                 return false;
             }
         }
+        // Update device
+        public bool UpdateDevice(int deviceId, int departmentId, int plantId, string ipAddress, string machineName, bool isActive, bool connectionStatus)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                    UPDATE DeviceList 
+                    SET 
+                        DepartmentID = @DepartmentID, 
+                        PlantID = @PlantID, 
+                        IpAddress = @IpAddress, 
+                        MachineName = @MachineName, 
+                        IsActive = @IsActive, 
+                        ConnectionStatus = @ConnectionStatus 
+                    WHERE DeviceID = @DeviceID";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        // Add parameters to prevent SQL injection
+                        cmd.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = departmentId;
+                        cmd.Parameters.Add("@PlantID", SqlDbType.Int).Value = plantId;
+                        cmd.Parameters.Add("@IpAddress", SqlDbType.VarChar, 50).Value = ipAddress;
+                        cmd.Parameters.Add("@MachineName", SqlDbType.VarChar, 100).Value = machineName;
+                        cmd.Parameters.Add("@IsActive", SqlDbType.Bit).Value = isActive;
+                        cmd.Parameters.Add("@ConnectionStatus", SqlDbType.Bit).Value = connectionStatus;
+                        cmd.Parameters.Add("@DeviceID", SqlDbType.Int).Value = deviceId;
+
+                        conn.Open();
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        conn.Close();
+
+                        return rowsAffected > 0; // Return true if update was successful
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                return false;
+            }
+        }
+
     }
 }
 

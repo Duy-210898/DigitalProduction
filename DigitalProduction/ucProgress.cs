@@ -4,52 +4,203 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Columns;
-using DevExpress.XtraGrid.Views.Base;
-using DevExpress.XtraGrid.Views.Grid.ViewInfo;
-using DevExpress.XtraGrid.Views.Grid;
-using DigitalProduction.Extensions;
 using Newtonsoft.Json;
 
 namespace DigitalProduction
 {
-    public partial class ucProgress : DevExpress.XtraEditors.XtraUserControl
+    public partial class ucProgress : UserControl
     {
         private BindingList<Distribution> distributionDataList = new BindingList<Distribution>();
         private WebSocketClient _webSocketClient;
-        private PanelControl paginationPanel;
-        private LabelControl lblPageInfo;
+        private Panel paginationPanel;
+        private Label lblPageInfo;
+        private DataGridView dgvProgressManagement;
+        private DateTimePicker dtpStartDate;
+        private DateTimePicker dtpEndDate;
+        private Button btnFilter;
+        private Label lblStartDate;
+        private Label lblEndDate;
 
         public ucProgress()
         {
             InitializeComponent();
-            LoadTextLable();
-            gridView_ProgressManagement.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
-            gridView_ProgressManagement.OptionsFind.ShowFindButton = false;
-            gridView_ProgressManagement.RowHeight = 50;
-            gridView_ProgressManagement.RowCellStyle += gridView_ProgressManagement_RowCellStyle;
+            LoadTextLabel();
+            InitializeControls();
         }
 
-        private void gridView_ProgressManagement_RowCellStyle(object sender, RowCellStyleEventArgs e)
+        private void InitializeControls()
         {
-            GridView view = sender as GridView;
-            if (view == null) return;
-
-            // Get IsLeather value for the current row
-            bool isLeather = Convert.ToBoolean(view.GetRowCellValue(e.RowHandle, "IsLeather"));
-
-            // Apply custom style if IsLeather is true
-            if (isLeather)
+            // Create a container panel to manage layout
+            Panel containerPanel = new Panel
             {
-                e.Appearance.BackColor = Color.LightYellow; // Highlight cell
-                e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold); // Make it bold
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10)
+            };
+
+            // Initialize filter controls at the top
+            Panel filterPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 50
+            };
+
+            lblStartDate = new Label
+            {
+                Text = "Start Date:",
+                Location = new Point(10, 15),
+                AutoSize = true
+            };
+
+            dtpStartDate = new DateTimePicker
+            {
+                Format = DateTimePickerFormat.Short,
+                Location = new Point(lblStartDate.Right + 5, 10),
+                Width = 100
+            };
+
+            lblEndDate = new Label
+            {
+                Text = "End Date:",
+                Location = new Point(dtpStartDate.Right + 10, 15),
+                AutoSize = true
+            };
+
+            dtpEndDate = new DateTimePicker
+            {
+                Format = DateTimePickerFormat.Short,
+                Location = new Point(lblEndDate.Right + 5, 10),
+                Width = 100
+            };
+
+            btnFilter = new Button
+            {
+                Text = "Filter",
+                Location = new Point(dtpEndDate.Right + 10, 10),
+                Width = 80
+            };
+
+            btnFilter.Click += BtnFilter_Click;
+
+            // Add filter controls to the filter panel
+            filterPanel.Controls.Add(lblStartDate);
+            filterPanel.Controls.Add(dtpStartDate);
+            filterPanel.Controls.Add(lblEndDate);
+            filterPanel.Controls.Add(dtpEndDate);
+            filterPanel.Controls.Add(btnFilter);
+
+            // Initialize DataGridView
+            dgvProgressManagement = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AllowUserToAddRows = false,
+                EnableHeadersVisualStyles = false, // Must be set before applying styles
+                BackgroundColor = Color.White
+            };
+
+            var headerStyle = new DataGridViewCellStyle
+            {
+                Font = new Font("Arial", 12, FontStyle.Bold),
+                Alignment = DataGridViewContentAlignment.MiddleCenter,
+                BackColor = Color.AntiqueWhite,
+                ForeColor = Color.Black
+            };
+
+            dgvProgressManagement.ColumnHeadersDefaultCellStyle = headerStyle;
+            dgvProgressManagement.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
+            dgvProgressManagement.ColumnHeadersHeight = 35;
+
+            // Ensure columns exist before applying styles
+            dgvProgressManagement.DataBindingComplete += (s, e) =>
+            {
+                dgvProgressManagement.ColumnHeadersDefaultCellStyle = headerStyle;
+                dgvProgressManagement.Refresh();
+            };
+
+            dgvProgressManagement.CellFormatting += DgvProgressManagement_CellFormatting;
+
+            // Initialize Pagination Panel
+            paginationPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 50,
+                Padding = new Padding(10)
+            };
+
+            lblPageInfo = new Label
+            {
+                Text = "Total Records: 0",
+                ForeColor = Color.Green,
+                Font = new Font("Arial", 10, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(20, 10)
+            };
+
+            Button refreshButton = new Button
+            {
+                Text = "Refresh",
+                Size = new Size(80, 30),
+                Location = new Point(250, 10)
+            };
+
+            refreshButton.Click += async (sender, e) =>
+            {
+                refreshButton.Enabled = false;
+                refreshButton.Text = "Loading...";
+                await GetDataAndLoadToGridAsync();
+                refreshButton.Enabled = true;
+                refreshButton.Text = "Refresh";
+            };
+
+            paginationPanel.Controls.Add(lblPageInfo);
+            paginationPanel.Controls.Add(refreshButton);
+
+            // Add everything to the container panel in proper order
+            containerPanel.Controls.Add(dgvProgressManagement); // Fill remaining space
+            containerPanel.Controls.Add(filterPanel); // Stays at the top
+            containerPanel.Controls.Add(paginationPanel); // Stays at the bottom
+
+            // Add the container panel to the UserControl
+            this.Controls.Add(containerPanel);
+        }
+
+        private void BtnFilter_Click(object sender, EventArgs e)
+        {
+            DateTime startDate = dtpStartDate.Value.Date;
+            DateTime endDate = dtpEndDate.Value.Date.AddDays(1).AddTicks(-1); // Include the whole end day
+
+            var filteredData = new BindingList<Distribution>(new List<Distribution>());
+
+            foreach (var distribution in distributionDataList)
+            {
+                if (distribution.CreatedAt >= startDate && distribution.CreatedAt <= endDate)
+                {
+                    filteredData.Add(distribution);
+                }
+            }
+
+            dgvProgressManagement.DataSource = filteredData;
+
+            // Update the total record label
+            lblPageInfo.Text = $"Total Records: {filteredData.Count}";
+        }
+     
+        private void DgvProgressManagement_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            // Check if we're in the DataRow section
+            if (dgvProgressManagement.Rows[e.RowIndex].Cells["IsLeather"].Value is bool isLeather && isLeather)
+            {
+                // Set the background color for the entire row for each cell
+                foreach (DataGridViewCell cell in dgvProgressManagement.Rows[e.RowIndex].Cells)
+                {
+                    cell.Style.BackColor = Color.LightYellow; // Highlight row
+                    cell.Style.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold); // Make it bold
+                }
             }
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-
             _webSocketClient = WebSocketClient.Instance;
             _ = GetDataAndLoadToGridAsync();
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
@@ -57,7 +208,6 @@ namespace DigitalProduction
 
         public async Task GetDataAndLoadToGridAsync()
         {
-            // WebSocket request to get distribution data from the server
             var request = new { app = Global.App, action = "getDistributions" };
             string jsonRequest = JsonConvert.SerializeObject(request);
             await _webSocketClient.SendAsync(jsonRequest);
@@ -67,161 +217,100 @@ namespace DigitalProduction
         {
             try
             {
-                // Deserialize the response message into a list of distribution data
                 ResponseMessage<List<Distribution>> response = ResponseMessage<List<Distribution>>.FromJson(jsonData);
 
                 if (response?.DistributionData != null && response.DistributionData.Count > 0)
                 {
-                    // Clear current distribution data list
                     distributionDataList.Clear();
-
-                    // Add the distribution data to the list
                     foreach (var distribution in response.DistributionData)
                     {
                         distributionDataList.Add(distribution);
                     }
 
-                    // Refresh pagination and grid view after loading new data
-                    CreatelabelTotalControls();
-                    gridControl_ProgressManagement.DataSource = distributionDataList;
-                    ConfigureGridView();
-                    gridView_ProgressManagement.EditFormPrepared += Extentions.GridView_EditFormPrepared;
-                    Extentions.showEditModeCellGridView(gridControl_ProgressManagement, gridView_ProgressManagement, "ucProgress");
+                    CreateLabelTotalControls();
+                    dgvProgressManagement.DataSource = distributionDataList;
+                    ConfigureDataGridView();
                 }
                 else
                 {
-                    ShowMessage.ShowInfo("No Data Found");
+                    MessageBox.Show("No Data Found", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage.ShowError($"Error receiving WebSocket data: {ex.Message}");
+                MessageBox.Show($"Error receiving WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void CreatelabelTotalControls()
+        private void CreateLabelTotalControls()
         {
-            // Remove any existing panel to prevent duplication
             if (paginationPanel != null)
             {
                 this.Controls.Remove(paginationPanel);
                 paginationPanel.Dispose();
             }
 
-            // Create a new PanelControl for pagination at the bottom
-            paginationPanel = new PanelControl()
+            paginationPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
-                Height = 50, // Adjust height
+                Height = 50,
                 Padding = new Padding(10)
             };
 
-            // Create Label for page info (Total Records)
-            lblPageInfo = new LabelControl()
+            lblPageInfo = new Label
             {
                 Text = $"Total Records: {distributionDataList.Count}",
-                Size = new Size(200, 30),
                 ForeColor = Color.Green,
                 Font = new Font("Arial", 10, FontStyle.Bold),
-                AutoSizeMode = LabelAutoSizeMode.None,
+                AutoSize = true,
                 Location = new Point(20, 10)
             };
-            //lblPageInfo.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            // Create a "Refresh" Button
-            SimpleButton refreshButton = new SimpleButton()
+
+            Button refreshButton = new Button
             {
                 Text = "Refresh",
                 Size = new Size(80, 30),
-                Location = new Point(250, 10) // Adjust positioning
+                Location = new Point(250, 10)
             };
-            // Style the Refresh Button
-            refreshButton.Appearance.BackColor = Color.LightBlue; // Change background color
-            refreshButton.Appearance.Font = new Font("Arial", 9f, FontStyle.Bold);
-            refreshButton.Appearance.Options.UseBackColor = true;
 
-            // Add click event to refresh the data
             refreshButton.Click += async (sender, e) =>
             {
-                // Disable the button while loading
                 refreshButton.Enabled = false;
-                refreshButton.Text = "Loading..."; // Provide user feedback
-
-                await GetDataAndLoadToGridAsync(); // Load the data
-
-                // Re-enable the button after data is loaded
+                refreshButton.Text = "Loading...";
+                await GetDataAndLoadToGridAsync();
                 refreshButton.Enabled = true;
-                refreshButton.Text = "Refresh"; // Reset button text
+                refreshButton.Text = "Refresh";
             };
 
-            // Add components to the panel
             paginationPanel.Controls.Add(lblPageInfo);
             paginationPanel.Controls.Add(refreshButton);
 
-            // Add the panel to the form (make sure it's added correctly)
+            // Ensure pagination panel is added at the bottom
             this.Controls.Add(paginationPanel);
-            this.Controls.SetChildIndex(paginationPanel, 0); // Ensures it appears at the bottom
         }
-
-        // Event to handle refresh button click
-        private void RefreshButton_Click(object sender, EventArgs e)
+        private void ConfigureDataGridView()
         {
-            _ = GetDataAndLoadToGridAsync();
-        }
+            dgvProgressManagement.Columns["DistributionID"].Visible = false;
+            dgvProgressManagement.Columns["InventoryQty"].HeaderText = "Inventory Quantity";
+            dgvProgressManagement.Columns["Status"].HeaderText = "Status";
 
-        private void ConfigureGridView()
-        {
-            // Hide sensitive columns
-            gridView_ProgressManagement.Columns["DistributionID"].Visible = false;
-            // Apply sorting, headers, and format
-            gridView_ProgressManagement.Columns["InventoryQty"].Caption = "Inventory Quantity";
-            gridView_ProgressManagement.Columns["Status"].Caption = "Status";
-            gridView_ProgressManagement.SortInfo.Clear();
-            gridView_ProgressManagement.SortInfo.Add(new GridColumnSortInfo(gridView_ProgressManagement.Columns["Status"], DevExpress.Data.ColumnSortOrder.Ascending));
-
-            // Format DateTime columns, if necessary
-            gridView_ProgressManagement.Columns["CreatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
-            gridView_ProgressManagement.Columns["CreatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy hh:mm";
-            gridView_ProgressManagement.BestFitColumns();
-            groupDataRawOrLeather("MaterialName");
-        }
-
-        private void groupDataRawOrLeather(string name)
-        {
-            gridView_ProgressManagement.Columns[name].GroupIndex = 0; // Group by PartName
-            gridView_ProgressManagement.ExpandAllGroups();
-            gridView_ProgressManagement.CustomDrawGroupRow += (sender, e) =>
+            // Formatting DateTime columns
+            foreach (DataGridViewColumn column in dgvProgressManagement.Columns)
             {
-                GridView view = sender as GridView;
-                GridGroupRowInfo groupInfo = e.Info as GridGroupRowInfo;
-
-                if (groupInfo.Column.FieldName == name) // Ensure correct grouping
+                if (column.Name == "CreatedAt")
                 {
-                    // Get name from the group
-                    object nameCol = view.GetGroupRowValue(e.RowHandle, groupInfo.Column);
-
-                    // Get IP Address from the first row in the group
-                    object ipAddress = view.GetRowCellValue(view.GetDataRowHandleByGroupRowHandle(e.RowHandle), "IpAddress");
-
-                    // Modify group row text
-                    groupInfo.GroupText = $"📦 {name}: {nameCol} - 🌐 IP: {ipAddress}";
-
-                    // Optional: Change group row text color
-                    e.Appearance.ForeColor = Color.Blue;
+                    column.DefaultCellStyle.Format = "dd/MM/yyyy hh:mm";
                 }
-            };
+            }
+
+            // Optionally, set auto-resizing for rows
+            dgvProgressManagement.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
         }
 
-        private void gridView_CustomDrawGroupPanel(object sender, CustomDrawEventArgs e)
+        private void LoadTextLabel()
         {
-            e.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            e.Appearance.Font = new Font("Tahoma", 13, FontStyle.Bold);
-            e.Appearance.ForeColor = Color.Blue;
-        }
-
-        private void LoadTextLable()
-        {
-            gridView_ProgressManagement.GroupPanelText = LocalizationManager.GetString("ListOfDistributions");
-            gridView_ProgressManagement.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
+            // Assuming LocalizationManager returns strings based on your localization needs
+            this.Text = LocalizationManager.GetString("ListOfDistributions");
         }
 
         private class Distribution
