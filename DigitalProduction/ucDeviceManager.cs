@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -20,7 +22,8 @@ namespace DigitalProduction
         private Panel paginationPanel;
         private Label lblPageInfo;
         private DataGridView dgvDevices;
-        private ComboBox departmentComboBox;
+
+        private bool isEditing = false;
 
         public ucDeviceManager()
         {
@@ -54,11 +57,14 @@ namespace DigitalProduction
         }
         private void ApplyLocalization()
         {
-            dgvDevices.Columns["Address"].HeaderText = LocalizationManager.GetString("Address");
-            dgvDevices.Columns["Machine Name"].HeaderText = LocalizationManager.GetString("MachineName");
+            if (dgvDevices.Columns.Contains("Address"))
+                dgvDevices.Columns["Address"].HeaderText = LocalizationManager.GetString("Address");
+            dgvDevices.Columns["Machine Name"].HeaderText = LocalizationManager.GetString("MachineName"); 
             dgvDevices.Columns["Plant Name"].HeaderText = LocalizationManager.GetString("PlantName");
             dgvDevices.Columns["Department Name"].HeaderText = LocalizationManager.GetString("DepartmentName");
             dgvDevices.Columns["ConnectionStatus"].HeaderText = LocalizationManager.GetString("Status");
+            dgvDevices.Columns["DeviceID"].Visible = false;
+
 
             // ✅ Add Action Column if it does not exist
             if (!dgvDevices.Columns.Contains("Action"))
@@ -85,89 +91,257 @@ namespace DigitalProduction
                 row.Cells["Action"].Value = "Edit";
             }
 
-            dgvDevices.CellClick += DgvDevices_CellClick; // Attach event
+            dgvDevices.CellClick += dgvDevices_CellClick; // Attach event
         }
 
-        private void DgvDevices_CellClick(object sender, DataGridViewCellEventArgs e)
+
+        private void dgvDevices_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0 || e.RowIndex >= dgvDevices.Rows.Count || e.ColumnIndex < 0 || e.ColumnIndex >= dgvDevices.Columns.Count)
+                return;
+
+            DataGridViewRow row = dgvDevices.Rows[e.RowIndex];
+
+            if (dgvDevices.Columns[e.ColumnIndex].Name == "Action")
             {
-                DataGridViewRow row = dgvDevices.Rows[e.RowIndex];
+                string action = row.Cells["Action"].Value.ToString();
 
-                // Check if the clicked cell is in the "Action" column
-                if (dgvDevices.Columns[e.ColumnIndex].Name == "Action")
+                if (action == "Edit")
                 {
-                    if (row.Cells["Action"].Value.ToString() == "Edit")
-                    {
-                        // Enable Editing
-                        row.Cells["Address"].ReadOnly = false;
-                        row.Cells["Machine Name"].ReadOnly = false;
-                        row.Cells["Plant Name"].ReadOnly = false;
-                        row.Cells["Department Name"].ReadOnly = false;
-                        row.Cells["IsActive"].ReadOnly = false;
-
-                        // Change Background Color to Indicate Editable Mode
-                        row.Cells["Address"].Style.BackColor = Color.LightYellow;
-                        row.Cells["Machine Name"].Style.BackColor = Color.LightYellow;
-                        row.Cells["Plant Name"].Style.BackColor = Color.LightYellow;
-                        row.Cells["Department Name"].Style.BackColor = Color.LightYellow;
-                        row.Cells["IsActive"].Style.BackColor = Color.LightYellow;
-
-                        row.Cells["Action"].Value = "Update";  // Change button text to "Update"
-
-                        // Display ComboBox for "Department Name"
-                        departmentComboBox = new ComboBox
-                        {
-                            DataSource = new List<string> { "HR", "Engineering", "Sales", "Marketing" },  // Example department names
-                            Location = row.Cells["Department Name"].ContentBounds.Location,
-                            Size = row.Cells["Department Name"].ContentBounds.Size,
-                            DropDownStyle = ComboBoxStyle.DropDownList
-                        };
-                        departmentComboBox.SelectedItem = row.Cells["Department Name"].Value.ToString();
-                        departmentComboBox.Leave += (s, ev) => UpdateDepartmentName(row, departmentComboBox);
-
-                        dgvDevices.Controls.Add(departmentComboBox);
-                    }
-                    else if (row.Cells["Action"].Value.ToString() == "Update")
-                    {
-                        // Get Updated Data from Row
-                        string address = row.Cells["Address"].Value.ToString();
-                        string machineName = row.Cells["Machine Name"].Value.ToString();
-                        string plantName = row.Cells["Plant Name"].Value.ToString();
-                        string departmentName = row.Cells["Department Name"].Value.ToString();
-                        bool isActive = Convert.ToBoolean(row.Cells["IsActive"].Value);
-                        bool connectionStatus = Convert.ToBoolean(row.Cells["ConnectionStatus"].Value);
-
-                        // Update Device
-                        UpdateDevice(address, machineName, plantName, departmentName, isActive, connectionStatus);
-
-                        // Make ReadOnly Again
-                        row.Cells["Machine Name"].ReadOnly = true;
-                        row.Cells["Plant Name"].ReadOnly = true;
-                        row.Cells["Department Name"].ReadOnly = true;
-
-                        // Reset Background Color
-                        row.Cells["Machine Name"].Style.BackColor = Color.White;
-                        row.Cells["Plant Name"].Style.BackColor = Color.White;
-                        row.Cells["Department Name"].Style.BackColor = Color.White;
-
-                        row.Cells["Action"].Value = "Edit";  // Change button text back to "Edit"
-                    }
+                    isEditing = true;
+                    HandleEditAction(row);
+                }
+                else if (action == "Update")
+                {
+                    HandleUpdateAction(row);
+                }
+            }
+            else if (dgvDevices.Columns[e.ColumnIndex].Name == "CancelAction")
+            {
+                if (row.Cells["Action"].Value != null && row.Cells["Action"].Value.ToString() == "Update")
+                {
+                    isEditing = false;
+                    HandleCancelAction(row);
                 }
             }
         }
 
-        private void UpdateDepartmentName(DataGridViewRow row, ComboBox comboBox)
+        private void HandleEditAction(DataGridViewRow row)
         {
-            // Update the department name in the DataGridView cell
-            row.Cells["Department Name"].Value = comboBox.SelectedItem.ToString();
+            try
+            {
+                var departments = GetDepartments();
+                var plants = GetPlants();
 
-            // Remove the ComboBox from the DataGridView controls
-            dgvDevices.Controls.Remove(comboBox);
+                if (departments == null || plants == null)
+                    return;
+
+                // Store the original values for cancellation
+                row.Tag = new { DepartmentName = row.Cells["Department Name"].Value, PlantName = row.Cells["Plant Name"].Value };
+
+                // Create and insert ComboBox columns
+                CreateComboBoxColumn("DepartmentCombo", "Department Name", departments, "DepartmentName", "DepartmentID");
+                CreateComboBoxColumn("PlantCombo", "Plant Name", plants, "PlantName", "PlantID");
+
+                // Set initial values for ComboBox cells
+                SetComboBoxInitialValues(row, departments, plants);
+
+                // Hide original columns
+                SetColumnVisibility(false, "Department Name", "Plant Name");
+
+                // Change button text to "Update"
+                row.Cells["Action"].Value = "Update";
+
+                // Add Cancel button
+                AddCancelButton(row);
+                SetRowEditable(row, true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
+        private void HandleUpdateAction(DataGridViewRow row)
+        {
+            object value = row.Cells["DeviceID"].Value;
+            int deviceId = Convert.ToInt32(value);
+            int plantId = Convert.ToInt32(row.Cells["PlantCombo"].Value);
+            int departmentId = Convert.ToInt32(row.Cells["DepartmentCombo"].Value);
+            string address = row.Cells["Address"].Value?.ToString();
+            string machineName = row.Cells["Machine Name"].Value?.ToString();
+            bool isActive = Convert.ToBoolean(row.Cells["IsActive"].Value);
+            bool connectionStatus = Convert.ToBoolean(row.Cells["ConnectionStatus"].Value);
 
+            bool status = DbHelper.updateDevice(deviceId, departmentId, plantId, address, machineName, isActive, connectionStatus);
+            string message = status ? "Updated device at: " + address : "Cannot update device at: " + address;
+            if (status) {
+                RemoveColumnIfExists("DepartmentCombo");
+                RemoveColumnIfExists("PlantCombo");
+                SetColumnVisibility(true, "Department Name", "Plant Name");
+                string departmentName = Extentions.getNameFromDataTable(DbHelper.getDepartments(), departmentId, "departmentID", "departmentName");
+                string plantName = Extentions.getNameFromDataTable(DbHelper.getPlants(), plantId, "plantID", "plantName");
+                UpdateDepartmentAndPlantName(row.Index, "Department", departmentName);
+                UpdateDepartmentAndPlantName(row.Index, "Plant", plantName);
+            }
+            ShowMessage.ShowInfo(message, status ? "Success" : "Fail");
+            SetRowEditable(row, false);
+            row.Cells["Action"].Value = "Edit";
 
+            // Clear Cancel button text
+            RemoveColumnIfExists("CancelAction");
+            isEditing = false;
+        }
+
+        private void HandleCancelAction(DataGridViewRow row)
+        {
+            var originalValues = (dynamic)row.Tag;
+            if (originalValues != null)
+            {
+                // Revert changes
+                row.Cells["Department Name"].Value = originalValues.DepartmentName;
+                row.Cells["Plant Name"].Value = originalValues.PlantName;
+
+                // Show original columns again
+                SetColumnVisibility(true, "Department Name", "Plant Name");
+
+                SetRowEditable(row, false);
+                row.Cells["Action"].Value = "Edit";
+
+                // Remove Cancel button and ComboBox columns
+                RemoveColumnIfExists("CancelAction");
+                RemoveColumnIfExists("DepartmentCombo");
+                RemoveColumnIfExists("PlantCombo");
+            }
+        }
+
+        // Helper methods
+        private List<Department> GetDepartments()
+        {
+            DataTable dt = DbHelper.getDepartments();
+            if (dt == null || dt.Rows.Count == 0)
+            {
+                MessageBox.Show("Error: No departments found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+            return dt.AsEnumerable().Select(s => new Department
+            {
+                DepartmentID = s.Field<int>("DepartmentID"),
+                DepartmentName = s.Field<string>("DepartmentName")
+            }).ToList();
+        }
+
+        private List<Plant> GetPlants()
+        {
+            DataTable dt = DbHelper.getPlants();
+            if (dt == null || dt.Rows.Count == 0)
+            {
+                MessageBox.Show("Error: No plants found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+            return dt.AsEnumerable().Select(s => new Plant
+            {
+                PlantID = s.Field<int>("PlantID"),
+                PlantName = s.Field<string>("PlantName")
+            }).ToList();
+        }
+
+        private void CreateComboBoxColumn<T>(string columnName, string headerText, List<T> dataSource, string displayMember, string valueMember)
+        {
+            var comboBoxColumn = new DataGridViewComboBoxColumn
+            {
+                Name = columnName,
+                HeaderText = headerText,
+                DataSource = dataSource,
+                DisplayMember = displayMember,
+                ValueMember = valueMember,
+                FlatStyle = FlatStyle.Flat,
+                DropDownWidth = 160,
+                Width = 130
+            };
+
+            // Insert the new ComboBox column only if it doesn't already exist
+            if (!dgvDevices.Columns.Contains(columnName))
+            {
+                int insertIndex = columnName == "DepartmentCombo" ? dgvDevices.Columns["Department Name"].Index : dgvDevices.Columns["Plant Name"].Index;
+                dgvDevices.Columns.Insert(insertIndex, comboBoxColumn);
+            }
+        }
+
+        private void SetComboBoxInitialValues(DataGridViewRow row, List<Department> departments, List<Plant> plants)
+        {
+            foreach (DataGridViewRow dgvRow in dgvDevices.Rows)
+            {
+                string deptName = dgvRow.Cells["Department Name"].Value?.ToString();
+                string plantName = dgvRow.Cells["Plant Name"].Value?.ToString();
+
+                int deptID = departments.FirstOrDefault(d => string.Equals(d.DepartmentName, deptName, StringComparison.OrdinalIgnoreCase))?.DepartmentID ?? departments.First().DepartmentID;
+                dgvRow.Cells["DepartmentCombo"].Value = deptID;
+
+                int plantID = plants.FirstOrDefault(p => string.Equals(p.PlantName, plantName, StringComparison.OrdinalIgnoreCase))?.PlantID ?? plants.First().PlantID;
+                dgvRow.Cells["PlantCombo"].Value = plantID;
+            }
+        }
+
+        private void SetColumnVisibility(bool isVisible, params string[] columnNames)
+        {
+            foreach (var name in columnNames)
+            {
+                if (dgvDevices.Columns.Contains(name))
+                {
+                    dgvDevices.Columns[name].Visible = isVisible;
+                }
+            }
+        }
+
+        private void AddCancelButton(DataGridViewRow row)
+        {
+            if (!dgvDevices.Columns.Contains("CancelAction"))
+            {
+                DataGridViewButtonColumn cancelColumn = new DataGridViewButtonColumn
+                {
+                    Name = "CancelAction",
+                    HeaderText = "Cancel",
+                    Text = "Cancel",
+                    UseColumnTextForButtonValue = true
+                };
+                dgvDevices.Columns.Add(cancelColumn);
+            }
+            row.Cells["CancelAction"].Value = "Cancel";
+        }
+        private void UpdateDepartmentAndPlantName(int rowIndex, string key, string newDepartmentName)
+        {
+            if (rowIndex >= 0 && rowIndex < dgvDevices.Rows.Count)
+            {
+                // Update the hidden column
+                dgvDevices.Rows[rowIndex].Cells[$"{key} Name"].Value = newDepartmentName;
+
+                // Refresh to reflect changes
+                dgvDevices.Refresh();
+            }
+        }
+        private void RemoveColumnIfExists(string columnName)
+        {
+            if (dgvDevices.Columns.Contains(columnName))
+            {
+                dgvDevices.Columns.Remove(columnName);
+            }
+        }
+
+        private void SetRowEditable(DataGridViewRow row, bool isEditable)
+        {
+            Color backColor = isEditable ? Color.LightYellow : Color.White;
+            foreach (DataGridViewCell cell in row.Cells)
+            {
+                if (cell.OwningColumn.Name != "Action")
+                {
+                    cell.ReadOnly = !isEditable;
+                    cell.Style.BackColor = backColor;
+                }
+            }
+        }
 
         private void UpdateDevice(string address, string machineName, string plantName, string departmentName, bool isActive, bool connectionStatus)
         {
@@ -242,6 +416,7 @@ namespace DigitalProduction
             foreach (var device in devices)
             {
                 deviceDataTable.Rows.Add(
+                    device.DeviceID,
                     device.IpAddress,
                     device.MachineName,
                     device.PlantName,
@@ -255,6 +430,7 @@ namespace DigitalProduction
 
         public DataTable InitializeDeviceDataTable()
         {
+            deviceDataTable.Columns.Add("DeviceID", typeof(int));
             deviceDataTable.Columns.Add("Address", typeof(string));
             deviceDataTable.Columns.Add("Machine Name", typeof(string));
             deviceDataTable.Columns.Add("Plant Name", typeof(string));
@@ -269,12 +445,6 @@ namespace DigitalProduction
             }
 
             return deviceDataTable;
-        }
-
-
-        private void RefreshButton_Click(object sender, EventArgs e)
-        {
-            _ = GetDataAndLoadToGridAsync();
         }
 
         private void CreateButtonContainer()
@@ -330,7 +500,6 @@ namespace DigitalProduction
                 this.Controls.Remove(paginationPanel);
                 paginationPanel.Dispose();
             }
-
             paginationPanel = new Panel { Dock = DockStyle.Bottom, Height = 50, Padding = new Padding(10) };
             lblPageInfo = new Label
             {
@@ -342,12 +511,33 @@ namespace DigitalProduction
             };
 
             Button refreshButton = new Button { Text = "Refresh", Size = new Size(80, 30), Location = new Point(250, 10) };
-            refreshButton.Click += async (sender, e) => await GetDataAndLoadToGridAsync();
+            refreshButton.Click += RefreshButton_Click;
 
             paginationPanel.Controls.Add(lblPageInfo);
             paginationPanel.Controls.Add(refreshButton);
             this.Controls.Add(paginationPanel);
             this.Controls.SetChildIndex(paginationPanel, 0);
+        }
+        private async void RefreshButton_Click(object sender, EventArgs e)
+        {
+            if (!isEditing) // Prevent refresh while editing
+            {
+                await GetDataAndLoadToGridAsync();
+            }
+            else
+            {
+                MessageBox.Show("Finish editing before refreshing.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+        public class Department
+        {
+            public int DepartmentID { get; set; }
+            public string DepartmentName { get; set; }
+        }
+        public class Plant
+        {
+            public int PlantID { get; set; }
+            public string PlantName { get; set; }
         }
     }
 }

@@ -28,7 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-          
+            this.SuspendLayout();
+            // 
+            // ucDeviceManager
+            // 
+            this.Name = "ucDeviceManager";
+            this.Size = new System.Drawing.Size(650, 391);
+            this.ResumeLayout(false);
+
         }
 
         #endregion
