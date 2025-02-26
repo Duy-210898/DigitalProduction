@@ -2,7 +2,7 @@ const fs = require('fs');
 const net = require('net');
 const Modbus = require('jsmodbus');
 const ping = require('ping');
-const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setOrderIsComplete } = require('./database');
+const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setOrderIsComplete, setDistributionIsComplete } = require('./database');
 const { notifyClientsToDeleteOrder } = require('./notifications');
 
 let previousRegister6507Value = null;
@@ -227,8 +227,10 @@ async function startReadingRegisters(client, ipAddress) {
 
     //readAndCheckBits(client, ipAddress);
     readOperatorID(client, ipAddress);
-    //readAndSaveDistribution(client, ipAddress);
-    readActualData(client);
+    checkAndSaveDistribution(client, ipAddress);
+    if (Object.keys(sizeDataInfo).length !== 0) {
+      readActualData(client);
+    }
   }, 1000);
 }
 
@@ -353,7 +355,7 @@ async function processRegister6510(register6510, client, ipAddress) {
   }
 }
 
-async function readAndSaveDistribution(client, ipAddress) {
+async function checkAndSaveDistribution(client, ipAddress) {
   try {
     // Read register 1000
     let response = await client.readHoldingRegisters(1000, 1);
@@ -385,6 +387,56 @@ async function readAndSaveDistribution(client, ipAddress) {
         modbusClients[ipAddress] = {};
       }
       modbusClients[ipAddress].orderID = orderID;
+
+      // check complete order
+      let response = await client.readHoldingRegisters(1001, 1);
+      let isLeather = response.response._body.values[0];
+      console.log(`Register 1001 value: ${isLeather}`);
+  
+      let sizeAddress;
+      let partID = 0;
+      if (isLeather != 0) {
+
+        if(isLeather == 1) {
+          sizeAddress = '3101,0';
+          const [baseRegister, offset] = sizeAddress.split(',').map(Number);
+          // read partID if is raw material
+          let response = await client.readHoldingRegisters(300, 1);
+          partID = response.response._body.values[0];
+
+        }
+        else {
+          sizeAddress =  '3103,0';
+          const [baseRegister, offset] = sizeAddress.split(',').map(Number);
+          const distribution =  await getSizeAndDistributionDataFromDb(ipAddress, orderID);
+          if (distribution != null) {
+            let results = [];
+            let countCompleteSize = 0; 
+            for (let i = 0; i  <  distribution.SizeData.length; i++) {
+                let registerAddress = `${baseRegister},${offset + i}`; // Preserve format "3103,0", "3103,1"
+                try {
+                    const response = await client.readHoldingRegisters(baseRegister + (offset + i), 1);
+                    countCompleteSize++;
+                    results.push({ address: registerAddress, value: response.response.body.valuesAsArray[0] });
+                } catch (error) {
+                    console.error(`Error reading register ${registerAddress}:`, error.message);
+                }
+            }
+            if (countCompleteSize == distribution.SizeData.length)
+            {
+              distribution.DistributionID.forEach(async (item) => {
+                try {
+                  await setDistributionIsComplete(item.DistributionID);
+                  console.log(`Cập nhật DistributionID: ${item.DistributionID}`);
+                } catch (error) {
+                  console.error(`Lỗi khi cập nhật DistributionID: ${item.DistributionID}`, error);
+                }
+              });
+            }
+            console.log("Register Values:", results);
+          }
+        }
+      }
     }
   } catch (error) {
     const errorMsg = `❌ Error reading register 1000 for IP ${ipAddress}: ${error.message}`;
@@ -415,16 +467,17 @@ function delay(ms) {
 async function readActualData(client) {
   try {
     const currentData = {};
-    let sizeDataInfo = {
-      sizeID: [900],
-      isLeather: 2,
-      sizeCount: 1
-  };
+  //   let sizeDataInfo = {
+  //     sizeID: [900],
+  //     isLeather: 2,
+  //     sizeCount: 1
+  // };
     
     // Read OrderID from register 1000
     const orderIDData = await client.readHoldingRegisters(1000, 1);
-    if (!orderIDData || !orderIDData.response || !orderIDData.response._body) {
+    if (!orderIDData || !orderIDData.response || !orderIDData.response._body || orderIDData.response._body.values[0] == 0) {
       console.log('Không thể đọc OrderID từ thanh ghi 1000');
+      return;
     }
 
     const baseAddress = sizeDataInfo.isLeather == 1 ? 886 : 966;
@@ -455,7 +508,7 @@ async function readActualData(client) {
           sizeDataInfo.isLeather == 1 ? safeRead(baseAddress + 4) :  Promise.resolve(null), //material
           sizeDataInfo.isLeather == 1 ? safeRead(baseAddress + 8) :  Promise.resolve(null), //cutting
           safeRead(baseActul + (16 * index)), //actul Cut
-           safeRead(baseActul + 4 + (16 * index)), //actualpieces
+          safeRead(baseActul + 4 + (16 * index)), //actualpieces
           safeRead(baseActul + 8 + (16 * index)), //actualSizeQty
           sizeDataInfo.isLeather == 2 ? safeRead(baseAddress) : Promise.resolve(null) // totalPieces
         ]);
@@ -1026,8 +1079,10 @@ async function writeRegisterSizeData(client, sizeData, isLeather) {
       if (!Array.isArray(sizeDataInfo.sizeID)) {
         sizeDataInfo.sizeID = [];
       }
-      sizeDataInfo.sizeID.push(registerSize[i].SizeID);
-      console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`)
+      if (!sizeDataInfo.sizeID.includes(registerSize[i].SizeID)) {
+        sizeDataInfo.sizeID.push(registerSize[i].SizeID);
+        console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`)
+      }      
 
       console.log(`Writing to register ${registerSize[i].SizeID}, value: ${item.SizeID}`);
       for (let j = 0; j < registerSizeData.length; j++) {

@@ -187,6 +187,7 @@ async function getActualOutputData() {
         do.ActualSizeQty,
         do.ActualPieces,
         do.InventoryQty,
+        dl.IpAddress,
         dd.InventoryQty AS DistInventoryQty
     FROM ProductOrder po
     JOIN Product pr ON po.ProductId = pr.ProductId
@@ -196,8 +197,8 @@ async function getActualOutputData() {
     JOIN Material m ON pso.MaterialID = m.MaterialID
     JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID
     JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId 
-    JOIN Operator o ON dd.OperatorID = o.OperatorID
-    WHERE dd.Status = 'Pending';
+    JOIN DeviceList dl ON dl.DeviceID = dd.DeviceID
+    JOIN Operator o ON dd.OperatorID = o.OperatorID;
   `;
 
   try {
@@ -209,6 +210,7 @@ async function getActualOutputData() {
       const firstRecord = result.recordset[0];
       
       const filteredOutputData = result.recordset.filter(record => record.SizeQty > 0).map(record => ({
+        IpAddress: record.IpAddress,
         PartName: record.PartName, 
         MaterialsName: record.MaterialsName,
         Size: record.Size,
@@ -269,6 +271,42 @@ async function setOrderIsComplete(OrderID) {
     throw error;
   }
 }
+
+
+async function setDistributionIsComplete(DistributionID) {
+  // Kiểm tra DistributionID hợp lệ
+  if (!DistributionID || DistributionID <= 0) {
+    throw new Error('DistributionID không hợp lệ. Nó phải là số nguyên dương.');
+  }
+
+  try {
+    const updateQuery = `
+      UPDATE DistributionData
+      SET Status = 'Complete'
+      WHERE DistributionID = @DistributionID;
+    `;
+
+    const request = (await initDatabase()).request();
+    request.input('DistributionID', sql.Int, DistributionID);
+
+    // Thực hiện truy vấn cập nhật
+    const result = await request.query(updateQuery);
+
+    // Kiểm tra số lượng bản ghi bị ảnh hưởng
+    if (result.rowsAffected[0] === 0) {
+      console.log(`Không tìm thấy DistributionID: ${DistributionID} trong bảng DistributionOrders.`);
+      return false;
+    }
+
+    console.log(`Cập nhật trạng thái 'Complete' thành công cho DistributionID: ${DistributionID}`);
+    return true; // Trả về true nếu cập nhật thành công
+  } catch (error) {
+    console.error('Lỗi khi cập nhật trạng thái Distribution thành Complete:', error.message);
+    throw error;
+  }
+}
+
+
 
 async function saveActualDataToDB(data) {
   const { OrderID, SizeData } = data;
@@ -340,11 +378,11 @@ async function saveActualDataToDB(data) {
 
       const result = await executeQuery(checkDeviceOutputQuery, inputs);
       if (result[0].count === 0) {
-        // 🔄 Step 2: If exists, UPDATE
+        // 🔄 Step 2: If not exists, INSERT
         await executeQuery(DeviceOutputQuery, DeviceOutputInputs);
         console.log(`✅ Updated DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
       } else {
-        // ➕ Step 3: If not exists, INSERT
+        // ➕ Step 3: If exists, UPDATE
         await  executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
         console.log(`✅ Inserted new DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
       }
@@ -849,11 +887,81 @@ async function getDistributionDataFromDb(ipAddress) {
     throw error;
   }
 }
+async function getSizeAndDistributionDataFromDb(ipAddress, orderId) {
+  try {
+    const query =
+          `SELECT  
+              dd.DistributionID, 
+              se.SizeID
+          FROM 
+              DistributionData AS dd
+          JOIN 
+              DeviceList AS d ON dd.DeviceID = d.DeviceID 
+          JOIN 
+              PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+          JOIN 
+              Part AS pa ON pa.PartID = ps.PartID
+          JOIN 
+              Size AS se ON se.SizeID = ps.SizeID
+          JOIN 
+              ProductOrder AS pr ON ps.OrderId = pr.OrderID
+          WHERE 
+              dd.IsDelete = 0  
+              AND d.IpAddress = @ipAddress
+              AND dd.Status = 'Pending'
+              AND ps.OrderId = @OrderId
+          GROUP BY 
+              dd.DistributionID, se.SizeID;
+    `;
+    
+    const request = new sql.Request();
+    request.input('IpAddress', sql.VarChar, ipAddress);
+    request.input('OrderId', sql.Int, orderId);
+    
+    const result = await request.query(query);
+    
+    if (result.recordset.length > 0) {
+      
+      // Lấy thông tin SizeData
+      const sizeData = result.recordset
+      .map(item => ({
+        SizeID: item.SizeID,
+      }))
+      .filter((value, index, self) =>
+        index === self.findIndex(
+          t => t.SizeID === value.SizeID
+        )
+      );
+       // Lấy thông tin distributionIDData 
+       const distributionID = result.recordset
+       .map(item => ({
+         DistributionID: item.DistributionID
+       }))
+       .filter((value, index, self) =>
+         index === self.findIndex(
+           t => t.DistributionID === value.DistributionID
+         )
+       );
+  
+      // Trả về dữ liệu theo cấu trúc yêu cầu
+      return {
+        SizeData: sizeData,
+        DistributionID: distributionID
+      };
+    } else {
+      return null; 
+    }
+  } catch (error) {
+    console.error(`Error fetching distribution data from DB: ${error.message}`);
+    logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
+    throw error;
+  }
+}
 async function getAllDeviceData() {
   try {
     const pool = await sql.connect(dbConfig);
     const result = await pool.request()
-      .query('SELECT a.IpAddress, a.MachineName, a.ConnectionStatus, a.IsActive, b.PlantName, d.DepartmentName FROM DeviceList a JOIN Plant b ON a.PlantID = b.PlantID JOIN Department d ON d.DepartmentID= a.DepartmentID');
+      .query('SELECT a.DeviceID, a.IpAddress, a.MachineName, a.ConnectionStatus, a.IsActive, b.PlantName, d.DepartmentName FROM DeviceList a JOIN Plant b ON a.PlantID = b.PlantID JOIN Department d ON d.DepartmentID= a.DepartmentID');
 
     return result.recordset;  
   } catch (error) {
@@ -1151,7 +1259,7 @@ async function getPlantNames() {
 async function getUserList() {
   try {
     const pool = await sql.connect(dbConfig);
-    const result = await pool.request().query('SELECT * FROM [CuttingProjectData].[dbo].[Users]');
+    const result = await pool.request().query('SELECT U.UserID, U.Username,  U.EmployeeName, U.EmployeeID, D.DepartmentName, D.DepartmentID, P.PositionName, P.PositionID, U.IsActive, U.CreatedAt, U.UpdatedAt FROM Users U LEFT JOIN Department D ON U.DepartmentID = D.DepartmentID LEFT JOIN Position P ON U.PositionID = P.PositionID;');
     return result.recordset;
   } catch (error) {
     console.error('Error fetching user list from database:', error.message);
@@ -1224,6 +1332,7 @@ module.exports = {
   getDistributionDataFromDb,
   getActualOutputData,
   setOrderIsComplete,
+  setDistributionIsComplete,
   getUserList,
   getOperatorList,
   getDistributions,

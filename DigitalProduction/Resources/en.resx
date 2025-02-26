@@ -348,4 +348,7 @@
   <data name="Report" xml:space="preserve">
     <value>Report</value>
   </data>
+  <data name="Sync" xml:space="preserve">
+    <value>Sync</value>
+  </data>
 </root>

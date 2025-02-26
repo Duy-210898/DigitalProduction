@@ -25,6 +25,7 @@ namespace DigitalProduction
         public event Action<string> OnErrorOccurred;
         public event Action OnDisconnected;
         public event Action<string> OnResponseReceived;
+        public event Action<string> OnResponseRealTime;
 
         // Private constructor to prevent external instantiation
         private WebSocketClient() { }
@@ -119,6 +120,53 @@ namespace DigitalProduction
                 return null;
             }
         }
+        public async Task<string> SendRealTimeAsync(string message)
+        {
+            if (_webSocket == null || _webSocket.State != WebSocketState.Open)
+            {
+                OnErrorOccurred?.Invoke("WebSocket is not connected.");
+                return null;
+            }
+
+            try
+            {
+                ResponseCompletionSource = new TaskCompletionSource<string>();
+
+                // Send the message to the server
+                await _webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)),
+                                           WebSocketMessageType.Text, true, System.Threading.CancellationToken.None);
+
+                // Receive response (in the same method after sending the request)
+                var buffer = new ArraySegment<byte>(new byte[12840]);
+
+                StringBuilder sb = new StringBuilder();
+                WebSocketReceiveResult result;
+                do
+                {
+                    result = await _webSocket.ReceiveAsync(buffer, System.Threading.CancellationToken.None);
+                    var chunk = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Trim();
+                    sb.Append(chunk.ToString());
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        NotifyDisconnection();
+                        return null;
+                    }
+                } while (!result.EndOfMessage);
+
+                // Convert the received byte array to a string and parse as JSON
+                string responseMessage = sb.ToString();
+
+                // Trigger the OnResponseReceived event with the response message
+                OnResponseRealTime?.Invoke(responseMessage);
+
+                return responseMessage;
+            }
+            catch (Exception ex)
+            {
+                OnErrorOccurred?.Invoke("Error while sending message: " + ex.Message);
+                return null;
+            }
+        }
 
         // Disconnect from the WebSocket server
         public async Task Disconnect()
@@ -195,6 +243,7 @@ namespace DigitalProduction
         // Method to clear all event handlers by setting the event to null
         public void ClearEventHandlers()
         {
+            OnResponseRealTime = null;
             OnResponseReceived = null;
         }
     }

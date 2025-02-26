@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraEditors;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -91,7 +92,11 @@ namespace DigitalProduction
                 row.Cells["Action"].Value = "Edit";
             }
 
-            dgvDevices.CellClick += dgvDevices_CellClick; // Attach event
+            if (dgvDevices != null)
+            {
+                dgvDevices.CellClick += dgvDevices_CellClick; // Unsubscribe if exists
+                dgvDevices.CellClick += dgvDevices_CellClick; // Subscribe
+            }
         }
 
 
@@ -106,8 +111,18 @@ namespace DigitalProduction
             {
                 string action = row.Cells["Action"].Value.ToString();
 
+
                 if (action == "Edit")
                 {
+                    // Reset "Action" column for all other rows to prevent multiple edits
+                    foreach (DataGridViewRow r in dgvDevices.Rows)
+                    {
+                        if (r.Index != e.RowIndex)
+                        {
+                            r.Cells["Action"].Value = "Edit";
+                            SetRowEditable(r, false);
+                        }
+                    }
                     isEditing = true;
                     HandleEditAction(row);
                 }
@@ -164,8 +179,7 @@ namespace DigitalProduction
 
         private void HandleUpdateAction(DataGridViewRow row)
         {
-            object value = row.Cells["DeviceID"].Value;
-            int deviceId = Convert.ToInt32(value);
+            int deviceId = Convert.ToInt32(row.Cells["DeviceID"].Value);
             int plantId = Convert.ToInt32(row.Cells["PlantCombo"].Value);
             int departmentId = Convert.ToInt32(row.Cells["DepartmentCombo"].Value);
             string address = row.Cells["Address"].Value?.ToString();
@@ -311,12 +325,12 @@ namespace DigitalProduction
             }
             row.Cells["CancelAction"].Value = "Cancel";
         }
-        private void UpdateDepartmentAndPlantName(int rowIndex, string key, string newDepartmentName)
+        private void UpdateDepartmentAndPlantName(int rowIndex, string key, string newName)
         {
             if (rowIndex >= 0 && rowIndex < dgvDevices.Rows.Count)
             {
                 // Update the hidden column
-                dgvDevices.Rows[rowIndex].Cells[$"{key} Name"].Value = newDepartmentName;
+                dgvDevices.Rows[rowIndex].Cells[$"{key} Name"].Value = newName;
 
                 // Refresh to reflect changes
                 dgvDevices.Refresh();
@@ -510,15 +524,22 @@ namespace DigitalProduction
                 Location = new Point(20, 10)
             };
 
-            Button refreshButton = new Button { Text = "Refresh", Size = new Size(80, 30), Location = new Point(250, 10) };
-            refreshButton.Click += RefreshButton_Click;
+
+            SimpleButton syncButton = new SimpleButton()
+            {
+                Text = LocalizationManager.GetString("Sync"),
+                Size = new Size(100, 40)
+            };
+            syncButton.Click += SyncButton_Click;
+            syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
 
             paginationPanel.Controls.Add(lblPageInfo);
-            paginationPanel.Controls.Add(refreshButton);
             this.Controls.Add(paginationPanel);
             this.Controls.SetChildIndex(paginationPanel, 0);
+            groupPanelButtonContainer.Controls.Add(syncButton);
+            syncButton.Location = new Point(120, 5); // Adjust the location accordingly
         }
-        private async void RefreshButton_Click(object sender, EventArgs e)
+        private async void SyncButton_Click(object sender, EventArgs e)
         {
             if (!isEditing) // Prevent refresh while editing
             {

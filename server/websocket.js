@@ -132,59 +132,43 @@ async function handleClientMessage(ws, message) {
 
 // Hàm xử lý yêu cầu lấy dữ liệu sản lượng thực tế
 async function handleGetActualData(ws, request) {
-
-  let intervalId;
-
   try {
-    // Function to fetch and send real-time data
-    //const sendRealTimeData = async () => {
-      try {
-        const realTimeData = await getActualOutputData();
+    // Fetch real-time data once and send response
+    const realTimeData = await getActualOutputData();
+    if (!realTimeData) {
+      return ws.send(JSON.stringify({
+        action: 'getActualData',
+        status: 'error',
+        message: 'No real-time data found'
+      }));
+    }
 
-        if (!realTimeData) {
-          ws.send(JSON.stringify({
-            action: 'getActualData',
-            status: 'error',
-            message: 'No real-time data found'
-          }));
-        } else {
-          ws.send(JSON.stringify({
-            action: 'getActualData',
-            status: 'success',
-            realTime: realTimeData
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching real-time data:', error);
-        ws.send(JSON.stringify({
-          action: 'getActualData',
-          status: 'error',
-          message: `Failed to get real-time data: ${error.message}`
-        }));
-      }
-   // };
+    // Send the real-time data once
+    ws.send(JSON.stringify({
+      action: 'getActualData',
+      status: 'success',
+      realTime: realTimeData
+    }));
 
-    // Send data immediately and then every 2 seconds
-    // await sendRealTimeData();
-    // intervalId = setInterval(sendRealTimeData, 2000);
+    // 🛑 Ensure only one 'close' listener per WebSocket
+    const closeHandler = () => {
+      ws.removeListener('close', closeHandler); // 🛠 Remove the event listener to prevent memory leaks
+      console.log('Client disconnected.');
+    };
+
+    ws.removeAllListeners('close'); // 🛑 Prevent multiple listeners from stacking
+    ws.on('close', closeHandler); // Attach the single close event
 
   } catch (error) {
-    console.error('Error handling the real-time data request:', error);
+    console.error('Error fetching real-time data:', error);
     ws.send(JSON.stringify({
       action: 'getActualData',
       status: 'error',
-      message: `Failed to handle request: ${error.message}`
+      message: `Failed to get real-time data: ${error.message}`
     }));
   }
-
-  // Cleanup on WebSocket close
-  ws.on('close', () => {
-    if (intervalId) {
-      clearInterval(intervalId);
-    }
-    console.log('Client disconnected. Stopping data requests.');
-  });
 }
+
 
 // Xử lý yêu cầu lấy thông tin phân phối của thiết bị
 async function handleGetDistributions(ws) {

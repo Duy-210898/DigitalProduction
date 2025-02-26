@@ -378,4 +378,7 @@
   <data name="Report" xml:space="preserve">
     <value>Báo cáo</value>
   </data>
+  <data name="Sync" xml:space="preserve">
+    <value>Đồng bộ</value>
+  </data>
 </root>

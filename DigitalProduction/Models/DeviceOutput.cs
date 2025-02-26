@@ -2,6 +2,7 @@
 {
     public class DeviceOutput
     {
+        public string IpAddress { get; set; }
         public string PartName { get; set; }
         public string Size { get; set; }
         public int SizeQty { get; set; }
@@ -11,5 +12,6 @@
         public int ActualCut { get; set; }
         public int ActualSizeQty { get; set; }
         public int ActualPieces { get; set; }
+        public bool IsGroupHeader { get; set; } // ✅ NEW PROPERTY to identify header rows
     }
 }

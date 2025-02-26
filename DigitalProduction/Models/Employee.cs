@@ -27,6 +27,16 @@ namespace DigitalProduction.Models
             PositionName = positionName;
             IsActive = isActive;
         }
+
+        public Employee(int operatorID, string operatorName, int employeeID, int positionID, int departmentID, bool isActive)
+        {
+            OperatorID = operatorID;
+            EmployeeID = employeeID;
+            OperatorName = operatorName;
+            DepartmentID = departmentID;
+            PositionID = positionID;
+            IsActive = isActive;
+        }
         public int OperatorID { get; set; }
         public int EmployeeID { get; set; }
         public string Username { get; set; }

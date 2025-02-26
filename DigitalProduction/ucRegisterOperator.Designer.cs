@@ -30,11 +30,11 @@
         {
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
             this.btn_close = new DevExpress.XtraEditors.SimpleButton();
+            this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
+            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
             this.btn_submit = new DevExpress.XtraEditors.SimpleButton();
             this.txt_employeeName = new DevExpress.XtraEditors.TextEdit();
             this.txt_employeeID = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
-            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txt_employeeName.Properties)).BeginInit();
@@ -66,6 +66,26 @@
             this.btn_close.Text = "Cancel";
             this.btn_close.Click += new System.EventHandler(this.btn_close_Click);
             // 
+            // labelControl4
+            // 
+            this.labelControl4.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.labelControl4.Appearance.Options.UseFont = true;
+            this.labelControl4.Location = new System.Drawing.Point(18, 45);
+            this.labelControl4.Name = "labelControl4";
+            this.labelControl4.Size = new System.Drawing.Size(97, 19);
+            this.labelControl4.TabIndex = 6;
+            this.labelControl4.Text = "Employee ID:";
+            // 
+            // labelControl3
+            // 
+            this.labelControl3.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.labelControl3.Appearance.Options.UseFont = true;
+            this.labelControl3.Location = new System.Drawing.Point(18, 97);
+            this.labelControl3.Name = "labelControl3";
+            this.labelControl3.Size = new System.Drawing.Size(121, 19);
+            this.labelControl3.TabIndex = 4;
+            this.labelControl3.Text = "Employee Name:";
+            // 
             // btn_submit
             // 
             this.btn_submit.Location = new System.Drawing.Point(145, 140);
@@ -92,26 +112,6 @@
             this.txt_employeeID.Properties.Appearance.Options.UseFont = true;
             this.txt_employeeID.Size = new System.Drawing.Size(171, 26);
             this.txt_employeeID.TabIndex = 10;
-            // 
-            // labelControl4
-            // 
-            this.labelControl4.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl4.Appearance.Options.UseFont = true;
-            this.labelControl4.Location = new System.Drawing.Point(18, 45);
-            this.labelControl4.Name = "labelControl4";
-            this.labelControl4.Size = new System.Drawing.Size(97, 19);
-            this.labelControl4.TabIndex = 6;
-            this.labelControl4.Text = "Employee ID:";
-            // 
-            // labelControl3
-            // 
-            this.labelControl3.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl3.Appearance.Options.UseFont = true;
-            this.labelControl3.Location = new System.Drawing.Point(18, 97);
-            this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(121, 19);
-            this.labelControl3.TabIndex = 4;
-            this.labelControl3.Text = "Employee Name:";
             // 
             // ucRegisterOperator
             // 
