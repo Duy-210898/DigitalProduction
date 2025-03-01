@@ -21,7 +21,7 @@ namespace DigitalProduction.Models
         public int DeviceID { get; set; }
 
         public int PartSizeOrderID { get; set; }
-
+        public int UserID { get; set; }
         public int OperatorID { get; set; }
 
         public int ProductID { get; set; }

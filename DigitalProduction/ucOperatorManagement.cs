@@ -30,7 +30,6 @@ namespace DigitalProduction
             InitializeComponent();
             LoadTextLable();
             InitializeDataGridView(); // Initialize the DataGridView
-            CreateButtonContainer();
             frmRegister = new ucRegisterOperator();
             frmRegister.Visible = false;
             this.Controls.Add(frmRegister);
@@ -399,6 +398,7 @@ namespace DigitalProduction
                     UpdateEmployees(response.Users);
                     Invoke(new Action(() => LoadDataGridView()));
                     ApplyLocalization();
+                    CreateButtonContainer();
                 }
                 else
                 {

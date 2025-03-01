@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.Data.Filtering;
 using DevExpress.DocumentServices.ServiceModel.DataContracts;
 using DigitalProduction.Models;
 
@@ -173,6 +174,44 @@ namespace DigitalProduction
                 return false;
             }
         }
+        public static bool updateOperator(Employee updatedOperator)
+        {
+            try
+            {
+                string query = @"
+                UPDATE Operator
+                SET 
+                    DepartmentID = @DepartmentID,
+                    PositionID = @PositionID,
+                    OperatorName = @OperatorName,
+                    EmployeeID = @EmployeeID,
+                    IsActive = @IsActive
+                WHERE OperatorID = @OperatorID";
+
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@OperatorID", updatedOperator.OperatorID);
+                        cmd.Parameters.AddWithValue("@DepartmentID", updatedOperator.DepartmentID);
+                        cmd.Parameters.AddWithValue("@PositionID", updatedOperator.PositionID);
+                        cmd.Parameters.AddWithValue("@OperatorName", updatedOperator.OperatorName);
+                        cmd.Parameters.AddWithValue("@EmployeeID", updatedOperator.EmployeeID);
+                        cmd.Parameters.AddWithValue("@IsActive", updatedOperator.IsActive);
+
+                        conn.Open();
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi: " + ex.Message);
+                return false;
+            }
+        }
+
         // delete user
         public static bool DeleteUser(string username)
         {
@@ -645,7 +684,7 @@ namespace DigitalProduction
             }
         }
         // Update device
-        public bool UpdateDevice(int deviceId, int departmentId, int plantId, string ipAddress, string machineName, bool isActive, bool connectionStatus)
+        public static bool updateDevice(int deviceId, int departmentId, int plantId, string ipAddress, string machineName, bool isActive, bool connectionStatus)
         {
             try
             {

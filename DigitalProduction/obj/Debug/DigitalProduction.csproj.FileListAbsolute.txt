@@ -160,3 +160,15 @@ D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.pdb
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucRegisterUser.resources
 D:\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucRegisterUser.resources
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraVerticalGrid.v24.2.dll
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraVerticalGrid.v24.2.xml
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucOperatorManagement.resources
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucRegisterDevice.resources
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucRegisterOperator.resources
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DigitalProduction.exe.manifest
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DigitalProduction.application
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.TrustInfo.xml
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.manifest
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.application
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.CodeDom.dll
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.CodeDom.xml

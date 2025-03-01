@@ -355,6 +355,8 @@ namespace DigitalProduction
                     cell.Style.BackColor = backColor;
                 }
             }
+            row.Cells["ConnectionStatus"].ReadOnly = true;
+            row.Cells["ConnectionStatus"].Style.BackColor = Color.White;
         }
 
         private void UpdateDevice(string address, string machineName, string plantName, string departmentName, bool isActive, bool connectionStatus)

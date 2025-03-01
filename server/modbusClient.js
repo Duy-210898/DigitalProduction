@@ -2,7 +2,7 @@ const fs = require('fs');
 const net = require('net');
 const Modbus = require('jsmodbus');
 const ping = require('ping');
-const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setOrderIsComplete, setDistributionIsComplete } = require('./database');
+const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setOrderIsComplete, setDistributionIsComplete, getSizeAndDistributionDataFromDb} = require('./database');
 const { notifyClientsToDeleteOrder } = require('./notifications');
 
 let previousRegister6507Value = null;
@@ -362,14 +362,13 @@ async function checkAndSaveDistribution(client, ipAddress) {
     let orderID = response.response._body.values[0]; // Extract the actual value
     console.log(`Register 1000 value: ${orderID}`);
 
-    if (orderID !== 0) {
+    if (orderID === 0) {
       console.log(`Register 1000 is 0. Fetching distribution data for IP: ${ipAddress}`);
 
       // Fetch distribution data from DB
       const distributionData = await getDistributionDataFromDb(ipAddress);
 
       if (distributionData) {
-    
         // Write order ID to register 1000
         await client.writeSingleRegister(1000, distributionData.OrderID);
         await delay(1000);
@@ -389,62 +388,187 @@ async function checkAndSaveDistribution(client, ipAddress) {
       modbusClients[ipAddress].orderID = orderID;
 
       // check complete order
-      let response = await client.readHoldingRegisters(1001, 1);
+      response = await client.readHoldingRegisters(1001, 1); // Reusing the variable name 'response'
       let isLeather = response.response._body.values[0];
       console.log(`Register 1001 value: ${isLeather}`);
   
       let sizeAddress;
-      let partID = 0;
-      if (isLeather != 0) {
+      // let deleteDistribution;
+      if (isLeather !== 0) {
+        if (isLeather === 1) {
+     //     deleteDistribution = 3000;
+          sizeAddress = 3102;
+          const distribution = await getSizeAndDistributionDataFromDb(ipAddress, orderID, 0);
+      
+          if (distribution !== null) {
+              let results = [];
+              let countCompleteSize = 0;
+          //    const sizeIndex = 1;
 
-        if(isLeather == 1) {
-          sizeAddress = '3101,0';
-          const [baseRegister, offset] = sizeAddress.split(',').map(Number);
-          // read partID if is raw material
-          let response = await client.readHoldingRegisters(300, 1);
-          partID = response.response._body.values[0];
+              // try {
+              //   const response = await client.readHoldingRegisters(deleteDistribution, 1);
+              //   const registerValue = response.response._body.values[0];  // assuming the response value is an array and we want the first value
+            
+              //   // Convert the registerValue to a binary string with leading zeros
+              //   let binaryValueDelete = registerValue.toString(2).padStart(16, '0');  // assuming 16-bit register, adjust if needed
+            
+              //   // Log the current value and binary representation
+              //   console.log(`deleteDistribution ${deleteDistribution} = ${registerValue}`);
+              //   console.log(`Binary deleteDistribution: ${binaryValueDelete}`);
+            
+              //   // Check if the specified bit is set at sizeIndex
+              //   if (isBitSetString(binaryValueDelete, sizeIndex)) {
+              //       // Prepare the value to write (000000000000100 is 4 in decimal)
+              //       const valueToWrite = 4; // This corresponds to 000000000000100 in binary
+            
+              //       // Write the value 4 to register 3001
+              //       await client.writeSingleRegister(3001, valueToWrite);
+              //       console.log(`Written value ${valueToWrite} to register 3001`);
+              //   }
+            
+              //   results.push({ address: deleteDistribution, value: registerValue });
+              // } catch (error) {
+              //   console.error(`Error reading register ${deleteDistribution}:`, error.message);
+              // }
 
-        }
-        else {
-          sizeAddress =  '3103,0';
-          const [baseRegister, offset] = sizeAddress.split(',').map(Number);
-          const distribution =  await getSizeAndDistributionDataFromDb(ipAddress, orderID);
-          if (distribution != null) {
-            let results = [];
-            let countCompleteSize = 0; 
-            for (let i = 0; i  <  distribution.SizeData.length; i++) {
-                let registerAddress = `${baseRegister},${offset + i}`; // Preserve format "3103,0", "3103,1"
+              // Iterate through size data
+              for (let i = 0; i < distribution.SizeData.length; i++) {
                 try {
-                    const response = await client.readHoldingRegisters(baseRegister + (offset + i), 1);
-                    countCompleteSize++;
-                    results.push({ address: registerAddress, value: response.response.body.valuesAsArray[0] });
+                    const response = await client.readHoldingRegisters(sizeAddress, 1);
+                    const registerValue = response.response._body.values[0];  // assuming the response value is an array and we want the first value
+                    
+                    // Convert the registerValue to a binary string with leading zeros
+                    let binaryValue = registerValue.toString(2).padStart(16, '0');  // assuming 16-bit register, adjust if needed
+            
+                    // Log each bit in the binary string
+                    console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
+                    console.log(`Binary representation: ${binaryValue}`);
+                    
+                    const sizeIndex = i + 1;
+                    
+                    if (isBitSetString(binaryValue, sizeIndex)) {
+                        countCompleteSize++;
+                        console.log(`Check size complete: ${sizeIndex} ` + isBitSetString(binaryValue, sizeIndex));
+                    }
+            
+                    results.push({ address: sizeAddress, value: registerValue });
                 } catch (error) {
-                    console.error(`Error reading register ${registerAddress}:`, error.message);
+                    console.error(`Error reading register ${sizeAddress}:`, error.message);
                 }
             }
-            if (countCompleteSize == distribution.SizeData.length)
-            {
-              distribution.DistributionID.forEach(async (item) => {
-                try {
-                  await setDistributionIsComplete(item.DistributionID);
-                  console.log(`Cập nhật DistributionID: ${item.DistributionID}`);
-                } catch (error) {
-                  console.error(`Lỗi khi cập nhật DistributionID: ${item.DistributionID}`, error);
+
+            // If all sizes are complete, update DistributionIDs
+            if (countCompleteSize === distribution.SizeData.length) {
+                for (const item of distribution.DistributionID) {
+                    try {
+                        await setDistributionIsComplete(item.DistributionID);
+                        console.log(`Updated DistributionID: ${item.DistributionID}`);
+                        deleteDistributionFromRegister(client);
+                    } catch (error) {
+                        console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
+                    }
                 }
-              });
             }
+
             console.log("Register Values:", results);
           }
+        } else {
+          sizeAddress = 3104;
+          const distribution = await getSizeAndDistributionDataFromDb(ipAddress, orderID, 1);
+          
+          if (distribution !== null) {
+            let results = [];
+            let countCompleteSize = 0;
+            for (let i = 0; i < distribution.SizeData.length; i++) {
+              try {
+                  const response = await client.readHoldingRegisters(sizeAddress, 1);
+                  const registerValue = response.response._body.values[0];  // assuming the response value is an array and we want the first value
+                  
+
+                  // Convert the registerValue to a binary string with leading zeros
+                  let binaryValue = registerValue.toString(2).padStart(16, '0');  // assuming 16-bit register, adjust if needed
+          
+                  // Log each bit in the binary string
+                  console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
+                  console.log(`Binary representation: ${binaryValue}`);
+                  
+                  const sizeIndex = i + 1;
+                  
+                  if (isBitSetString(binaryValue, sizeIndex)) {
+                      countCompleteSize++;
+                      console.log(`Check size complete: ${sizeIndex} ` + isBitSetString(binaryValue, sizeIndex));
+                  }
+          
+                  results.push({ address: sizeAddress, value: registerValue });
+              } catch (error) {
+                  console.error(`Error reading register ${sizeAddress}:`, error.message);
+              }
+          }
+
+          // If all sizes are complete, update DistributionIDs
+          if (countCompleteSize === distribution.SizeData.length) {
+              for (const item of distribution.DistributionID) {
+                  try {
+                      await setDistributionIsComplete(item.DistributionID);
+                      console.log(`Updated DistributionID: ${item.DistributionID}`);
+                      deleteDistributionFromRegister(client);
+                  } catch (error) {
+                      console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
+                  }
+              }
+          }
+
+          console.log("Register Values:", results);
         }
       }
     }
-  } catch (error) {
+  }} catch (error) {
     const errorMsg = `❌ Error reading register 1000 for IP ${ipAddress}: ${error.message}`;
     console.error(errorMsg);
     logToFile(errorLogPath, errorMsg);
   }
 }
 
+/**
+ * Delete distribution by modifying a register based on a specific condition.
+ * @param {Object} client - The Modbus client instance.
+ * @returns {Promise<void>} - Resolves when the operation is completed.
+ */
+async function deleteDistributionFromRegister(client) {
+  let results = [];
+  let deleteDistribution = 3000;
+  const sizeIndex = 1;
+  try {
+    const response = await client.readHoldingRegisters(deleteDistribution, 1);
+    const registerValue = response.response._body.values[0];  // assuming the response value is an array and we want the first value
+
+    // Convert the registerValue to a binary string with leading zeros
+    let binaryValueDelete = registerValue.toString(2).padStart(16, '0');  // assuming 16-bit register, adjust if needed
+
+    // Log the current value and binary representation
+    console.log(`deleteDistribution ${deleteDistribution} = ${registerValue}`);
+    console.log(`Binary deleteDistribution: ${binaryValueDelete}`);
+
+    // Check if the specified bit is set at sizeIndex
+    if (isBitSetString(binaryValueDelete, sizeIndex)) {
+        // Prepare the value to write (000000000000100 is 4 in decimal)
+        const valueToWrite = 4; // This corresponds to 000000000000100 in binary
+
+        // Write the value 4 to register 3001
+        await client.writeSingleRegister(deleteDistribution, valueToWrite);
+        console.log(`Written value ${valueToWrite} to register 3001`);
+    }
+
+    results.push({ address: deleteDistribution, value: registerValue });
+  } catch (error) {
+    console.error(`Error reading register ${deleteDistribution}:`, error.message);
+  }
+}
+
+  // Check bit at position `n` (1-based index from right)
+function isBitSetString(binaryStr, bitPosition) {
+    return binaryStr[binaryStr.length - bitPosition] === '1';
+  }
 async function readOperatorID(client, ipAddress) {
   try {
     const data = await client.readHoldingRegisters(3105, 2);
@@ -540,10 +664,12 @@ async function readActualData(client) {
           processedCuttingDieQty,
           actualCut,
           actualPieces,
-          actualSizeQty
+          actualSizeQty,
+          processedTotalPieces
         });
         await saveActualDataToDB({ 
           OrderID: OrderID,
+          IsLeather: sizeDataInfo.isLeather == 2 ? 1 : 0,
           SizeData: [{
               SizeID: sizeID,
               PiecesPerPair: piecesPerPair,
@@ -551,7 +677,8 @@ async function readActualData(client) {
               CuttingDieQty: cuttingDieQty,
               ActualCut: actualCut,
               ActualPieces: actualPieces,
-              ActualSizeQty: actualSizeQty
+              ActualSizeQty: actualSizeQty,
+              TotalPiecesPerPair: totalPieces 
                 }] 
               });
       } catch (error) {

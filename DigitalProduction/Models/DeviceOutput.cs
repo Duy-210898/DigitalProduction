@@ -1,17 +1,122 @@
-﻿namespace DigitalProduction.Models
+﻿using System.ComponentModel;
+
+namespace DigitalProduction.Models
 {
-    public class DeviceOutput
+    public class DeviceOutput : INotifyPropertyChanged
     {
-        public string IpAddress { get; set; }
-        public string PartName { get; set; }
-        public string Size { get; set; }
-        public int SizeQty { get; set; }
-        public int? PiecesPerPair { get; set; }
-        public int? MaterialLayer { get; set; }
-        public int? CuttingDieQty { get; set; }
-        public int ActualCut { get; set; }
-        public int ActualSizeQty { get; set; }
-        public int ActualPieces { get; set; }
-        public bool IsGroupHeader { get; set; } // ✅ NEW PROPERTY to identify header rows
+        private string _machineName;
+        private string _so;
+        private string _size;
+        private bool _isLeather;
+        private string _operatorName;
+        private int _sizeQty;
+        private int? _piecesPerPair;
+        private int? _materialLayer;
+        private int? _cuttingDieQty;
+        private int _actualCut;
+        private int _actualSizeQty;
+        private int _actualPieces;
+        private int _inventoryQty;
+        private int? _totalPiecesPerPair;
+        private bool _isGroupHeader;
+        private string _materialType;
+
+        public string MachineName
+        {
+            get => _machineName;
+            set { _machineName = value; OnPropertyChanged(nameof(MachineName)); }
+        }
+        public string OperatorName
+        {
+            get => _operatorName;
+            set { _operatorName = value; OnPropertyChanged(nameof(OperatorName)); }
+        }
+        public string SO
+        {
+            get => _so;
+            set { _so = value; OnPropertyChanged(nameof(SO)); }
+        }
+
+        public bool IsLeather
+        {
+            get => _isLeather;
+            set { _isLeather = value; OnPropertyChanged(nameof(IsLeather)); }
+        }
+        public string MaterialType
+        {
+            get => _materialType;
+            set { _materialType = value; OnPropertyChanged(nameof(MaterialType)); }
+        }
+
+        public string Size
+        {
+            get => _size;
+            set { _size = value; OnPropertyChanged(nameof(Size)); }
+        }
+
+        public int SizeQty
+        {
+            get => _sizeQty;
+            set { _sizeQty = value; OnPropertyChanged(nameof(SizeQty)); }
+        }
+
+        public int? PiecesPerPair
+        {
+            get => _piecesPerPair;
+            set { _piecesPerPair = value; OnPropertyChanged(nameof(PiecesPerPair)); }
+        }
+        public int? TotalPiecesPerPair
+        {
+            get => _totalPiecesPerPair;
+            set { _totalPiecesPerPair = value; OnPropertyChanged(nameof(_totalPiecesPerPair)); }
+        }
+
+        public int? MaterialLayer
+        {
+            get => _materialLayer;
+            set { _materialLayer = value; OnPropertyChanged(nameof(MaterialLayer)); }
+        }
+
+        public int? CuttingDieQty
+        {
+            get => _cuttingDieQty;
+            set { _cuttingDieQty = value; OnPropertyChanged(nameof(CuttingDieQty)); }
+        }
+
+        public int ActualCut
+        {
+            get => _actualCut;
+            set { _actualCut = value; OnPropertyChanged(nameof(ActualCut)); }
+        }
+
+        public int ActualSizeQty
+        {
+            get => _actualSizeQty;
+            set { _actualSizeQty = value; OnPropertyChanged(nameof(ActualSizeQty)); }
+        }
+
+        public int ActualPieces
+        {
+            get => _actualPieces;
+            set { _actualPieces = value; OnPropertyChanged(nameof(ActualPieces)); }
+        }
+
+        public bool IsGroupHeader
+        {
+            get => _isGroupHeader;
+            set { _isGroupHeader = value; OnPropertyChanged(nameof(IsGroupHeader)); }
+        }
+
+        public int InventoryQty
+        {
+            get => _inventoryQty;
+            set { _inventoryQty = value; OnPropertyChanged(nameof(InventoryQty)); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

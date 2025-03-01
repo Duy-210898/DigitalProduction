@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO.Ports;
 using System.Linq;
 using System.Windows.Forms;
-using DevExpress.XtraBars.Customization;
+using DevExpress.Data.Filtering.Helpers;
 using DevExpress.XtraEditors;
-using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
@@ -18,10 +18,11 @@ namespace DigitalProduction
     {
         private DbHelper dbHelper;
         private WebSocketClient _webSocketClient;
-        private List<MaterialData> materialDataList; // Store your data source
+        private List<MaterialData> materialDataList;
         private int orderID = 0;
         private int operatorID = 0;
         private int deviceID = 0;
+        private int userID = 0;
         private int inventory = 0;
         private int cuttingDieQty = 0;
         private int piecesPerPair = 0;
@@ -30,6 +31,7 @@ namespace DigitalProduction
         private HashSet<int> sizeIDs = new HashSet<int>();
         private HashSet<int> partIDs = new HashSet<int>();
         private HashSet<int> partSizeOrderIDs = new HashSet<int>();
+        private List<SizeData> sizeDataList;
 
         public ucDistribution()
         {
@@ -86,39 +88,39 @@ namespace DigitalProduction
             else
                 combo.ClosePopup();
         }
-        private DataTable TransformSizeData(DataTable originalTable)
-        {
-            DataTable transformedTable = new DataTable();
+        //private DataTable TransformSizeData(DataTable originalTable)
+        //{
+        //    DataTable transformedTable = new DataTable();
 
-            transformedTable.Columns.Add("Field");
+        //    transformedTable.Columns.Add("Field");
 
-            foreach (DataRow row in originalTable.Rows)
-            {
-                transformedTable.Columns.Add(row["Size"].ToString());
-            }
+        //    foreach (DataRow row in originalTable.Rows)
+        //    {
+        //        transformedTable.Columns.Add(row["Size"].ToString());
+        //    }
 
-            // Lấy danh sách các tiêu đề cột (bỏ qua cột "Size")
-            var columnNames = originalTable.Columns.Cast<DataColumn>()
-                               .Where(c => c.ColumnName != "Size")
-                               .Select(c => c.ColumnName)
-                               .ToList();
+        //    // Lấy danh sách các tiêu đề cột (bỏ qua cột "Size")
+        //    var columnNames = originalTable.Columns.Cast<DataColumn>()
+        //                       .Where(c => c.ColumnName != "Size")
+        //                       .Select(c => c.ColumnName)
+        //                       .ToList();
 
-            // Thêm dữ liệu vào bảng mới
-            foreach (var columnName in columnNames)
-            {
-                DataRow newRow = transformedTable.NewRow();
-                newRow["Field"] = columnName;
+        //    // Thêm dữ liệu vào bảng mới
+        //    foreach (var columnName in columnNames)
+        //    {
+        //        DataRow newRow = transformedTable.NewRow();
+        //        newRow["Field"] = columnName;
 
-                foreach (DataRow row in originalTable.Rows)
-                {
-                    newRow[row["Size"].ToString()] = row[columnName];
-                }
+        //        foreach (DataRow row in originalTable.Rows)
+        //        {
+        //            newRow[row["Size"].ToString()] = row[columnName];
+        //        }
 
-                transformedTable.Rows.Add(newRow);
-            }
+        //        transformedTable.Rows.Add(newRow);
+        //    }
 
-            return transformedTable;
-        }
+        //    return transformedTable;
+        //}
         private DataTable ConvertSizeDataToDataTable(List<SizeData> sizeDataList)
         {
             DataTable table = new DataTable();
@@ -214,7 +216,7 @@ namespace DigitalProduction
 
             pnlSize.Visible = true;
 
-            var sizeDataList = new List<SizeData>();
+            sizeDataList = new List<SizeData>();
             materialDataList = new List<MaterialData>();
 
             // Lọc và sắp xếp các kích thước duy nhất
@@ -602,9 +604,10 @@ namespace DigitalProduction
         {
             List<DistributionData> results = new List<DistributionData>();
             partSizeOrderIDs.Clear();
+            //userID = Global.CurrentUser.
             deviceID = int.Parse(cbxDevice.SelectedValue.ToString());
             operatorID = int.Parse(lbl_operatorID.Text);
-            inventory = int.Parse(txtInventory.Text);
+            int inventory = int.TryParse(txtInventory.Text, out int result) ? result : 0;
             cuttingDieQty = int.Parse(numCuttingDieQty.Text);
             piecesPerPair = int.Parse(numPiecesPerPair.Text);
             materialLayer = int.Parse(numMaterialLayer.Text);
@@ -613,7 +616,7 @@ namespace DigitalProduction
             bool isLeather = false;
             int partID;
 
-            // 1 part has many sizes
+            // 1 part has many sizes - care part
             if (rdRawMaterial.Checked)
             {
                 partID = (int)cbxPart.EditValue;
@@ -623,15 +626,15 @@ namespace DigitalProduction
                     partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partID, i, orderID));
                 }
             }
-            // 1-3 size has many parts
+            // 1-3 size has many parts - care size
             else
             {
                 isLeather = true;
-                foreach (int i in partIDs)
+                foreach (int i in sizeIDs)
                 {
-                    foreach (int sizeId in sizeIDs)
+                    foreach (int partId in partIDs)
                     {
-                        partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(i, sizeId, orderID));
+                        partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partId, i, orderID));
                     }
                 }
             }
@@ -642,6 +645,7 @@ namespace DigitalProduction
                 {
                     DeviceID = deviceID,
                     OperatorID = operatorID,
+                    UserID = userID,
                     ProductID = productId,
                     PartSizeOrderID = i,
                     CuttingDieQty = cuttingDieQty,
@@ -764,6 +768,7 @@ namespace DigitalProduction
             setControlVisibility(true, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
             if (rdLeather.Checked)
             {
+                dataGrid_overviewDistribution.DataSource = null;
                 if (cbxPart.Properties.DataSource != null)
                 {
                     cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "FT2").ToList();
@@ -783,6 +788,7 @@ namespace DigitalProduction
             setControlVisibility(true, numCuttingDieQty, numMaterialLayer, numPiecesPerPair, lblCuttingDie, lblMaterialLayer, lblPeicesPerPair);
             if (rdRawMaterial.Checked)
             {
+                dataGrid_overviewDistribution.DataSource = null;
                 lblPartValue.ResetText();
                 if (cbxPart.Properties.DataSource != null)
                 {
@@ -846,6 +852,8 @@ namespace DigitalProduction
 
                 // Refresh DataGridView to apply the change
                 dgvSize.Refresh();
+
+                UpdateOverviewDistributionGrid();
             }
         }
 
@@ -857,6 +865,81 @@ namespace DigitalProduction
                 control.Visible = isVisible;
             }
         }
+        private void UpdateOverviewDistributionGrid()
+        {
+            DataTable overviewTable = new DataTable();
+            overviewTable.Columns.Add("PartName", typeof(string));
+            overviewTable.Columns.Add("Size", typeof(string));
+
+            Dictionary<string, HashSet<string>> partSizeMap = new Dictionary<string, HashSet<string>>();
+
+            if (rdRawMaterial.Checked && cbxPart.EditValue != null)
+            {
+                partIDs.Add((int)cbxPart.EditValue);
+            }
+
+            // Loop over the selected parts and sizes
+            foreach (int partId in partIDs)
+            {
+                var part = materialDataList.FirstOrDefault(m => m.PartID == partId);
+                if (part == null)
+                    continue;
+
+                if (!partSizeMap.ContainsKey(part.PartName))
+                {
+                    partSizeMap[part.PartName] = new HashSet<string>(); // Store unique sizes
+                }
+
+                foreach (int sizeId in sizeIDs)
+                {
+                    string sizeName = GetSizeName(sizeId);
+                    partSizeMap[part.PartName].Add(sizeName);
+                }
+            }
+
+            // Add grouped data to DataTable
+            foreach (var entry in partSizeMap)
+            {
+                string partName = entry.Key;
+                string sizeList = string.Join(", ", entry.Value); // Merge sizes as a comma-separated string
+
+                overviewTable.Rows.Add(partName, sizeList);
+            }
+
+            // Bind the table to your overview grid.
+            dataGrid_overviewDistribution.DataSource = overviewTable;
+            updateUIDataGridOverView();
+
+        }
+
+        private void updateUIDataGridOverView() {
+            dataGrid_overviewDistribution.Dock = DockStyle.Fill;
+            dataGrid_overviewDistribution.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGrid_overviewDistribution.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGrid_overviewDistribution.AllowUserToResizeRows = false;
+            dataGrid_overviewDistribution.AllowUserToResizeColumns = false;
+
+            // Set alternating row colors for better readability
+            dataGrid_overviewDistribution.AlternatingRowsDefaultCellStyle.BackColor = Color.LightGray;
+
+            // Center align content in cells
+            dataGrid_overviewDistribution.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dataGrid_overviewDistribution.DefaultCellStyle.Font = new Font("Segoe UI", 10);
+
+        
+            // Allow selection of entire rows
+            dataGrid_overviewDistribution.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dataGrid_overviewDistribution.MultiSelect = false;
+            dataGrid_overviewDistribution.ReadOnly = true;  // Prevent editing if needed
+
+        }
+
+        private string GetSizeName(int sizeId)
+        {
+            var sizeData = sizeDataList.FirstOrDefault(s => s.SizeID == sizeId);
+            return sizeData != null ? sizeData.Size : string.Empty;
+        }
+
 
     }
 }

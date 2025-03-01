@@ -107,6 +107,7 @@ CREATE TABLE DeviceOutput (
     OutputID INT PRIMARY KEY IDENTITY(1,1),
 	SizeID INT,
 	OrderID INT,
+	IsLeather INT,
     PiecesPerPair INT,
     MaterialLayer INT,
     CuttingDieQty INT,
@@ -123,6 +124,7 @@ GO
 -- Table: DistributionData
 CREATE TABLE DistributionData (
     DistributionID INT PRIMARY KEY IDENTITY(1,1),
+	UserID INT,
     DeviceID INT,
     PartSizeOrderId INT,
     OperatorID INT,
@@ -188,7 +190,8 @@ ALTER TABLE DefaultInfo
     ADD CONSTRAINT FK_DefaultInfo_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID);
 GO
 ALTER TABLE DistributionData
-    ADD CONSTRAINT FK_DistributionData_Device FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID),
+	ADD CONSTRAINT FK_DistributionData_Users FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    CONSTRAINT FK_DistributionData_Device FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID),
     CONSTRAINT FK_DistributionData_PartSizeOrder FOREIGN KEY (PartSizeOrderId) REFERENCES PartSizeOrder(PartSizeOrderId),
     CONSTRAINT FK_DistributionData_Operator FOREIGN KEY (OperatorID) REFERENCES Operator(OperatorID);
 GO
