@@ -351,4 +351,16 @@
   <data name="Sync" xml:space="preserve">
     <value>Sync</value>
   </data>
+  <data name="ChangeOfPlan" xml:space="preserve">
+    <value>Change of plan</value>
+  </data>
+  <data name="ForgotToChooseSize" xml:space="preserve">
+    <value>Forgot to choose size</value>
+  </data>
+  <data name="NotEnoughMaterials" xml:space="preserve">
+    <value>Not enough materials</value>
+  </data>
+  <data name="OtherReason" xml:space="preserve">
+    <value>Other reason</value>
+  </data>
 </root>

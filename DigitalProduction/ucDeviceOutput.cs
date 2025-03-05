@@ -17,15 +17,24 @@ namespace DigitalProduction
 
             // Bind UI elements to ViewModel properties
             dataGrid_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
-            // Assuming dataGridView1 is your DataGridView
-            dataGrid_DeviceOutput.Columns["IsLeather"].Visible = false;
-            dataGrid_DeviceOutput.Columns["IsGroupHeader"].Visible = false;
-
             dataGrid_DeviceOutput.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGrid_DeviceOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             dataGrid_DeviceOutput.CellFormatting += DataGrid_DeviceOutput_CellFormatting;
             this.Resize += UcDeviceOutput_Resize;
+            dataGrid_DeviceOutput.DataBindingComplete += DataGrid_DeviceOutput_DataBindingComplete;
+        }
+
+        private void DataGrid_DeviceOutput_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            if (dataGrid_DeviceOutput.Columns.Contains("IsLeather"))
+            {
+                dataGrid_DeviceOutput.Columns["IsLeather"].Visible = false;
+            }
+            if (dataGrid_DeviceOutput.Columns.Contains("IsGroupHeader"))
+            {
+                dataGrid_DeviceOutput.Columns["IsGroupHeader"].Visible = false;
+            }
         }
 
         private void UcDeviceOutput_Resize(object sender, EventArgs e)

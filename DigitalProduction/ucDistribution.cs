@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.IO.Ports;
 using System.Linq;
 using System.Windows.Forms;
-using DevExpress.Data.Filtering.Helpers;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -23,7 +21,6 @@ namespace DigitalProduction
         private int operatorID = 0;
         private int deviceID = 0;
         private int userID = 0;
-        private int inventory = 0;
         private int cuttingDieQty = 0;
         private int piecesPerPair = 0;
         private int materialLayer = 0;
@@ -832,13 +829,26 @@ namespace DigitalProduction
 
                 // Get SizeID from the selected row
                 int sizeId = Convert.ToInt32(dgvSize.Rows[e.RowIndex].Cells["SizeID"].Value);
-
+                    
                 if (!isChecked) // If user is checking the box
                 {
-                    if (sizeIDs.Count >= 3)
+                    // if Lether only 3 sizes
+                    if (rdLeather.Checked)
                     {
-                        MessageBox.Show("You can select a maximum of 3 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
+                        if (sizeIDs.Count >= 3)
+                        {
+                            MessageBox.Show("You can select a maximum of 3 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+                    }
+                    // if raw only 6 sizes
+                    if (rdRawMaterial.Checked)
+                    {
+                        if (sizeIDs.Count >= 6)
+                        {
+                            MessageBox.Show("You can select a maximum of 3 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
                     }
                     sizeIDs.Add(sizeId);
                 }

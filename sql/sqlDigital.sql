@@ -132,8 +132,11 @@ CREATE TABLE DistributionData (
     Status VARCHAR(50) DEFAULT 'Pending',
     CreatedAt DATETIME DEFAULT GETDATE(),
     IsLeather BIT,
-    IsDelete BIT
+    IsDelete BIT,
+	Note INT
 );
+
+
 GO
 -- Table: ProductionSchedule
 CREATE TABLE ProductionSchedule (

@@ -9,14 +9,14 @@ namespace DigitalProduction.Models
         private string _size;
         private bool _isLeather;
         private string _operatorName;
-        private int _sizeQty;
+        private int? _sizeQty;
         private int? _piecesPerPair;
         private int? _materialLayer;
         private int? _cuttingDieQty;
-        private int _actualCut;
-        private int _actualSizeQty;
-        private int _actualPieces;
-        private int _inventoryQty;
+        private int? _actualCut;
+        private int? _actualSizeQty;
+        private int? _actualPieces;
+        private int? _inventoryQty;
         private int? _totalPiecesPerPair;
         private bool _isGroupHeader;
         private string _materialType;
@@ -54,50 +54,50 @@ namespace DigitalProduction.Models
             set { _size = value; OnPropertyChanged(nameof(Size)); }
         }
 
-        public int SizeQty
+        public int? SizeQty
         {
-            get => _sizeQty;
+            get => _sizeQty ?? 0;
             set { _sizeQty = value; OnPropertyChanged(nameof(SizeQty)); }
         }
 
         public int? PiecesPerPair
         {
-            get => _piecesPerPair;
+            get => _piecesPerPair ?? 0;
             set { _piecesPerPair = value; OnPropertyChanged(nameof(PiecesPerPair)); }
         }
         public int? TotalPiecesPerPair
         {
-            get => _totalPiecesPerPair;
+            get => _totalPiecesPerPair ?? 0;
             set { _totalPiecesPerPair = value; OnPropertyChanged(nameof(_totalPiecesPerPair)); }
         }
 
         public int? MaterialLayer
         {
-            get => _materialLayer;
+            get => _materialLayer ?? 0;
             set { _materialLayer = value; OnPropertyChanged(nameof(MaterialLayer)); }
         }
 
         public int? CuttingDieQty
         {
-            get => _cuttingDieQty;
+            get => _cuttingDieQty ?? 0;
             set { _cuttingDieQty = value; OnPropertyChanged(nameof(CuttingDieQty)); }
         }
 
-        public int ActualCut
+        public int? ActualCut
         {
-            get => _actualCut;
+            get => _actualCut ?? 0;
             set { _actualCut = value; OnPropertyChanged(nameof(ActualCut)); }
         }
 
-        public int ActualSizeQty
+        public int? ActualSizeQty
         {
-            get => _actualSizeQty;
+            get => _actualSizeQty ?? 0;
             set { _actualSizeQty = value; OnPropertyChanged(nameof(ActualSizeQty)); }
         }
 
-        public int ActualPieces
+        public int? ActualPieces
         {
-            get => _actualPieces;
+            get => _actualPieces ?? 0;
             set { _actualPieces = value; OnPropertyChanged(nameof(ActualPieces)); }
         }
 
@@ -107,9 +107,9 @@ namespace DigitalProduction.Models
             set { _isGroupHeader = value; OnPropertyChanged(nameof(IsGroupHeader)); }
         }
 
-        public int InventoryQty
+        public int? InventoryQty
         {
-            get => _inventoryQty;
+            get => _inventoryQty ?? 0;
             set { _inventoryQty = value; OnPropertyChanged(nameof(InventoryQty)); }
         }
 

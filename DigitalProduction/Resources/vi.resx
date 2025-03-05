@@ -381,4 +381,16 @@
   <data name="Sync" xml:space="preserve">
     <value>Đồng bộ</value>
   </data>
+  <data name="ChangeOfPlan" xml:space="preserve">
+    <value>Thay đổi kế hoạch</value>
+  </data>
+  <data name="ForgotToChooseSize" xml:space="preserve">
+    <value>Quên chọn size</value>
+  </data>
+  <data name="NotEnoughMaterials" xml:space="preserve">
+    <value>Không đủ liệu</value>
+  </data>
+  <data name="OtherReason" xml:space="preserve">
+    <value>Lí do khác</value>
+  </data>
 </root>

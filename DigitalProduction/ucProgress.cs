@@ -184,20 +184,49 @@ namespace DigitalProduction
             // Update the total record label
             lblPageInfo.Text = $"Total Records: {filteredData.Count}";
         }
-     
+
         private void DgvProgressManagement_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            // Check if we're in the DataRow section
-            if (dgvProgressManagement.Rows[e.RowIndex].Cells["IsLeather"].Value is bool isLeather && isLeather)
+            // Check if we're formatting the 'IsLeather' column to apply custom style.
+            if (dgvProgressManagement.Columns[e.ColumnIndex].Name == "IsLeather")
             {
-                // Set the background color for the entire row for each cell
-                foreach (DataGridViewCell cell in dgvProgressManagement.Rows[e.RowIndex].Cells)
+                if (dgvProgressManagement.Rows[e.RowIndex].Cells["IsLeather"].Value is bool isLeather && isLeather)
                 {
-                    cell.Style.BackColor = Color.LightYellow; // Highlight row
-                    cell.Style.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold); // Make it bold
+                    // Highlight the row.
+                    foreach (DataGridViewCell cell in dgvProgressManagement.Rows[e.RowIndex].Cells)
+                    {
+                        cell.Style.BackColor = Color.LightYellow;
+                        cell.Style.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
+                    }
                 }
             }
+
+            // Format the 'Note' column.
+            if (dgvProgressManagement.Columns[e.ColumnIndex].Name == "Note" && e.Value is int)
+            {
+                int noteValue = (int)e.Value;
+                switch (noteValue)
+                {
+                    case 1:
+                        e.Value = LocalizationManager.GetString("NotEnoughMaterials");
+                        break;
+                    case 2:
+                        e.Value = LocalizationManager.GetString("ChangeOfPlan");
+                        break;
+                    case 3:
+                        e.Value = LocalizationManager.GetString("ForgotToChooseSize");
+                        break;
+                    case 0:
+                        e.Value = String.Empty;
+                        break;
+                    default:
+                        e.Value = "N/A";
+                        break;
+                }
+                e.FormattingApplied = true;
+            }
         }
+
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
@@ -329,6 +358,7 @@ namespace DigitalProduction
             public string Status { get; set; }
             public DateTime CreatedAt { get; set; }
             public bool IsLeather { get; set; }
+            public int? Note { get; set; }
         }
     }
 }

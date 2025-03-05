@@ -1,12 +1,10 @@
-﻿using DigitalProduction.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Forms;
+using System.Threading;
+using DigitalProduction.Models;
 using Newtonsoft.Json;
-using System.Reflection;
 
 namespace DigitalProduction.ViewModels
 {
@@ -14,7 +12,8 @@ namespace DigitalProduction.ViewModels
     {
         private WebSocketClient _webSocketClient;
         private BindingList<DeviceOutput> _bindingDeviceOutputs = new BindingList<DeviceOutput>();
-        private Timer _timer;
+        private System.Windows.Forms.Timer _timer;
+        private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
 
         public BindingList<DeviceOutput> BindingDeviceOutputs
         {
@@ -28,11 +27,14 @@ namespace DigitalProduction.ViewModels
 
         public DeviceOutputListViewModel()
         {
-            // Initialize the collections once.
+            // Capture the UI thread synchronization context (assuming this is created on the UI thread)
+            _syncContext = SynchronizationContext.Current;
+
+            // Initialize the BindingList.
             _bindingDeviceOutputs = new BindingList<DeviceOutput>();
 
             // Initialize Timer with a 2-second interval.
-            _timer = new Timer { Interval = 2000 };
+            _timer = new System.Windows.Forms.Timer { Interval = 2000 };
             _timer.Tick += Timer_Tick;
         }
 
@@ -46,9 +48,28 @@ namespace DigitalProduction.ViewModels
 
         public async void RequestData()
         {
-            var request = new { app = Global.App, action = "getActualData" };
-            string jsonRequest = JsonConvert.SerializeObject(request);
-            await _webSocketClient.SendRealTimeAsync(jsonRequest);
+            // Check if the WebSocket is open before sending.
+            if (_webSocketClient != null)
+            {
+                var request = new { app = Global.App, action = "getActualData" };
+                string jsonRequest = JsonConvert.SerializeObject(request);
+                try
+                {
+                    await _webSocketClient.SendRealTimeAsync(jsonRequest);
+                }
+                catch (System.Net.WebSockets.WebSocketException ex)
+                {
+                    Console.WriteLine("WebSocket exception in RequestData: " + ex.Message);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Console.WriteLine("Invalid operation in RequestData: " + ex.Message);
+                }
+            }
+            else
+            {
+                Console.WriteLine("WebSocket is not open or is null in RequestData.");
+            }
         }
 
         // Timer tick event handler to request data.
@@ -58,6 +79,20 @@ namespace DigitalProduction.ViewModels
         }
 
         private void WebSocket_OnMessage(string jsonData)
+        {
+            // Use the captured synchronization context to ensure UI updates occur on the UI thread.
+            if (_syncContext != null)
+            {
+                _syncContext.Post(_ => ProcessWebSocketMessage(jsonData), null);
+            }
+            else
+            {
+                // Fallback if no synchronization context is available.
+                ProcessWebSocketMessage(jsonData);
+            }
+        }
+
+        private void ProcessWebSocketMessage(string jsonData)
         {
             try
             {
@@ -70,7 +105,7 @@ namespace DigitalProduction.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error receiving WebSocket data: {ex.Message}");
+                Console.WriteLine($"Error processing WebSocket data: {ex.Message}");
             }
         }
 
@@ -88,14 +123,12 @@ namespace DigitalProduction.ViewModels
               .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName })
               .SelectMany(g =>
               {
-                  // Check if the MachineName is uniform across the group.
                   bool machineNameUniform = g.All(x => x.MachineName == g.Key.MachineName);
                   bool soUniform = g.All(x => x.SO == g.Key.SO);
                   bool operatorUniform = g.All(x => x.OperatorName == g.Key.OperatorName);
-                  // Calculate the total ActualCut for this group.
-                  int totalActualCut = g.Sum(x => x.ActualCut);
-                  int totalActualPieces = g.Sum(x => x.ActualPieces);
-                  int totalActualSizeQty = g.Sum(x => x.ActualSizeQty);
+                  int totalActualCut = (int)g.Sum(x => x.ActualCut);
+                  int totalActualPieces = (int)g.Sum(x => x.ActualPieces);
+                  int totalActualSizeQty = (int)g.Sum(x => x.ActualSizeQty);
 
                   // Create the header row using the group key.
                   var header = new DeviceOutput
@@ -109,12 +142,10 @@ namespace DigitalProduction.ViewModels
                       ActualSizeQty = totalActualSizeQty
                   };
 
-                  // For each item in the group, compute its material and, if uniform, clear MachineName.
+                  // For each item in the group, update the MaterialType and clear common values if uniform.
                   var items = g.Select(item =>
                   {
                       item.MaterialType = item.IsLeather ? "Leather Material" : "Raw Material";
-
-                      // If all items have the same MachineName, clear it for non-header display.
                       if (machineNameUniform)
                       {
                           item.MachineName = string.Empty;
@@ -134,54 +165,61 @@ namespace DigitalProduction.ViewModels
                   return new[] { header }.Concat(items);
               })
               .ToList();
-    
-
 
             Console.WriteLine($"Updating DeviceOutputs with {groupedData.Count} items.");
-
-
-            // Update the BindingDeviceOutputs in-place so that only changed cells update.
             UpdateBindingDeviceOutputs(groupedData);
         }
 
-        /// <summary>
-        /// Updates the BindingDeviceOutputs collection by comparing new data with the existing items.
-        /// Only properties that differ are updated so that the UI refreshes only the changed cells.
-        /// </summary>
-        /// <param name="newData">The new list of DeviceOutput items.</param>
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
+        {
+            // Giả sử bạn có một control UI (đã khởi tạo trên UI thread)
+            if (!System.Windows.Forms.Application.OpenForms[0].InvokeRequired)
+            {
+                PerformUpdateBindingDeviceOutputs(newData);
+            }
+            else
+            {
+                System.Windows.Forms.Application.OpenForms[0].Invoke(new Action(() =>
+                {
+                    PerformUpdateBindingDeviceOutputs(newData);
+                }));
+            }
+        }
+
+        private void PerformUpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
             int minCount = Math.Min(BindingDeviceOutputs.Count, newData.Count);
             int i = 0;
-            // Update existing items.
+            // Cập nhật các phần tử đã có.
             for (; i < minCount; i++)
             {
                 var existingItem = BindingDeviceOutputs[i];
                 var newItem = newData[i];
 
-            // Update the specified properties.
-            UpdateProperties(existingItem, newItem,
-            nameof(existingItem.MachineName),
-            nameof(existingItem.ActualCut),
-            nameof(existingItem.ActualPieces),
-            nameof(existingItem.Size),
-            nameof(existingItem.SizeQty),
-            nameof(existingItem.InventoryQty),
-            nameof(existingItem.ActualSizeQty),
-            nameof(existingItem.TotalPiecesPerPair));
-        }
-            // Add new items if there are more in newData.
+                UpdateProperties(existingItem, newItem,
+                    nameof(existingItem.MachineName),
+                    nameof(existingItem.ActualCut),
+                    nameof(existingItem.ActualPieces),
+                    nameof(existingItem.Size),
+                    nameof(existingItem.SizeQty),
+                    nameof(existingItem.InventoryQty),
+                    nameof(existingItem.ActualSizeQty),
+                    nameof(existingItem.TotalPiecesPerPair));
+            }
+            // Thêm các phần tử mới nếu newData có nhiều hơn.
             for (; i < newData.Count; i++)
             {
                 BindingDeviceOutputs.Add(newData[i]);
             }
-            // Remove extra items if the current list has more items than newData.
+            // Loại bỏ các phần tử dư nếu BindingDeviceOutputs có nhiều hơn newData.
             while (BindingDeviceOutputs.Count > newData.Count)
             {
                 BindingDeviceOutputs.RemoveAt(BindingDeviceOutputs.Count - 1);
             }
             OnPropertyChanged(nameof(BindingDeviceOutputs));
         }
+
+
 
         public static void UpdateProperties<T>(T existing, T updated, params string[] propertyNames)
         {
@@ -204,9 +242,7 @@ namespace DigitalProduction.ViewModels
                         }
                         catch (Exception ex)
                         {
-                            // Optionally log the error.
                             Console.WriteLine($"Error updating property '{propertyName}': {ex.Message}");
-                            // Depending on your needs, you can choose to ignore or rethrow.
                             throw;
                         }
                     }
@@ -216,10 +252,6 @@ namespace DigitalProduction.ViewModels
 
         public class RealTimeData
         {
-            //public int OrderID { get; set; }
-            //public string MasterWorkOrder { get; set; }
-            //public string SO { get; set; }
-            //public string Model { get; set; }
             public List<DeviceOutput> OutputData { get; set; }
         }
 

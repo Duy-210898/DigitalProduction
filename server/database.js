@@ -169,69 +169,78 @@ async function getSizeDataFromDB(ipAddress, orderID, partName) {
 // }
 async function getActualOutputData() {
   const query = `
-        SELECT 
-          po.OrderID,
-          po.MasterWorkOrder,
-          po.SO,
-          pr.Model,
-          pr.ART,
-          do.IsLeather,
-          o.OperatorName,
-          s.Size,
-          dl.MachineName,
-          pso.SizeID,
-          pso.SizeQty,
-          do.PiecesPerPair,
-          do.MaterialLayer,
-          do.CuttingDieQty,
-          do.ActualCut,
-          do.ActualSizeQty,
-          do.ActualPieces,
-          do.TotalPiecesPerPair,
-        do.InventoryQty
-      FROM ProductOrder po
-      JOIN Product pr ON po.ProductId = pr.ProductId
-      JOIN PartSizeOrder pso ON po.OrderID = pso.OrderId
-      JOIN Part p ON pso.PartId = p.PartId
-      JOIN Size s ON pso.SizeId = s.SizeID
-      JOIN Material m ON pso.MaterialID = m.MaterialID
-      JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID
-      JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId 
-      JOIN DeviceList dl ON dl.DeviceID = dd.DeviceID
-      JOIN Operator o ON dd.OperatorID = o.OperatorID
-      GROUP BY po.OrderID, do.IsLeather,  do.TotalPiecesPerPair, po.MasterWorkOrder,  po.SO,  pr.Model, pr.ART, o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
-      do.PiecesPerPair, do.MaterialLayer, do.CuttingDieQty, do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty;
+    SELECT 
+      po.OrderID,
+      po.MasterWorkOrder,
+      po.SO,
+      pr.Model,
+      pr.ART,
+      do.IsLeather,
+      o.OperatorName,
+      s.Size,
+      dl.MachineName,
+      pso.SizeID,
+      pso.SizeQty,
+      do.PiecesPerPair,
+      do.MaterialLayer,
+      do.CuttingDieQty,
+      do.ActualCut,
+      do.ActualSizeQty,
+      do.ActualPieces,
+      do.TotalPiecesPerPair,
+      do.InventoryQty
+    FROM ProductOrder po
+    JOIN Product pr ON po.ProductId = pr.ProductId
+    JOIN PartSizeOrder pso ON po.OrderID = pso.OrderId
+    JOIN Part p ON pso.PartId = p.PartId
+    JOIN Size s ON pso.SizeId = s.SizeID
+    JOIN Material m ON pso.MaterialID = m.MaterialID
+    JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID
+    JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId 
+    JOIN DeviceList dl ON dl.DeviceID = dd.DeviceID
+    JOIN Operator o ON dd.OperatorID = o.OperatorID
+    WHERE dd.CreatedAt BETWEEN @StartDate AND @EndDate
+    GROUP BY 
+      po.OrderID, do.IsLeather, do.TotalPiecesPerPair, 
+      po.MasterWorkOrder, po.SO, pr.Model, pr.ART, 
+      o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
+      do.PiecesPerPair, do.MaterialLayer, do.CuttingDieQty, 
+      do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty;
   `;
-
+  
+  let transaction; // Declare transaction variable for rollback
   try {
-    const request = (await initDatabase()).request();
+    const pool = await initDatabase();
+    transaction = new sql.Transaction(pool);
+    await transaction.begin();
     
+    const request = transaction.request();
     const result = await request.query(query);
-
+    
+    // Commit the transaction if the query is successful.
+    await transaction.commit();
+    
     if (result.recordset.length > 0) {
-     // const firstRecord = result.recordset[0];
-      
-      const filteredOutputData = result.recordset.filter(record => record.SizeQty > 0).map(record => ({
-        MachineName: record.MachineName,
-        SO : record.SO,
-        IsLeather: record.IsLeather,
-        OperatorName: record.OperatorName,
-        Size: record.Size,
-        SizeQty: record.SizeQty,
-        PiecesPerPair: record.PiecesPerPair,
-        MaterialLayer: record.MaterialLayer,
-        CuttingDieQty: record.CuttingDieQty,
-        ActualCut: record.ActualCut,
-        ActualSizeQty: record.ActualSizeQty,
-        ActualPieces: record.ActualPieces,
-        TotalPiecesPerPair: record.TotalPiecesPerPair
-      }));
+      // Filter and map the output data.
+      const filteredOutputData = result.recordset
+        .filter(record => record.SizeQty > 0)
+        .map(record => ({
+          MachineName: record.MachineName,
+          SO: record.SO,
+          IsLeather: record.IsLeather,
+          OperatorName: record.OperatorName,
+          Size: record.Size,
+          SizeQty: record.SizeQty,
+          PiecesPerPair: record.PiecesPerPair,
+          MaterialLayer: record.MaterialLayer,
+          CuttingDieQty: record.CuttingDieQty,
+          ActualCut: record.ActualCut,
+          ActualSizeQty: record.ActualSizeQty,
+          ActualPieces: record.ActualPieces,
+          TotalPiecesPerPair: record.TotalPiecesPerPair
+        }));
       
       return {
-      //  OrderID: firstRecord.OrderID,
-        //MasterWorkOrder: firstRecord.MasterWorkOrder,
-      //Model: firstRecord.Model,
-      //  OperatorName: firstRecord.OperatorName,
         OutputData: filteredOutputData 
       };
     } else {
@@ -239,9 +248,18 @@ async function getActualOutputData() {
     }
   } catch (error) {
     console.error('Error fetching actual output data from database:', error.message);
+    if (transaction) {
+      try {
+        await transaction.rollback();
+        console.log('Transaction rolled back.');
+      } catch (rollbackError) {
+        console.error('Error during transaction rollback:', rollbackError.message);
+      }
+    }
     throw error;
   }
 }
+
 async function setOrderIsComplete(OrderID) {
   // Kiểm tra OrderID hợp lệ
   if (!OrderID || OrderID <= 0) {
@@ -276,7 +294,7 @@ async function setOrderIsComplete(OrderID) {
 }
 
 
-async function setDistributionIsComplete(DistributionID) {
+async function setDistributionIsComplete(DistributionID, Note) {
   // Kiểm tra DistributionID hợp lệ
   if (!DistributionID || DistributionID <= 0) {
     throw new Error('DistributionID không hợp lệ. Nó phải là số nguyên dương.');
@@ -285,12 +303,14 @@ async function setDistributionIsComplete(DistributionID) {
   try {
     const updateQuery = `
       UPDATE DistributionData
-      SET Status = 'Complete'
+      SET Status = 'Complete',
+      [Note] = @Note
       WHERE DistributionID = @DistributionID;
     `;
 
     const request = (await initDatabase()).request();
     request.input('DistributionID', sql.Int, DistributionID);
+    request.input('Note', sql.Int, Note);
 
     // Thực hiện truy vấn cập nhật
     const result = await request.query(updateQuery);
@@ -970,6 +990,70 @@ async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather) {
     throw error;
   }
 }
+
+async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID) {
+  try {
+    const query =
+          `SELECT  
+              dd.DistributionID, 
+              se.SizeID
+          FROM 
+              DistributionData AS dd
+          JOIN 
+              DeviceList AS d ON dd.DeviceID = d.DeviceID 
+          JOIN 
+              PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+          JOIN 
+              Part AS pa ON pa.PartID = ps.PartID
+          JOIN 
+              Size AS se ON se.SizeID = ps.SizeID
+          JOIN 
+              ProductOrder AS pr ON ps.OrderId = pr.OrderID
+          WHERE 
+              dd.IsDelete = 0  
+              AND d.IpAddress = @ipAddress
+              AND dd.Status = 'Pending'
+              AND ps.OrderId = @OrderId
+              AND dd.IsLeather = @IsLeather
+              AND se.SizeID = @SizeID
+          GROUP BY 
+              dd.DistributionID, se.SizeID;
+    `;
+    
+    const request = new sql.Request();
+    request.input('IpAddress', sql.VarChar, ipAddress);
+    request.input('OrderId', sql.Int, orderId);
+    request.input('IsLeather', sql.Int, isLeather);
+    request.input('SizeID', sql.Int, sizeID);
+    
+    const result = await request.query(query);
+    
+    if (result.recordset.length > 0) {
+      
+       // Lấy thông tin distributionIDData 
+       const distributionID = result.recordset
+       .map(item => ({
+         DistributionID: item.DistributionID
+       }))
+       .filter((value, index, self) =>
+         index === self.findIndex(
+           t => t.DistributionID === value.DistributionID
+         )
+       );
+  
+      // Trả về dữ liệu theo cấu trúc yêu cầu
+      return {
+        DistributionID: distributionID
+      };
+    } else {
+      return null; 
+    }
+  } catch (error) {
+    console.error(`Error fetching distribution data from DB: ${error.message}`);
+    logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
+    throw error;
+  }
+}
 async function getAllDeviceData() {
   try {
     const pool = await sql.connect(dbConfig);
@@ -1006,7 +1090,8 @@ async function getDistributions() {
                 dd.Status,
                 dd.CreatedAt,
                 dd.IsLeather,
-                dd.IsDelete
+                dd.IsDelete,
+                dd.Note
             FROM 
                 DistributionData dd
             JOIN 
@@ -1350,5 +1435,6 @@ module.exports = {
   getOperatorList,
   getDistributions,
   getOperatorDistribution,
-  getSizeAndDistributionDataFromDb
+  getSizeAndDistributionDataFromDb,
+  getDistributionIDFromSizeID
 };
