@@ -13,9 +13,9 @@ public static class Global
     }
     public static string App = "CuttingProject";
     public static string Language { get; set; }
-    public static void SetUser(string employeeName, int positionID, int departmentID, string role)
+    public static void SetUser(int userID, string employeeName, int positionID, int departmentID, string role)
     {
-        currentUser = new UserRole(employeeName, positionID, departmentID, role);
+        currentUser = new UserRole(userID, employeeName, positionID, departmentID, role);
     }
 
     // Method to reset the current user (e.g., for logout)

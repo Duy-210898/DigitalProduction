@@ -157,17 +157,41 @@ namespace DigitalProduction
 
         private void ShowUserControl<T>() where T : UserControl, new()
         {
-            if (!(pnlControl.Controls.Count > 0 && pnlControl.Controls[0] is T))
+            if (InvokeRequired)
             {
-                pnlControl.Controls.Clear();
-
-                T userControl = new T();
-                userControl.Dock = DockStyle.Fill;
-
-                InvokeSetWebSocketClient(userControl);
-
-                pnlControl.Controls.Add(userControl);
+                BeginInvoke(new Action(() => ShowUserControl<T>()));
+                return;
             }
+
+            // Dispose old UserControl and ViewModel if applicable
+            if (pnlControl.Controls.Count > 0)
+            {
+                var oldControl = pnlControl.Controls[0] as UserControl;
+                if (oldControl != null)
+                {
+                    if (oldControl.DataBindings.Count > 0)
+                    {
+                        oldControl.DataBindings.Clear();  // Prevent binding errors
+                    }
+
+                    if (oldControl is IDisposable disposableControl)
+                    {
+                        disposableControl.Dispose();
+                    }
+
+                    pnlControl.Controls.Remove(oldControl);
+                }
+            }
+
+            // Create new UserControl
+            T userControl = new T();
+            userControl.Dock = DockStyle.Fill;
+
+            // Invoke WebSocketClient setup
+            InvokeSetWebSocketClient(userControl);
+
+            // Add to panel
+            pnlControl.Controls.Add(userControl);
         }
 
         private void InvokeSetWebSocketClient(UserControl userControl)

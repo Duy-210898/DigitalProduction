@@ -103,7 +103,7 @@
             this.label1.Location = new System.Drawing.Point(40, 3);
             this.label1.Margin = new System.Windows.Forms.Padding(40, 3, 3, 3);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(189, 37);
+            this.label1.Size = new System.Drawing.Size(189, 33);
             this.label1.TabIndex = 2;
             this.label1.Text = "Input SO:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.BottomRight;
@@ -112,7 +112,7 @@
             // 
             this.lblProductionDate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblProductionDate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblProductionDate.Location = new System.Drawing.Point(235, 43);
+            this.lblProductionDate.Location = new System.Drawing.Point(235, 39);
             this.lblProductionDate.Name = "lblProductionDate";
             this.lblProductionDate.Size = new System.Drawing.Size(226, 20);
             this.lblProductionDate.TabIndex = 2;
@@ -122,7 +122,7 @@
             // 
             this.lblCreatedDate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblCreatedDate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCreatedDate.Location = new System.Drawing.Point(467, 43);
+            this.lblCreatedDate.Location = new System.Drawing.Point(467, 39);
             this.lblCreatedDate.Name = "lblCreatedDate";
             this.lblCreatedDate.Size = new System.Drawing.Size(226, 20);
             this.lblCreatedDate.TabIndex = 2;
@@ -132,7 +132,7 @@
             // 
             this.lblFactory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblFactory.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFactory.Location = new System.Drawing.Point(699, 63);
+            this.lblFactory.Location = new System.Drawing.Point(699, 59);
             this.lblFactory.Name = "lblFactory";
             this.lblFactory.Size = new System.Drawing.Size(229, 20);
             this.lblFactory.TabIndex = 2;
@@ -142,7 +142,7 @@
             // 
             this.lblLastNo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblLastNo.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLastNo.Location = new System.Drawing.Point(467, 63);
+            this.lblLastNo.Location = new System.Drawing.Point(467, 59);
             this.lblLastNo.Name = "lblLastNo";
             this.lblLastNo.Size = new System.Drawing.Size(226, 20);
             this.lblLastNo.TabIndex = 2;
@@ -152,7 +152,7 @@
             // 
             this.lblArt.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblArt.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblArt.Location = new System.Drawing.Point(235, 63);
+            this.lblArt.Location = new System.Drawing.Point(235, 59);
             this.lblArt.Name = "lblArt";
             this.lblArt.Size = new System.Drawing.Size(226, 20);
             this.lblArt.TabIndex = 2;
@@ -162,7 +162,7 @@
             // 
             this.lblModel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblModel.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblModel.Location = new System.Drawing.Point(3, 63);
+            this.lblModel.Location = new System.Drawing.Point(3, 59);
             this.lblModel.Name = "lblModel";
             this.lblModel.Size = new System.Drawing.Size(226, 20);
             this.lblModel.TabIndex = 2;
@@ -172,7 +172,7 @@
             // 
             this.lblPO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPO.Location = new System.Drawing.Point(3, 83);
+            this.lblPO.Location = new System.Drawing.Point(3, 79);
             this.lblPO.Name = "lblPO";
             this.lblPO.Size = new System.Drawing.Size(226, 20);
             this.lblPO.TabIndex = 2;
@@ -196,7 +196,7 @@
             // 
             this.lblSO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSO.Location = new System.Drawing.Point(235, 83);
+            this.lblSO.Location = new System.Drawing.Point(235, 79);
             this.lblSO.Name = "lblSO";
             this.lblSO.Size = new System.Drawing.Size(226, 20);
             this.lblSO.TabIndex = 2;
@@ -206,7 +206,7 @@
             // 
             this.lblMasterWorkOrder.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMasterWorkOrder.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMasterWorkOrder.Location = new System.Drawing.Point(467, 83);
+            this.lblMasterWorkOrder.Location = new System.Drawing.Point(467, 79);
             this.lblMasterWorkOrder.Name = "lblMasterWorkOrder";
             this.lblMasterWorkOrder.Size = new System.Drawing.Size(226, 20);
             this.lblMasterWorkOrder.TabIndex = 2;
@@ -241,7 +241,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(931, 103);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(931, 99);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // panel4
@@ -250,13 +250,13 @@
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel4.Location = new System.Drawing.Point(235, 3);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(226, 37);
+            this.panel4.Size = new System.Drawing.Size(226, 33);
             this.panel4.TabIndex = 4;
             // 
             // cbxSO
             // 
             this.cbxSO.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.cbxSO.Location = new System.Drawing.Point(0, 15);
+            this.cbxSO.Location = new System.Drawing.Point(0, 11);
             this.cbxSO.Name = "cbxSO";
             this.cbxSO.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbxSO.Properties.Appearance.Options.UseFont = true;
@@ -271,7 +271,7 @@
             // 
             this.lblWorkCenter.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblWorkCenter.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblWorkCenter.Location = new System.Drawing.Point(3, 43);
+            this.lblWorkCenter.Location = new System.Drawing.Point(3, 39);
             this.lblWorkCenter.Name = "lblWorkCenter";
             this.lblWorkCenter.Size = new System.Drawing.Size(226, 20);
             this.lblWorkCenter.TabIndex = 2;
@@ -291,10 +291,10 @@
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 27.4776F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 31.2254F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 197F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 142F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 72.5224F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 200F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 68.7746F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(971, 736);
             this.tableLayoutPanel1.TabIndex = 1;
             this.tableLayoutPanel1.SizeChanged += new System.EventHandler(this.tableLayoutPanel1_SizeChanged);
@@ -311,7 +311,7 @@
             this.tableLayoutPanel3.Controls.Add(this.panel1, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.panel5, 0, 2);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(20, 112);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(20, 108);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 3;
@@ -618,9 +618,9 @@
             this.dataGrid_overviewDistribution.BackgroundColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.dataGrid_overviewDistribution.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGrid_overviewDistribution.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGrid_overviewDistribution.Location = new System.Drawing.Point(3, 451);
+            this.dataGrid_overviewDistribution.Location = new System.Drawing.Point(3, 505);
             this.dataGrid_overviewDistribution.Name = "dataGrid_overviewDistribution";
-            this.dataGrid_overviewDistribution.Size = new System.Drawing.Size(965, 282);
+            this.dataGrid_overviewDistribution.Size = new System.Drawing.Size(965, 228);
             this.dataGrid_overviewDistribution.TabIndex = 3;
             // 
             // pnlSize
@@ -628,10 +628,10 @@
             this.pnlSize.BackColor = System.Drawing.Color.LightGray;
             this.pnlSize.Controls.Add(this.dgvSize);
             this.pnlSize.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlSize.Location = new System.Drawing.Point(3, 309);
+            this.pnlSize.Location = new System.Drawing.Point(3, 305);
             this.pnlSize.Name = "pnlSize";
             this.pnlSize.Padding = new System.Windows.Forms.Padding(20, 0, 20, 0);
-            this.pnlSize.Size = new System.Drawing.Size(965, 136);
+            this.pnlSize.Size = new System.Drawing.Size(965, 194);
             this.pnlSize.TabIndex = 1;
             this.pnlSize.Visible = false;
             // 
@@ -641,7 +641,7 @@
             this.dgvSize.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvSize.Location = new System.Drawing.Point(20, 0);
             this.dgvSize.Name = "dgvSize";
-            this.dgvSize.Size = new System.Drawing.Size(925, 136);
+            this.dgvSize.Size = new System.Drawing.Size(925, 194);
             this.dgvSize.TabIndex = 0;
             // 
             // ucDistribution

@@ -116,6 +116,16 @@ namespace DigitalProduction
                 dgvProgressManagement.ColumnHeadersDefaultCellStyle = headerStyle;
                 dgvProgressManagement.Refresh();
             };
+            // Create a new TextBox column for "IsLeather"
+            DataGridViewTextBoxColumn isLeatherTextColumn = new DataGridViewTextBoxColumn
+            {
+                Name = "IsLeather",
+                HeaderText = "Leather Type",
+                DataPropertyName = "IsLeather"
+            };
+
+            // Insert "IsLeather" column at the last position
+            dgvProgressManagement.Columns.Add(isLeatherTextColumn);
 
             dgvProgressManagement.CellFormatting += DgvProgressManagement_CellFormatting;
 
@@ -187,18 +197,37 @@ namespace DigitalProduction
 
         private void DgvProgressManagement_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            // Check if we're formatting the 'IsLeather' column to apply custom style.
-            if (dgvProgressManagement.Columns[e.ColumnIndex].Name == "IsLeather")
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
-                if (dgvProgressManagement.Rows[e.RowIndex].Cells["IsLeather"].Value is bool isLeather && isLeather)
+                DataGridViewRow row = dgvProgressManagement.Rows[e.RowIndex];
+
+                // Get value from the "Status" column (ensure it exists)
+                string status = row.Cells["Status"].Value?.ToString();
+
+                // Apply style if "Status" is "Complete"
+                if (status == "Complete")
                 {
-                    // Highlight the row.
-                    foreach (DataGridViewCell cell in dgvProgressManagement.Rows[e.RowIndex].Cells)
+                    foreach (DataGridViewCell cell in row.Cells)
                     {
-                        cell.Style.BackColor = Color.LightYellow;
+                        cell.Style.BackColor = Color.LightBlue;
                         cell.Style.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
                     }
                 }
+                else
+                {
+                    // Reset to default style if not "Complete"
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        cell.Style.BackColor = dgvProgressManagement.DefaultCellStyle.BackColor;
+                        cell.Style.Font = dgvProgressManagement.DefaultCellStyle.Font;
+                    }
+                }
+            }
+
+            if (dgvProgressManagement.Columns[e.ColumnIndex].Name == "IsLeather")
+            {
+                e.Value = (Convert.ToBoolean(e.Value)) ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
+                e.FormattingApplied = true;
             }
 
             // Format the 'Note' column.
@@ -354,6 +383,7 @@ namespace DigitalProduction
             public int SizeQty { get; set; }
             public string MaterialName { get; set; }
             public string OperatorName { get; set; }
+            public string EmployeeName { get; set; }
             public int InventoryQty { get; set; }
             public string Status { get; set; }
             public DateTime CreatedAt { get; set; }

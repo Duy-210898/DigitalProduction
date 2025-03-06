@@ -444,6 +444,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
           // set value size data when start
           if (checkCompleteSize === 0) {
               sizeDataArraySelected =  distribution.SizeData;
+              console.log(`sizeDataArraySelected: ${sizeDataArraySelected.length}`)
               checkCompleteSize++;
           }
           let results = [];
@@ -527,7 +528,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
             for (const item of distribution.DistributionID) {
                 try {
                     await setDistributionIsComplete(item.DistributionID, 0);
-                    console.log(`Updated DistributionID: ${item.DistributionID}`);
+                    console.log(`Updated DistributionID: ${item.DistributionID} countCompleteSize ${countCompleteSize} sizeDataArraySelected ${sizeDataArraySelected.length}`);
                     sizeDataInfo.sizeID = [];
                     deleteDistributionFromRegister(client);
                     checkCompleteSize = 0;

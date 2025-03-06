@@ -393,4 +393,13 @@
   <data name="OtherReason" xml:space="preserve">
     <value>Lí do khác</value>
   </data>
+  <data name="Search" xml:space="preserve">
+    <value>Tìm kiếm...</value>
+  </data>
+  <data name="leatherMaterial" xml:space="preserve">
+    <value>Liệu da</value>
+  </data>
+  <data name="rawMaterial" xml:space="preserve">
+    <value>Liệu thường</value>
+  </data>
 </root>

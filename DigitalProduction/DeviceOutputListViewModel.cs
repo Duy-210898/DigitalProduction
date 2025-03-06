@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
+using System.Windows.Forms;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -14,6 +15,86 @@ namespace DigitalProduction.ViewModels
         private BindingList<DeviceOutput> _bindingDeviceOutputs = new BindingList<DeviceOutput>();
         private System.Windows.Forms.Timer _timer;
         private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
+
+        // Filter properties for API
+        public string FilterKeyword
+        {
+            get => FilterService.Instance.FilterKeyword;
+            set
+            {
+                if (FilterService.Instance.FilterKeyword != value)
+                {
+                    FilterService.Instance.FilterKeyword = value;
+                    OnPropertyChanged(nameof(FilterKeyword));
+                }
+            }
+        }
+
+        public DateTime? FilterStartDate
+        {
+            get => FilterService.Instance.FilterStartDate;
+            set
+            {
+                if (FilterService.Instance.FilterStartDate != value)
+                {
+                    FilterService.Instance.FilterStartDate = value ?? DateTime.Today;
+                    OnPropertyChanged(nameof(FilterStartDate));
+                }
+            }
+        }
+
+        public DateTime? FilterEndDate
+        {
+            get => FilterService.Instance.FilterEndDate;
+            set
+            {
+                if (FilterService.Instance.FilterEndDate != value)
+                {
+                    FilterService.Instance.FilterEndDate = value ?? DateTime.Today;
+                    OnPropertyChanged(nameof(FilterEndDate));
+                }
+            }
+        }
+
+        public string FilterMachineName
+        {
+            get => FilterService.Instance.FilterMachineName;
+            set
+            {
+                if (FilterService.Instance.FilterMachineName != value)
+                {
+                    FilterService.Instance.FilterMachineName = value;
+                    OnPropertyChanged(nameof(FilterMachineName));
+                }
+            }
+        }
+
+        public string FilterSO
+        {
+            get => FilterService.Instance.FilterSO;
+            set
+            {
+                if (FilterService.Instance.FilterSO != value)
+                {
+                    FilterService.Instance.FilterSO = value;
+                    OnPropertyChanged(nameof(FilterSO));
+                }
+            }
+        }
+
+        public string FilterOperatorName
+        {
+            get => FilterService.Instance.FilterOperatorName;
+            set
+            {
+                if (FilterService.Instance.FilterOperatorName != value)
+                {
+                    FilterService.Instance.FilterOperatorName = value;
+                    OnPropertyChanged(nameof(FilterOperatorName));
+                }
+            }
+        }
+
 
         public BindingList<DeviceOutput> BindingDeviceOutputs
         {
@@ -28,7 +109,7 @@ namespace DigitalProduction.ViewModels
         public DeviceOutputListViewModel()
         {
             // Capture the UI thread synchronization context (assuming this is created on the UI thread)
-            _syncContext = SynchronizationContext.Current;
+            _syncContext = SynchronizationContext.Current ?? new SynchronizationContext();
 
             // Initialize the BindingList.
             _bindingDeviceOutputs = new BindingList<DeviceOutput>();
@@ -51,7 +132,21 @@ namespace DigitalProduction.ViewModels
             // Check if the WebSocket is open before sending.
             if (_webSocketClient != null)
             {
-                var request = new { app = Global.App, action = "getActualData" };
+                // Build the request object including the filter parameters.
+                var request = new
+                {
+                    app = Global.App,
+                    action = "getActualData",
+                    filter = new
+                    {
+                        // Format dates as "yyyy-MM-dd" or adjust as required.
+                        startDate = FilterStartDate.HasValue ? FilterStartDate.Value.ToString("yyyy-MM-dd") : null,
+                        endDate = FilterEndDate.HasValue ? FilterEndDate.Value.ToString("yyyy-MM-dd") : null,
+                        machineName = string.IsNullOrEmpty(FilterMachineName) ? null : FilterMachineName,
+                        so = string.IsNullOrEmpty(FilterSO) ? null : FilterSO,
+                        operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName
+                    }
+                };
                 string jsonRequest = JsonConvert.SerializeObject(request);
                 try
                 {
@@ -98,9 +193,31 @@ namespace DigitalProduction.ViewModels
             {
                 Console.WriteLine($"Received WebSocket Data: {jsonData}");
                 var response = JsonConvert.DeserializeObject<WebSocketResponse>(jsonData);
+
                 if (response?.RealTime != null && response.Status == "success")
                 {
-                    UpdateData(response.RealTime);
+                    var keyword = FilterKeyword?.Trim().ToLower(); // Normalize keyword for comparison
+
+                    var cleanedKeyword = string.IsNullOrWhiteSpace(keyword) || FilterKeyword == LocalizationManager.GetString("Search") ? "" : keyword.ToLower();
+                    var filteredData = response.RealTime.OutputData
+                        .Where(d =>
+                            string.IsNullOrEmpty(keyword) || // Show all if no keyword
+                            (d.MachineName?.ToLower().Contains(cleanedKeyword) ?? false) ||
+                            (d.SO?.ToLower().Contains(cleanedKeyword) ?? false) ||
+                            (d.OperatorName?.ToLower().Contains(cleanedKeyword) ?? false))
+                        .ToList();
+
+                    UpdateData(new RealTimeData { OutputData = filteredData });
+                }
+                else
+                {
+                    Console.WriteLine("error.");
+                    if (BindingDeviceOutputs.Count > 0)
+                    {
+                        BindingDeviceOutputs.RaiseListChangedEvents = false; // Disable UI updates
+                        BindingDeviceOutputs.Clear();
+                        BindingDeviceOutputs.RaiseListChangedEvents = true; // Re-enable UI updates
+                    }
                 }
             }
             catch (Exception ex)
@@ -109,12 +226,14 @@ namespace DigitalProduction.ViewModels
             }
         }
 
+
         // Update only the values so that the UI only refreshes changed cells.
         private void UpdateData(RealTimeData realTimeData)
         {
             if (realTimeData.OutputData == null || !realTimeData.OutputData.Any())
             {
                 Console.WriteLine("No OutputData received from WebSocket.");
+                BindingDeviceOutputs.Clear();
                 return;
             }
 
@@ -145,7 +264,7 @@ namespace DigitalProduction.ViewModels
                   // For each item in the group, update the MaterialType and clear common values if uniform.
                   var items = g.Select(item =>
                   {
-                      item.MaterialType = item.IsLeather ? "Leather Material" : "Raw Material";
+                      item.MaterialType = item.IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
                       if (machineNameUniform)
                       {
                           item.MachineName = string.Empty;
@@ -167,58 +286,77 @@ namespace DigitalProduction.ViewModels
               .ToList();
 
             Console.WriteLine($"Updating DeviceOutputs with {groupedData.Count} items.");
-            UpdateBindingDeviceOutputs(groupedData);
+            try
+            {
+                UpdateBindingDeviceOutputs(groupedData);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"InvalidOperationException in UpdateBindingDeviceOutputs: {ex.Message}\n{ex.StackTrace}");
+            }
         }
 
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
-            // Giả sử bạn có một control UI (đã khởi tạo trên UI thread)
-            if (!System.Windows.Forms.Application.OpenForms[0].InvokeRequired)
+            if (_syncContext != null)
             {
-                PerformUpdateBindingDeviceOutputs(newData);
+                _syncContext.Post(_ =>
+                {
+                    PerformUpdateBindingDeviceOutputs(newData);
+                }, null);
             }
             else
             {
-                System.Windows.Forms.Application.OpenForms[0].Invoke(new Action(() =>
-                {
-                    PerformUpdateBindingDeviceOutputs(newData);
-                }));
+                // Direct UI update if no context (fallback)
+                PerformUpdateBindingDeviceOutputs(newData);
             }
         }
 
         private void PerformUpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
-            int minCount = Math.Min(BindingDeviceOutputs.Count, newData.Count);
-            int i = 0;
-            // Cập nhật các phần tử đã có.
-            for (; i < minCount; i++)
+            try
             {
-                var existingItem = BindingDeviceOutputs[i];
-                var newItem = newData[i];
+                Console.WriteLine($"Performing UI update with {newData.Count} items.");
 
-                UpdateProperties(existingItem, newItem,
-                    nameof(existingItem.MachineName),
-                    nameof(existingItem.ActualCut),
-                    nameof(existingItem.ActualPieces),
-                    nameof(existingItem.Size),
-                    nameof(existingItem.SizeQty),
-                    nameof(existingItem.InventoryQty),
-                    nameof(existingItem.ActualSizeQty),
-                    nameof(existingItem.TotalPiecesPerPair));
+                int minCount = Math.Min(BindingDeviceOutputs.Count, newData.Count);
+                int i = 0;
+
+                // Update existing items
+                for (; i < minCount; i++)
+                {
+                    var existingItem = BindingDeviceOutputs[i];
+                    var newItem = newData[i];
+
+                    UpdateProperties(existingItem, newItem,
+                        nameof(existingItem.MachineName),
+                        nameof(existingItem.ActualCut),
+                        nameof(existingItem.ActualPieces),
+                        nameof(existingItem.Size),
+                        nameof(existingItem.SizeQty),
+                        nameof(existingItem.InventoryQty),
+                        nameof(existingItem.ActualSizeQty),
+                        nameof(existingItem.TotalPiecesPerPair));
+                }
+
+                // Add new items
+                for (; i < newData.Count; i++)
+                {
+                    BindingDeviceOutputs.Add(newData[i]);
+                }
+
+                // Remove extra items
+                while (BindingDeviceOutputs.Count > newData.Count)
+                {
+                    BindingDeviceOutputs.RemoveAt(BindingDeviceOutputs.Count - 1);
+                }
+
+                OnPropertyChanged(nameof(BindingDeviceOutputs));
             }
-            // Thêm các phần tử mới nếu newData có nhiều hơn.
-            for (; i < newData.Count; i++)
+            catch (Exception ex)
             {
-                BindingDeviceOutputs.Add(newData[i]);
+                Console.WriteLine($"Error updating UI: {ex.Message}\n{ex.StackTrace}");
             }
-            // Loại bỏ các phần tử dư nếu BindingDeviceOutputs có nhiều hơn newData.
-            while (BindingDeviceOutputs.Count > newData.Count)
-            {
-                BindingDeviceOutputs.RemoveAt(BindingDeviceOutputs.Count - 1);
-            }
-            OnPropertyChanged(nameof(BindingDeviceOutputs));
         }
-
 
 
         public static void UpdateProperties<T>(T existing, T updated, params string[] propertyNames)
@@ -249,6 +387,24 @@ namespace DigitalProduction.ViewModels
                 }
             }
         }
+        public void Dispose()
+        {
+            if (_timer != null)
+            {
+                _timer.Stop();
+                _timer.Tick -= Timer_Tick;
+                _timer.Dispose();
+                _timer = null;
+            }
+
+            if (_webSocketClient != null)
+            {
+                _webSocketClient.OnResponseRealTime -= WebSocket_OnMessage;
+            }
+
+            Console.WriteLine("DeviceOutputListViewModel disposed successfully.");
+        }
+
 
         public class RealTimeData
         {

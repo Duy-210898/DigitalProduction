@@ -599,9 +599,9 @@ namespace DigitalProduction
 
         private List<DistributionData> getDistributionDataFromControls()
         {
-            List<DistributionData> results = new List<DistributionData>();
             partSizeOrderIDs.Clear();
-            //userID = Global.CurrentUser.
+            List<DistributionData> results = new List<DistributionData>();
+            userID = Global.CurrentUser != null ? Global.CurrentUser.UserID : 0;
             deviceID = int.Parse(cbxDevice.SelectedValue.ToString());
             operatorID = int.Parse(lbl_operatorID.Text);
             int inventory = int.TryParse(txtInventory.Text, out int result) ? result : 0;

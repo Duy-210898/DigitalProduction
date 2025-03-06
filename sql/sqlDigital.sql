@@ -207,7 +207,7 @@ ALTER TABLE Users
 	CONSTRAINT FK_User_Position FOREIGN KEY (PositionID) REFERENCES  Position(PositionID);
 GO
 ALTER TABLE DeviceList
-    ADD CONSTRAINT FK_Size_Device FOREIGN KEY (DepartmentID) REFERENCES  Department(DepartmentID),
+    ADD CONSTRAINT FK_DeviceList_Department FOREIGN KEY (DepartmentID) REFERENCES  Department(DepartmentID),
 	CONSTRAINT FK_DeviceList_Plant FOREIGN KEY (PlantID) REFERENCES Plant(PlantID) ON DELETE CASCADE;
 GO
 /*ALTER TABLE Size

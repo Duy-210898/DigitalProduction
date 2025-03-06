@@ -363,4 +363,13 @@
   <data name="OtherReason" xml:space="preserve">
     <value>Other reason</value>
   </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search...</value>
+  </data>
+  <data name="leatherMaterial" xml:space="preserve">
+    <value>Leather Material</value>
+  </data>
+  <data name="rawMaterial" xml:space="preserve">
+    <value>Raw Material</value>
+  </data>
 </root>

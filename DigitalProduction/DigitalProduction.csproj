@@ -152,6 +152,7 @@
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="DeviceOutputListViewModel.cs" />
     <Compile Include="Extensions\Extentions.cs" />
+    <Compile Include="FilterService.cs" />
     <Compile Include="LocalizationManager.cs" />
     <Compile Include="dbHelper.cs" />
     <Compile Include="frmMain.cs">

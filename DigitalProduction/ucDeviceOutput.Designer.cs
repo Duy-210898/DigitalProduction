@@ -38,22 +38,22 @@
             // 
             this.dataGrid_DeviceOutput.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGrid_DeviceOutput.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGrid_DeviceOutput.Location = new System.Drawing.Point(3, 25);
+            this.dataGrid_DeviceOutput.Location = new System.Drawing.Point(3, 3);
             this.dataGrid_DeviceOutput.Name = "dataGrid_DeviceOutput";
-            this.dataGrid_DeviceOutput.Size = new System.Drawing.Size(787, 422);
+            this.dataGrid_DeviceOutput.Size = new System.Drawing.Size(787, 444);
             this.dataGrid_DeviceOutput.TabIndex = 0;
             // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.dataGrid_DeviceOutput, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.dataGrid_DeviceOutput, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 95F));
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(793, 450);
             this.tableLayoutPanel1.TabIndex = 7;
             // 

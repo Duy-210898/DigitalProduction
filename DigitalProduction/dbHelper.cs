@@ -65,12 +65,13 @@ namespace DigitalProduction
                             {
                                 reader.Read();
                                 // Assuming EmployeeName, PositionID, and DepartmentID are returned in the query
+                                int userID = reader.GetInt32(0);
                                 string employeeName = reader.GetString(1);
                                 int positionID = reader.GetInt32(2);
                                 int departmentID = reader.GetInt32(3);
                                 string role = determineUserRole(positionID, departmentID);
                                 // Set the global user
-                                Global.SetUser(employeeName, positionID, departmentID, role);
+                                Global.SetUser(userID, employeeName, positionID, departmentID, role);
 
                                 return true;
                                 // You can now use the userID, positionID, departmentID, etc., for further actions
@@ -378,7 +379,7 @@ namespace DigitalProduction
                 try
                 {
                     con.Open();
-                    string query = "SELECT DISTINCT SO FROM PRODUCTORDER";
+                    string query = "SELECT DISTINCT SO FROM ProductOrder WHERE OrderID NOT IN ( SELECT DISTINCT OrderID FROM DeviceOutput WHERE OrderID IN ( SELECT OrderID FROM DeviceOutput WHERE IsLeather IN (0, 1) GROUP BY OrderID HAVING COUNT(DISTINCT IsLeather) = 2 ) );";
                     SqlCommand cmd = new SqlCommand(query, con);
                     SqlDataReader reader = cmd.ExecuteReader();
 

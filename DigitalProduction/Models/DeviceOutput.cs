@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace DigitalProduction.Models
 {
@@ -20,6 +21,7 @@ namespace DigitalProduction.Models
         private int? _totalPiecesPerPair;
         private bool _isGroupHeader;
         private string _materialType;
+        public DateTime Timestamp { get; set; }
 
         public string MachineName
         {
