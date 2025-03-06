@@ -129,98 +129,82 @@ async function handleDisconnection(ipAddress) {
 
 async function connectToDevice(ipAddress, retries = 0) {
   if (!modbusClients[ipAddress]) {
-    modbusClients[ipAddress] = {};
+      modbusClients[ipAddress] = {};
   }
 
   const modbusClient = modbusClients[ipAddress];
 
   if (modbusClient.isDisconnected) {
-    console.log(`Device at ${ipAddress} is disconnected. Skipping reconnection attempt.`);
-    return;
+      console.log(`Device at ${ipAddress} is disconnected. Skipping reconnection attempt.`);
+      return;
   }
 
   const isReachable = await pingHost(ipAddress);
   if (!isReachable) {
-    console.log(`Device at ${ipAddress} is not reachable. Skipping connection attempt.`);
-    logToFile(errorLogPath, `Device at ${ipAddress} is not reachable. Skipping connection attempt.`);
-    await updateDeviceConnectionStatus(ipAddress, false).catch((err) => {
-      console.error(`Error updating device connection status: ${err.message}`);
-    });
-    return;
-  }
-  else {
-
+      console.log(`Device at ${ipAddress} is not reachable.`);
+      logToFile(errorLogPath, `Device at ${ipAddress} is not reachable.`);
+      await updateDeviceConnectionStatus(ipAddress, false).catch((err) => {
+          console.error(`Error updating device connection status: ${err.message}`);
+      });
+      return;
   }
 
   if (modbusClient && modbusClient.isConnected) {
-    return modbusClient;
+      return modbusClient;
   }
 
   const socket = new net.Socket();
   const client = new Modbus.client.TCP(socket, 1);
   const options = { host: ipAddress, port: 502 };
 
-  socket.connect(options, async function () {
-    console.log(`Connected to device at ${ipAddress}`);
-    logToFile(successLogPath, `Connected to device at ${ipAddress}`);
+  return new Promise((resolve, reject) => {
+      socket.connect(options, async function () {
+          console.log(`✅ Connected to device at ${ipAddress}`);
+          logToFile(successLogPath, `Connected to device at ${ipAddress}`);
 
-    modbusClients[ipAddress] = { client, socket, isConnected: true, isDisconnected: false };
+          modbusClients[ipAddress] = { client, socket, isConnected: true, isDisconnected: false };
 
-    try {
-      await updateDeviceConnectionStatus(ipAddress, true).catch((err) => {
-        console.error(`Error updating device connection status: ${err.message}`);
+          try {
+              await updateDeviceConnectionStatus(ipAddress, true);
+          } catch (err) {
+              console.error(`Error updating device connection status: ${err.message}`);
+              logToFile(errorLogPath, `Error updating device connection status: ${err.message}`);
+          }
+
+          startReadingRegisters(client, ipAddress);
+          writeToModbusRegister(client).catch((err) => {
+              console.error(`Error writing to Modbus register: ${err.message}`);
+              logToFile(errorLogPath, `Error writing to Modbus register: ${err.message}`);
+          });
+
+          resolve(client);
       });
-    } catch (err) {
-      console.error(`Error updating device connection status for ${ipAddress}: ${err.message}`);
-      logToFile(errorLogPath, `Error updating device connection status for ${ipAddress}: ${err.message}`);
-    }
 
-    startReadingRegisters(client, ipAddress);
+      socket.on('error', async function (error) {
+          console.error(`❌ Unable to connect to device at ${ipAddress}: ${error.message}`);
+          logToFile(errorLogPath, `Unable to connect to device at ${ipAddress}: ${error.message}`);
 
-    try {
-      writeToModbusRegister(client).catch((err) => {
-        console.error(`Error writing to Modbus register for ${ipAddress}: ${err.message}`);
+          modbusClient.isDisconnected = true;
+          await handleDisconnection(ipAddress);
+
+          if (retries < 3) {
+              console.log(`🔄 Retrying connection to ${ipAddress} (${retries + 1}/3)`);
+              setTimeout(() => connectToDevice(ipAddress, retries + 1).then(resolve).catch(reject), 10000);
+          } else {
+              console.log(`❌ Max retries reached for ${ipAddress}. Giving up.`);
+              await updateDeviceConnectionStatus(ipAddress, false);
+              reject(new Error("Max retries reached"));
+          }
       });
-    } catch (err) {
-      console.error(`Error writing to Modbus register for ${ipAddress}: ${err.message}`);
-      logToFile(errorLogPath, `Error writing to Modbus register for ${ipAddress}: ${err.message}`);
-    }
 
-  });
+      socket.on('close', async function () {
+          console.log(`⚠️ Connection closed to device at ${ipAddress}`);
+          logToFile(successLogPath, `Connection closed to device at ${ipAddress}`);
 
-  socket.on('error', async function (error) {
-    console.error(`Unable to connect to device at ${ipAddress}: ${error.message}`);
-    logToFile(errorLogPath, `Unable to connect to device at ${ipAddress}: ${error.message}`);
-
-    if (modbusClient) {
-      modbusClient.isDisconnected = true;
-    }
-
-    await handleDisconnection(ipAddress);
-
-    if (retries < 3) {
-      console.log(`Retrying connection to ${ipAddress} (${retries + 1}/3)`);
-      setTimeout(() => connectToDevice(ipAddress, retries + 1), 10000);
-    } else {
-      console.log(`Max retries reached for ${ipAddress}. Giving up on connection.`);
-      await updateDeviceConnectionStatus(ipAddress, false).catch((err) => {
-        console.error(`Error updating device connection status: ${err.message}`);
+          modbusClient.isDisconnected = true;
+          await handleDisconnection(ipAddress);
       });
-    }
   });
-
-  socket.on('close', async function () {
-    console.log(`Connection closed to device at ${ipAddress}`);
-    logToFile(successLogPath, `Connection closed to device at ${ipAddress}`);
-
-    if (modbusClient) {
-      modbusClient.isDisconnected = true;
-    }
-
-    await handleDisconnection(ipAddress);
-  });
-
-  return modbusClients[ipAddress];
 }
 
 
@@ -380,59 +364,37 @@ async function checkAndSaveDistribution(client, ipAddress) {
       } else {
         console.warn(`No distribution data found for IP ${ipAddress}. Skipping save.`);
       }
-    } else {
-      console.log(`Register 1000 already has value ${orderID} for IP ${ipAddress}`);
+    } 
+    else {
+    console.log(`Register 1000 already has value ${orderID} for IP ${ipAddress}`);
 
-      // Store orderID in modbusClients
-      if (!modbusClients[ipAddress]) {
-        modbusClients[ipAddress] = {};
-      }
-      modbusClients[ipAddress].orderID = orderID;
+    // Store orderID in modbusClients
+    if (!modbusClients[ipAddress]) {
+      modbusClients[ipAddress] = {};
+    }
+    modbusClients[ipAddress].orderID = orderID;
 
-      // check complete order
-      let responseLeather = await client.readHoldingRegisters(1001, 1); // Reusing the variable name 'response'
-      let isLeather = responseLeather.response._body.values[0];
-      console.log(`Register 1001 value: ${isLeather}`);
+    // check complete order
+    let responseLeather = await client.readHoldingRegisters(1001, 1); // Reusing the variable name 'response'
+    let isLeather = responseLeather.response._body.values[0];
+    console.log(`Register 1001 value: ${isLeather}`);
   
+    // interrupt HMI set distributionData again
+    if (Object.keys(sizeDataInfo).length === 0) {
+        const distributionData = await getDistributionDataFromDb(ipAddress);
+        if (distributionData != null) {
+          await saveDistributionDataToModbus(ipAddress, distributionData);
+        }
+    }
     let sizeAddress;
     let chooseSizeAddress;
     let distribution;
     deleteDistributionFromRegister(client);
-    // let deleteDistribution;
     if (isLeather !== 0) {
       if (isLeather === 1) {
-     //     deleteDistribution = 3000;
           chooseSizeAddress = 3101;
           sizeAddress = 3102;
           distribution = await getSizeAndDistributionDataFromDb(ipAddress, orderID, 0);
-    
-          //    const sizeIndex = 1;
-
-              // try {
-              //   const response = await client.readHoldingRegisters(deleteDistribution, 1);
-              //   const registerValue = response.response._body.values[0];  // assuming the response value is an array and we want the first value
-            
-              //   // Convert the registerValue to a binary string with leading zeros
-              //   let binaryValueDelete = registerValue.toString(2).padStart(16, '0');  // assuming 16-bit register, adjust if needed
-            
-              //   // Log the current value and binary representation
-              //   console.log(`deleteDistribution ${deleteDistribution} = ${registerValue}`);
-              //   console.log(`Binary deleteDistribution: ${binaryValueDelete}`);
-            
-              //   // Check if the specified bit is set at sizeIndex
-              //   if (isBitSetString(binaryValueDelete, sizeIndex)) {
-              //       // Prepare the value to write (000000000000100 is 4 in decimal)
-              //       const valueToWrite = 4; // This corresponds to 000000000000100 in binary
-            
-              //       // Write the value 4 to register 3001
-              //       await client.writeSingleRegister(3001, valueToWrite);
-              //       console.log(`Written value ${valueToWrite} to register 3001`);
-              //   }
-            
-              //   results.push({ address: deleteDistribution, value: registerValue });
-              // } catch (error) {
-              //   console.error(`Error reading register ${deleteDistribution}:`, error.message);
-              // }
 
         } else {
           chooseSizeAddress = 3103;
@@ -441,55 +403,48 @@ async function checkAndSaveDistribution(client, ipAddress) {
       }
         if (distribution !== null) {
 
-          // set value size data when start
-          if (checkCompleteSize === 0) {
-              sizeDataArraySelected =  distribution.SizeData;
-              console.log(`sizeDataArraySelected: ${sizeDataArraySelected.length}`)
-              checkCompleteSize++;
-          }
           let results = [];
           let countCompleteSize = 0;
         
-          for (let i = 0; i < distribution.SizeData.length; i++) {
-            try {
-                  // Check choose size 
-                  const responseChooseSize = await client.readHoldingRegisters(chooseSizeAddress, 1);
-                  const registerChooseSizeValue = responseChooseSize.response._body.values[0];
-    
-                  let binaryChooseSizsValue = registerChooseSizeValue.toString(2).padStart(16, '0');
-          
-                  console.log(`Output of size at register address ${chooseSizeAddress} = ${registerChooseSizeValue}`);
-                  console.log(`Binary representation: ${binaryChooseSizsValue}`);
-                  
-                  const index = findSetBitIndex(binaryChooseSizsValue);
-                  if (index !== -1) {
-                  // check reason complete size order
-                  let responseReaseonCompleteSize = await client.readHoldingRegisters(3100, 1);
-                  let reasonComplete = responseReaseonCompleteSize.response._body.values[0];
-                  console.log("ReasonComplete: " + reasonComplete);
-
-                  if(reasonComplete != 0) {
-                  console.log("[SizeID] The index of the set bit is:", index);  
-                  let  distributionIDFromSize = await getDistributionIDFromSizeID(ipAddress, orderID, isLeather === 1 ? 0 : 1, sizeDataArraySelected[index].SizeID);
-                  console.log("[SizeID]: " +  sizeDataArraySelected[index].SizeID);
-                  if (distributionIDFromSize != null) {
-                  let message, note;
-                  switch (reasonComplete) {
-                    case 1:
-                        note = 1;
-                        message = "Not enough materials";
-                        break;
-                    case 2:
-                        note = 2;
-                        message = "Change of plan";
-                        break;
-                    case 3:
-                        note = 3;
-                        message = "Forgot to choose size";
-                        break;
-                    default:
-                        message = "Unknown reason";
-                        break;
+          try {
+                // Check choose size 
+                const responseChooseSize = await client.readHoldingRegisters(chooseSizeAddress, 1);
+                const registerChooseSizeValue = responseChooseSize.response._body.values[0];
+  
+                let binaryChooseSizsValue = registerChooseSizeValue.toString(2).padStart(16, '0');
+        
+                console.log(`Output of size at register address ${chooseSizeAddress} = ${registerChooseSizeValue}`);
+                console.log(`Binary representation: ${binaryChooseSizsValue}`);
+                
+                const index = findSetBitIndex(binaryChooseSizsValue);
+                if (index !== -1) {
+                // check reason complete size order
+                let responseReaseonCompleteSize = await client.readHoldingRegisters(3100, 1);
+                let reasonComplete = responseReaseonCompleteSize.response._body.values[0];
+                console.log("ReasonComplete: " + reasonComplete);
+                console.log("[SizeID] The index of the set bit is:", index);  
+                
+                if(reasonComplete != 0) {
+                  console.log("[SizeID]: " +  distribution.SizeData[index].SizeID);
+                let  distributionIDFromSize = await getDistributionIDFromSizeID(ipAddress, orderID, isLeather === 1 ? 0 : 1, distribution.SizeData[index].SizeID);
+                if (distributionIDFromSize != null) {
+                let message, note;
+                switch (reasonComplete) {
+                  case 1:
+                      note = 1;
+                      message = "Not enough materials";
+                      break;
+                  case 2:
+                      note = 2;
+                      message = "Change of plan";
+                      break;
+                  case 3:
+                      note = 3;
+                      message = "Forgot to choose size";
+                      break;
+                  default:
+                      message = "Unknown reason";
+                      break;
                 }
                 for (const item of distributionIDFromSize.DistributionID) {
                   try {
@@ -522,7 +477,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
         } catch (error) {
             console.error(`Error reading register ${sizeAddress}:`, error.message);
         }
-    }
+    
         // If all sizes are complete, update DistributionIDs
         if (countCompleteSize === sizeDataArraySelected.length) {
             for (const item of distribution.DistributionID) {
@@ -531,7 +486,6 @@ async function checkAndSaveDistribution(client, ipAddress) {
                     console.log(`Updated DistributionID: ${item.DistributionID} countCompleteSize ${countCompleteSize} sizeDataArraySelected ${sizeDataArraySelected.length}`);
                     sizeDataInfo.sizeID = [];
                     deleteDistributionFromRegister(client);
-                    checkCompleteSize = 0;
                 } catch (error) {
                     console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
                 }
@@ -588,6 +542,7 @@ async function deleteDistributionFromRegister(client) {
         // Write the value 1 to register 3001
         await client.writeSingleRegister(deleteDistribution, valueToWrite);
         console.log(`Written value ${valueToWrite} to register 3001`);
+        checkCompleteSize = 0;
     }
 
     results.push({ address: deleteDistribution, value: registerValue });

@@ -947,7 +947,6 @@ async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather) {
           WHERE 
               dd.IsDelete = 0  
               AND d.IpAddress = @ipAddress
-              AND dd.Status = 'Pending'
               AND ps.OrderId = @OrderId
               AND dd.IsLeather = @IsLeather
           GROUP BY 

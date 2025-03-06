@@ -137,19 +137,26 @@ namespace DigitalProduction
 
         private void DataGrid_DeviceOutput_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            var row = dataGrid_DeviceOutput.Rows[e.RowIndex].DataBoundItem as DeviceOutput;
-            if (row != null)
+            try
             {
-                if (row.IsGroupHeader)
+                var row = dataGrid_DeviceOutput.Rows[e.RowIndex].DataBoundItem as DeviceOutput;
+                if (row != null)
                 {
-                    e.CellStyle.BackColor = Color.LightGray;
-                    e.CellStyle.Font = new Font(dataGrid_DeviceOutput.Font, FontStyle.Bold);
+                    if (row.IsGroupHeader)
+                    {
+                        e.CellStyle.BackColor = Color.LightGray;
+                        e.CellStyle.Font = new Font(dataGrid_DeviceOutput.Font, FontStyle.Bold);
+                    }
+                    else if (dataGrid_DeviceOutput.Columns[e.ColumnIndex].Name == "IpAddress")
+                    {
+                        e.Value = string.Empty; // Hide IpAddress for normal rows
+                        e.FormattingApplied = true;
+                    }
                 }
-                else if (dataGrid_DeviceOutput.Columns[e.ColumnIndex].Name == "IpAddress")
-                {
-                    e.Value = string.Empty; // Hide IpAddress for normal rows
-                    e.FormattingApplied = true;
-                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage.ShowError("Exception: " + ex.Message);
             }
         }
     }
