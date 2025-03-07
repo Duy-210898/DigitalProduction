@@ -445,12 +445,6 @@ namespace DigitalProduction
             }
         }
 
-
-
-        private void ShowMessage(string title, string message, MessageBoxIcon icon)
-        {
-            MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
-        }
         private void WebSocket_OnResponseReceived(string data)
         {
             Console.WriteLine("Response from server: " + data);
@@ -528,7 +522,7 @@ namespace DigitalProduction
 
         private void ShowErrorNotification(string message)
         {
-            ShowMessage("Error", message, MessageBoxIcon.Error);
+            ShowMessage.ShowError("Error" + message);
         }
 
         private void cbxSO_SelectedIndexChanged(object sender, EventArgs e)
@@ -732,11 +726,11 @@ namespace DigitalProduction
 
                     if (response != null && response.Status == "success")
                     {
-                        MessageBox.Show("Distribution Data saved successfully!\nThank you!", "Saved Successfully", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        ShowMessage.ShowInfo(response.Message, "Sucess");
                     }
                     else
                     {
-                        MessageBox.Show("Failed to save data. Message: " + response.Message, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                        ShowMessage.ShowError(response.Message, "Error");
                     }
                 }
                 else
@@ -829,28 +823,29 @@ namespace DigitalProduction
 
                 // Get SizeID from the selected row
                 int sizeId = Convert.ToInt32(dgvSize.Rows[e.RowIndex].Cells["SizeID"].Value);
-                    
+
                 if (!isChecked) // If user is checking the box
                 {
-                    // if Lether only 3 sizes
-                    if (rdLeather.Checked)
+                    // If Leather, allow only 3 sizes
+                    if (rdLeather.Checked && sizeIDs.Count >= 3)
                     {
-                        if (sizeIDs.Count >= 3)
-                        {
-                            MessageBox.Show("You can select a maximum of 3 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
+                        MessageBox.Show("You can select a maximum of 3 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        checkBoxCell.Value = false; // ✅ Uncheck the checkbox
+                        dgvSize.RefreshEdit(); // ✅ Refresh UI to reflect changes
+                        return;
                     }
-                    // if raw only 6 sizes
-                    if (rdRawMaterial.Checked)
+
+                    // If Raw Material, allow only 6 sizes
+                    if (rdRawMaterial.Checked && sizeIDs.Count >= 6)
                     {
-                        if (sizeIDs.Count >= 6)
-                        {
-                            MessageBox.Show("You can select a maximum of 3 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
+                        MessageBox.Show("You can select a maximum of 6 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        checkBoxCell.Value = false; // ✅ Uncheck the checkbox
+                        dgvSize.RefreshEdit(); // ✅ Refresh UI to reflect changes
+                        return;
                     }
+
                     sizeIDs.Add(sizeId);
+                    checkBoxCell.Value = true; // ✅ Ensure the checkbox is checked when added
                 }
                 else // If user is unchecking the box
                 {

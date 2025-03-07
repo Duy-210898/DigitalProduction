@@ -235,34 +235,36 @@ namespace DigitalProduction
         }
         private void CreatelabelTotalControls()
         {
-            // Remove any existing panel to prevent duplication
+            // Check if paginationPanel already exists
             if (paginationPanel != null)
             {
-                this.Controls.Remove(paginationPanel);
-                paginationPanel.Dispose();
+                // Update the existing label instead of creating a new one
+                lblPageInfo.Text = $"Total Records: {employees.Count}";
             }
-
-            // Create a new PanelControl for pagination at the bottom
-            paginationPanel = new PanelControl()
+            else
             {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Padding = new Padding(10)
-            };
+                // Create a new PanelControl for pagination at the bottom
+                paginationPanel = new PanelControl()
+                {
+                    Dock = DockStyle.Bottom,
+                    Height = 50,
+                    Padding = new Padding(10)
+                };
 
-            lblPageInfo = new LabelControl()
-            {
-                Text = $"Total Records: {employees.Count}",
-                Size = new Size(200, 30),
-                ForeColor = Color.Green,
-                Font = new Font("Arial", 10, FontStyle.Bold),
-                AutoSizeMode = LabelAutoSizeMode.None,
-                Location = new Point(20, 10)
-            };
+                lblPageInfo = new LabelControl()
+                {
+                    Text = $"Total Records: {employees.Count}",
+                    Size = new Size(200, 30),
+                    ForeColor = Color.Green,
+                    Font = new Font("Arial", 10, FontStyle.Bold),
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Location = new Point(20, 10)
+                };
 
-            paginationPanel.Controls.Add(lblPageInfo);
-            this.Controls.Add(paginationPanel);
-            this.Controls.SetChildIndex(paginationPanel, 0);
+                paginationPanel.Controls.Add(lblPageInfo);
+                this.Controls.Add(paginationPanel);
+                this.Controls.SetChildIndex(paginationPanel, 0);
+            }
         }
 
         private void RegisterForm_UserCreated(object sender, Employee newUser)
@@ -273,8 +275,10 @@ namespace DigitalProduction
 
         private void LoadDataGridView()
         {
-            // Store the state of existing columns
-            var columnState = dataGridView_UserManagement.Columns
+            this.Invoke((MethodInvoker)delegate
+            {
+                // Store the state of existing columns
+                var columnState = dataGridView_UserManagement.Columns
                 .Cast<DataGridViewColumn>()
                 .Select(c => new
                 {
@@ -284,31 +288,32 @@ namespace DigitalProduction
                 })
                 .ToList();
 
-            // Reset the data source
-            dataGridView_UserManagement.DataSource = null;
-            dataGridView_UserManagement.DataSource = employees.ToList(); // Bind to updated list
+                // Reset the data source
+                dataGridView_UserManagement.DataSource = null;
+                dataGridView_UserManagement.DataSource = employees.ToList(); // Bind to updated list
 
-            // Ensure Action column exists and is set correctly
-            if (!dataGridView_UserManagement.Columns.Contains("Action"))
-            {
-                DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn
+                // Ensure Action column exists and is set correctly
+                if (!dataGridView_UserManagement.Columns.Contains("Action"))
                 {
-                    Name = "Action",
-                    HeaderText = LocalizationManager.GetString("Action"),
-                    UseColumnTextForButtonValue = false // Allows for dynamic text
-                };
-                dataGridView_UserManagement.Columns.Add(actionColumn);
-            }
-
-            // Restore column state after resetting the data source
-            foreach (var column in columnState)
-            {
-                if (dataGridView_UserManagement.Columns.Contains(column.Name))
-                {
-                    dataGridView_UserManagement.Columns[column.Name].Visible = column.Visible;
-                    dataGridView_UserManagement.Columns[column.Name].DisplayIndex = column.DisplayIndex;
+                    DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn
+                    {
+                        Name = "Action",
+                        HeaderText = LocalizationManager.GetString("Action"),
+                        UseColumnTextForButtonValue = false // Allows for dynamic text
+                    };
+                    dataGridView_UserManagement.Columns.Add(actionColumn);
                 }
-            }
+
+                // Restore column state after resetting the data source
+                foreach (var column in columnState)
+                {
+                    if (dataGridView_UserManagement.Columns.Contains(column.Name))
+                    {
+                        dataGridView_UserManagement.Columns[column.Name].Visible = column.Visible;
+                        dataGridView_UserManagement.Columns[column.Name].DisplayIndex = column.DisplayIndex;
+                    }
+                }
+            });
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -323,7 +328,17 @@ namespace DigitalProduction
             var request = new { app = Global.App, action = "getUsers" };
             string jsonRequest = JsonConvert.SerializeObject(request);
 
-            await _webSocketClient.SendAsync(jsonRequest);
+            try
+            {
+                await _webSocketClient.SendAsync(jsonRequest);
+            }
+            catch (Exception ex)
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    MessageBox.Show($"Error fetching data: {ex.Message}");
+                });
+            }
         }
 
         private void WebSocket_OnMessage(string jsonData)
@@ -334,29 +349,42 @@ namespace DigitalProduction
 
                 if (response?.Users != null && response.Users.Count > 0)
                 {
+                    // Clear employees and populate with new data
                     employees.Clear();
-
                     foreach (var employee in response.Users)
                     {
                         employees.Add(employee);
                     }
 
-                    CreatelabelTotalControls(); // Create/update pagination info
-                    LoadDataGridView(); // Load data into the DataGridView
-                    ApplyLocalization();
+                    // Invoke UI updates on the UI thread
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        CreatelabelTotalControls(); // Create/update pagination info
+                        LoadDataGridView(); // Load data into the DataGridView
+                        ApplyLocalization();
+                    });
                 }
                 else
                 {
-                    MessageBox.Show("No Data Found");
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        MessageBox.Show("No Data Found");
+                    });
                 }
             }
             catch (JsonSerializationException jsonEx)
             {
-                MessageBox.Show($"JSON Deserialization Error: {jsonEx.Message}");
+                this.Invoke((MethodInvoker)delegate
+                {
+                    MessageBox.Show($"JSON Deserialization Error: {jsonEx.Message}");
+                });
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occurred: {ex.Message}");
+                this.Invoke((MethodInvoker)delegate
+                {
+                    MessageBox.Show($"An error occurred: {ex.Message}");
+                });
             }
         }
 

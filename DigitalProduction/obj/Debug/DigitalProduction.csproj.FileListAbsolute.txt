@@ -172,3 +172,4 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.mani
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.application
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.CodeDom.dll
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.CodeDom.xml
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucReportOder.resources

@@ -206,7 +206,8 @@ async function getActualOutputData(startDate, endDate) {
       po.MasterWorkOrder, po.SO, pr.Model, pr.ART, 
       o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
       do.PiecesPerPair, do.MaterialLayer, do.CuttingDieQty, 
-      do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt;
+      do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt
+      ORDER BY do.CreatedAt DESC;
   `;
   
   let transaction;
@@ -537,96 +538,121 @@ async function saveActualDataToDB(data) {
 // Function to save distribution data and default info
 async function saveDistributionDataToDB(dataList) {
   let pool;
+  let results = []; // Store status of each data entry
 
   try {
     pool = await sql.connect(dbConfig);
 
     for (const data of dataList) {
-      const distributionConditions = {
-        DeviceID: { type: sql.Int, value: data.DeviceID },
-        PartSizeOrderID: { type: sql.Int, value: data.PartSizeOrderID }
+      let status = {
+        DeviceID: data.DeviceID,
+        ProductID: data.ProductID,
+        DistributionInserted: false,
+        DistributionDuplicate: false,
+        Error: null,
       };
 
-      const defaultInfoConditions = {
-        ProductID: { type: sql.Int, value: data.ProductID }
-      };
+      try {
+        const distributionConditions = {
+          DeviceID: { type: sql.Int, value: data.DeviceID },
+          PartSizeOrderID: { type: sql.Int, value: data.PartSizeOrderID }
+        };
 
-      // Check if record exists before inserting
-      const distributionExists = await recordExists("DistributionData", distributionConditions, pool);
-      const defaultInfoExists = await recordExists("DefaultInfo", defaultInfoConditions, pool);
+        const defaultInfoConditions = {
+          ProductID: { type: sql.Int, value: data.ProductID }
+        };
 
-      if (!distributionExists) {
-        // Insert into DistributionData table
-        const distributionQuery = `
-          INSERT INTO DistributionData (
-            DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt, IsLeather, IsDelete, UserID
-          ) VALUES (
-            @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @IsLeather, @IsDelete, @UserID
-          );
-        `;
+        // Check if record exists before inserting
+        const distributionExists = await recordExists("DistributionData", distributionConditions, pool);
+        const defaultInfoExists = await recordExists("DefaultInfo", defaultInfoConditions, pool);
 
-        let request = pool.request();
-        request.input('DeviceID', sql.Int, data.DeviceID);
-        request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
-        request.input('OperatorID', sql.Int, data.OperatorID);
-        request.input('InventoryQty', sql.Int, data.InventoryQty);
-        request.input('Status', sql.NVarChar, data.Status || 'Pending');
-        request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
-        request.input('IsLeather', sql.Bit, data.IsLeather);
-        request.input('IsDelete', sql.Bit, data.IsDelete || 0);
-        request.input('UserID', sql.Int, data.UserID);
+        if (!distributionExists) {
+          // Insert into DistributionData table
+          const distributionQuery = `
+            INSERT INTO DistributionData (
+              DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt, IsLeather, IsDelete, UserID
+            ) VALUES (
+              @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @IsLeather, @IsDelete, @UserID
+            );
+          `;
 
-        await request.query(distributionQuery);
-        console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
-      } else {
-        console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
+          let request = pool.request();
+          request.input('DeviceID', sql.Int, data.DeviceID);
+          request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
+          request.input('OperatorID', sql.Int, data.OperatorID);
+          request.input('InventoryQty', sql.Int, data.InventoryQty);
+          request.input('Status', sql.NVarChar, data.Status || 'Pending');
+          request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
+          request.input('IsLeather', sql.Bit, data.IsLeather);
+          request.input('IsDelete', sql.Bit, data.IsDelete || 0);
+          request.input('UserID', sql.Int, data.UserID);
+
+          const result = await request.query(distributionQuery);
+          if (result.rowsAffected && result.rowsAffected[0] > 0) {
+            console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
+            status.DistributionInserted = true;
+          } else {
+            console.log(`❌ Insert failed: No rows affected for DeviceID ${data.DeviceID}`);
+          }
+        } else {
+          console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
+          status.DistributionDuplicate = true;
+        }
+
+        if (!defaultInfoExists) {
+          // INSERT DefaultInfo nếu chưa tồn tại
+          const defaultInfoQuery = `
+            INSERT INTO DefaultInfo (
+              ProductID, PiecesPerPair, CuttingDieQty, MaterialLayer, TotalPiecesPerPair
+            ) VALUES (
+              @ProductID, @PiecesPerPair, @CuttingDieQty, @MaterialLayer, @TotalPiecesPerPair
+            );
+          `;
+
+          let request = pool.request();
+          request.input('ProductID', sql.Int, data.ProductID);
+          request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
+          request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
+          request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
+          request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
+
+          await request.query(defaultInfoQuery);
+          console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
+        } else {
+          // UPDATE DefaultInfo nếu đã tồn tại
+          const updateInfoQuery = `
+            UPDATE DefaultInfo 
+            SET PiecesPerPair = @PiecesPerPair, 
+                CuttingDieQty = @CuttingDieQty, 
+                MaterialLayer = @MaterialLayer, 
+                TotalPiecesPerPair = @TotalPiecesPerPair
+            WHERE ProductID = @ProductID;
+          `;
+
+          let request = pool.request();
+          request.input('ProductID', sql.Int, data.ProductID);
+          request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
+          request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
+          request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
+          request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
+
+          await request.query(updateInfoQuery);
+          console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
+        }
+      } catch (innerError) {
+        console.error(`❌ Error processing DeviceID ${data.DeviceID}: ${innerError.message}`);
+        status.Error = innerError.message;
       }
 
-      if (!defaultInfoExists) {
-        // INSERT DefaultInfo nếu chưa tồn tại
-        const defaultInfoQuery = `
-          INSERT INTO DefaultInfo (
-            ProductID, PiecesPerPair, CuttingDieQty, MaterialLayer, TotalPiecesPerPair
-          ) VALUES (
-            @ProductID, @PiecesPerPair, @CuttingDieQty, @MaterialLayer, @TotalPiecesPerPair
-          );
-        `;
-
-        let request = pool.request();
-        request.input('ProductID', sql.Int, data.ProductID);
-        request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
-        request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
-        request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
-        request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
-
-        await request.query(defaultInfoQuery);
-        console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
-      } else {
-        // UPDATE DefaultInfo nếu đã tồn tại
-        const updateInfoQuery = `
-          UPDATE DefaultInfo 
-          SET PiecesPerPair = @PiecesPerPair, 
-              CuttingDieQty = @CuttingDieQty, 
-              MaterialLayer = @MaterialLayer, 
-              TotalPiecesPerPair = @TotalPiecesPerPair
-          WHERE ProductID = @ProductID;
-        `;
-
-        let request = pool.request();
-        request.input('ProductID', sql.Int, data.ProductID);
-        request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
-        request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
-        request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
-        request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
-
-        await request.query(updateInfoQuery);
-        console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
-      }
+      results.push(status);
     }
 
     console.log('✅ All unique data processed successfully.');
+    return results; // Return status for all entries
+
   } catch (error) {
-    console.error('❌ Error saving data:', error.message);
+    console.error('❌ Critical error saving data:', error.message);
+    return { success: false, error: error.message };
   }
 }
 
@@ -926,7 +952,7 @@ async function getDistributionDataFromDb(ipAddress) {
     throw error;
   }
 }
-async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather) {
+async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather, reasonComplete) {
   try {
     const query =
           `SELECT  
@@ -997,6 +1023,50 @@ async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather) {
     throw error;
   }
 }
+
+async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather) {
+  try {
+      const query = `
+           SELECT  
+                dd.DistributionID
+            FROM 
+                DistributionData AS dd
+            JOIN 
+                DeviceList AS d ON dd.DeviceID = d.DeviceID 
+            JOIN 
+                PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+            WHERE 
+			        dd.Status = 'Complete'
+              AND dd.IsDelete = 0  
+              AND d.IpAddress = @IpAddress
+              AND ps.OrderId = @OrderId
+              AND dd.IsLeather = @IsLeather
+            GROUP BY 
+                dd.DistributionID;
+      `;
+
+      const request = new sql.Request();
+      request.input('IpAddress', sql.VarChar, ipAddress);
+      request.input('OrderId', sql.Int, orderId);
+      request.input('IsLeather', sql.Int, isLeather);
+
+      const result = await request.query(query);
+
+      if (result.recordset.length > 0) {
+          // ✅ Return only DistributionID and IsComplete
+          return result.recordset.map(item => ({
+              DistributionID: item.DistributionID
+          }));
+      } else {
+          return null;
+      }
+  } catch (error) {
+      console.error(`❌ Error fetching distribution data from DB: ${error.message}`);
+      logToFile(errorLogPath, `❌ Error fetching distribution data from DB: ${error.message}`);
+      throw error;
+  }
+}
+
 
 async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID) {
   try {
@@ -1446,5 +1516,6 @@ module.exports = {
   getDistributions,
   getOperatorDistribution,
   getSizeAndDistributionDataFromDb,
-  getDistributionIDFromSizeID
+  getDistributionIDFromSizeID,
+  getDistributionCompleteFromDb
 };

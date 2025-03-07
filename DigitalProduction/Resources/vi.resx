@@ -402,4 +402,13 @@
   <data name="rawMaterial" xml:space="preserve">
     <value>Liệu thường</value>
   </data>
+  <data name="NumberOfOrder" xml:space="preserve">
+    <value>Số lượng đơn hàng</value>
+  </data>
+  <data name="OperatorCode" xml:space="preserve">
+    <value>Mã người vận hành</value>
+  </data>
+  <data name="OperatorName" xml:space="preserve">
+    <value>Tên người vận hành</value>
+  </data>
 </root>

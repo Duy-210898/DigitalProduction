@@ -372,4 +372,13 @@
   <data name="rawMaterial" xml:space="preserve">
     <value>Raw Material</value>
   </data>
+  <data name="NumberOfOrder" xml:space="preserve">
+    <value>Number Of Order</value>
+  </data>
+  <data name="OperatorCode" xml:space="preserve">
+    <value>Operator Code</value>
+  </data>
+  <data name="OperatorName" xml:space="preserve">
+    <value>Operator Name</value>
+  </data>
 </root>

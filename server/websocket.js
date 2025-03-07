@@ -145,6 +145,8 @@ async function handleGetActualData(ws, request) {
     
     // Set endDate to 23:59:59.999 in local time
     endDate.setHours(23, 59, 59, 999);
+    // Add 1 day to the endDate
+    endDate.setDate(endDate.getDate() + 1);
     
     // Format dates for SQL (YYYY-MM-DD HH:mm:ss.SSS) - LOCAL TIME
     const formatDateForSQL = (date) => {
@@ -454,14 +456,36 @@ async function handleSaveDistributionData(ws, request) {
   try {
 
     // Lưu dữ liệu vào cơ sở dữ liệu
-    await saveDistributionDataToDB(data);
-
-    // Gửi phản hồi thành công
-    ws.send(JSON.stringify({
-      action: 'saveDistributionData',
-      status: 'success',
-      message: 'Distribution data saved and sent to Modbus successfully'
-    }));
+    const result = await saveDistributionDataToDB(data);
+    if (!result || result.length === 0) {
+      console.log("⚠️ No results returned from the function.");
+      ws.send(JSON.stringify({
+        action: 'saveDistributionData',
+        status: 'error',
+        message: `Failed to save distribution data: ${error.message}`
+      }));
+    } else if (result[0].DistributionDuplicate) {
+        console.log("🚨 Entry is a duplicate. Insertion skipped.");
+         ws.send(JSON.stringify({
+          action: 'saveDistributionData',
+          status: 'error',
+          message: 'Entry is a duplicate. Insertion skipped!!'
+        }));
+    } else if (result[0].DistributionInserted) {
+         // Gửi phản hồi thành công
+        ws.send(JSON.stringify({
+          action: 'saveDistributionData',
+          status: 'success',
+          message: 'Distribution data saved and sent to Modbus successfully'
+        }));
+    } else {
+        console.log("❌ Error: Entry was not inserted.");
+        ws.send(JSON.stringify({
+          action: 'saveDistributionData',
+          status: 'error',
+          message: `Failed to save distribution data`
+        }));
+    }
   } catch (error) {
     console.error('Error saving distribution data:', error);
     ws.send(JSON.stringify({
@@ -489,8 +513,8 @@ async function handleSaveDistributionDatas(ws, request) {
     console.log(`Proceeding with saving data for device at ${IpAddress}...`);
 
     // Lưu dữ liệu vào cơ sở dữ liệu
-    await saveDistributionDataToDB(data);
-
+    const result = await saveDistributionDataToDB(dataList);
+    console.log("Final Status:", result);
     // Gửi phản hồi thành công
     ws.send(JSON.stringify({
       action: 'saveDistributionData',

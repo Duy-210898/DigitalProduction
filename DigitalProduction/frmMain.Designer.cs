@@ -44,6 +44,7 @@
             this.btnUserManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnOperator = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement6 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnReportOder = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.fluentDesignFormControl1 = new DevExpress.XtraBars.FluentDesignSystem.FluentDesignFormControl();
             this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
             this.statusItem = new DevExpress.XtraBars.BarStaticItem();
@@ -175,9 +176,18 @@
             // 
             // accordionControlElement6
             // 
+            this.accordionControlElement6.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.btnReportOder});
             this.accordionControlElement6.Expanded = true;
             this.accordionControlElement6.Name = "accordionControlElement6";
             this.accordionControlElement6.Text = "Report";
+            // 
+            // btnReportOder
+            // 
+            this.btnReportOder.Name = "btnReportOder";
+            this.btnReportOder.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnReportOder.Text = "Performance Order";
+            this.btnReportOder.Click += new System.EventHandler(this.btnReportOder_Click);
             // 
             // fluentDesignFormControl1
             // 
@@ -259,6 +269,7 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement6;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnOperator;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnProgressDistribution;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnReportOder;
     }
 }
 

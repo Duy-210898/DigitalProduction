@@ -214,9 +214,13 @@ namespace DigitalProduction.ViewModels
                     Console.WriteLine("error.");
                     if (BindingDeviceOutputs.Count > 0)
                     {
-                        BindingDeviceOutputs.RaiseListChangedEvents = false; // Disable UI updates
+                        // Reset DataGridView by clearing BindingDeviceOutputs
+                        BindingDeviceOutputs.RaiseListChangedEvents = false;
                         BindingDeviceOutputs.Clear();
-                        BindingDeviceOutputs.RaiseListChangedEvents = true; // Re-enable UI updates
+                        BindingDeviceOutputs.RaiseListChangedEvents = true;
+                        BindingDeviceOutputs.ResetBindings();
+
+                        OnPropertyChanged(nameof(BindingDeviceOutputs)); // Ensure UI updates
                     }
                 }
             }
@@ -357,6 +361,9 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"Error updating UI: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
+
+
 
 
         public static void UpdateProperties<T>(T existing, T updated, params string[] propertyNames)

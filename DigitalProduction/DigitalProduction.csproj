@@ -240,6 +240,12 @@
     <Compile Include="ucProgressManagement.Designer.cs">
       <DependentUpon>ucProgressManagement.cs</DependentUpon>
     </Compile>
+    <Compile Include="ucReportOder.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucReportOder.Designer.cs">
+      <DependentUpon>ucReportOder.cs</DependentUpon>
+    </Compile>
     <Compile Include="ucSchedule.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -299,6 +305,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ucProgressManagement.resx">
       <DependentUpon>ucProgressManagement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucReportOder.resx">
+      <DependentUpon>ucReportOder.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ucSchedule.resx">
       <DependentUpon>ucSchedule.cs</DependentUpon>

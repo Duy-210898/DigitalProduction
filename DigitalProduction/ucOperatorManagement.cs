@@ -30,6 +30,8 @@ namespace DigitalProduction
             InitializeComponent();
             LoadTextLable();
             InitializeDataGridView(); // Initialize the DataGridView
+            CreatelabelTotalControls();
+            CreateButtonContainer();
             frmRegister = new ucRegisterOperator();
             frmRegister.Visible = false;
             this.Controls.Add(frmRegister);
@@ -41,7 +43,7 @@ namespace DigitalProduction
         {
             dataGridView_OperatorManagement = new DataGridView
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Fill, // Fill the remaining space in the parent control
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 AllowUserToAddRows = false,
                 ReadOnly = false,
@@ -49,7 +51,11 @@ namespace DigitalProduction
                 RowTemplate = { Height = 50 }
             };
 
-            this.Controls.Add(dataGridView_OperatorManagement);
+            this.Controls.Add(dataGridView_OperatorManagement); // Add DataGridView first
+        }
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            dataGridView_OperatorManagement.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - paginationPanel.Height);
         }
         private void ApplyLocalization()
         {
@@ -315,37 +321,34 @@ namespace DigitalProduction
                     dataGridView_OperatorManagement.Columns[column.Name].DisplayIndex = column.DisplayIndex;
                 }
             }
-            CreatelabelTotalControls(); // Call after loading data
         }
 
         private void CreatelabelTotalControls()
         {
-            if (paginationPanel != null)
+            // Creating pagination panel if it does not exist
+            if (paginationPanel == null)
             {
-                this.Controls.Remove(paginationPanel);
-                paginationPanel.Dispose();
+                paginationPanel = new PanelControl()
+                {
+                    Dock = DockStyle.Bottom, // Dock to the bottom
+                    Height = 50, // Set fixed height
+                    Padding = new Padding(10)
+                };
+
+                lblPageInfo = new LabelControl()
+                {
+                    Size = new Size(200, 30),
+                    ForeColor = Color.Green,
+                    Font = new Font("Arial", 10, FontStyle.Bold),
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Location = new Point(20, 10)
+                };
+
+                paginationPanel.Controls.Add(lblPageInfo); // Add Label to Panel
+                this.Controls.Add(paginationPanel); // Finally add Panel to control collection
             }
 
-            paginationPanel = new PanelControl()
-            {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Padding = new Padding(10)
-            };
-
-            lblPageInfo = new LabelControl()
-            {
-                Text = $"Total Records: {employees.Count}",
-                Size = new Size(200, 30),
-                ForeColor = Color.Green,
-                Font = new Font("Arial", 10, FontStyle.Bold),
-                AutoSizeMode = LabelAutoSizeMode.None,
-                Location = new Point(20, 10)
-            };
-
-            paginationPanel.Controls.Add(lblPageInfo);
-            this.Controls.Add(paginationPanel);
-            this.Controls.SetChildIndex(paginationPanel, 0);
+            lblPageInfo.Text = $"Total Records: {employees.Count}"; // Update the label text
         }
         private async void SyncButton_Click(object sender, EventArgs e)
         {
@@ -392,13 +395,23 @@ namespace DigitalProduction
             try
             {
                 ResponseMessage<List<Employee>> response = ResponseMessage<List<Employee>>.FromJson(jsonData);
+
                 if (response?.Users != null && response.Users.Count > 0)
                 {
-                    employees.Clear();
-                    UpdateEmployees(response.Users);
-                    Invoke(new Action(() => LoadDataGridView()));
-                    ApplyLocalization();
-                    CreateButtonContainer();
+                    employees.Clear(); // Clear existing employees
+                    UpdateEmployees(response.Users); // Update with new employee data
+
+                    // Ensure UI update happens on the main thread
+                    Invoke(new Action(() =>
+                    {
+                        CreatelabelTotalControls(); // Create/update pagination controls based on the latest employee count
+                        LoadDataGridView();
+                        ApplyLocalization();
+
+                        // Optionally refresh to enforce drawing updates
+                        paginationPanel?.Invalidate();
+                        paginationPanel?.Refresh();
+                    }));
                 }
                 else
                 {
@@ -414,6 +427,7 @@ namespace DigitalProduction
                 ShowMessage.ShowError($"An error occurred: {ex.Message}");
             }
         }
+
 
         private void AddCancelButton(DataGridViewRow row)
         {

@@ -728,6 +728,29 @@ namespace DigitalProduction
             }
         }
 
+        public static DataTable reportOrderbyOperator()
+        {
+            DataTable dt = new DataTable();
+            SqlConnection con = new SqlConnection(connectionString);
+            try
+            {
+                string query = "SELECT o.EmployeeID, o.OperatorName, COUNT(DISTINCT ps.OrderID) AS OrderCount FROM DistributionData d JOIN PartSizeOrder ps ON ps.PartSizeOrderId = d.PartSizeOrderId JOIN Operator o ON d.OperatorID = o.OperatorID WHERE d.Status = 'Complete' GROUP BY o.EmployeeID, o.OperatorName ORDER BY OrderCount DESC;";
+                SqlCommand cmd = new SqlCommand(query, con);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
+            return dt;
+        }
+
     }
 }
 

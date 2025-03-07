@@ -1,6 +1,6 @@
 ﻿namespace DigitalProduction
 {
-    partial class ucUserManagement
+    partial class ucReportOder
     {
         /// <summary> 
         /// Required designer variable.
@@ -30,15 +30,18 @@
         {
             this.SuspendLayout();
             // 
-            // ucUserManagement
+            // ucReportOder
             // 
-            this.Name = "ucUserManagement";
-            this.Size = new System.Drawing.Size(602, 443);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Name = "ucReportOder";
+            this.Size = new System.Drawing.Size(576, 398);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
+        private System.Windows.Forms.DataGridView dataGridView_OperatorReport;
     }
 }

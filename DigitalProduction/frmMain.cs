@@ -17,6 +17,7 @@ namespace DigitalProduction
 
         private WebSocketClient _webSocketClient;
         private ResourceManager resourceManager;
+        private Dictionary<Type, UserControl> _userControls = new Dictionary<Type, UserControl>();
 
         private Dictionary<string, string> statusMapping;
 
@@ -157,41 +158,36 @@ namespace DigitalProduction
 
         private void ShowUserControl<T>() where T : UserControl, new()
         {
-            if (InvokeRequired)
+            if (pnlControl.InvokeRequired)
             {
-                BeginInvoke(new Action(() => ShowUserControl<T>()));
+                pnlControl.Invoke(new Action(() => ShowUserControl<T>()));
                 return;
             }
 
-            // Dispose old UserControl and ViewModel if applicable
-            if (pnlControl.Controls.Count > 0)
+            // Check if the control already exists in pnlControl
+            if (pnlControl.Controls.Count > 0 && pnlControl.Controls[0] is T existingControl)
             {
-                var oldControl = pnlControl.Controls[0] as UserControl;
-                if (oldControl != null)
-                {
-                    if (oldControl.DataBindings.Count > 0)
-                    {
-                        oldControl.DataBindings.Clear();  // Prevent binding errors
-                    }
-
-                    if (oldControl is IDisposable disposableControl)
-                    {
-                        disposableControl.Dispose();
-                    }
-
-                    pnlControl.Controls.Remove(oldControl);
-                }
+                return; // If it already exists, do nothing
             }
 
-            // Create new UserControl
-            T userControl = new T();
-            userControl.Dock = DockStyle.Fill;
+            // Hide all existing controls instead of removing them
+            foreach (Control ctrl in pnlControl.Controls)
+            {
+                ctrl.Visible = false;
+            }
 
-            // Invoke WebSocketClient setup
-            InvokeSetWebSocketClient(userControl);
+            // Check if the requested UserControl already exists in a dictionary
+            if (!_userControls.TryGetValue(typeof(T), out UserControl userControl))
+            {
+                userControl = new T { Dock = DockStyle.Fill };
+                _userControls[typeof(T)] = userControl;
+                InvokeSetWebSocketClient(userControl);
+                pnlControl.Controls.Add(userControl);
+            }
 
-            // Add to panel
-            pnlControl.Controls.Add(userControl);
+            // Show the existing UserControl without reloading
+            userControl.Visible = true;
+            userControl.BringToFront();
         }
 
         private void InvokeSetWebSocketClient(UserControl userControl)
@@ -251,6 +247,11 @@ namespace DigitalProduction
         {
             ShowUserControl<ucProgress>();
         }
+        private void btnReportOder_Click(object sender, EventArgs e)
+        {
+            ShowUserControl<ucReportOder>();
+        }
+
         private void frmMain_Load(object sender, EventArgs e)
         {
             if (Global.CurrentUser == null)

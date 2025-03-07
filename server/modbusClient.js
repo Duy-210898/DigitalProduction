@@ -2,7 +2,7 @@ const fs = require('fs');
 const net = require('net');
 const Modbus = require('jsmodbus');
 const ping = require('ping');
-const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setOrderIsComplete, setDistributionIsComplete, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID} = require('./database');
+const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setOrderIsComplete, setDistributionIsComplete, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb} = require('./database');
 const { notifyClientsToDeleteOrder } = require('./notifications');
 
 let previousRegister6507Value = null;
@@ -10,7 +10,7 @@ let previousRegister1034 = null;
 let previousRegister1032 = null;
 let previousRegister6510 = null;
 let isDataSentToModbus = false;
-let checkCompleteSize = 0;
+let countCompleteSize = 0;
 let sizeDataArraySelected;
 let sizeDataInfo = {}; 
 
@@ -404,9 +404,10 @@ async function checkAndSaveDistribution(client, ipAddress) {
         if (distribution !== null) {
 
           let results = [];
-          let countCompleteSize = 0;
         
           try {
+                //time to set reason
+                await delay(1000);
                 // Check choose size 
                 const responseChooseSize = await client.readHoldingRegisters(chooseSizeAddress, 1);
                 const registerChooseSizeValue = responseChooseSize.response._body.values[0];
@@ -422,77 +423,87 @@ async function checkAndSaveDistribution(client, ipAddress) {
                 let responseReaseonCompleteSize = await client.readHoldingRegisters(3100, 1);
                 let reasonComplete = responseReaseonCompleteSize.response._body.values[0];
                 console.log("ReasonComplete: " + reasonComplete);
-                console.log("[SizeID] The index of the set bit is:", index);  
-                
-                if(reasonComplete != 0) {
+                console.log(`[IndexSize] ReasonComplete ${reasonComplete} The index of the set bit is: ${index}`);  
+
+                if(reasonComplete > 0) {
                   console.log("[SizeID]: " +  distribution.SizeData[index].SizeID);
-                let  distributionIDFromSize = await getDistributionIDFromSizeID(ipAddress, orderID, isLeather === 1 ? 0 : 1, distribution.SizeData[index].SizeID);
-                if (distributionIDFromSize != null) {
-                let message, note;
-                switch (reasonComplete) {
-                  case 1:
-                      note = 1;
-                      message = "Not enough materials";
-                      break;
-                  case 2:
-                      note = 2;
-                      message = "Change of plan";
-                      break;
-                  case 3:
-                      note = 3;
-                      message = "Forgot to choose size";
-                      break;
-                  default:
-                      message = "Unknown reason";
-                      break;
-                }
-                for (const item of distributionIDFromSize.DistributionID) {
-                  try {
-                      await setDistributionIsComplete(item.DistributionID, note);
-                      console.log(`Updated DistributionID: ${item.DistributionID} note ${note}`);
-                  } catch (error) {
-                      console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
+                  let  distributionIDFromSize = await getDistributionIDFromSizeID(ipAddress, orderID, isLeather === 1 ? 0 : 1, distribution.SizeData[index].SizeID);
+                  if (distributionIDFromSize != null) {
+                  let message, note;
+                  switch (reasonComplete) {
+                    case 1:
+                        note = 1;
+                        message = "Not enough materials";
+                        break;
+                    case 2:
+                        note = 2;
+                        message = "Change of plan";
+                        break;
+                    case 3:
+                        note = 3;
+                        message = "Forgot to choose size";
+                        break;
+                    default:
+                        message = "Unknown reason";
+                        break;
                   }
+                  for (const item of distributionIDFromSize.DistributionID) {
+                    try {
+                        await setDistributionIsComplete(item.DistributionID, note);
+                        console.log(`Updated DistributionID: ${item.DistributionID} note ${note}`);
+                    } catch (error) {
+                        console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
+                    }
               }
                 console.log("Reason: " + message);
             }
           }
         }
-        
-          // Continute read size 
-          const response = await client.readHoldingRegisters(sizeAddress, 1);
-          const registerValue = response.response._body.values[0];  // assuming the response value is an array and we want the first value
-          
-          // Convert the registerValue to a binary string with leading zeros
-          let binaryValue = registerValue.toString(2).padStart(16, '0');  // assuming 16-bit register, adjust if needed
+        let distributionComplete = await getDistributionCompleteFromDb(ipAddress, orderID, isLeather === 1 ? 0 : 1);
 
-          // Log each bit in the binary string
-          console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
-          console.log(`Binary representation: ${binaryValue}`);
-          
-          countCompleteSize = binaryValue.split('').filter(bit => bit === '1').length;
-          console.log("[Size] Count size of '1' bits:", countCompleteSize);          
+        if (distributionComplete && distributionComplete.length && distribution?.SizeData) {
+            if (distribution.SizeData.length === distributionComplete.length) {
+              console.log(`Complete deu to reason size ${distribution.SizeData.length} and dis ${distributionComplete.length}`)
+            }
+            else {
+               // Continute read size 
+              const response = await client.readHoldingRegisters(sizeAddress, 1);
+              const registerValue = response.response._body.values[0];  // assuming the response value is an array and we want the first value
+              
+              // Convert the registerValue to a binary string with leading zeros
+              let binaryValue = registerValue.toString(2).padStart(16, '0');  // assuming 16-bit register, adjust if needed
 
-          results.push({ address: sizeAddress, value: registerValue });
-        } catch (error) {
+              // Log each bit in the binary string
+              console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
+              console.log(`Binary representation: ${binaryValue}`);
+              
+              countCompleteSize = binaryValue.split('').filter(bit => bit === '1').length;
+              console.log("[Size] Count size of '1' bits:", countCompleteSize);          
+
+              results.push({ address: sizeAddress, value: registerValue });
+
+
+              // If all sizes are complete, update DistributionIDs
+              if (countCompleteSize === distribution.SizeData.length) {
+              for (const item of distribution.DistributionID) {
+                  try {
+                      await setDistributionIsComplete(item.DistributionID, 0);
+                      console.log(`Updated DistributionID: ${item.DistributionID} countCompleteSize ${countCompleteSize}  distribution.SizeData ${ distribution.SizeData.length}`);
+                      sizeDataInfo.sizeID = [];
+                      deleteDistributionFromRegister(client);
+                  } catch (error) {
+                      console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
+                  }
+              }
+          }
+
+          console.log("Register Values:", results); 
+            }
+          }
+        } 
+        catch (error) {
             console.error(`Error reading register ${sizeAddress}:`, error.message);
         }
-    
-        // If all sizes are complete, update DistributionIDs
-        if (countCompleteSize === sizeDataArraySelected.length) {
-            for (const item of distribution.DistributionID) {
-                try {
-                    await setDistributionIsComplete(item.DistributionID, 0);
-                    console.log(`Updated DistributionID: ${item.DistributionID} countCompleteSize ${countCompleteSize} sizeDataArraySelected ${sizeDataArraySelected.length}`);
-                    sizeDataInfo.sizeID = [];
-                    deleteDistributionFromRegister(client);
-                } catch (error) {
-                    console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
-                }
-            }
-        }
-
-        console.log("Register Values:", results);
       }
     }
   }} catch (error) {
