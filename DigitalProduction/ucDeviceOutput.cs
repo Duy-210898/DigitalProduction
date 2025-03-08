@@ -17,6 +17,7 @@ namespace DigitalProduction
         {
             InitializeComponent();
             _viewModel = new DeviceOutputListViewModel();
+            Console.WriteLine("Uc is loading");
             initFilterDate();
             // Bind UI elements to ViewModel properties
             dataGrid_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;

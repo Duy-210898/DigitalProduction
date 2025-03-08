@@ -119,9 +119,9 @@ namespace DigitalProduction.ViewModels
             _timer.Tick += Timer_Tick;
         }
 
-        public void SetWebSocketClient(WebSocketClient webSocketClient)
+        public void SetWebSocketClient(WebSocketClient webSocket)
         {
-            _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
+            _webSocketClient = webSocket ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseRealTime += WebSocket_OnMessage;
             // Start the timer to request data every 2 seconds.
             _timer.Start();

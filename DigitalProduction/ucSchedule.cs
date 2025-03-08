@@ -88,7 +88,7 @@ namespace DigitalProduction
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-            _webSocketClient = WebSocketClient.Instance;
+            _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
             _ = GetDataAndLoadToGridAsync();
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }

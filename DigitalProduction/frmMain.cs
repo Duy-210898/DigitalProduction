@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reflection;
 using System.Resources;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Utils.CodedUISupport;
 using DevExpress.XtraBars;
@@ -156,47 +158,69 @@ namespace DigitalProduction
             HighlightSelectedItem(e.Element);
         }
 
-        private void ShowUserControl<T>() where T : UserControl, new()
+        private async Task ShowUserControlAsync<T>() where T : UserControl, new()
         {
             if (pnlControl.InvokeRequired)
             {
-                pnlControl.Invoke(new Action(() => ShowUserControl<T>()));
+                await Task.Run(() => pnlControl.Invoke(new Action(async () => await ShowUserControlAsync<T>())));
                 return;
             }
 
-            // Check if the control already exists in pnlControl
-            if (pnlControl.Controls.Count > 0 && pnlControl.Controls[0] is T existingControl)
-            {
-                return; // If it already exists, do nothing
-            }
-
-            // Hide all existing controls instead of removing them
-            foreach (Control ctrl in pnlControl.Controls)
-            {
-                ctrl.Visible = false;
-            }
-
-            // Check if the requested UserControl already exists in a dictionary
+            // Check if the requested UserControl already exists in the dictionary
             if (!_userControls.TryGetValue(typeof(T), out UserControl userControl))
             {
+                // Create a new instance of the control
                 userControl = new T { Dock = DockStyle.Fill };
                 _userControls[typeof(T)] = userControl;
-                InvokeSetWebSocketClient(userControl);
+
+                // Ensure WebSocket setup happens on the UI thread
+                pnlControl.Invoke(new Action(() => InvokeSetWebSocketClient(userControl)));
+
                 pnlControl.Controls.Add(userControl);
             }
+            else
+            {
+                // If control already exists, ensure WebSocketClient is properly initialized
+                pnlControl.Invoke(new Action(() =>
+                {
+                    _webSocketClient?.ClearEventHandlers();
+                    InvokeSetWebSocketClient(userControl);
+                }));
+            }
 
-            // Show the existing UserControl without reloading
-            userControl.Visible = true;
+            // Only change visibility without reloading the UI
+            foreach (Control ctrl in pnlControl.Controls)
+            {
+                ctrl.Visible = ctrl == userControl; // Show only the requested control
+            }
+
             userControl.BringToFront();
         }
 
+
+
+
         private void InvokeSetWebSocketClient(UserControl userControl)
         {
-            var methodInfo = userControl.GetType().GetMethod("SetWebSocketClient", new Type[] { typeof(WebSocketClient) });
+            var methodInfo = userControl.GetType().GetMethod("SetWebSocketClient", BindingFlags.Public | BindingFlags.Instance);
+
             if (methodInfo != null)
             {
-                _webSocketClient.ClearEventHandlers();
-                methodInfo.Invoke(userControl, new object[] { _webSocketClient });
+                if (methodInfo.GetParameters().Length == 0)
+                {
+                    methodInfo.Invoke(userControl, null); // No parameters
+                }
+                else
+                {
+                    if (_webSocketClient == null)
+                    {
+                        Console.WriteLine("WebSocketClient is null! Cannot pass to method.");
+                        return;
+                    }
+
+                    _webSocketClient.ClearEventHandlers(); // Ensure clean event handling
+                    methodInfo.Invoke(userControl, new object[] { _webSocketClient }); // Pass WebSocketClient
+                }
             }
             else
             {
@@ -204,53 +228,59 @@ namespace DigitalProduction
             }
         }
 
-        private void btnDeviceManager_Click(object sender, EventArgs e)
+
+
+
+        private async void btnDeviceManager_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucDeviceManager>();
+            await ShowUserControlAsync<ucDeviceManager>();
         }
 
-        private void btnUserManager_Click(object sender, EventArgs e)
+        private async void btnUserManager_Click(object sender, EventArgs e)
         {
-            ucRegisterUser register = new ucRegisterUser();
-            ShowUserControl<ucUserManagement>();
+            await ShowUserControlAsync<ucUserManagement>();
         }
 
-        private void btnSchedule_Click(object sender, EventArgs e)
+        private async void btnSchedule_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucSchedule>();
+            await ShowUserControlAsync<ucSchedule>();
         }
 
-        private void btnProgress_Click(object sender, EventArgs e)
+        private async void btnProgress_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucProgress>();
+            await ShowUserControlAsync<ucProgress>();
         }
 
-        private void btnDeviceManage_Click(object sender, EventArgs e)
+        private async void btnDeviceManage_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucProgressManagement>();
+            await ShowUserControlAsync<ucProgressManagement>();
         }
 
-        private void btnDistribution_Click(object sender, EventArgs e)
+        private async void btnDistribution_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucDistribution>();
+            await ShowUserControlAsync<ucDistribution>();
         }
 
-        private void btnDeviceOutput_Click(object sender, EventArgs e)
+        private async void btnDeviceOutput_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucDeviceOutput>();
+            await ShowUserControlAsync<ucDeviceOutput>();
         }
-        private void btnOperator_Click(object sender, EventArgs e)
+
+        private async void btnOperator_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucOperatorManagement>();
+            await ShowUserControlAsync<ucOperatorManagement>();
         }
-        private void btnProgressDistribution_Click(object sender, EventArgs e)
+
+        private async void btnProgressDistribution_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucProgress>();
+            await ShowUserControlAsync<ucProgress>();
         }
-        private void btnReportOder_Click(object sender, EventArgs e)
+
+        private async void btnReportOder_Click(object sender, EventArgs e)
         {
-            ShowUserControl<ucReportOder>();
+            await ShowUserControlAsync<ucReportOder>();
         }
+
 
         private void frmMain_Load(object sender, EventArgs e)
         {

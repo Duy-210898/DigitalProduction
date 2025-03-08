@@ -47,6 +47,7 @@ async function handleClientMessage(ws, message) {
   try {
     const request = JSON.parse(message);
     const { app, action } = request;
+    console.log(`Action: ${action}`);
 
     if (!app) {
       console.log('Missing app field');
@@ -201,6 +202,7 @@ async function handleGetActualData(ws, request) {
 
 // Xử lý yêu cầu lấy thông tin phân phối của thiết bị
 async function handleGetDistributions(ws) {
+  console.log("Nhan duoc");
   try {
     // Gọi hàm getDistributionByDevice từ database.js để lấy dữ liệu phân phối
     const distributionData = await getDistributions();

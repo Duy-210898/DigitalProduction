@@ -1041,6 +1041,7 @@ async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather) {
               AND d.IpAddress = @IpAddress
               AND ps.OrderId = @OrderId
               AND dd.IsLeather = @IsLeather
+              AND dd.Note IS NOT NULL
             GROUP BY 
                 dd.DistributionID;
       `;

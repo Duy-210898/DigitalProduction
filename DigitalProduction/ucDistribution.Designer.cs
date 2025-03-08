@@ -70,7 +70,7 @@
             this.numericTotalPeicesPerPair = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.txtInventory = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.lblInventoryQty = new System.Windows.Forms.Label();
             this.dataGrid_overviewDistribution = new System.Windows.Forms.DataGridView();
             this.pnlSize = new System.Windows.Forms.Panel();
             this.dgvSize = new System.Windows.Forms.DataGridView();
@@ -243,6 +243,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(931, 99);
             this.tableLayoutPanel2.TabIndex = 0;
+            this.tableLayoutPanel2.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel2_Paint);
             // 
             // panel4
             // 
@@ -582,7 +583,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel5.Controls.Add(this.txtInventory, 1, 0);
-            this.tableLayoutPanel5.Controls.Add(this.label2, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.lblInventoryQty, 0, 0);
             this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
@@ -599,19 +600,19 @@
             this.txtInventory.Size = new System.Drawing.Size(120, 23);
             this.txtInventory.TabIndex = 1;
             // 
-            // label2
+            // lblInventoryQty
             // 
-            this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.Color.MistyRose;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label2.Location = new System.Drawing.Point(3, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(226, 30);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Inventory Quanity:";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblInventoryQty.AutoSize = true;
+            this.lblInventoryQty.BackColor = System.Drawing.Color.MistyRose;
+            this.lblInventoryQty.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblInventoryQty.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblInventoryQty.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblInventoryQty.Location = new System.Drawing.Point(3, 0);
+            this.lblInventoryQty.Name = "lblInventoryQty";
+            this.lblInventoryQty.Size = new System.Drawing.Size(226, 30);
+            this.lblInventoryQty.TabIndex = 2;
+            this.lblInventoryQty.Text = "Inventory Quanity:";
+            this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // dataGrid_overviewDistribution
             // 
@@ -651,7 +652,6 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "ucDistribution";
             this.Size = new System.Drawing.Size(971, 736);
-            this.Load += new System.EventHandler(this.ucDistribution_Load);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.cbxSO.Properties)).EndInit();
@@ -720,7 +720,7 @@
         private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View;
         private System.Windows.Forms.Label lblTotalPeicesPerPair;
         private System.Windows.Forms.NumericUpDown numericTotalPeicesPerPair;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lblInventoryQty;
         private System.Windows.Forms.TextBox txtInventory;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;

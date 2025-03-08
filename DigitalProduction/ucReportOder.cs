@@ -80,7 +80,7 @@ namespace DigitalProduction
                     dataGridView_OperatorReport.Columns["OperatorName"].HeaderText = LocalizationManager.GetString("OperatorName");
 
                 if (dataGridView_OperatorReport.Columns.Contains("OrderCount"))
-                    dataGridView_OperatorReport.Columns["OrderCount"].HeaderText = LocalizationManager.GetString("NumberOfOrders");
+                    dataGridView_OperatorReport.Columns["OrderCount"].HeaderText = LocalizationManager.GetString("NumberOfOrder");
             }
         }
     }

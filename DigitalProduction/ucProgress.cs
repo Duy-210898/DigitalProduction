@@ -21,6 +21,7 @@ namespace DigitalProduction
         private Label lblStartDate;
         private Label lblEndDate;
 
+
         public ucProgress()
         {
             InitializeComponent();
@@ -120,7 +121,7 @@ namespace DigitalProduction
             DataGridViewTextBoxColumn isLeatherTextColumn = new DataGridViewTextBoxColumn
             {
                 Name = "IsLeather",
-                HeaderText = "Leather Type",
+                HeaderText = "Material Type",
                 DataPropertyName = "IsLeather"
             };
 
@@ -201,25 +202,27 @@ namespace DigitalProduction
             {
                 DataGridViewRow row = dgvProgressManagement.Rows[e.RowIndex];
 
-                // Get value from the "Status" column (ensure it exists)
-                string status = row.Cells["Status"].Value?.ToString();
-
                 // Apply style if "Status" is "Complete"
-                if (status == "Complete")
+                if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
                 {
-                    foreach (DataGridViewCell cell in row.Cells)
+                    DataGridViewColumn column = dgvProgressManagement.Columns[e.ColumnIndex];
+
+                    // Apply green text only to the "Status" column
+                    if (column.Name == "Status")
                     {
-                        cell.Style.BackColor = Color.LightBlue;
-                        cell.Style.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
-                    }
-                }
-                else
-                {
-                    // Reset to default style if not "Complete"
-                    foreach (DataGridViewCell cell in row.Cells)
-                    {
-                        cell.Style.BackColor = dgvProgressManagement.DefaultCellStyle.BackColor;
-                        cell.Style.Font = dgvProgressManagement.DefaultCellStyle.Font;
+                        string status = e.Value?.ToString();
+                        if (status == "Complete")
+                        {
+                            e.CellStyle.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
+                            e.CellStyle.ForeColor = Color.Green; // Apply green text only to "Status" column
+                        }
+                        else
+                        {
+                            // Reset style if not "Complete"
+                            e.CellStyle.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
+                            e.CellStyle.ForeColor = Color.Red;
+                        }
+                        e.FormattingApplied = true;
                     }
                 }
             }
@@ -259,20 +262,44 @@ namespace DigitalProduction
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-            _webSocketClient = WebSocketClient.Instance;
+            _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
             _ = GetDataAndLoadToGridAsync();
-            _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }
 
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new { app = Global.App, action = "getDistributions" };
+            var request = new {app = Global.App, action = "getDistributions" };
             string jsonRequest = JsonConvert.SerializeObject(request);
-            await _webSocketClient.SendAsync(jsonRequest);
+
+            try
+            {
+                string response = await _webSocketClient.SendAsync(jsonRequest);
+                if (response == null)
+                {
+                    Console.WriteLine("Received null response from WebSocket.");
+                    MessageBox.Show("No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                Console.WriteLine($"Response received: {response}");
+                ProcessResponse(response);
+            }
+            catch (TimeoutException)
+            {
+                Console.WriteLine("WebSocket request timed out.");
+                MessageBox.Show("Request timed out for UserControlA.");
+            }
         }
 
-        private void WebSocket_OnMessage(string jsonData)
+
+        private void ProcessResponse(string jsonData)
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => ProcessResponse(jsonData)));
+                return;
+            }
+
             try
             {
                 ResponseMessage<List<Distribution>> response = ResponseMessage<List<Distribution>>.FromJson(jsonData);
@@ -285,9 +312,12 @@ namespace DigitalProduction
                         distributionDataList.Add(distribution);
                     }
 
-                    CreateLabelTotalControls();
-                    dgvProgressManagement.DataSource = distributionDataList;
-                    ConfigureDataGridView();
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        CreateLabelTotalControls();
+                        dgvProgressManagement.DataSource = distributionDataList;
+                        ConfigureDataGridView();
+                    });
                 }
                 else
                 {
@@ -299,6 +329,8 @@ namespace DigitalProduction
                 MessageBox.Show($"Error receiving WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
 
         private void CreateLabelTotalControls()
         {
@@ -335,10 +367,22 @@ namespace DigitalProduction
             {
                 refreshButton.Enabled = false;
                 refreshButton.Text = "Loading...";
-                await GetDataAndLoadToGridAsync();
-                refreshButton.Enabled = true;
-                refreshButton.Text = "Refresh";
+                
+                try
+                {
+                    await GetDataAndLoadToGridAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error refreshing data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    refreshButton.Enabled = true;
+                    refreshButton.Text = "Refresh";
+                }
             };
+
 
             paginationPanel.Controls.Add(lblPageInfo);
             paginationPanel.Controls.Add(refreshButton);
@@ -348,6 +392,7 @@ namespace DigitalProduction
         }
         private void ConfigureDataGridView()
         {
+            dgvProgressManagement.AutoGenerateColumns = false;
             dgvProgressManagement.Columns["DistributionID"].Visible = false;
             dgvProgressManagement.Columns["InventoryQty"].HeaderText = "Inventory Quantity";
             dgvProgressManagement.Columns["Status"].HeaderText = "Status";
@@ -370,8 +415,7 @@ namespace DigitalProduction
             // Assuming LocalizationManager returns strings based on your localization needs
             this.Text = LocalizationManager.GetString("ListOfDistributions");
         }
-
-        private class Distribution
+        public class Distribution
         {
             public int DistributionID { get; set; }
             public string IpAddress { get; set; }

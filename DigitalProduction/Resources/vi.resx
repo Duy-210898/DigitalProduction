@@ -411,4 +411,25 @@
   <data name="OperatorName" xml:space="preserve">
     <value>Tên người vận hành</value>
   </data>
+  <data name="CuttingDieQty" xml:space="preserve">
+    <value>Số lần chặt</value>
+  </data>
+  <data name="Infomation" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="InputOperatorID" xml:space="preserve">
+    <value>Vui lòng nhập mã người vận hành!!!</value>
+  </data>
+  <data name="InventoryQty" xml:space="preserve">
+    <value>Số lượng tồn kho</value>
+  </data>
+  <data name="MaterialLayer" xml:space="preserve">
+    <value>Số lớp vật liệu</value>
+  </data>
+  <data name="PeicesPerPair" xml:space="preserve">
+    <value>Số đôi</value>
+  </data>
+  <data name="TotalPeicesPerPair" xml:space="preserve">
+    <value>Tổng số đôi</value>
+  </data>
 </root>

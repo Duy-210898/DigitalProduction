@@ -380,7 +380,7 @@ namespace DigitalProduction
 
 
 
-        public void SetWebSocketClient(WebSocketClient webSocketClient)
+        public void SetWebSocketClient()
         {
             _webSocketClient = WebSocketClient.Instance;
             _ = GetDataAndLoadToGridAsync();

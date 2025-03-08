@@ -316,9 +316,9 @@ namespace DigitalProduction
             });
         }
 
-        public void SetWebSocketClient(WebSocketClient webSocketClient)
+        public void SetWebSocketClient()
         {
-            _webSocketClient = webSocketClient;
+            _webSocketClient = WebSocketClient.Instance;
             _ = GetDataAndLoadToGridAsync();
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }

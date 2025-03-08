@@ -3,6 +3,11 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using System.Collections.Concurrent;
+using System.Threading;
+using Newtonsoft.Json.Linq;
 namespace DigitalProduction
 {
     public class WebSocketClient : IDisposable
@@ -26,6 +31,9 @@ namespace DigitalProduction
         public event Action OnDisconnected;
         public event Action<string> OnResponseReceived;
         public event Action<string> OnResponseRealTime;
+        private readonly Dictionary<string, Action<string>> _responseHandlers = new Dictionary<string, Action<string>>();
+
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         // Private constructor to prevent external instantiation
         private WebSocketClient() { }
@@ -71,6 +79,22 @@ namespace DigitalProduction
                 StartReconnect();
             }
         }
+        public void RegisterHandler(string requestId, Action<string> handler)
+        {
+            lock (_responseHandlers)
+            {
+                _responseHandlers[requestId] = handler;
+            }
+        }
+
+        public void UnregisterHandler(string requestId)
+        {
+            lock (_responseHandlers)
+            {
+                _responseHandlers.Remove(requestId);
+            }
+        }
+      
 
         // Send a message to the WebSocket server and wait for a response
         public async Task<string> SendAsync(string message)
@@ -87,7 +111,7 @@ namespace DigitalProduction
 
                 // Send the message to the server
                 await _webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)),
-                                           WebSocketMessageType.Text, true, System.Threading.CancellationToken.None);
+                                           WebSocketMessageType.Text, true, _cts.Token);
 
                 // Receive response (in the same method after sending the request)
                 var buffer = new ArraySegment<byte>(new byte[12840]);
@@ -96,7 +120,7 @@ namespace DigitalProduction
                 WebSocketReceiveResult result;
                 do
                 {
-                    result = await _webSocket.ReceiveAsync(buffer, System.Threading.CancellationToken.None);
+                    result = await _webSocket.ReceiveAsync(buffer, _cts.Token);
                     var chunk = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Trim();
                     sb.Append(chunk.ToString());
                     if (result.MessageType == WebSocketMessageType.Close)
@@ -134,7 +158,7 @@ namespace DigitalProduction
 
                 // Send the message to the server
                 await _webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)),
-                                           WebSocketMessageType.Text, true, System.Threading.CancellationToken.None);
+                                           WebSocketMessageType.Text, true, _cts.Token);
 
                 // Receive response (in the same method after sending the request)
                 var buffer = new ArraySegment<byte>(new byte[12840]);
@@ -143,7 +167,7 @@ namespace DigitalProduction
                 WebSocketReceiveResult result;
                 do
                 {
-                    result = await _webSocket.ReceiveAsync(buffer, System.Threading.CancellationToken.None);
+                    result = await _webSocket.ReceiveAsync(buffer, _cts.Token);
                     var chunk = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Trim();
                     sb.Append(chunk.ToString());
                     if (result.MessageType == WebSocketMessageType.Close)

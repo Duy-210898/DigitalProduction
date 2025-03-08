@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
@@ -40,11 +41,12 @@ namespace DigitalProduction
             lbl_operatorName.Visible = false;
             // Subscribe to the CellValueChanged event
             dgvSize.CellContentClick += dgvSize_CellContentClick;
+            loadDeviceDistribution();
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-            _webSocketClient = WebSocketClient.Instance;
+            _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }
 
@@ -59,6 +61,22 @@ namespace DigitalProduction
             cbxSO.Properties.Items.AddRange(soList);
 
             cbxSO.EditValueChanged += CbxSO_EditValueChanged;
+            cbxSO.Leave += CbxSO_Leave; // Gán sự kiện Leave
+        }
+
+        private void CbxSO_Leave(object sender, EventArgs e)
+        {
+            ReloadSOList();
+        }
+
+        private void ReloadSOList()
+        {
+            soList = DbHelper.GetSOList(); // Lấy lại danh sách mới
+
+            cbxSO.Properties.Items.Clear(); // Xóa danh sách cũ
+            cbxSO.Properties.Items.AddRange(soList); // Cập nhật danh sách mới
+
+            Console.WriteLine("SO List reloaded on leave."); // Debug log
         }
 
         private void CbxSO_EditValueChanged(object sender, EventArgs e)
@@ -445,11 +463,6 @@ namespace DigitalProduction
             }
         }
 
-        private void WebSocket_OnResponseReceived(string data)
-        {
-            Console.WriteLine("Response from server: " + data);
-        }
-
         private void WebSocket_OnMessage(object data)
         {
             try
@@ -469,7 +482,13 @@ namespace DigitalProduction
                                 HandleGetScheduleResponse(scheduleResponse);
                                 break;
                             case "getOperatorDistribution":
-                                loadOperator(scheduleResponse.Employee[0]);
+                                if (scheduleResponse.Employee != null)
+                                {
+                                    loadOperator(scheduleResponse.Employee[0]);
+                                }
+                                else {
+                                    ShowMessage.ShowInfo(LocalizationManager.GetString("InputOperatorID"), LocalizationManager.GetString("Infomation"));
+                                }
                                 break;
                             case "saveDistributionData":
                                 Console.WriteLine("Suscess");
@@ -531,7 +550,7 @@ namespace DigitalProduction
 
             if (!string.IsNullOrEmpty(so))
             {
-                SendGetScheduleRequestAsync(so);
+                SendGetOpertaionAndScheduleRequestAsync(so, String.Empty, "getSchedule");
             }
         }
 
@@ -543,16 +562,11 @@ namespace DigitalProduction
                 string IpAddress = await dbHelper.GetIPAddressByDeviceIDAsync(int.Parse(deviceID));
                 if (!string.IsNullOrEmpty(deviceID) || !string.IsNullOrEmpty(IpAddress))
                 {
-                    SendGetOperatorRequestAsync(IpAddress);
+                    SendGetOpertaionAndScheduleRequestAsync(String.Empty, IpAddress, "getOperatorDistribution");
                 }
             }
         }
 
-        private async void SendGetOperatorRequestAsync(string IpAddress)
-        {
-            var request = JsonConvert.SerializeObject(new {app = Global.App, action = "getOperatorDistribution", IpAddress });
-            await _webSocketClient.SendAsync(request);
-        }
         private void loadOperator(Employee employee)
         {
             if (employee != null)
@@ -569,17 +583,12 @@ namespace DigitalProduction
 
         }
 
-        private async void SendGetScheduleRequestAsync(string so)
+        private async void SendGetOpertaionAndScheduleRequestAsync(string so, string IpAddress, string key)
         {
-            var soInfo = new { app = Global.App, action = "getSchedule", so };
+            var soInfo = new { app = Global.App, action = key, so, IpAddress};
             string jsonRequest = JsonConvert.SerializeObject(soInfo);
             await _webSocketClient.SendAsync(jsonRequest);
         }
-        private void ucDistribution_Load(object sender, EventArgs e)
-        {
-                loadDeviceDistribution();
-        }
-
         private void loadDeviceDistribution()
         {
             List<Device> machines = dbHelper.getlistMachines();
@@ -689,7 +698,12 @@ namespace DigitalProduction
             { lblPO, "PO" },
             { lblModel, "Model" },
             { lblArt, "ART" },
-            { btnSend, "Send" }
+            { btnSend, "Send" },
+            { lblInventoryQty, "InventoryQty" },
+            {lblPeicesPerPair, "PeicesPerPair" },
+            {lblCuttingDie, "CuttingDieQty" },
+            {lblMaterialLayer, "MaterialLayer" },
+            {lblTotalPeicesPerPair, "TotalPeicesPerPair" },
         };
 
             foreach (var control in controls)
@@ -945,6 +959,9 @@ namespace DigitalProduction
             return sizeData != null ? sizeData.Size : string.Empty;
         }
 
+        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
+        {
 
+        }
     }
 }

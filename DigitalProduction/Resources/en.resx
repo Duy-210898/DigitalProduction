@@ -381,4 +381,25 @@
   <data name="OperatorName" xml:space="preserve">
     <value>Operator Name</value>
   </data>
+  <data name="CuttingDieQty" xml:space="preserve">
+    <value>Cutting Die Quantity</value>
+  </data>
+  <data name="Infomation" xml:space="preserve">
+    <value>Infomation</value>
+  </data>
+  <data name="InputOperatorID" xml:space="preserve">
+    <value>Please input the Operator ID!!!</value>
+  </data>
+  <data name="InventoryQty" xml:space="preserve">
+    <value>Inventory Quantity</value>
+  </data>
+  <data name="MaterialLayer" xml:space="preserve">
+    <value>Material Layer</value>
+  </data>
+  <data name="PeicesPerPair" xml:space="preserve">
+    <value>Peices Per Pair</value>
+  </data>
+  <data name="TotalPeicesPerPair" xml:space="preserve">
+    <value>Total Peices Per Pair</value>
+  </data>
 </root>
