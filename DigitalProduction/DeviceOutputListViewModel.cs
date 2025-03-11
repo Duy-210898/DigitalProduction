@@ -243,51 +243,47 @@ namespace DigitalProduction.ViewModels
 
             // Group the output data.
             var groupedData = realTimeData.OutputData
-              .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName })
-              .SelectMany(g =>
-              {
-                  bool machineNameUniform = g.All(x => x.MachineName == g.Key.MachineName);
-                  bool soUniform = g.All(x => x.SO == g.Key.SO);
-                  bool operatorUniform = g.All(x => x.OperatorName == g.Key.OperatorName);
-                  int totalActualCut = (int)g.Sum(x => x.ActualCut);
-                  int totalActualPieces = (int)g.Sum(x => x.ActualPieces);
-                  int totalActualSizeQty = (int)g.Sum(x => x.ActualSizeQty);
+                .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName })
+                .SelectMany(g =>
+                {
+                    bool machineNameUniform = g.All(x => x.MachineName == g.Key.MachineName);
+                    bool soUniform = g.All(x => x.SO == g.Key.SO);
+                    bool operatorUniform = g.All(x => x.OperatorName == g.Key.OperatorName);
+                    int totalActualCut = (int)g.Sum(x => x.ActualCut);
+                    int totalActualPieces = (int)g.Sum(x => x.ActualPieces);
+                    int totalActualSizeQty = (int)g.Sum(x => x.ActualSizeQty);
 
-                  // Create the header row using the group key.
-                  var header = new DeviceOutput
-                  {
-                      MachineName = g.Key.MachineName,
-                      SO = g.Key.SO,
-                      OperatorName = g.Key.OperatorName,
-                      IsGroupHeader = true,
-                      ActualCut = totalActualCut,
-                      ActualPieces = totalActualPieces,
-                      ActualSizeQty = totalActualSizeQty
-                  };
+                    // Determine if any item in the group is leather
+                    bool isLeatherGroup = g.Any(x => x.IsLeather);
 
-                  // For each item in the group, update the MaterialType and clear common values if uniform.
-                  var items = g.Select(item =>
-                  {
-                      item.MaterialType = item.IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
-                      if (machineNameUniform)
-                      {
-                          item.MachineName = string.Empty;
-                      }
-                      if (soUniform)
-                      {
-                          item.SO = string.Empty;
-                      }
-                      if (operatorUniform)
-                      {
-                          item.OperatorName = string.Empty;
-                      }
-                      return item;
-                  });
+                    // Create the header row using the group key.
+                    var header = new DeviceOutput
+                    {
+                        MachineName = g.Key.MachineName,
+                        SO = g.Key.SO,
+                        OperatorName = g.Key.OperatorName,
+                        IsGroupHeader = true,
+                        ActualCut = totalActualCut,
+                        ActualPieces = totalActualPieces,
+                        ActualSizeQty = totalActualSizeQty,
+                        IsLeather = isLeatherGroup, // Ensure header reflects leather status
+                        MaterialType = isLeatherGroup ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial")
+                    };
 
-                  // Return header followed by items.
-                  return new[] { header }.Concat(items);
-              })
-              .ToList();
+                    // For each item in the group, update the MaterialType and clear common values if uniform.
+                    var items = g.Select(item =>
+                    {
+                        item.MaterialType = item.IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
+                        if (machineNameUniform) item.MachineName = string.Empty;
+                        if (soUniform) item.SO = string.Empty;
+                        if (operatorUniform) item.OperatorName = string.Empty;
+                        return item;
+                    });
+
+                    // Return header followed by items.
+                    return new[] { header }.Concat(items);
+                })
+                .ToList();
 
             Console.WriteLine($"Updating DeviceOutputs with {groupedData.Count} items.");
             try
@@ -299,6 +295,7 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"InvalidOperationException in UpdateBindingDeviceOutputs: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
 
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
@@ -322,33 +319,66 @@ namespace DigitalProduction.ViewModels
             {
                 Console.WriteLine($"Performing UI update with {newData.Count} items.");
 
-                int minCount = Math.Min(BindingDeviceOutputs.Count, newData.Count);
-                int i = 0;
+                var existingGroups = BindingDeviceOutputs
+                    .Where(d => d.IsGroupHeader)
+                    .ToDictionary(d => new { d.MachineName, d.SO, d.OperatorName });
 
-                // Update existing items
-                for (; i < minCount; i++)
+                int index = 0;
+
+                foreach (var newItem in newData)
                 {
-                    var existingItem = BindingDeviceOutputs[i];
-                    var newItem = newData[i];
+                    if (newItem.IsGroupHeader)
+                    {
+                        // If group header exists, update values
+                        var key = new { newItem.MachineName, newItem.SO, newItem.OperatorName };
+                        if (existingGroups.TryGetValue(key, out var existingHeader))
+                        {
+                            // Update group header values
+                            existingHeader.ActualCut = newItem.ActualCut;
+                            existingHeader.ActualPieces = newItem.ActualPieces;
+                            existingHeader.ActualSizeQty = newItem.ActualSizeQty;
+                        }
+                        else
+                        {
+                            // Add new group header if not found
+                            BindingDeviceOutputs.Insert(index, newItem);
+                        }
+                    }
+                    else
+                    {
+                        // Ensure correct row updates for individual items
+                        if (index < BindingDeviceOutputs.Count)
+                        {
+                            var existingItem = BindingDeviceOutputs[index];
+                            if (existingItem.IsGroupHeader == false)
+                            {
+                                UpdateProperties(existingItem, newItem,
+                                    nameof(existingItem.MachineName),
+                                    nameof(existingItem.SO),
+                                    nameof(existingItem.OperatorName),
+                                    nameof(existingItem.ActualCut),
+                                    nameof(existingItem.ActualPieces),
+                                    nameof(existingItem.Size),
+                                    nameof(existingItem.SizeQty),
+                                    nameof(existingItem.InventoryQty),
+                                    nameof(existingItem.ActualSizeQty),
+                                    nameof(existingItem.TotalPiecesPerPair));
+                            }
+                            else
+                            {
+                                BindingDeviceOutputs.Insert(index, newItem);
+                            }
+                        }
+                        else
+                        {
+                            BindingDeviceOutputs.Add(newItem);
+                        }
+                    }
 
-                    UpdateProperties(existingItem, newItem,
-                        nameof(existingItem.MachineName),
-                        nameof(existingItem.ActualCut),
-                        nameof(existingItem.ActualPieces),
-                        nameof(existingItem.Size),
-                        nameof(existingItem.SizeQty),
-                        nameof(existingItem.InventoryQty),
-                        nameof(existingItem.ActualSizeQty),
-                        nameof(existingItem.TotalPiecesPerPair));
+                    index++;
                 }
 
-                // Add new items
-                for (; i < newData.Count; i++)
-                {
-                    BindingDeviceOutputs.Add(newData[i]);
-                }
-
-                // Remove extra items
+                // Remove extra items if the new data is smaller
                 while (BindingDeviceOutputs.Count > newData.Count)
                 {
                     BindingDeviceOutputs.RemoveAt(BindingDeviceOutputs.Count - 1);
@@ -361,6 +391,7 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"Error updating UI: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
 
 
 

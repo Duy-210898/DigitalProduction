@@ -36,7 +36,7 @@ namespace DigitalProduction
             frmRegister.Visible = false;
             this.Controls.Add(frmRegister);
             frmRegister.ExitClicked += RegisterControl_ExitClicked;
-            frmRegister.UserCreated += RegisterForm_UserCreated;
+           // frmRegister.UserCreated += RegisterForm_UserCreated;
         }
 
         private void InitializeDataGridView()

@@ -20,7 +20,7 @@ namespace DigitalProduction
             Task.Run(() => ConnectWithRetry());
 
             // Run the main application form
-            Application.Run(new frmMain());
+            Application.Run(new frmLogin());
         }
 
         static async Task ConnectWithRetry()

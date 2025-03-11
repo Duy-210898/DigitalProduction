@@ -32,14 +32,14 @@ namespace DigitalProduction
             if (result)
             {
                 ShowMessage.ShowInfo($"Registration successful with {employeeName}!", "Success");
-                ExitClicked.Invoke(this, EventArgs.Empty);
+               // ExitClicked.Invoke(this, EventArgs.Empty);
                 DataTable dtDepartment = DbHelper.getDepartments();
                 DataTable dtPosition = DbHelper.getPositions();
 
                 string departmentName = Extentions.getNameFromDataTable(dtDepartment, departmentID, "departmentID", "departmentName");
                 string positionName = Extentions.getNameFromDataTable(dtPosition, positionID, "positionID", "positionName");
 
-                UserCreated.Invoke(this, new Employee(employeeName, employeeID, positionName, departmentName, true));
+               // UserCreated.Invoke(this, new Employee(employeeName, employeeID, positionName, departmentName, true));
             }
             else
             {

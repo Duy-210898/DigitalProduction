@@ -11,10 +11,10 @@
     <AssemblyName>DigitalProduction</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
     <PublishUrl>\\10.30.0.116\Sharedata\Digital\</PublishUrl>
     <Install>true</Install>
-    <InstallFrom>Unc</InstallFrom>
+    <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
@@ -22,9 +22,10 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>4</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -136,6 +137,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -150,6 +152,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionManager.cs" />
+    <Compile Include="Models\CuttingReportModel.cs" />
+    <Compile Include="ucCuttingReport.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucCuttingReport.Designer.cs">
+      <DependentUpon>ucCuttingReport.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeviceOutputListViewModel.cs" />
     <Compile Include="Extensions\Extentions.cs" />
     <Compile Include="FilterService.cs" />
@@ -259,6 +268,9 @@
       <DependentUpon>ucUserManagement.cs</DependentUpon>
     </Compile>
     <Compile Include="WebSocketClient.cs" />
+    <EmbeddedResource Include="ucCuttingReport.resx">
+      <DependentUpon>ucCuttingReport.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmLogin.resx">
       <DependentUpon>frmLogin.cs</DependentUpon>
     </EmbeddedResource>

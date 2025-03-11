@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblInputSO = new System.Windows.Forms.Label();
             this.lblProductionDate = new System.Windows.Forms.Label();
             this.lblCreatedDate = new System.Windows.Forms.Label();
             this.lblFactory = new System.Windows.Forms.Label();
@@ -51,7 +51,7 @@
             this.lbl_operatorName = new System.Windows.Forms.Label();
             this.lbl_Name = new System.Windows.Forms.Label();
             this.cbxDevice = new System.Windows.Forms.ComboBox();
-            this.lblSelect = new System.Windows.Forms.Label();
+            this.lblSelectMachine = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.cbxPart = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
@@ -96,17 +96,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgvSize)).BeginInit();
             this.SuspendLayout();
             // 
-            // label1
+            // lblInputSO
             // 
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(40, 3);
-            this.label1.Margin = new System.Windows.Forms.Padding(40, 3, 3, 3);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(189, 33);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Input SO:";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.BottomRight;
+            this.lblInputSO.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblInputSO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblInputSO.Location = new System.Drawing.Point(40, 3);
+            this.lblInputSO.Margin = new System.Windows.Forms.Padding(40, 3, 3, 3);
+            this.lblInputSO.Name = "lblInputSO";
+            this.lblInputSO.Size = new System.Drawing.Size(189, 33);
+            this.lblInputSO.TabIndex = 2;
+            this.lblInputSO.Text = "Input SO:";
+            this.lblInputSO.TextAlign = System.Drawing.ContentAlignment.BottomRight;
             // 
             // lblProductionDate
             // 
@@ -230,7 +230,7 @@
             this.tableLayoutPanel2.Controls.Add(this.lblMasterWorkOrder, 2, 3);
             this.tableLayoutPanel2.Controls.Add(this.panel4, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.lblWorkCenter, 0, 1);
-            this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.lblInputSO, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.lblFactory, 3, 2);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(20, 3);
@@ -308,7 +308,7 @@
             this.tableLayoutPanel3.Controls.Add(this.lblPartValue, 0, 1);
             this.tableLayoutPanel3.Controls.Add(this.panel2, 1, 2);
             this.tableLayoutPanel3.Controls.Add(this.cbxDevice, 1, 1);
-            this.tableLayoutPanel3.Controls.Add(this.lblSelect, 1, 0);
+            this.tableLayoutPanel3.Controls.Add(this.lblSelectMachine, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.panel1, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.panel5, 0, 2);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -330,7 +330,7 @@
             this.lblPartValue.Name = "lblPartValue";
             this.lblPartValue.Size = new System.Drawing.Size(470, 28);
             this.lblPartValue.TabIndex = 9;
-            this.lblPartValue.Text = "Select Part";
+            this.lblPartValue.Text = "...";
             this.lblPartValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panel2
@@ -389,15 +389,15 @@
             this.cbxDevice.TabIndex = 5;
             this.cbxDevice.SelectedValueChanged += new System.EventHandler(this.cbxDevice_SelectedValueChanged);
             // 
-            // lblSelect
+            // lblSelectMachine
             // 
-            this.lblSelect.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblSelect.Location = new System.Drawing.Point(479, 0);
-            this.lblSelect.Name = "lblSelect";
-            this.lblSelect.Size = new System.Drawing.Size(449, 28);
-            this.lblSelect.TabIndex = 0;
-            this.lblSelect.Text = "Select Machine";
-            this.lblSelect.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblSelectMachine.Location = new System.Drawing.Point(479, 0);
+            this.lblSelectMachine.Name = "lblSelectMachine";
+            this.lblSelectMachine.Size = new System.Drawing.Size(449, 28);
+            this.lblSelectMachine.TabIndex = 0;
+            this.lblSelectMachine.Text = "Select Machine";
+            this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panel1
             // 
@@ -679,7 +679,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblInputSO;
         private System.Windows.Forms.Label lblProductionDate;
         private System.Windows.Forms.Label lblCreatedDate;
         private System.Windows.Forms.Label lblFactory;
@@ -707,7 +707,7 @@
         private System.Windows.Forms.NumericUpDown numMaterialLayer;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ComboBox cbxDevice;
-        private System.Windows.Forms.Label lblSelect;
+        private System.Windows.Forms.Label lblSelectMachine;
         private System.Windows.Forms.DataGridView dataGrid_overviewDistribution;
         private System.Windows.Forms.Label lblMaterialLayer;
         private System.Windows.Forms.Label lblPeicesPerPair;

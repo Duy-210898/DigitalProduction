@@ -126,7 +126,9 @@ namespace DigitalProduction
                     }
                     con.Close();
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine("Lỗi: " + ex.Message);
             }
             return false;
@@ -372,7 +374,7 @@ namespace DigitalProduction
         }
         public static List<string> GetSOList()
         {
-            List<string> soList = new List<string>(); 
+            List<string> soList = new List<string>();
 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
@@ -599,14 +601,14 @@ namespace DigitalProduction
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string query = "SELECT ProductId FROM Product WHERE LTRIM(RTRIM(ART)) = LTRIM(RTRIM(@ART))"; 
+                string query = "SELECT ProductId FROM Product WHERE LTRIM(RTRIM(ART)) = LTRIM(RTRIM(@ART))";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@ART", art.Trim());
                     conn.Open();
                     object result = cmd.ExecuteScalar();
-                    return (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : -1; 
+                    return (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : -1;
                 }
             }
         }
@@ -674,7 +676,7 @@ namespace DigitalProduction
                         int rowsAffected = command.ExecuteNonQuery();
 
                         // Check if the record was deleted successfully
-                       return rowsAffected > 0;
+                        return rowsAffected > 0;
                     }
                 }
             }
@@ -728,29 +730,100 @@ namespace DigitalProduction
             }
         }
 
-        public static DataTable reportOrderbyOperator()
+        public static DataTable reportOrderbyOperator(int year, int month)
         {
             DataTable dt = new DataTable();
-            SqlConnection con = new SqlConnection(connectionString);
+            string query = @"
+                    SELECT 
+                        o.EmployeeID, 
+                        o.OperatorName, 
+                        COUNT(DISTINCT ps.OrderID) AS OrderCount 
+                    FROM DistributionData d 
+                    JOIN PartSizeOrder ps ON ps.PartSizeOrderId = d.PartSizeOrderId 
+                    JOIN Operator o ON d.OperatorID = o.OperatorID 
+                    WHERE d.Status = 'Complete'
+                      AND YEAR(d.CreatedAt) = @Year
+                      AND MONTH(d.CreatedAt) = @Month
+                    GROUP BY o.EmployeeID, o.OperatorName 
+                    ORDER BY OrderCount DESC;";
+
             try
             {
-                string query = "SELECT o.EmployeeID, o.OperatorName, COUNT(DISTINCT ps.OrderID) AS OrderCount FROM DistributionData d JOIN PartSizeOrder ps ON ps.PartSizeOrderId = d.PartSizeOrderId JOIN Operator o ON d.OperatorID = o.OperatorID WHERE d.Status = 'Complete' GROUP BY o.EmployeeID, o.OperatorName ORDER BY OrderCount DESC;";
-                SqlCommand cmd = new SqlCommand(query, con);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(dt);
+                using (SqlConnection con = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Year", year);
+                    cmd.Parameters.AddWithValue("@Month", month);
 
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(dt);
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex.Message);
             }
-            finally
-            {
-                con.Close();
-            }
+
             return dt;
         }
 
+        public static List<CuttingReportModel> getProductionSummary(int year, int month)
+        {
+            List<CuttingReportModel> summaryList = new List<CuttingReportModel>();
+
+            string query = @"
+                SELECT 
+                    dl.MachineName,
+                    p.SO,
+                    ac.OrderID,
+                    o.OperatorName,
+                    SUM(DISTINCT ac.ActualCut) AS TotalActualCut,
+                    SUM(DISTINCT ac.ActualPieces) AS TotalPieces,
+                    SUM(DISTINCT ac.ActualSizeQty) AS TotalSizeQty
+                FROM 
+                    DeviceOutput ac
+                LEFT JOIN PartSizeOrder pso ON pso.OrderId = ac.OrderID AND pso.SizeId = ac.SizeID
+                JOIN ProductOrder p ON p.OrderID = pso.OrderId
+                JOIN DistributionData dt ON dt.PartSizeOrderId = pso.PartSizeOrderId
+                JOIN DeviceList dl ON dl.DeviceID = dt.DeviceID
+                JOIN Operator o ON dt.OperatorID = o.OperatorID
+                WHERE 
+                    YEAR(ac.CreatedAt) = @Year AND 
+                    MONTH(p.CreatedAt) = @Month
+                GROUP BY 
+                    dl.MachineName,
+                    p.SO,
+                    ac.OrderID, 
+                    o.OperatorName;";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Year", year);
+                    cmd.Parameters.AddWithValue("@Month", month);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            summaryList.Add(new CuttingReportModel
+                            {
+                                MachineName = reader["MachineName"].ToString(),
+                                SO = reader["SO"].ToString(),
+                                OrderID = Convert.ToInt32(reader["OrderID"]),
+                                OperatorName = reader["OperatorName"].ToString(),
+                                TotalActualCut = Convert.ToInt32(reader["TotalActualCut"]),
+                                TotalPieces = Convert.ToInt32(reader["TotalPieces"]),
+                                TotalSizeQty = Convert.ToInt32(reader["TotalSizeQty"])
+                            });
+                        }
+                    }
+                }
+            }
+            return summaryList;
+        }
     }
 }
 

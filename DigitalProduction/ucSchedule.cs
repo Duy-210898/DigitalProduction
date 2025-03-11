@@ -88,9 +88,19 @@ namespace DigitalProduction
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
+            if (_webSocketClient != null)
+            {
+                // Unsubscribe previous event handler if already set
+                _webSocketClient.OnResponseReceived -= WebSocket_OnMessage;
+            }
+
             _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
-            _ = GetDataAndLoadToGridAsync();
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
+
+            if (productionSchedules.Count == 0) // Only fetch data if not already populated
+            {
+                _ = GetDataAndLoadToGridAsync();
+            }
         }
 
         public async Task GetDataAndLoadToGridAsync()

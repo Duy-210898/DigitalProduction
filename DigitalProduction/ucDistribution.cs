@@ -76,6 +76,9 @@ namespace DigitalProduction
             cbxSO.Properties.Items.Clear(); // Xóa danh sách cũ
             cbxSO.Properties.Items.AddRange(soList); // Cập nhật danh sách mới
 
+            dataGrid_overviewDistribution.DataSource = null;
+            sizeIDs.Clear();
+            partIDs.Clear();
             Console.WriteLine("SO List reloaded on leave."); // Debug log
         }
 
@@ -482,12 +485,13 @@ namespace DigitalProduction
                                 HandleGetScheduleResponse(scheduleResponse);
                                 break;
                             case "getOperatorDistribution":
-                                if (scheduleResponse.Employee != null)
+                                if (scheduleResponse.Status == "success" && scheduleResponse.Employee != null)
                                 {
                                     loadOperator(scheduleResponse.Employee[0]);
                                 }
                                 else {
-                                    ShowMessage.ShowInfo(LocalizationManager.GetString("InputOperatorID"), LocalizationManager.GetString("Infomation"));
+                                    lbl_operatorName.ResetText();
+                                    ShowMessage.ShowError(scheduleResponse.Message, LocalizationManager.GetString("Error"));
                                 }
                                 break;
                             case "saveDistributionData":
@@ -704,6 +708,8 @@ namespace DigitalProduction
             {lblCuttingDie, "CuttingDieQty" },
             {lblMaterialLayer, "MaterialLayer" },
             {lblTotalPeicesPerPair, "TotalPeicesPerPair" },
+            {lblSelectMachine, "SelectMachine" },
+            {lbl_Name, "NameOperator" },
         };
 
             foreach (var control in controls)
@@ -713,8 +719,9 @@ namespace DigitalProduction
 
             cbxDevice.Text = LocalizationManager.GetString("SelectDevice");
             cbxPart.Properties.NullText = LocalizationManager.GetString("SelectPart");
-            rdLeather.Text = LocalizationManager.GetString("Leather");
-            rdRawMaterial.Text = LocalizationManager.GetString("RawMaterial");
+            rdLeather.Text = LocalizationManager.GetString("leatherMaterial");
+            rdRawMaterial.Text = LocalizationManager.GetString("rawMaterial");
+            lblInputSO.Text = LocalizationManager.GetString("InputSO");
         }
 
         private async void SendDistributionDataToServer()

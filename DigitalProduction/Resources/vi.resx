@@ -432,4 +432,46 @@
   <data name="TotalPeicesPerPair" xml:space="preserve">
     <value>Tổng số đôi</value>
   </data>
+  <data name="CuttingReport" xml:space="preserve">
+    <value>Báo cáo đơn chặt</value>
+  </data>
+  <data name="NameOperator" xml:space="preserve">
+    <value>Người vận hành</value>
+  </data>
+  <data name="OperatorPerformance" xml:space="preserve">
+    <value>Hiệu suất của người vận hành</value>
+  </data>
+  <data name="OrderID" xml:space="preserve">
+    <value>Mã đơn hàng</value>
+  </data>
+  <data name="SelectMachine" xml:space="preserve">
+    <value>Chọn thiết bị</value>
+  </data>
+  <data name="InputSO" xml:space="preserve">
+    <value>Nhập SO:</value>
+  </data>
+  <data name="TotalActualCut" xml:space="preserve">
+    <value>Số lần chặt thực tế</value>
+  </data>
+  <data name="TotalPieces" xml:space="preserve">
+    <value>Số miếng thực tế</value>
+  </data>
+  <data name="TotalSizeQty" xml:space="preserve">
+    <value>Số lượng thực tế</value>
+  </data>
+  <data name="LoginFailedMessage" xml:space="preserve">
+    <value>Tài khoản hoặc mật khẩu không chính xác!!!</value>
+  </data>
+  <data name="LoginFailedTitle" xml:space="preserve">
+    <value>Đăng nhập thất bại</value>
+  </data>
+  <data name="DepartmentName" xml:space="preserve">
+    <value>Bộ phận</value>
+  </data>
+  <data name="PositionName" xml:space="preserve">
+    <value>Vị trí</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Ghi nhớ đăng nhập?</value>
+  </data>
 </root>

@@ -1,6 +1,6 @@
 ﻿namespace DigitalProduction
 {
-    partial class ucReportOrder
+    partial class ucCuttingReport
     {
         /// <summary> 
         /// Required designer variable.
@@ -30,17 +30,16 @@
         {
             this.SuspendLayout();
             // 
-            // ucReportOder
+            // CuttingReport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Name = "ucReportOder";
-            this.Size = new System.Drawing.Size(576, 398);
+            this.Name = "CuttingReport";
+            this.Size = new System.Drawing.Size(499, 424);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
     }
 }

@@ -45,8 +45,8 @@ namespace DigitalProduction
             if (checkRegisteruser)
             {
                 ShowMessage.ShowInfo($"Registration successful with {username}!", "Success");
-                ExitClicked.Invoke(this, EventArgs.Empty);
-                UserCreated.Invoke(this, new Employee(employeeID, username, null, employeeName, positionID, departmentID, DateTime.Now, null, true));
+                //ExitClicked.Invoke(this, EventArgs.Empty);
+                //UserCreated.Invoke(this, new Employee(employeeID, username, null, employeeName, positionID, departmentID, DateTime.Now, null, true));
             }
             else
             {

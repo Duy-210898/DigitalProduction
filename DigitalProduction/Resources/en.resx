@@ -402,4 +402,46 @@
   <data name="TotalPeicesPerPair" xml:space="preserve">
     <value>Total Peices Per Pair</value>
   </data>
+  <data name="CuttingReport" xml:space="preserve">
+    <value>Cutting Report</value>
+  </data>
+  <data name="OperatorPerformance" xml:space="preserve">
+    <value>Operator Performance</value>
+  </data>
+  <data name="NameOperator" xml:space="preserve">
+    <value>Operator Name</value>
+  </data>
+  <data name="SelectMachine" xml:space="preserve">
+    <value>Select Machine</value>
+  </data>
+  <data name="OrderID" xml:space="preserve">
+    <value>OrderID</value>
+  </data>
+  <data name="InputSO" xml:space="preserve">
+    <value>Input SO:</value>
+  </data>
+  <data name="TotalActualCut" xml:space="preserve">
+    <value>Total Actual Cuttting</value>
+  </data>
+  <data name="TotalPieces" xml:space="preserve">
+    <value>Total Actual Pieces</value>
+  </data>
+  <data name="TotalSizeQty" xml:space="preserve">
+    <value>Total Actual Size Quatity</value>
+  </data>
+  <data name="LoginFailedMessage" xml:space="preserve">
+    <value>Account or Password is not correct!!!</value>
+  </data>
+  <data name="LoginFailedTitle" xml:space="preserve">
+    <value>Login Failed</value>
+  </data>
+  <data name="DepartmentName" xml:space="preserve">
+    <value>Department Name</value>
+  </data>
+  <data name="PositionName" xml:space="preserve">
+    <value>Position Name</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Remember Me?</value>
+  </data>
 </root>

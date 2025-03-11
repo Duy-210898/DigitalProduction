@@ -39,7 +39,7 @@ namespace DigitalProduction
             frmRegister.Visible = false;
             this.Controls.Add(frmRegister);
             frmRegister.ExitClicked += RegisterControl_ExitClicked;
-            frmRegister.DeviceCreated += RegisterForm_DeviceCreated;
+           // frmRegister.DeviceCreated += RegisterForm_DeviceCreated;
         }
 
         private void InitializeDataGridView()
@@ -380,11 +380,17 @@ namespace DigitalProduction
 
 
 
-        public void SetWebSocketClient()
+        public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-            _webSocketClient = WebSocketClient.Instance;
-            _ = GetDataAndLoadToGridAsync();
+            if (_webSocketClient != null)
+            {
+                _webSocketClient.OnResponseReceived -= WebSocket_OnMessage; // Unsubscribe previous instance
+            }
+
+            _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
+
+            _ = GetDataAndLoadToGridAsync();
         }
 
         public async Task GetDataAndLoadToGridAsync()
@@ -396,35 +402,68 @@ namespace DigitalProduction
 
         private void WebSocket_OnMessage(string jsonData)
         {
+            if (IsDisposed || !IsHandleCreated) return; // Ensure control is still valid
+
             try
             {
                 var item = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonData);
                 string action = item.ContainsKey("action") ? item["action"].ToString() : null;
 
-                if (action.Equals("getDevices"))
+                if (action?.Equals("getDevices") == true)
                 {
                     ResponseMessage<List<Device>> response = ResponseMessage<List<Device>>.FromJson(jsonData);
+
                     if (response?.Devices != null)
                     {
-                        PopulateDeviceDataTable(response.Devices);
-                        CreatelabelTotalControls(response.Devices);
-                        ApplyLocalization();
+                        // Ensure UI updates happen on the main thread
+                        SafeInvoke(() =>
+                        {
+                            PopulateDeviceDataTable(response.Devices);
+                            CreatelabelTotalControls(response.Devices);
+                            ApplyLocalization();
+                        });
                     }
                     else
                     {
-                        MessageBox.Show("No Data Found", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        SafeInvoke(() => ShowMessageBox("No Data Found", "Info", MessageBoxIcon.Information));
                     }
                 }
             }
             catch (JsonSerializationException jsonEx)
             {
-                MessageBox.Show($"JSON Deserialization Error: {jsonEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                SafeInvoke(() => ShowMessageBox($"JSON Deserialization Error: {jsonEx.Message}", "Error", MessageBoxIcon.Error));
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                SafeInvoke(() => ShowMessageBox($"An error occurred: {ex.Message}", "Error", MessageBoxIcon.Error));
             }
         }
+
+        // Helper method to safely invoke UI updates
+        private void SafeInvoke(Action action)
+        {
+            if (IsDisposed || !IsHandleCreated) return;
+
+            if (InvokeRequired)
+            {
+                try
+                {
+                    Invoke(action);
+                }
+                catch (ObjectDisposedException) { } // Handle case where form is already disposed
+            }
+            else
+            {
+                action();
+            }
+        }
+
+        // Helper method to show message boxes safely
+        private void ShowMessageBox(string message, string title, MessageBoxIcon icon)
+        {
+            SafeInvoke(() => MessageBox.Show(message, title, MessageBoxButtons.OK, icon));
+        }
+      
 
         private void PopulateDeviceDataTable(List<Device> devices)
         {

@@ -45,6 +45,7 @@
             this.btnOperator = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement6 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnReportOder = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnCuttingReportQty = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.fluentDesignFormControl1 = new DevExpress.XtraBars.FluentDesignSystem.FluentDesignFormControl();
             this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
             this.statusItem = new DevExpress.XtraBars.BarStaticItem();
@@ -177,8 +178,14 @@
             // accordionControlElement6
             // 
             this.accordionControlElement6.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.btnReportOder});
+            this.btnReportOder,
+            this.btnCuttingReportQty});
             this.accordionControlElement6.Expanded = true;
+            this.accordionControlElement6.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.accordionControlElement6.Name = "accordionControlElement6";
             this.accordionControlElement6.Text = "Report";
             // 
@@ -186,8 +193,15 @@
             // 
             this.btnReportOder.Name = "btnReportOder";
             this.btnReportOder.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.btnReportOder.Text = "Performance Order";
+            this.btnReportOder.Text = "Operator Performance";
             this.btnReportOder.Click += new System.EventHandler(this.btnReportOder_Click);
+            // 
+            // btnCuttingReportQty
+            // 
+            this.btnCuttingReportQty.Name = "btnCuttingReportQty";
+            this.btnCuttingReportQty.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnCuttingReportQty.Text = "Cutting Report";
+            this.btnCuttingReportQty.Click += new System.EventHandler(this.btnCuttingReport_Click);
             // 
             // fluentDesignFormControl1
             // 
@@ -270,6 +284,7 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnOperator;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnProgressDistribution;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnReportOder;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnCuttingReportQty;
     }
 }
 

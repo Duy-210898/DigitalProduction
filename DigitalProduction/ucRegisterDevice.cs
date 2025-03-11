@@ -114,7 +114,7 @@ namespace DigitalProduction
             if (statusAddDevice)
             {
                 ShowMessage.ShowInfo($"Added new device: {ipAddress}!", "Success");
-                DeviceCreated?.Invoke(this, new Device(ipAddress, machineName, departmentID, plantId));
+           //     DeviceCreated?.Invoke(this, new Device(ipAddress, machineName, departmentID, plantId));
             }
             else
             {

@@ -20,6 +20,13 @@ namespace DigitalProduction
             toggleLanguage.Properties.OffText = LocalizationManager.GetString("  English");
             picEye.Click += PicEye_Click;
             UpdateUI();
+            // Load saved credentials if "Remember Me" is checked
+            if (Properties.Settings.Default.RememberMe)
+            {
+                txt_username.Text = Properties.Settings.Default.SavedUsername;
+                txt_pwd.Text = Properties.Settings.Default.SavedPassword; // Consider hashing/encrypting this in production
+                chkRememberMe.Checked = true;
+            }
         }
 
         // Flag to track password visibility
@@ -67,6 +74,22 @@ namespace DigitalProduction
             bool checkLogin = DbHelper.loginUser(txt_username.Text, SecurityHelper.HashPassword(txt_pwd.Text));
             if (checkLogin)
             {
+                // Save credentials if "Remember Me" is checked
+                if (chkRememberMe.Checked)
+                {
+                    Properties.Settings.Default.RememberMe = true;
+                    Properties.Settings.Default.SavedUsername = txt_username.Text;
+                    Properties.Settings.Default.SavedPassword = txt_pwd.Text; // Consider hashing/encrypting
+                }
+                else
+                {
+                    Properties.Settings.Default.RememberMe = false;
+                    Properties.Settings.Default.SavedUsername = "";
+                    Properties.Settings.Default.SavedPassword = "";
+                }
+
+                Properties.Settings.Default.Save(); // Save changes
+
                 frmMain formMain = new frmMain();
                 formMain.Show();
                 this.Hide();
@@ -122,6 +145,7 @@ namespace DigitalProduction
             btn_Login.Text = LocalizationManager.GetString("Login");
             lblExit.Text = LocalizationManager.GetString("Exit");
             lblChangePassword.Text = LocalizationManager.GetString("ChangePassword");
+            chkRememberMe.Text = LocalizationManager.GetString("RememberMe");
         }
     }
 }

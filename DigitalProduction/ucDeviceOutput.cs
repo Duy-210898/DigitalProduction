@@ -19,6 +19,7 @@ namespace DigitalProduction
             _viewModel = new DeviceOutputListViewModel();
             Console.WriteLine("Uc is loading");
             initFilterDate();
+            LoadFilters();
             // Bind UI elements to ViewModel properties
             dataGrid_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
             dataGrid_DeviceOutput.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -31,7 +32,8 @@ namespace DigitalProduction
             dateTimePickerStart.DataBindings.Add("Value", _viewModel, "FilterStartDate", true, DataSourceUpdateMode.OnPropertyChanged);
             dateTimePickerEnd.DataBindings.Add("Value", _viewModel, "FilterEndDate", true, DataSourceUpdateMode.OnPropertyChanged);
             txtFilter.DataBindings.Add("Text", _viewModel, "FilterKeyword", false, DataSourceUpdateMode.OnPropertyChanged);
-            LoadFilters();
+            dateTimePickerStart.ValueChanged += DateTimePickerStart_ValueChanged;
+            dateTimePickerEnd.ValueChanged += DateTimePickerEnd_ValueChanged;
         }
 
         private void LoadFilters()
@@ -42,6 +44,26 @@ namespace DigitalProduction
             dateTimePickerEnd.Value = FilterService.Instance.FilterEndDate ?? DateTime.Today;
             // Similar for other controls
         }
+        // **Ensure start date is never greater than end date**
+        private void DateTimePickerStart_ValueChanged(object sender, EventArgs e)
+        {
+            if (dateTimePickerStart.Value > dateTimePickerEnd.Value)
+            {
+                dateTimePickerStart.Value = dateTimePickerEnd.Value;
+                MessageBox.Show("Start date cannot be after End date!", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        // **Ensure end date is never less than start date**
+        private void DateTimePickerEnd_ValueChanged(object sender, EventArgs e)
+        {
+            if (dateTimePickerEnd.Value < dateTimePickerStart.Value)
+            {
+                dateTimePickerEnd.Value = dateTimePickerStart.Value;
+                MessageBox.Show("End date cannot be before Start date!", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         private void initFilterDate()
         {
             // Create a FlowLayoutPanel to hold the filter controls and dock it at the top.

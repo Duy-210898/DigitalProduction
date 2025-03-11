@@ -278,7 +278,12 @@ namespace DigitalProduction
 
         private async void btnReportOder_Click(object sender, EventArgs e)
         {
-            await ShowUserControlAsync<ucReportOder>();
+            await ShowUserControlAsync<ucReportOrder>();
+        }
+
+        private async void btnCuttingReport_Click(object sender, EventArgs e)
+        {
+            await ShowUserControlAsync<ucCuttingReport>();
         }
 
 
@@ -326,6 +331,8 @@ namespace DigitalProduction
             btnDeviceOutput.Text = LocalizationManager.GetString("DeviceOutput");
             btnOperator.Text = LocalizationManager.GetString("OperatorManager");
             btnProgressDistribution.Text = LocalizationManager.GetString("Progress");
+            btnReportOder.Text = LocalizationManager.GetString("OperatorPerformance");
+            btnCuttingReportQty.Text = LocalizationManager.GetString("CuttingReport");
         }
 
 

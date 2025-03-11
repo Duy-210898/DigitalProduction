@@ -573,19 +573,55 @@ async function handleGetOperators(ws, request) {
 // Xử lý yêu cầu lấy thông tin operator from HMI
 async function handleGetOperatorDistribution(ws, request) {
   const { IpAddress } = request;
+
   if (!IpAddress) {
-    return ws.send(JSON.stringify({ action: 'getOperatorDistribution', status: 'error', message: 'Missing IpAddress parameter' }));
+    return ws.send(JSON.stringify({ 
+      action: 'getOperatorDistribution', 
+      status: 'error', 
+      message: 'Missing IpAddress parameter' 
+    }));
   }
+
   try {
     const operatorID = modbusClients[IpAddress]?.operatorID;
-    console.log(`getOperatorID on ipAddress:${IpAddress} ${operatorID}`);
+
+    if (!operatorID) {
+      console.warn(`No operatorID found for IpAddress: ${IpAddress}`);
+      return ws.send(JSON.stringify({ 
+        action: 'getOperatorDistribution', 
+        status: 'error', 
+        message: 'No operatorID assigned to this IpAddress' 
+      }));
+    }
+
+    console.log(`Fetching distribution data for operatorID: ${operatorID}`);
     const usersResponse = await getOperatorDistribution(operatorID);
-    ws.send(JSON.stringify({ action: 'getOperatorDistribution', employee: usersResponse }));
+
+    if (!usersResponse || usersResponse.length === 0) {
+      console.warn(`No operator distribution data found for operatorID: ${operatorID}`);
+      return ws.send(JSON.stringify({ 
+        action: 'getOperatorDistribution', 
+        status: 'error', 
+        message: 'No distribution data found for this operator' 
+      }));
+    }
+
+    ws.send(JSON.stringify({ 
+      action: 'getOperatorDistribution', 
+      status: 'success',
+      employee: usersResponse 
+    }));
+
   } catch (error) {
-    console.error('Error getting getOperatorDistribution:', error);
-    ws.send(JSON.stringify({ error: 'Failed to retrieve operatorID' }));
+    console.error('Error retrieving operator distribution:', error);
+    ws.send(JSON.stringify({ 
+      action: 'getOperatorDistribution', 
+      status: 'error', 
+      message: 'Failed to retrieve operator distribution data' 
+    }));
   }
 }
+
 // Hàm gửi thông báo cho tất cả client
 function notifyClients(devicesResponse) {
   clients.forEach(client => {

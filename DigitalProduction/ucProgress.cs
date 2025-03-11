@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
@@ -20,6 +21,7 @@ namespace DigitalProduction
         private Button btnFilter;
         private Label lblStartDate;
         private Label lblEndDate;
+        private TextBox txtSearch;
 
 
         public ucProgress()
@@ -38,56 +40,64 @@ namespace DigitalProduction
                 Padding = new Padding(10)
             };
 
-            // Initialize filter controls at the top
-            Panel filterPanel = new Panel
+            // Use FlowLayoutPanel for better alignment
+            FlowLayoutPanel filterPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Top,
-                Height = 50
+                Height = 50,
+                AutoSize = true,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false
             };
 
             lblStartDate = new Label
             {
                 Text = "Start Date:",
-                Location = new Point(10, 15),
-                AutoSize = true
+                AutoSize = true,
+                Margin = new Padding(5, 15, 5, 5)
             };
 
             dtpStartDate = new DateTimePicker
             {
                 Format = DateTimePickerFormat.Short,
-                Location = new Point(lblStartDate.Right + 5, 10),
-                Width = 100
+                Width = 100,
+                Margin = new Padding(5, 10, 10, 5)
             };
 
             lblEndDate = new Label
             {
                 Text = "End Date:",
-                Location = new Point(dtpStartDate.Right + 10, 15),
-                AutoSize = true
+                AutoSize = true,
+                Margin = new Padding(5, 15, 5, 5)
             };
 
             dtpEndDate = new DateTimePicker
             {
                 Format = DateTimePickerFormat.Short,
-                Location = new Point(lblEndDate.Right + 5, 10),
-                Width = 100
+                Width = 100,
+                Margin = new Padding(5, 10, 10, 5)
             };
 
-            btnFilter = new Button
+            txtSearch = new TextBox
             {
-                Text = "Filter",
-                Location = new Point(dtpEndDate.Right + 10, 10),
-                Width = 80
+                Text = LocalizationManager.GetString("Search"),
+                Width = 200,
+                Margin = new Padding(10, 10, 10, 5)
             };
 
-            btnFilter.Click += BtnFilter_Click;
+            txtSearch.Enter += TxtSearch_Enter;
+            txtSearch.Leave += TxtSearch_Leave;
+            txtSearch.TextChanged += TxtSearch_TextChanged;
 
-            // Add filter controls to the filter panel
+            dtpStartDate.ValueChanged += DateTimePicker_ValueChanged;
+            dtpEndDate.ValueChanged += DateTimePicker_ValueChanged;
+
+            // Add controls to filter panel
             filterPanel.Controls.Add(lblStartDate);
             filterPanel.Controls.Add(dtpStartDate);
             filterPanel.Controls.Add(lblEndDate);
             filterPanel.Controls.Add(dtpEndDate);
-            filterPanel.Controls.Add(btnFilter);
+            filterPanel.Controls.Add(txtSearch);
 
             // Initialize DataGridView
             dgvProgressManagement = new DataGridView
@@ -95,7 +105,7 @@ namespace DigitalProduction
                 Dock = DockStyle.Fill,
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 AllowUserToAddRows = false,
-                EnableHeadersVisualStyles = false, // Must be set before applying styles
+                EnableHeadersVisualStyles = false,
                 BackgroundColor = Color.White
             };
 
@@ -131,6 +141,7 @@ namespace DigitalProduction
             dgvProgressManagement.CellFormatting += DgvProgressManagement_CellFormatting;
 
             // Initialize Pagination Panel
+            // Pagination Panel
             paginationPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
@@ -166,33 +177,122 @@ namespace DigitalProduction
             paginationPanel.Controls.Add(lblPageInfo);
             paginationPanel.Controls.Add(refreshButton);
 
-            // Add everything to the container panel in proper order
-            containerPanel.Controls.Add(dgvProgressManagement); // Fill remaining space
-            containerPanel.Controls.Add(filterPanel); // Stays at the top
-            containerPanel.Controls.Add(paginationPanel); // Stays at the bottom
+            // Add components to container panel
+            containerPanel.Controls.Add(dgvProgressManagement);
+            containerPanel.Controls.Add(filterPanel);
+            containerPanel.Controls.Add(paginationPanel);
 
-            // Add the container panel to the UserControl
+            // Add container panel to the UserControl
             this.Controls.Add(containerPanel);
         }
 
-        private void BtnFilter_Click(object sender, EventArgs e)
+        // Event handlers for placeholder functionality
+        private void TxtSearch_Enter(object sender, EventArgs e)
         {
-            DateTime startDate = dtpStartDate.Value.Date;
-            DateTime endDate = dtpEndDate.Value.Date.AddDays(1).AddTicks(-1); // Include the whole end day
-
-            var filteredData = new BindingList<Distribution>(new List<Distribution>());
-
-            foreach (var distribution in distributionDataList)
+            if (txtSearch.Text == LocalizationManager.GetString("Search"))
             {
-                if (distribution.CreatedAt >= startDate && distribution.CreatedAt <= endDate)
-                {
-                    filteredData.Add(distribution);
-                }
+                txtSearch.Text = "";
+                txtSearch.ForeColor = Color.Black;
+            }
+        }
+
+        private void TxtSearch_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtSearch.Text))
+            {
+                txtSearch.Text = LocalizationManager.GetString("Search");
+                txtSearch.ForeColor = Color.Gray;
+            }
+        }
+
+        private void DateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
+            // Get current values from DateTimePickers
+            DateTime newStartDate = dtpStartDate.Value.Date;
+            DateTime newEndDate = dtpEndDate.Value.Date;
+
+            // Check for invalid date range
+            if (newStartDate > newEndDate)
+            {
+                AdjustDates(sender, ref newStartDate, ref newEndDate);
+                ShowInvalidDateMessage();
+            }
+            else
+            {
+                // If dates are valid, filter data
+                Console.WriteLine("Text search: " + txtSearch.Text);
+                FilterData(newStartDate, newEndDate, txtSearch.Text == LocalizationManager.GetString("Search") ? "" : txtSearch.Text.Trim());
+            }
+        }
+
+        private void AdjustDates(object sender, ref DateTime newStartDate, ref DateTime newEndDate)
+        {
+            // Temporarily unsubscribe from the ValueChanged event to prevent recursion
+            if (sender == dtpStartDate)
+            {
+                dtpStartDate.ValueChanged -= DateTimePicker_ValueChanged;
+                newStartDate = newEndDate; // Roll back to endDate
+                dtpStartDate.Value = newStartDate;
+                dtpStartDate.ValueChanged += DateTimePicker_ValueChanged;
+            }
+            else if (sender == dtpEndDate)
+            {
+                dtpEndDate.ValueChanged -= DateTimePicker_ValueChanged;
+                newEndDate = newStartDate; // Roll back to startDate
+                dtpEndDate.Value = newEndDate;
+                dtpEndDate.ValueChanged += DateTimePicker_ValueChanged;
+            }
+        }
+
+        private void ShowInvalidDateMessage()
+        {
+            MessageBox.Show("Invalid date range! Start date cannot be after End date.",
+                            "Date Selection Error",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+        private void TxtSearch_TextChanged(object sender, EventArgs e)
+        {
+            // This will ensure search text has no placeholders and is trimmed.
+            string searchInput = txtSearch.Text.Trim();
+            if (!string.IsNullOrEmpty(searchInput) && searchInput != "Search...")
+            {
+                FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, searchInput);
+            }
+            else
+            {
+                FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, "");
+            }
+        }
+
+        private void FilterData(DateTime startDate, DateTime endDate, string searchText)
+        {
+            endDate = endDate.AddDays(1).AddTicks(-1); // Include the full end day
+            searchText = searchText.ToLower();
+
+            var filteredData = new BindingList<Distribution>(
+                distributionDataList.Where(distribution =>
+                    distribution.CreatedAt >= startDate &&
+                    distribution.CreatedAt <= endDate &&
+                    (string.IsNullOrEmpty(searchText) ||
+                    distribution.IpAddress.ToLower().Contains(searchText) ||
+                    distribution.MachineName.ToLower().Contains(searchText) ||
+                    distribution.OperatorName.ToLower().Contains(searchText) ||
+                    distribution.EmployeeName.ToLower().Contains(searchText))
+                ).ToList()
+            );
+
+            UpdateDataGridView(filteredData);
+        }
+
+        private void UpdateDataGridView(BindingList<Distribution> filteredData)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => UpdateDataGridView(filteredData)));
+                return;
             }
 
             dgvProgressManagement.DataSource = filteredData;
-
-            // Update the total record label
             lblPageInfo.Text = $"Total Records: {filteredData.Count}";
         }
 
@@ -215,6 +315,11 @@ namespace DigitalProduction
                         {
                             e.CellStyle.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
                             e.CellStyle.ForeColor = Color.Green; // Apply green text only to "Status" column
+                        }
+                        else if (status == "Pending") {
+                            // Reset style if not "Complete"
+                            e.CellStyle.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
+                            e.CellStyle.ForeColor = Color.Orange;
                         }
                         else
                         {
@@ -260,29 +365,45 @@ namespace DigitalProduction
         }
 
 
+
+        private bool _isDataLoaded = false; // Track if data has been loaded
+
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
+            if (_webSocketClient != null)
+            {
+                _webSocketClient.OnResponseReceived -= WebSocket_OnMessage; // Unsubscribe previous instance
+            }
+
             _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
-            _ = GetDataAndLoadToGridAsync();
+            _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
+
+            if (!_isDataLoaded)
+            {
+                _ = GetDataAndLoadToGridAsync();
+            }
         }
+
 
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new {app = Global.App, action = "getDistributions" };
+            var request = new { app = Global.App, action = "getDistributions" };
             string jsonRequest = JsonConvert.SerializeObject(request);
 
             try
             {
                 string response = await _webSocketClient.SendAsync(jsonRequest);
-                if (response == null)
+                if (string.IsNullOrEmpty(response))
                 {
-                    Console.WriteLine("Received null response from WebSocket.");
+                    Console.WriteLine("Received null or empty response from WebSocket.");
                     MessageBox.Show("No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 Console.WriteLine($"Response received: {response}");
-                ProcessResponse(response);
+                WebSocket_OnMessage(response); // Process WebSocket response
+
+                _isDataLoaded = true; // Mark data as loaded (but we will reset it in Refresh)
             }
             catch (TimeoutException)
             {
@@ -292,11 +413,13 @@ namespace DigitalProduction
         }
 
 
-        private void ProcessResponse(string jsonData)
+        private void WebSocket_OnMessage(string jsonData)
         {
+            if (this.IsDisposed || !this.IsHandleCreated) return; // Prevent accessing disposed controls
+
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action(() => ProcessResponse(jsonData)));
+                this.Invoke(new Action(() => WebSocket_OnMessage(jsonData)));
                 return;
             }
 
@@ -307,14 +430,15 @@ namespace DigitalProduction
                 if (response?.DistributionData != null && response.DistributionData.Count > 0)
                 {
                     distributionDataList.Clear();
-                    foreach (var distribution in response.DistributionData)
-                    {
-                        distributionDataList.Add(distribution);
-                    }
+                    distributionDataList = new BindingList<Distribution>(response.DistributionData);
 
                     this.Invoke((MethodInvoker)delegate
                     {
+                        if (this.IsDisposed || !this.IsHandleCreated) return;
+
                         CreateLabelTotalControls();
+
+                        dgvProgressManagement.DataSource = null;  // ✅ Prevent binding issues
                         dgvProgressManagement.DataSource = distributionDataList;
                         ConfigureDataGridView();
                     });
@@ -329,8 +453,6 @@ namespace DigitalProduction
                 MessageBox.Show($"Error receiving WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
 
         private void CreateLabelTotalControls()
         {
@@ -367,9 +489,10 @@ namespace DigitalProduction
             {
                 refreshButton.Enabled = false;
                 refreshButton.Text = "Loading...";
-                
+
                 try
                 {
+                    _isDataLoaded = false; // ✅ Allow data reload
                     await GetDataAndLoadToGridAsync();
                 }
                 catch (Exception ex)
@@ -382,6 +505,7 @@ namespace DigitalProduction
                     refreshButton.Text = "Refresh";
                 }
             };
+
 
 
             paginationPanel.Controls.Add(lblPageInfo);

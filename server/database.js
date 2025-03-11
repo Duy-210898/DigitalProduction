@@ -298,7 +298,7 @@ async function setOrderIsComplete(OrderID) {
 }
 
 
-async function setDistributionIsComplete(DistributionID, Note) {
+async function setDistributionIsComplete(DistributionID, Status ,Note) {
   // Kiểm tra DistributionID hợp lệ
   if (!DistributionID || DistributionID <= 0) {
     throw new Error('DistributionID không hợp lệ. Nó phải là số nguyên dương.');
@@ -307,7 +307,7 @@ async function setDistributionIsComplete(DistributionID, Note) {
   try {
     const updateQuery = `
       UPDATE DistributionData
-      SET Status = 'Complete',
+      SET Status = @Status,
       [Note] = @Note
       WHERE DistributionID = @DistributionID;
     `;
@@ -315,6 +315,7 @@ async function setDistributionIsComplete(DistributionID, Note) {
     const request = (await initDatabase()).request();
     request.input('DistributionID', sql.Int, DistributionID);
     request.input('Note', sql.Int, parseInt(Note, 10));
+    request.input('Status', sql.VarChar, Status);
 
     // Thực hiện truy vấn cập nhật
     const result = await request.query(updateQuery);
@@ -1024,7 +1025,7 @@ async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather, r
   }
 }
 
-async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather) {
+async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather, note) {
   try {
       const query = `
            SELECT  
@@ -1042,6 +1043,7 @@ async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather) {
               AND ps.OrderId = @OrderId
               AND dd.IsLeather = @IsLeather
               AND dd.Note IS NOT NULL
+              AND TRY_CAST(dd.Note AS FLOAT) <> 0
             GROUP BY 
                 dd.DistributionID;
       `;
@@ -1050,6 +1052,7 @@ async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather) {
       request.input('IpAddress', sql.VarChar, ipAddress);
       request.input('OrderId', sql.Int, orderId);
       request.input('IsLeather', sql.Int, isLeather);
+      request.input('Note', sql.Int, note);
 
       const result = await request.query(query);
 
@@ -1465,7 +1468,7 @@ async function getOperatorDistribution(employeeID) {
     const pool = await sql.connect(dbConfig);
     const result = await pool.request()
       .input('EmployeeID', sql.Int, employeeID)
-      .query('SELECT * FROM [CuttingProjectData].[dbo].[Operator] WHERE Operator.EmployeeID = @EmployeeID');
+      .query('SELECT * FROM [CuttingProjectData].[dbo].[Operator] WHERE Operator.EmployeeID = @EmployeeID AND IsActive = 1');
     return result.recordset;
   } catch (error) {
     console.error('Error fetching user list from database:', error.message);

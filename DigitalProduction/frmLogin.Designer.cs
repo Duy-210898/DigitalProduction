@@ -35,6 +35,7 @@
             this.btn_Login = new DevExpress.XtraEditors.SimpleButton();
             this.lblChangePassword = new System.Windows.Forms.Label();
             this.toggleLanguage = new DevExpress.XtraEditors.ToggleSwitch();
+            this.chkRememberMe = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picEye)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_pwd.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_username.Properties)).BeginInit();
@@ -105,7 +106,7 @@
             this.btn_Login.Appearance.ForeColor = System.Drawing.Color.White;
             this.btn_Login.Appearance.Options.UseFont = true;
             this.btn_Login.Appearance.Options.UseForeColor = true;
-            this.btn_Login.Location = new System.Drawing.Point(551, 403);
+            this.btn_Login.Location = new System.Drawing.Point(551, 413);
             this.btn_Login.LookAndFeel.SkinMaskColor = System.Drawing.Color.Black;
             this.btn_Login.LookAndFeel.SkinMaskColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
             this.btn_Login.LookAndFeel.SkinName = "WXI";
@@ -122,7 +123,7 @@
             this.lblChangePassword.BackColor = System.Drawing.Color.Transparent;
             this.lblChangePassword.Font = new System.Drawing.Font("Times New Roman", 11.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblChangePassword.ForeColor = System.Drawing.Color.Gray;
-            this.lblChangePassword.Location = new System.Drawing.Point(607, 448);
+            this.lblChangePassword.Location = new System.Drawing.Point(607, 458);
             this.lblChangePassword.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblChangePassword.Name = "lblChangePassword";
             this.lblChangePassword.Size = new System.Drawing.Size(93, 17);
@@ -141,6 +142,16 @@
             this.toggleLanguage.TabIndex = 33;
             this.toggleLanguage.Toggled += new System.EventHandler(this.toggleLanguage_Toggled);
             // 
+            // chkRememberMe
+            // 
+            this.chkRememberMe.AutoSize = true;
+            this.chkRememberMe.Location = new System.Drawing.Point(610, 390);
+            this.chkRememberMe.Name = "chkRememberMe";
+            this.chkRememberMe.Size = new System.Drawing.Size(94, 17);
+            this.chkRememberMe.TabIndex = 34;
+            this.chkRememberMe.Text = "Remember me";
+            this.chkRememberMe.UseVisualStyleBackColor = true;
+            // 
             // frmLogin
             // 
             this.AcceptButton = this.btn_Login;
@@ -151,6 +162,7 @@
             this.BackgroundImageLayoutStore = System.Windows.Forms.ImageLayout.Stretch;
             this.BackgroundImageStore = global::DigitalProduction.Properties.Resources.bg;
             this.ClientSize = new System.Drawing.Size(905, 628);
+            this.Controls.Add(this.chkRememberMe);
             this.Controls.Add(this.toggleLanguage);
             this.Controls.Add(this.btn_Login);
             this.Controls.Add(this.lblChangePassword);
@@ -180,5 +192,6 @@
         private DevExpress.XtraEditors.SimpleButton btn_Login;
         private System.Windows.Forms.Label lblChangePassword;
         private DevExpress.XtraEditors.ToggleSwitch toggleLanguage;
+        private System.Windows.Forms.CheckBox chkRememberMe;
     }
 }
