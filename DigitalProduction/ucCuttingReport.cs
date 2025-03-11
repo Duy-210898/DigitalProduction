@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraGrid; // Include DevExpress GridControl
+using DevExpress.XtraGrid.Views.Grid; // Include DevExpress GridView
 using DigitalProduction.Models;
 
 namespace DigitalProduction
@@ -10,7 +12,8 @@ namespace DigitalProduction
     public partial class ucCuttingReport : UserControl
     {
         private DateTimePicker dateTimePicker;
-        private DataGridView dataGridView_CuttingReport;
+        private GridControl gridControl_CuttingReport; // Use GridControl
+        private GridView gridView_CuttingReport;      // Use GridView
         private TableLayoutPanel mainLayout;
         private Button btnLoadData;
 
@@ -64,37 +67,32 @@ namespace DigitalProduction
 
             topPanel.Controls.Add(dateTimePicker);
             topPanel.Controls.Add(btnLoadData);
-            topPanel.Controls.SetChildIndex(dateTimePicker, 0);
-            topPanel.Controls.SetChildIndex(btnLoadData, 1);
-
             mainLayout.Controls.Add(topPanel, 0, 0);
 
-            // **Setup DataGridView**
-            SetupDataGridView();
-            mainLayout.Controls.Add(dataGridView_CuttingReport, 0, 1);
+            // **Setup GridControl**
+            SetupGridControl();
+            mainLayout.Controls.Add(gridControl_CuttingReport, 0, 1);
         }
 
-        private void SetupDataGridView()
+        private void SetupGridControl()
         {
-            dataGridView_CuttingReport = new DataGridView
+            // Initialize GridControl and GridView
+            gridControl_CuttingReport = new GridControl
             {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                ReadOnly = true,
-                BackgroundColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle
+                Dock = DockStyle.Fill // Ensure it fills remaining space
             };
 
-            var headerStyle = new DataGridViewCellStyle
+            gridView_CuttingReport = new GridView(gridControl_CuttingReport)
             {
-                Font = new Font("Arial", 12, FontStyle.Bold),
-                Alignment = DataGridViewContentAlignment.MiddleCenter,
-                ForeColor = Color.Black
+                OptionsView = { ShowGroupPanel = false } // Disable grouping panel
             };
-            dataGridView_CuttingReport.ColumnHeadersDefaultCellStyle = headerStyle;
-            dataGridView_CuttingReport.ColumnHeadersHeight = 40;
-            dataGridView_CuttingReport.EnableHeadersVisualStyles = false;
+
+            // Assign the GridView to the GridControl
+            gridControl_CuttingReport.MainView = gridView_CuttingReport;
+
+            // Set some basic appearance options if desired
+            gridView_CuttingReport.OptionsBehavior.Editable = false; // Make it read-only
+            gridView_CuttingReport.Appearance.Row.Font = new Font("Arial", 12, FontStyle.Regular);
         }
 
         private async Task LoadCuttingReportAsync()
@@ -106,9 +104,9 @@ namespace DigitalProduction
 
                 List<CuttingReportModel> data = await Task.Run(() => DbHelper.getProductionSummary(selectedYear, selectedMonth));
 
-                if (dataGridView_CuttingReport.InvokeRequired)
+                if (gridControl_CuttingReport.InvokeRequired)
                 {
-                    dataGridView_CuttingReport.Invoke(new Action(() => UpdateGrid(data)));
+                    gridControl_CuttingReport.Invoke(new Action(() => UpdateGrid(data)));
                 }
                 else
                 {
@@ -122,54 +120,58 @@ namespace DigitalProduction
         }
 
         /// <summary>
-        /// Updates the DataGridView with data or clears it when no data is found.
+        /// Updates the GridControl with data or clears it when no data is found.
         /// </summary>
         private void UpdateGrid(List<CuttingReportModel> data)
         {
             if (data.Count > 0)
             {
-                dataGridView_CuttingReport.DataSource = data;
+                gridControl_CuttingReport.DataSource = data;
                 TranslateHeaders();
             }
             else
             {
-                dataGridView_CuttingReport.DataSource = null; // Clear grid
-                dataGridView_CuttingReport.Rows.Clear();
-                dataGridView_CuttingReport.Refresh();
-
-                // Optionally, add a placeholder row (if columns exist)
-                if (dataGridView_CuttingReport.Columns.Count > 0)
-                {
-                    dataGridView_CuttingReport.Rows.Add(new object[] { "No data available" });
-                }
+                gridControl_CuttingReport.DataSource = null; // Clear grid
+                // Optionally, hide. Show message on the grid if needed.
+                gridView_CuttingReport.ClearColumnsFilter();
+                gridView_CuttingReport.Columns.Clear();
             }
         }
 
-
         private void TranslateHeaders()
         {
-            if (dataGridView_CuttingReport.Columns.Count > 0)
+            if (gridControl_CuttingReport.DataSource is List<CuttingReportModel>)
             {
-                if (dataGridView_CuttingReport.Columns.Contains("MachineName"))
-                    dataGridView_CuttingReport.Columns["MachineName"].HeaderText = LocalizationManager.GetString("MachineName");
+                if (gridView_CuttingReport.Columns.Count > 0)
+                {
+                    if (gridView_CuttingReport.Columns["CreatedAt"] != null)
+                    {
+                        gridView_CuttingReport.Columns["CreatedAt"].Caption = LocalizationManager.GetString("Timestamp");
+                        gridView_CuttingReport.Columns["CreatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+                        gridView_CuttingReport.Columns["CreatedAt"].DisplayFormat.FormatString = "MM/dd/yyyy";
+                    }
 
-                if (dataGridView_CuttingReport.Columns.Contains("SO"))
-                    dataGridView_CuttingReport.Columns["SO"].HeaderText = LocalizationManager.GetString("SO");
+                    if (gridView_CuttingReport.Columns["MachineName"] != null)
+                        gridView_CuttingReport.Columns["MachineName"].Caption = LocalizationManager.GetString("MachineName");
 
-                if (dataGridView_CuttingReport.Columns.Contains("OrderID"))
-                    dataGridView_CuttingReport.Columns["OrderID"].HeaderText = LocalizationManager.GetString("OrderID");
+                    if (gridView_CuttingReport.Columns["SO"] != null)
+                        gridView_CuttingReport.Columns["SO"].Caption = LocalizationManager.GetString("SO");
 
-                if (dataGridView_CuttingReport.Columns.Contains("OperatorName"))
-                    dataGridView_CuttingReport.Columns["OperatorName"].HeaderText = LocalizationManager.GetString("OperatorName");
+                    if (gridView_CuttingReport.Columns["OrderID"] != null)
+                        gridView_CuttingReport.Columns["OrderID"].Caption = LocalizationManager.GetString("OrderID");
 
-                if (dataGridView_CuttingReport.Columns.Contains("TotalActualCut"))
-                    dataGridView_CuttingReport.Columns["TotalActualCut"].HeaderText = LocalizationManager.GetString("TotalActualCut");
+                    if (gridView_CuttingReport.Columns["OperatorName"] != null)
+                        gridView_CuttingReport.Columns["OperatorName"].Caption = LocalizationManager.GetString("OperatorName");
 
-                if (dataGridView_CuttingReport.Columns.Contains("TotalPieces"))
-                    dataGridView_CuttingReport.Columns["TotalPieces"].HeaderText = LocalizationManager.GetString("TotalPieces");
+                    if (gridView_CuttingReport.Columns["TotalActualCut"] != null)
+                        gridView_CuttingReport.Columns["TotalActualCut"].Caption = LocalizationManager.GetString("TotalActualCut");
 
-                if (dataGridView_CuttingReport.Columns.Contains("TotalSizeQty"))
-                    dataGridView_CuttingReport.Columns["TotalSizeQty"].HeaderText = LocalizationManager.GetString("TotalSizeQty");
+                    if (gridView_CuttingReport.Columns["TotalPieces"] != null)
+                        gridView_CuttingReport.Columns["TotalPieces"].Caption = LocalizationManager.GetString("TotalPieces");
+
+                    if (gridView_CuttingReport.Columns["TotalSizeQty"] != null)
+                        gridView_CuttingReport.Columns["TotalSizeQty"].Caption = LocalizationManager.GetString("TotalSizeQty");
+                }
             }
         }
     }

@@ -735,6 +735,7 @@ namespace DigitalProduction
             DataTable dt = new DataTable();
             string query = @"
                     SELECT 
+                        d.CreatedAt,
                         o.EmployeeID, 
                         o.OperatorName, 
                         COUNT(DISTINCT ps.OrderID) AS OrderCount 
@@ -744,7 +745,7 @@ namespace DigitalProduction
                     WHERE d.Status = 'Complete'
                       AND YEAR(d.CreatedAt) = @Year
                       AND MONTH(d.CreatedAt) = @Month
-                    GROUP BY o.EmployeeID, o.OperatorName 
+                    GROUP BY o.EmployeeID, o.OperatorName, d.CreatedAt
                     ORDER BY OrderCount DESC;";
 
             try
@@ -773,6 +774,7 @@ namespace DigitalProduction
 
             string query = @"
                 SELECT 
+                    ac.CreatedAt,
                     dl.MachineName,
                     p.SO,
                     ac.OrderID,
@@ -791,6 +793,7 @@ namespace DigitalProduction
                     YEAR(ac.CreatedAt) = @Year AND 
                     MONTH(p.CreatedAt) = @Month
                 GROUP BY 
+                    ac.CreatedAt,
                     dl.MachineName,
                     p.SO,
                     ac.OrderID, 
@@ -810,6 +813,7 @@ namespace DigitalProduction
                         {
                             summaryList.Add(new CuttingReportModel
                             {
+                                CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]).ToString("MM/dd/yyyy") : "N/A",
                                 MachineName = reader["MachineName"].ToString(),
                                 SO = reader["SO"].ToString(),
                                 OrderID = Convert.ToInt32(reader["OrderID"]),

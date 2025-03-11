@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraGrid.Views.Grid;
 using Newtonsoft.Json;
 
 namespace DigitalProduction
@@ -202,6 +203,7 @@ namespace DigitalProduction
             {
                 txtSearch.Text = LocalizationManager.GetString("Search");
                 txtSearch.ForeColor = Color.Gray;
+                FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, "");
             }
         }
 
@@ -441,6 +443,7 @@ namespace DigitalProduction
                         dgvProgressManagement.DataSource = null;  // ✅ Prevent binding issues
                         dgvProgressManagement.DataSource = distributionDataList;
                         ConfigureDataGridView();
+                        TranslateHeaders();
                     });
                 }
                 else
@@ -538,6 +541,14 @@ namespace DigitalProduction
         {
             // Assuming LocalizationManager returns strings based on your localization needs
             this.Text = LocalizationManager.GetString("ListOfDistributions");
+        }
+        private void TranslateHeaders()
+        {
+            foreach (DataGridViewColumn col in dgvProgressManagement.Columns)
+            {
+                // Use the appropriate property depending on how you identify headers
+                col.HeaderText = LocalizationManager.GetString(col.Name) ?? col.Name; // Assuming you're using column Name as key
+            }
         }
         public class Distribution
         {

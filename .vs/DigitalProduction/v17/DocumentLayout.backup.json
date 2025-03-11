@@ -3,28 +3,32 @@
   "WorkspaceRootPath": "D:\\reps\\DigitalProduction\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|d:\\reps\\digitalproduction\\digitalproduction\\ucdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|d:\\reps\\digitalproduction\\digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\dbhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|d:\\reps\\digitalproduction\\digitalproduction\\resources\\en.resx||{FF4D6ACA-9352-4A5F-821E-F4D6EBDCAB11}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\resources\\en.resx||{FF4D6ACA-9352-4A5F-821E-F4D6EBDCAB11}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|d:\\reps\\digitalproduction\\digitalproduction\\resources\\vi.resx||{FF4D6ACA-9352-4A5F-821E-F4D6EBDCAB11}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\resources\\vi.resx||{FF4D6ACA-9352-4A5F-821E-F4D6EBDCAB11}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|d:\\reps\\digitalproduction\\digitalproduction\\dbhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\dbhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\frmlogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\frmlogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\changepassword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\changepassword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\changepassword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\changepassword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\securityhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\securityhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -35,20 +39,40 @@
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|d:\\reps\\digitalproduction\\digitalproduction\\ucreportoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucreportoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucreportoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucreportoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\frmlogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\frmlogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\changepassword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\changepassword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\securityhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\securityhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -61,14 +85,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\filterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -107,22 +123,6 @@
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucoperatormanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\deviceoutputlistviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\deviceoutputlistviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucreportoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucreportoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\websocketclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\websocketclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -138,7 +138,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Bookmark",
@@ -162,45 +162,70 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ucDistribution.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDistribution.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucDistribution.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDistribution.cs",
-              "RelativeToolTip": "DigitalProduction\\ucDistribution.cs",
-              "ViewState": "AgIAACADAAAAAAAAAAAqwCgDAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-11T09:44:15.341Z",
+              "DocumentIndex": 3,
+              "Title": "vi.resx",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\Resources\\vi.resx",
+              "RelativeDocumentMoniker": "DigitalProduction\\Resources\\vi.resx",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\Resources\\vi.resx",
+              "RelativeToolTip": "DigitalProduction\\Resources\\vi.resx",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001005|",
+              "WhenOpened": "2025-03-11T10:44:57.672Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
+              "Title": "en.resx",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\Resources\\en.resx",
+              "RelativeDocumentMoniker": "DigitalProduction\\Resources\\en.resx",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\Resources\\en.resx",
+              "RelativeToolTip": "DigitalProduction\\Resources\\en.resx",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001005|",
+              "WhenOpened": "2025-03-11T10:42:59.107Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ucProgress.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucProgress.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
+              "RelativeToolTip": "DigitalProduction\\ucProgress.cs",
+              "ViewState": "AgIAALkAAAAAAAAAAAAAwM0AAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-11T10:39:50.375Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "dbHelper.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\dbHelper.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\dbHelper.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\dbHelper.cs",
               "RelativeToolTip": "DigitalProduction\\dbHelper.cs",
-              "ViewState": "AgIAAEoDAAAAAAAAAAAEwGADAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAACgDAAAAAAAAAAAAAC8DAABQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-11T07:10:40.556Z",
+              "WhenOpened": "2025-03-11T10:23:54.037Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ChangePassword.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ChangePassword.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ChangePassword.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ChangePassword.cs",
-              "RelativeToolTip": "DigitalProduction\\ChangePassword.cs",
-              "ViewState": "AgIAACEAAAAAAAAAAAAowAMAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 11,
+              "Title": "ucReportOder.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucReportOder.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucReportOder.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucReportOder.cs",
+              "RelativeToolTip": "DigitalProduction\\ucReportOder.cs",
+              "ViewState": "AgIAAF0AAAAAAAAAAAAqwHUAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-11T07:09:40.449Z"
+              "WhenOpened": "2025-03-11T09:56:57.652Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 14,
               "Title": "ChangePassword.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ChangePassword.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ChangePassword.cs",
@@ -211,7 +236,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 16,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\Program.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\Program.cs",
@@ -223,7 +248,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 15,
               "Title": "SecurityHelper.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\SecurityHelper.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\SecurityHelper.cs",
@@ -235,7 +260,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 21,
               "Title": "FilterService.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\FilterService.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\FilterService.cs",
@@ -247,7 +272,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 23,
               "Title": "ucRegisterDevice.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucRegisterDevice.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucRegisterDevice.cs",
@@ -258,7 +283,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 28,
               "Title": "ucOperatorManagement.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucOperatorManagement.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucOperatorManagement.cs",
@@ -270,7 +295,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 13,
               "Title": "frmLogin.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\frmLogin.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\frmLogin.cs",
@@ -282,7 +307,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 26,
               "Title": "ucRegisterOperator.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucRegisterOperator.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucRegisterOperator.cs",
@@ -294,7 +319,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 27,
               "Title": "ucRegisterOperator.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucRegisterOperator.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucRegisterOperator.cs",
@@ -305,7 +330,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 18,
               "Title": "ucUserManagement.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucUserManagement.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucUserManagement.cs",
@@ -317,7 +342,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 24,
               "Title": "ucRegisterUser.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucRegisterUser.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucRegisterUser.cs",
@@ -329,7 +354,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 25,
               "Title": "ucRegisterUser.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucRegisterUser.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucRegisterUser.cs",
@@ -340,19 +365,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "ucProgress.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucProgress.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
-              "RelativeToolTip": "DigitalProduction\\ucProgress.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAXAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-10T09:57:16.531Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 17,
               "Title": "frmMain.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\frmMain.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\frmMain.cs",
@@ -364,30 +377,32 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 9,
               "Title": "ucCuttingReport.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucCuttingReport.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs",
               "RelativeToolTip": "DigitalProduction\\ucCuttingReport.cs",
-              "ViewState": "AgIAAGMAAAAAAAAAAAA2wGgAAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAAFkAAAAAAAAAAAAwwGsAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-10T06:45:38.997Z"
+              "WhenOpened": "2025-03-10T06:45:38.997Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 10,
               "Title": "ucCuttingReport.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucCuttingReport.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucCuttingReport.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-10T06:43:40.988Z"
+              "WhenOpened": "2025-03-10T06:43:40.988Z",
+              "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 19,
               "Title": "ucDeviceManager.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceManager.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceManager.cs",
@@ -398,18 +413,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "ucSchedule.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucSchedule.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucSchedule.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-08T05:55:54.066Z"
+              "WhenOpened": "2025-03-08T05:55:54.066Z",
+              "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 22,
               "Title": "ucRegisterDevice.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucRegisterDevice.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucRegisterDevice.cs",
@@ -421,15 +437,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "ucSchedule.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucSchedule.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
               "RelativeToolTip": "DigitalProduction\\ucSchedule.cs",
-              "ViewState": "AgIAAEwAAAAAAAAAAAAYwGQAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAH8AAAAAAAAAAAAUwIsAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-08T02:56:39.986Z"
+              "WhenOpened": "2025-03-08T02:56:39.986Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -445,49 +462,40 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
-              "Title": "DeviceOutputListViewModel.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\DeviceOutputListViewModel.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\DeviceOutputListViewModel.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\DeviceOutputListViewModel.cs",
-              "RelativeToolTip": "DigitalProduction\\DeviceOutputListViewModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAI4AAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-08T00:56:57.629Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 4,
               "Title": "ucDeviceOutput.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceOutput.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs",
               "RelativeToolTip": "DigitalProduction\\ucDeviceOutput.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAUwBIAAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAkwCEAAABqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-07T08:13:03.731Z"
+              "WhenOpened": "2025-03-07T08:13:03.731Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 5,
               "Title": "ucDeviceOutput.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceOutput.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucDeviceOutput.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-07T08:13:02.624Z"
+              "WhenOpened": "2025-03-07T08:13:02.624Z",
+              "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 12,
               "Title": "ucReportOder.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucReportOder.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucReportOder.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucReportOder.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucReportOder.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-07T06:33:42.893Z"
+              "WhenOpened": "2025-03-07T06:33:42.893Z",
+              "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
@@ -503,18 +511,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 1,
               "Title": "ucProgress.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucProgress.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucProgress.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-07T06:10:07.792Z"
+              "WhenOpened": "2025-03-07T06:10:07.792Z",
+              "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 29,
               "Title": "ucOperatorManagement.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucOperatorManagement.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucOperatorManagement.cs",
@@ -525,7 +534,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 20,
               "Title": "ucUserManagement.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucUserManagement.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucUserManagement.cs",

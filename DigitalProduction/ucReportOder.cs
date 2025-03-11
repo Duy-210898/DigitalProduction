@@ -3,14 +3,17 @@ using System.Data;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Views.Grid;
 
 namespace DigitalProduction
 {
     public partial class ucReportOrder : UserControl
     {
         private DateTimePicker dateTimePicker;
-        private DataGridView dataGridView_OperatorReport;
-        private TableLayoutPanel mainLayout; // Ensures proper structure
+        private GridControl gridControl_OperatorReport; // Use GridControl
+        private GridView gridView_OperatorReport;        // Use GridView
+        private TableLayoutPanel mainLayout;
 
         public ucReportOrder()
         {
@@ -21,7 +24,7 @@ namespace DigitalProduction
 
         private void SetupUI()
         {
-            // **Main Layout Panel**
+            // Main Layout Panel
             mainLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -29,10 +32,10 @@ namespace DigitalProduction
                 RowCount = 2
             };
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50)); // Top panel fixed height
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // DataGridView fills rest
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // GridControl fills rest
             Controls.Add(mainLayout);
 
-            // **Top Panel for DateTimePicker**
+            // Top Panel for DateTimePicker
             Panel topPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -53,32 +56,31 @@ namespace DigitalProduction
             topPanel.Controls.Add(dateTimePicker);
             mainLayout.Controls.Add(topPanel, 0, 0); // Add DateTimePicker Panel at row 0
 
-            // **Setup DataGridView**
-            SetupDataGridView();
-            mainLayout.Controls.Add(dataGridView_OperatorReport, 0, 1); // Add DataGridView at row 1
+            // Setup GridControl and GridView
+            SetupGridControl();
+            mainLayout.Controls.Add(gridControl_OperatorReport, 0, 1); // Add GridControl at row 1
         }
 
-        private void SetupDataGridView()
+        private void SetupGridControl()
         {
-            dataGridView_OperatorReport = new DataGridView
+            // Initialize GridControl and GridView
+            gridControl_OperatorReport = new GridControl
             {
-                Dock = DockStyle.Fill, // Ensure it fills remaining space
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                ReadOnly = true,
-                BackgroundColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle,
+                Dock = DockStyle.Fill // Ensure it fills remaining space
             };
 
-            var headerStyle = new DataGridViewCellStyle
+            gridView_OperatorReport = new GridView(gridControl_OperatorReport)
             {
-                Font = new Font("Arial", 12, FontStyle.Bold),
-                Alignment = DataGridViewContentAlignment.MiddleCenter,
-                ForeColor = Color.Black
+                // You can also customize the GridView here if needed
+                OptionsView = { ShowGroupPanel = false }
             };
-            dataGridView_OperatorReport.ColumnHeadersDefaultCellStyle = headerStyle;
-            dataGridView_OperatorReport.ColumnHeadersHeight = 40;
-            dataGridView_OperatorReport.EnableHeadersVisualStyles = false;
+
+            // Assign the GridView to the GridControl
+            gridControl_OperatorReport.MainView = gridView_OperatorReport;
+
+            // Optionally set grid styling
+            gridView_OperatorReport.Appearance.Row.Font = new Font("Arial", 12, FontStyle.Regular);
+            gridView_OperatorReport.OptionsBehavior.Editable = false; // Make it read-only
         }
 
         private async Task LoadOperatorReportAsync()
@@ -92,13 +94,13 @@ namespace DigitalProduction
 
                 if (dt != null)
                 {
-                    if (dataGridView_OperatorReport.InvokeRequired)
+                    if (gridControl_OperatorReport.InvokeRequired)
                     {
-                        dataGridView_OperatorReport.Invoke(new Action(() => dataGridView_OperatorReport.DataSource = dt));
+                        gridControl_OperatorReport.Invoke(new Action(() => gridControl_OperatorReport.DataSource = dt));
                     }
                     else
                     {
-                        dataGridView_OperatorReport.DataSource = dt;
+                        gridControl_OperatorReport.DataSource = dt;
                     }
                     TranslateHeaders();
                 }
@@ -111,16 +113,19 @@ namespace DigitalProduction
 
         private void TranslateHeaders()
         {
-            if (dataGridView_OperatorReport.Columns.Count > 0)
+            if (gridControl_OperatorReport.DataSource is DataTable dt)
             {
-                if (dataGridView_OperatorReport.Columns.Contains("EmployeeID"))
-                    dataGridView_OperatorReport.Columns["EmployeeID"].HeaderText = LocalizationManager.GetString("OperatorCode");
+                if ((dt.Columns.Contains("CreatedAt")))
+                    gridView_OperatorReport.Columns["CreatedAt"].Caption = LocalizationManager.GetString("Timestamp");
 
-                if (dataGridView_OperatorReport.Columns.Contains("OperatorName"))
-                    dataGridView_OperatorReport.Columns["OperatorName"].HeaderText = LocalizationManager.GetString("OperatorName");
+                if (dt.Columns.Contains("EmployeeID"))
+                    gridView_OperatorReport.Columns["EmployeeID"].Caption = LocalizationManager.GetString("OperatorCode");
 
-                if (dataGridView_OperatorReport.Columns.Contains("OrderCount"))
-                    dataGridView_OperatorReport.Columns["OrderCount"].HeaderText = LocalizationManager.GetString("NumberOfOrder");
+                if (dt.Columns.Contains("OperatorName"))
+                    gridView_OperatorReport.Columns["OperatorName"].Caption = LocalizationManager.GetString("OperatorName");
+
+                if (dt.Columns.Contains("OrderCount"))
+                    gridView_OperatorReport.Columns["OrderCount"].Caption = LocalizationManager.GetString("NumberOfOrder");
             }
         }
     }

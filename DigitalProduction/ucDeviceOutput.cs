@@ -34,6 +34,7 @@ namespace DigitalProduction
             txtFilter.DataBindings.Add("Text", _viewModel, "FilterKeyword", false, DataSourceUpdateMode.OnPropertyChanged);
             dateTimePickerStart.ValueChanged += DateTimePickerStart_ValueChanged;
             dateTimePickerEnd.ValueChanged += DateTimePickerEnd_ValueChanged;
+            TranslateHeaders();
         }
 
         private void LoadFilters()
@@ -180,6 +181,14 @@ namespace DigitalProduction
             catch (Exception ex)
             {
                 ShowMessage.ShowError("Exception: " + ex.Message);
+            }
+        }
+        private void TranslateHeaders()
+        {
+            foreach (DataGridViewColumn col in dataGrid_DeviceOutput.Columns)
+            {
+                // Use the appropriate property depending on how you identify headers
+                col.HeaderText = LocalizationManager.GetString(col.Name) ?? col.Name; // Assuming you're using column Name as key
             }
         }
     }

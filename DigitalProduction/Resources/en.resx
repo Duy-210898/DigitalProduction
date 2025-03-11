@@ -147,7 +147,7 @@
   <data name="Home" xml:space="preserve">
     <value>Home</value>
   </data>
-  <data name="IPAddress" xml:space="preserve">
+  <data name="IpAddress" xml:space="preserve">
     <value>IP Address</value>
   </data>
   <data name="Language" xml:space="preserve">
@@ -443,5 +443,35 @@
   </data>
   <data name="RememberMe" xml:space="preserve">
     <value>Remember Me?</value>
+  </data>
+  <data name="IsLeather" xml:space="preserve">
+    <value>Material Type</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="PartName" xml:space="preserve">
+    <value>Part Name</value>
+  </data>
+  <data name="Timestamp" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="ActualCut" xml:space="preserve">
+    <value>Actual Cut</value>
+  </data>
+  <data name="ActualPieces" xml:space="preserve">
+    <value>Actual Pieces</value>
+  </data>
+  <data name="ActualSizeQty" xml:space="preserve">
+    <value>Actual Size Quantity</value>
+  </data>
+  <data name="Material Type" xml:space="preserve">
+    <value>Material Type</value>
+  </data>
+  <data name="PiecesPerPair" xml:space="preserve">
+    <value>Pieces Per Pair</value>
+  </data>
+  <data name="TotalPiecesPerPair" xml:space="preserve">
+    <value>Total Pieces Per Pair</value>
   </data>
 </root>

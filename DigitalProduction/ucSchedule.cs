@@ -133,6 +133,7 @@ namespace DigitalProduction
         {
             if (gridView.Columns.Count > 0)
             {
+                gridView.Columns["Factory"].Visible = false;
                 gridView.Columns["OrderID"].Visible = false;
                 gridView.Columns["LastNo"].Visible = false;
                 gridView.Columns["PartSizeUnit"].Visible = false;

@@ -234,7 +234,7 @@
   <data name="Home" xml:space="preserve">
     <value>Trang chủ</value>
   </data>
-  <data name="IPAddress" xml:space="preserve">
+  <data name="IpAddress" xml:space="preserve">
     <value>Địa chỉ IP</value>
   </data>
   <data name="Language" xml:space="preserve">
@@ -473,5 +473,35 @@
   </data>
   <data name="RememberMe" xml:space="preserve">
     <value>Ghi nhớ đăng nhập?</value>
+  </data>
+  <data name="IsLeather" xml:space="preserve">
+    <value>Loại liệu </value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Ghi chú</value>
+  </data>
+  <data name="PartName" xml:space="preserve">
+    <value>Bộ vị</value>
+  </data>
+  <data name="Timestamp" xml:space="preserve">
+    <value>Thời gian</value>
+  </data>
+  <data name="ActualCut" xml:space="preserve">
+    <value>Số lần chặt thực tế</value>
+  </data>
+  <data name="ActualPieces" xml:space="preserve">
+    <value>Số miếng thực tế</value>
+  </data>
+  <data name="ActualSizeQty" xml:space="preserve">
+    <value>Số đôi thực tế</value>
+  </data>
+  <data name="MaterialType" xml:space="preserve">
+    <value>Loại liệu</value>
+  </data>
+  <data name="PiecesPerPair" xml:space="preserve">
+    <value>Số miếng</value>
+  </data>
+  <data name="TotalPiecesPerPair" xml:space="preserve">
+    <value>Tổng số miếng</value>
   </data>
 </root>

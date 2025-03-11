@@ -425,6 +425,7 @@ namespace DigitalProduction.ViewModels
                 }
             }
         }
+
         public void Dispose()
         {
             if (_timer != null)
