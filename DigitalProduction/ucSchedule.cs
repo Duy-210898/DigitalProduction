@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -13,46 +15,39 @@ namespace DigitalProduction
     {
         private BindingList<ProductionSchedule> productionSchedules = new BindingList<ProductionSchedule>();
         private WebSocketClient _webSocketClient;
-        private DateTime? selectedMonth; // Store selected filter month
-        private Label lblTotalRecords; // Label to display total records
-        private DataGridView dataGridView_productionSchedule; // DataGridView for display
+        private DateTime? selectedMonth;
+        private Label lblTotalRecords;
+        private GridControl gridControl;
+        private GridView gridView;
 
         public ucSchedule()
         {
             InitializeComponent();
-            SetupDataGridView();
+            SetupGridControl();
             InitializeTotalLabel();
             InitializeMonthFilter();
         }
 
-        private void SetupDataGridView()
+        private void SetupGridControl()
         {
-            dataGridView_productionSchedule = new DataGridView
+            gridControl = new GridControl { Dock = DockStyle.Fill };
+            gridView = new GridView(gridControl)
             {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false
+                OptionsView = { ShowGroupPanel = false, ColumnAutoWidth = true }
             };
-            var headerStyle = new DataGridViewCellStyle
-            {
-                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
-                Alignment = DataGridViewContentAlignment.MiddleCenter,
-                BackColor = System.Drawing.Color.AntiqueWhite,
-                ForeColor = System.Drawing.Color.Black
-            };
-            dataGridView_productionSchedule.ColumnHeadersHeight = 35;
-            dataGridView_productionSchedule.EnableHeadersVisualStyles = false; // Important: Disable default styles
-            dataGridView_productionSchedule.ColumnHeadersDefaultCellStyle = headerStyle;
+            gridControl.MainView = gridView;
+            gridControl.DataSource = productionSchedules;
+            gridView.OptionsBehavior.Editable = false;
+            gridView.Appearance.HeaderPanel.Font = new System.Drawing.Font("Arial", 8, System.Drawing.FontStyle.Bold);
+            gridView.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
+            gridView.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
+            gridView.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
 
-            // Optionally configure DataGridView styles and properties here
-
-            // Add DataGridView to the user control
-            Controls.Add(dataGridView_productionSchedule);
+            Controls.Add(gridControl);
         }
 
         private void InitializeTotalLabel()
         {
-            // Create and configure the total label
             lblTotalRecords = new Label
             {
                 Dock = DockStyle.Bottom,
@@ -60,14 +55,11 @@ namespace DigitalProduction
                 Text = "Total Records: 0",
                 BackColor = System.Drawing.Color.Transparent
             };
-
-            // Add label to the control
             Controls.Add(lblTotalRecords);
         }
 
         private void InitializeMonthFilter()
         {
-            // Create and configure the DateTimePicker control
             DateTimePicker dateTimePicker = new DateTimePicker
             {
                 Format = DateTimePickerFormat.Custom,
@@ -75,14 +67,12 @@ namespace DigitalProduction
                 Dock = DockStyle.Top
             };
 
-            // Handle value change
             dateTimePicker.ValueChanged += (sender, e) =>
             {
                 selectedMonth = new DateTime(dateTimePicker.Value.Year, dateTimePicker.Value.Month, 1);
                 ApplyMonthFilter();
             };
 
-            // Add the DateTimePicker control to the form
             Controls.Add(dateTimePicker);
         }
 
@@ -90,14 +80,13 @@ namespace DigitalProduction
         {
             if (_webSocketClient != null)
             {
-                // Unsubscribe previous event handler if already set
                 _webSocketClient.OnResponseReceived -= WebSocket_OnMessage;
             }
 
             _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
 
-            if (productionSchedules.Count == 0) // Only fetch data if not already populated
+            if (productionSchedules.Count == 0)
             {
                 _ = GetDataAndLoadToGridAsync();
             }
@@ -133,41 +122,46 @@ namespace DigitalProduction
             {
                 productionSchedules.Add(schedule);
             }
+
             ApplyMonthFilter();
+
+            // Hide columns after data is bound
+            HideGridColumns();
         }
+
+        private void HideGridColumns()
+        {
+            if (gridView.Columns.Count > 0)
+            {
+                gridView.Columns["OrderID"].Visible = false;
+                gridView.Columns["LastNo"].Visible = false;
+                gridView.Columns["PartSizeUnit"].Visible = false;
+                gridView.Columns[18].Visible = false; //Part ID
+                gridView.Columns["SizeID"].Visible = false;
+                gridView.Columns["Process"].Visible = false;
+            }
+        }
+
 
         private void ApplyMonthFilter()
         {
             if (selectedMonth == null)
             {
-                dataGridView_productionSchedule.DataSource = productionSchedules.ToList();
+                gridControl.DataSource = productionSchedules.ToList();
             }
             else
             {
                 var filteredData = productionSchedules
                     .Where(schedule => schedule.CreatedAt.Year == selectedMonth.Value.Year && schedule.CreatedAt.Month == selectedMonth.Value.Month)
                     .ToList();
-
-                dataGridView_productionSchedule.DataSource = filteredData;
+                gridControl.DataSource = filteredData;
             }
-
             UpdateTotalLabel();
         }
 
         private void UpdateTotalLabel()
         {
-            // Ensure DataSource is not null and count the number of items based on its type
-            int totalCount = 0;
-
-            if (dataGridView_productionSchedule.DataSource is BindingList<ProductionSchedule> bindingList)
-            {
-                totalCount = bindingList.Count;
-            }
-            else if (dataGridView_productionSchedule.DataSource is List<ProductionSchedule> list)
-            {
-                totalCount = list.Count;
-            }
-
+            int totalCount = (gridControl.DataSource as List<ProductionSchedule>)?.Count ?? 0;
             lblTotalRecords.Text = $"Total Records: {totalCount}";
             lblTotalRecords.BackColor = System.Drawing.Color.AntiqueWhite;
             lblTotalRecords.ForeColor = System.Drawing.Color.Green;
