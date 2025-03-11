@@ -33,7 +33,7 @@
             this.txt_username = new DevExpress.XtraEditors.TextEdit();
             this.lblExit = new System.Windows.Forms.Label();
             this.btn_Login = new DevExpress.XtraEditors.SimpleButton();
-            this.lblChangePassword = new System.Windows.Forms.Label();
+            this.lblShowPassword = new System.Windows.Forms.Label();
             this.toggleLanguage = new DevExpress.XtraEditors.ToggleSwitch();
             this.chkRememberMe = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picEye)).BeginInit();
@@ -117,18 +117,20 @@
             this.btn_Login.Text = "Log in";
             this.btn_Login.Click += new System.EventHandler(this.btn_Login_Click);
             // 
-            // lblChangePassword
+            // lblShowPassword
             // 
-            this.lblChangePassword.AutoSize = true;
-            this.lblChangePassword.BackColor = System.Drawing.Color.Transparent;
-            this.lblChangePassword.Font = new System.Drawing.Font("Times New Roman", 11.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblChangePassword.ForeColor = System.Drawing.Color.Gray;
-            this.lblChangePassword.Location = new System.Drawing.Point(607, 458);
-            this.lblChangePassword.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblChangePassword.Name = "lblChangePassword";
-            this.lblChangePassword.Size = new System.Drawing.Size(93, 17);
-            this.lblChangePassword.TabIndex = 32;
-            this.lblChangePassword.Text = "Đổi mật khẩu";
+            this.lblShowPassword.AutoSize = true;
+            this.lblShowPassword.BackColor = System.Drawing.Color.Transparent;
+            this.lblShowPassword.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblShowPassword.Font = new System.Drawing.Font("Times New Roman", 11.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblShowPassword.ForeColor = System.Drawing.Color.Gray;
+            this.lblShowPassword.Location = new System.Drawing.Point(607, 458);
+            this.lblShowPassword.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblShowPassword.Name = "lblShowPassword";
+            this.lblShowPassword.Size = new System.Drawing.Size(93, 17);
+            this.lblShowPassword.TabIndex = 32;
+            this.lblShowPassword.Text = "Đổi mật khẩu";
+            this.lblShowPassword.Click += new System.EventHandler(this.lblChangePassword_Click);
             // 
             // toggleLanguage
             // 
@@ -165,7 +167,7 @@
             this.Controls.Add(this.chkRememberMe);
             this.Controls.Add(this.toggleLanguage);
             this.Controls.Add(this.btn_Login);
-            this.Controls.Add(this.lblChangePassword);
+            this.Controls.Add(this.lblShowPassword);
             this.Controls.Add(this.lblExit);
             this.Controls.Add(this.picEye);
             this.Controls.Add(this.txt_pwd);
@@ -190,7 +192,7 @@
         private DevExpress.XtraEditors.TextEdit txt_username;
         private System.Windows.Forms.Label lblExit;
         private DevExpress.XtraEditors.SimpleButton btn_Login;
-        private System.Windows.Forms.Label lblChangePassword;
+        private System.Windows.Forms.Label lblShowPassword;
         private DevExpress.XtraEditors.ToggleSwitch toggleLanguage;
         private System.Windows.Forms.CheckBox chkRememberMe;
     }

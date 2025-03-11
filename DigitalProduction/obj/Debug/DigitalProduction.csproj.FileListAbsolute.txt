@@ -173,3 +173,5 @@ D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.CodeDom.dll
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.CodeDom.xml
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucReportOrder.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucCuttingReport.resources
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ChangePassword.resources
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses

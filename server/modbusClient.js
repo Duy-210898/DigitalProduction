@@ -224,9 +224,10 @@ async function startReadingRegisters(client, ipAddress) {
     //readAndCheckBits(client, ipAddress);
     readOperatorID(client, ipAddress);
     checkAndSaveDistribution(client, ipAddress);
-    if (modbusClients[ipAddress].sizeDataInfo != null) {
-      readActualData(client, ipAddress);
-    }
+    if (modbusClients[ipAddress]?.sizeDataInfo != null) 
+      {
+          readActualData(client, ipAddress);
+      }      
   }, 1000);
 }
 

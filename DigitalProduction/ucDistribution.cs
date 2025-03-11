@@ -783,7 +783,8 @@ namespace DigitalProduction
                 dataGrid_overviewDistribution.DataSource = null;
                 if (cbxPart.Properties.DataSource != null)
                 {
-                    cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "FT2").ToList();
+                    cbxPart.Properties.DataSource = materialDataList;
+                    //cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "FT2").ToList();
                 // Allow multi-selection for cbxPart
                 cbxPart.Properties.View.OptionsSelection.MultiSelect = true;
                 cbxPart.Properties.View.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CheckBoxRowSelect;
@@ -804,7 +805,8 @@ namespace DigitalProduction
                 lblPartValue.ResetText();
                 if (cbxPart.Properties.DataSource != null)
                 {
-                    cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "YD").ToList();
+                    cbxPart.Properties.DataSource = materialDataList;
+                    //cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "YD").ToList();
                     // Allow single selection for cbxPart
                     cbxPart.Properties.View.OptionsSelection.MultiSelect = false;
                 }

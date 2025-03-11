@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Resources;
 using System.Windows.Forms;
-using DevExpress.XtraBars;
 using DevExpress.XtraEditors;
 using static DigitalProduction.frmMain;
 
@@ -144,8 +143,13 @@ namespace DigitalProduction
             this.Text = LocalizationManager.GetString("frmLogin_Title");
             btn_Login.Text = LocalizationManager.GetString("Login");
             lblExit.Text = LocalizationManager.GetString("Exit");
-            lblChangePassword.Text = LocalizationManager.GetString("ChangePassword");
+            lblShowPassword.Text = LocalizationManager.GetString("ChangePassword");
             chkRememberMe.Text = LocalizationManager.GetString("RememberMe");
+        }
+        private void lblChangePassword_Click(object sender, EventArgs e)
+        {
+            ChangePassword changePasswordForm = new ChangePassword();
+            changePasswordForm.ShowDialog();
         }
     }
 }

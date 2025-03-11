@@ -824,6 +824,65 @@ namespace DigitalProduction
             }
             return summaryList;
         }
+        public static bool CheckLogin(string username, string hashedPassword)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand("SELECT IsActive FROM dbo.Users WHERE Username=@Username AND Password=@Password", connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@Password", hashedPassword);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            bool isActive = reader.GetBoolean(0);
+                            return isActive;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        public static bool IsNewPasswordValid(string newPassword)
+        {
+            // Độ dài tối thiểu
+            if (newPassword.Length < 5)
+            {
+                return false;
+            }
+            return true;
+        }
+        public static bool ChangePassword(string username, string currentPassword, string newPassword)
+        {
+            if (!CheckLogin(username, SecurityHelper. ComputeHash(currentPassword)))
+            {
+                return false;
+            }
+
+            if (!IsNewPasswordValid(newPassword))
+            {
+                return false;
+            }
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand("UPDATE dbo.Users SET Password=@Password WHERE Username=@Username", connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@Password", SecurityHelper.ComputeHash(newPassword));
+
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+        }
     }
 }
 
