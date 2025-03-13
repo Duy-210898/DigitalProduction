@@ -163,7 +163,7 @@ async function handleGetActualData(ws, request) {
     
     
     // Fetch real-time data once and send response
-    const realTimeData = await getActualOutputData(startDate, endDate);    
+    const realTimeData = await getActualOutputData(startDate, endDate, retryCount = 0);    
 
     if (!realTimeData) {
       return ws.send(JSON.stringify({
@@ -190,12 +190,12 @@ async function handleGetActualData(ws, request) {
     ws.on('close', closeHandler); // Attach the single close event
 
   } catch (error) {
-    console.error('Error fetching real-time data:', error);
-    ws.send(JSON.stringify({
-      action: 'getActualData',
-      status: 'error',
-      message: `Failed to get real-time data: ${error.message}`
-    }));
+    if (error.message.includes('timeout') && retryCount < 3) {
+        // Retry after a delay
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        return getActualOutputData(startDate, endDate, retryCount + 1);
+    }
+    throw error; // Throw the error if it exceeded retry attempts
   }
 }
 
@@ -489,7 +489,7 @@ async function handleSaveDistributionData(ws, request) {
         }));
     }
   } catch (error) {
-    console.error('Error saving distribution data:', error);
+    console.error("Error saving distribution data:" + error.message);
     ws.send(JSON.stringify({
       action: 'saveDistributionData',
       status: 'error',

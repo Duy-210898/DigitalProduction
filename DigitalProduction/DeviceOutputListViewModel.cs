@@ -17,18 +17,20 @@ namespace DigitalProduction.ViewModels
         private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
 
         // Filter properties for API
+        private string _filterKeyword = LocalizationManager.GetString("Search");
         public string FilterKeyword
         {
-            get => FilterService.Instance.FilterKeyword;
+            get => _filterKeyword;
             set
             {
-                if (FilterService.Instance.FilterKeyword != value)
+                if (_filterKeyword != value)
                 {
-                    FilterService.Instance.FilterKeyword = value;
+                    _filterKeyword = value;
                     OnPropertyChanged(nameof(FilterKeyword));
                 }
             }
         }
+
 
         public DateTime? FilterStartDate
         {
@@ -243,7 +245,7 @@ namespace DigitalProduction.ViewModels
 
             // Group the output data.
             var groupedData = realTimeData.OutputData
-                .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName })
+                .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName, d.PartName })
                 .SelectMany(g =>
                 {
                     bool machineNameUniform = g.All(x => x.MachineName == g.Key.MachineName);
@@ -259,6 +261,7 @@ namespace DigitalProduction.ViewModels
                     // Create the header row using the group key.
                     var header = new DeviceOutput
                     {
+                        PartName = g.Key.PartName,
                         MachineName = g.Key.MachineName,
                         SO = g.Key.SO,
                         OperatorName = g.Key.OperatorName,
@@ -320,8 +323,9 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"Performing UI update with {newData.Count} items.");
 
                 var existingGroups = BindingDeviceOutputs
-                    .Where(d => d.IsGroupHeader)
-                    .ToDictionary(d => new { d.MachineName, d.SO, d.OperatorName });
+               .Where(d => d.IsGroupHeader)
+               .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName })
+               .ToDictionary(g => g.Key, g => g.First());
 
                 int index = 0;
 

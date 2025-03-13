@@ -40,9 +40,73 @@ namespace DigitalProduction
             cbxSO.Focus();
             lbl_operatorName.Visible = false;
             // Subscribe to the CellValueChanged event
-            dgvSize.CellContentClick += dgvSize_CellContentClick;
+            dgvSize.CellValueChanged += dgvSize_CellValueChanged;
+            dgvSize.CurrentCellDirtyStateChanged += dgvSize_CurrentCellDirtyStateChanged;
             loadDeviceDistribution();
+
+            // Attach event handler for GridLookUpEdit
+            cbxPart.EditValueChanged += cbxPart_EditValueChanged;
+            SetDataGridViewState(false);
         }
+        private void cbxPart_EditValueChanged(object sender, EventArgs e)
+        {
+            bool isEnabled = cbxPart.EditValue != null
+                             && !string.IsNullOrWhiteSpace(cbxPart.Text);
+
+            SetDataGridViewState(isEnabled);
+        }
+        private void SetDataGridViewState(bool isEnabled)
+        {
+            dgvSize.Enabled = isEnabled;
+
+            if (!isEnabled)
+            {
+                // Disable color styling
+                dgvSize.DefaultCellStyle.BackColor = Color.LightGray;
+                dgvSize.DefaultCellStyle.ForeColor = Color.DarkGray;
+                dgvSize.ColumnHeadersDefaultCellStyle.BackColor = Color.Gray;
+                dgvSize.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+
+                // Clear all checkboxes and reset sizeIDs
+                dgvSize.SuspendLayout(); // Prevent flickering
+                                         // Uncheck all checkboxes and clear the SizeIDs list
+                foreach (DataGridViewRow row in dgvSize.Rows)
+                {
+                    if (row.Cells["SelectSize"] is DataGridViewCheckBoxCell checkBoxCell)
+                    {
+                        checkBoxCell.Value = false; // Uncheck all
+                        checkBoxCell.EditingCellFormattedValue = false; // Force update
+                    }
+                }
+                dgvSize.ResumeLayout(); // Resume layout updates
+
+                // Uncheck the header checkbox
+                headerCheckBox.Checked = false; 
+
+                // Reset part selection
+                cbxPart.Properties.NullText = LocalizationManager.GetString("RequiredPart");
+                cbxPart.EditValue = null;
+
+                // Clear selected lists
+                sizeIDs.Clear();
+                partIDs.Clear();
+            }
+            else
+            {
+                // Enable color styling
+                dgvSize.DefaultCellStyle.BackColor = Color.White;
+                dgvSize.DefaultCellStyle.ForeColor = Color.Black;
+                dgvSize.ColumnHeadersDefaultCellStyle.BackColor = Color.LightGray;
+                dgvSize.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+            }
+
+            dgvSize.ReadOnly = !isEnabled;
+            dgvSize.EnableHeadersVisualStyles = false;
+            dgvSize.ClearSelection();
+
+            dgvSize.Refresh();
+        }
+
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
@@ -106,39 +170,6 @@ namespace DigitalProduction
             else
                 combo.ClosePopup();
         }
-        //private DataTable TransformSizeData(DataTable originalTable)
-        //{
-        //    DataTable transformedTable = new DataTable();
-
-        //    transformedTable.Columns.Add("Field");
-
-        //    foreach (DataRow row in originalTable.Rows)
-        //    {
-        //        transformedTable.Columns.Add(row["Size"].ToString());
-        //    }
-
-        //    // Lấy danh sách các tiêu đề cột (bỏ qua cột "Size")
-        //    var columnNames = originalTable.Columns.Cast<DataColumn>()
-        //                       .Where(c => c.ColumnName != "Size")
-        //                       .Select(c => c.ColumnName)
-        //                       .ToList();
-
-        //    // Thêm dữ liệu vào bảng mới
-        //    foreach (var columnName in columnNames)
-        //    {
-        //        DataRow newRow = transformedTable.NewRow();
-        //        newRow["Field"] = columnName;
-
-        //        foreach (DataRow row in originalTable.Rows)
-        //        {
-        //            newRow[row["Size"].ToString()] = row[columnName];
-        //        }
-
-        //        transformedTable.Rows.Add(newRow);
-        //    }
-
-        //    return transformedTable;
-        //}
         private DataTable ConvertSizeDataToDataTable(List<SizeData> sizeDataList)
         {
             DataTable table = new DataTable();
@@ -157,20 +188,20 @@ namespace DigitalProduction
 
             return table;
         }
+        private CheckBox headerCheckBox = new CheckBox();
+
         private void ConfigureDataGridView()
         {
-            // Set DataGridView properties similar to DevExpress GridView
             dgvSize.AllowUserToAddRows = false;
             dgvSize.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvSize.MultiSelect = true;
             dgvSize.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvSize.ColumnHeadersHeight = 35;
+            dgvSize.ColumnHeadersHeight = 40;
 
             // Header appearance
             dgvSize.EnableHeadersVisualStyles = false;
             dgvSize.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
             {
-                //BackColor = Color.LightSteelBlue,
                 ForeColor = Color.Black,
                 Alignment = DataGridViewContentAlignment.MiddleCenter,
                 Font = new Font("Arial", 10, FontStyle.Bold)
@@ -200,22 +231,112 @@ namespace DigitalProduction
             // Auto-size columns to fit content
             dgvSize.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-            // Add checkbox column (Equivalent to `RepositoryItemCheckEdit` in DevExpress)
-            DataGridViewCheckBoxColumn checkColumn = new DataGridViewCheckBoxColumn
+            // Add STT Column (Row Index)
+            if (dgvSize.Columns["STT"] == null)
             {
-                Name = "SelectSize",
-                HeaderText = "Select",
-                Width = 50,
-                TrueValue = true,
-                FalseValue = false
-            };
+                DataGridViewTextBoxColumn sttColumn = new DataGridViewTextBoxColumn
+                {
+                    Name = "STT",
+                    HeaderText = "STT",
+                    ReadOnly = true,
+                    Width = 50
+                };
+                dgvSize.Columns.Insert(0, sttColumn);
+            }
 
+            // Add Checkbox Column
             if (dgvSize.Columns["SelectSize"] == null)
             {
-                dgvSize.Columns.Insert(0, checkColumn);
+                DataGridViewCheckBoxColumn checkColumn = new DataGridViewCheckBoxColumn
+                {
+                    Name = "SelectSize",
+                    HeaderText = "SelectSize",
+                    Width = 50,
+                    TrueValue = true,
+                    FalseValue = false
+                };
+                dgvSize.Columns.Insert(1, checkColumn);
+            }
+
+            // Ensure STT is updated when data changes
+            dgvSize.RowPostPaint += dgvSize_RowPostPaint;
+
+            // Ensure the header checkbox is added after the column is created
+            dgvSize.Paint += new PaintEventHandler(DataGridView_Paint);
+            dgvSize.ColumnHeaderMouseClick += DataGridView_ColumnHeaderMouseClick;
+            dgvSize.CellPainting += dgvSize_CellPainting;
+            headerCheckBox.CheckedChanged += HeaderCheckBox_CheckedChanged;
+            dgvSize.Controls.Add(headerCheckBox);
+        }
+
+        // Automatically update STT column numbers
+        private void dgvSize_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
+        {
+            dgvSize.Rows[e.RowIndex].Cells["STT"].Value = (e.RowIndex + 1).ToString();
+        }
+
+
+        // Custom Paint event to adjust header text and checkbox alignment
+        private void dgvSize_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex == -1 && e.ColumnIndex == dgvSize.Columns["SelectSize"].Index)
+            {
+                e.PaintBackground(e.ClipBounds, true);
+                e.Handled = true;
+
+                // Get translated text
+                string translatedHeader = LocalizationManager.GetString("SelectSize") ?? "SelectSize";
+
+                using (StringFormat sf = new StringFormat())
+                {
+                    sf.Alignment = StringAlignment.Center;
+                    sf.LineAlignment = StringAlignment.Near;
+
+                    Rectangle textRect = e.CellBounds;
+                    textRect.Height -= 15; // Adjust for checkbox space
+
+                    using (Font headerFont = new Font("Arial", 10, FontStyle.Bold))
+                    {
+                        e.Graphics.DrawString(translatedHeader, headerFont, Brushes.Black, textRect, sf);
+                    }
+                }
             }
         }
 
+
+        // Handles checkbox position inside the header
+        private void DataGridView_Paint(object sender, PaintEventArgs e)
+        {
+            Rectangle rect = dgvSize.GetCellDisplayRectangle(dgvSize.Columns["SelectSize"].Index, -1, true);
+            headerCheckBox.Size = new Size(15, 15);
+
+            // Set checkbox position under the text
+            int x = rect.Left + (rect.Width - headerCheckBox.Width) / 2;
+            int y = rect.Top + 18; // Adjust below "Select" text
+            headerCheckBox.Location = new Point(x, y);
+        }
+
+        // Allow clicking on header to toggle "Select All"
+        private void DataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.ColumnIndex == dgvSize.Columns["SelectSize"].Index)
+            {
+                headerCheckBox.Checked = !headerCheckBox.Checked;
+                HeaderCheckBox_CheckedChanged(headerCheckBox, EventArgs.Empty);
+            }
+        }
+
+        private void TranslateHeaders()
+        {
+            foreach (DataGridViewColumn col in dgvSize.Columns)
+            {
+                string translatedHeader = LocalizationManager.GetString(col.Name) ?? col.Name;
+                col.HeaderText = translatedHeader;
+            }
+            // Force UI refresh to apply new headers
+            dgvSize.Refresh();
+            dgvSize.Invalidate();
+        }
 
         private void HandleReceivedSchedule(List<ProductionSchedule> schedules)
         {
@@ -271,6 +392,8 @@ namespace DigitalProduction
 
             // Cấu hình hiển thị của gridView_Size
             ConfigureDataGridView();
+            TranslateHeaders();
+
             // Duyệt qua các phần vật liệu và thêm vào materialDataList
             foreach (var schedule in uniqueParts)
             {
@@ -434,6 +557,8 @@ namespace DigitalProduction
                 string selectedParts = string.Join(", ", partIDs.Select(id => view.GetRowCellValue(view.LocateByValue("PartID", id), "PartName")));
                 lblPartValue.Text = selectedParts;
                 lblPartValue.ForeColor = Color.Green;
+                // Enable/Disable DataGridView based on partIDs count
+                SetDataGridViewState(partIDs.Count > 0);
             };
 
             // Detach event handler when the popup closes
@@ -667,30 +792,6 @@ namespace DigitalProduction
             return results;
         }
 
-        //    return distributionData;
-        //}
-        //private DistributionData GetDistributionDataFromControls()
-        //{
-        //    string user = Global.CurrentUser.EmployeeName;
-        //    string machineName = cbxDevice.SelectedItem.ToString();
-        //    string ipAddress = dbHelper.GetIpAddress(machineName);
-
-            //    var distributionData = new DistributionData
-            //    {
-            //        MasterWorkOrder = lblMasterWorkOrder.Text.Replace("Master Work Order: ", ""),
-            //        SO = lblSO.Text.Replace("SO: ", ""),
-            //        Model = lblModel.Text.Replace("Model: ", ""),
-            //        ART = lblArt.Text.Replace("ART: ", ""),
-            //        SizeData = new List<SizeData>(),
-            //        MaterialData = new List<MaterialData>(),
-            //        User = user,
-            //        IpAddress = ipAddress,
-            //    };
-
-            //    return distributionData;
-            //}
-
-
         private void ApplyLocalization()
         {
             var controls = new Dictionary<Control, string>
@@ -773,9 +874,7 @@ namespace DigitalProduction
 
         private void rdLeather_CheckedChanged(object sender, EventArgs e)
         {
-            cbxPart.Properties.NullText = "Please select Part...";
-            cbxPart.EditValue = null;
-            partIDs.Clear();
+            SetDataGridViewState(false);
             setControlVisibility(false, numCuttingDieQty, numMaterialLayer, numPiecesPerPair, lblCuttingDie, lblMaterialLayer, lblPeicesPerPair);
             setControlVisibility(true, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
             if (rdLeather.Checked)
@@ -794,9 +893,7 @@ namespace DigitalProduction
 
         private void rdRawMaterial_CheckedChanged(object sender, EventArgs e)
         {
-            cbxPart.Properties.NullText = "Please select Part...";
-            cbxPart.EditValue = null;
-            partIDs.Clear();
+            SetDataGridViewState(false);
             setControlVisibility(false, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
             setControlVisibility(true, numCuttingDieQty, numMaterialLayer, numPiecesPerPair, lblCuttingDie, lblMaterialLayer, lblPeicesPerPair);
             if (rdRawMaterial.Checked)
@@ -836,54 +933,82 @@ namespace DigitalProduction
 
             return sizeDataList;
         }
-        private void dgvSize_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void dgvSize_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            // Ensure the event fires only for the checkbox column
-            if (dgvSize.Columns[e.ColumnIndex].Name == "SelectSize" && e.RowIndex >= 0)
+            if (e.RowIndex >= 0 && dgvSize.Columns[e.ColumnIndex].Name == "SelectSize")
             {
                 DataGridViewCheckBoxCell checkBoxCell = (DataGridViewCheckBoxCell)dgvSize.Rows[e.RowIndex].Cells["SelectSize"];
-                bool isChecked = (bool)(checkBoxCell.Value ?? false); // Handle null values
+                bool isChecked = (bool)(checkBoxCell.Value ?? false); // ✅ Now gets the correct value
 
-                // Get SizeID from the selected row
                 int sizeId = Convert.ToInt32(dgvSize.Rows[e.RowIndex].Cells["SizeID"].Value);
 
-                if (!isChecked) // If user is checking the box
+                if (isChecked)
                 {
-                    // If Leather, allow only 3 sizes
-                    if (rdLeather.Checked && sizeIDs.Count >= 3)
-                    {
-                        MessageBox.Show("You can select a maximum of 3 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        checkBoxCell.Value = false; // ✅ Uncheck the checkbox
-                        dgvSize.RefreshEdit(); // ✅ Refresh UI to reflect changes
-                        return;
-                    }
-
-                    // If Raw Material, allow only 6 sizes
-                    if (rdRawMaterial.Checked && sizeIDs.Count >= 6)
-                    {
-                        MessageBox.Show("You can select a maximum of 6 sizes.", "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        checkBoxCell.Value = false; // ✅ Uncheck the checkbox
-                        dgvSize.RefreshEdit(); // ✅ Refresh UI to reflect changes
-                        return;
-                    }
-
-                    sizeIDs.Add(sizeId);
-                    checkBoxCell.Value = true; // ✅ Ensure the checkbox is checked when added
+                    if (!sizeIDs.Contains(sizeId))
+                        sizeIDs.Add(sizeId);
                 }
-                else // If user is unchecking the box
+                else
                 {
                     sizeIDs.Remove(sizeId);
                 }
 
-                // Toggle the checkbox manually since CellContentClick happens before the value is updated
-                checkBoxCell.Value = !isChecked;
-
-                // Refresh DataGridView to apply the change
-                dgvSize.Refresh();
-
                 UpdateOverviewDistributionGrid();
             }
         }
+
+        // ✅ Make sure you subscribe to the event
+        private void dgvSize_CurrentCellDirtyStateChanged(object sender, EventArgs e)
+        {
+            if (dgvSize.CurrentCell is DataGridViewCheckBoxCell)
+            {
+                dgvSize.CommitEdit(DataGridViewDataErrorContexts.Commit); // ✅ Forces the change to be committed
+            }
+        }
+
+        private void HeaderCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            bool isChecked = headerCheckBox.Checked;
+
+            dgvSize.SuspendLayout(); // ✅ Prevent flickering
+
+            sizeIDs.Clear(); // ✅ Clear the list before updating
+
+            foreach (DataGridViewRow row in dgvSize.Rows)
+            {
+                if (row.Cells["SelectSize"] != null)
+                {
+                    row.Cells["SelectSize"].Value = isChecked;
+                    int sizeId = Convert.ToInt32(row.Cells["SizeID"].Value);
+
+                    if (isChecked)
+                    {
+                        if (!sizeIDs.Contains(sizeId))
+                            sizeIDs.Add(sizeId);
+                    }
+                }
+            }
+
+            dgvSize.EndEdit(); // ✅ Ensure checkboxes apply values properly
+            dgvSize.Refresh();
+
+            // ✅ Ensure the overview grid updates properly when selecting/unselecting all sizes
+            if (isChecked)
+            {
+                UpdateOverviewDistributionGrid();
+            }
+            else
+            {
+                ClearOverviewDistributionGrid(); // ✅ Clear the overview if all sizes are unchecked
+            }
+        }
+
+        private void ClearOverviewDistributionGrid()
+        {
+            dataGrid_overviewDistribution.DataSource = null;  // Clear the data source
+            dataGrid_overviewDistribution.Rows.Clear();
+        }
+
+
 
 
         private void setControlVisibility(bool isVisible, params Control[] controls)
@@ -898,13 +1023,17 @@ namespace DigitalProduction
             DataTable overviewTable = new DataTable();
             overviewTable.Columns.Add("PartName", typeof(string));
             overviewTable.Columns.Add("Size", typeof(string));
+            overviewTable.Columns.Add("QueueSize", typeof(string)); // New column for extra sizes
 
-            Dictionary<string, HashSet<string>> partSizeMap = new Dictionary<string, HashSet<string>>();
+            Dictionary<string, List<int>> partSizeMap = new Dictionary<string, List<int>>();
 
             if (rdRawMaterial.Checked && cbxPart.EditValue != null)
             {
                 partIDs.Add((int)cbxPart.EditValue);
             }
+
+            // Define the split limit based on material type
+            int sizeLimit = rdLeather.Checked ? 3 : 6;
 
             // Loop over the selected parts and sizes
             foreach (int partId in partIDs)
@@ -915,30 +1044,35 @@ namespace DigitalProduction
 
                 if (!partSizeMap.ContainsKey(part.PartName))
                 {
-                    partSizeMap[part.PartName] = new HashSet<string>(); // Store unique sizes
+                    partSizeMap[part.PartName] = new List<int>(); // Store sizes in order
                 }
 
-                foreach (int sizeId in sizeIDs)
-                {
-                    string sizeName = GetSizeName(sizeId);
-                    partSizeMap[part.PartName].Add(sizeName);
-                }
+                partSizeMap[part.PartName].AddRange(sizeIDs);
             }
 
             // Add grouped data to DataTable
             foreach (var entry in partSizeMap)
             {
                 string partName = entry.Key;
-                string sizeList = string.Join(", ", entry.Value); // Merge sizes as a comma-separated string
+                List<int> sizes = entry.Value;
 
-                overviewTable.Rows.Add(partName, sizeList);
+                // Split sizes: first (sizeLimit) go to "Size", remaining to "Queue Size"
+                var selectedSizes = sizes.Take(sizeLimit).Select(GetSizeName).ToList();
+                var queueSizes = sizes.Skip(sizeLimit).Select(GetSizeName).ToList();
+
+                string sizeList = string.Join(", ", selectedSizes);
+                string queueSizeList = queueSizes.Any() ? string.Join(", ", queueSizes) : "-";
+
+                overviewTable.Rows.Add(partName, sizeList, queueSizeList);
             }
 
             // Bind the table to your overview grid.
             dataGrid_overviewDistribution.DataSource = overviewTable;
             updateUIDataGridOverView();
-
+            TranslateDataGridOverviewDistributionHeaders();
         }
+
+
 
         private void updateUIDataGridOverView() {
             dataGrid_overviewDistribution.Dock = DockStyle.Fill;
@@ -961,16 +1095,19 @@ namespace DigitalProduction
             dataGrid_overviewDistribution.ReadOnly = true;  // Prevent editing if needed
 
         }
+        private void TranslateDataGridOverviewDistributionHeaders()
+        {
+            foreach (DataGridViewColumn col in dataGrid_overviewDistribution.Columns)
+            {
+                // Use the appropriate property depending on how you identify headers
+                col.HeaderText = LocalizationManager.GetString(col.Name) ?? col.Name; // Assuming you're using column Name as key
+            }
+        }
 
         private string GetSizeName(int sizeId)
         {
             var sizeData = sizeDataList.FirstOrDefault(s => s.SizeID == sizeId);
             return sizeData != null ? sizeData.Size : string.Empty;
-        }
-
-        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
-        {
-
         }
     }
 }

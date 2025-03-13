@@ -2,13 +2,14 @@
 using System.Data;
 using System.Windows.Forms;
 using DigitalProduction.Models;
+using DigitalProduction.Validation;
 
 namespace DigitalProduction
 {
     public partial class ucRegisterUser : DevExpress.XtraEditors.XtraUserControl
     {
         public event EventHandler ExitClicked;
-        public event EventHandler<Employee> UserCreated;
+       // public event EventHandler<Employee> UserCreated;
         public ucRegisterUser()
         {
             InitializeComponent();
@@ -23,6 +24,16 @@ namespace DigitalProduction
 
         private void btn_submit_Click(object sender, EventArgs e)
         {
+            if (!cb_department.ValidateInput(ValidationType.NotNull) ||
+               !cb_position.ValidateInput(ValidationType.NotNull) ||
+                !txt_username.ValidateInput(ValidationType.NotEmptyString) ||
+                 !txt_pwd.ValidateInput(ValidationType.NotEmptyString) ||
+                 !txt_employeeID.ValidateInput(ValidationType.NotEmptyString) ||
+                !txt_employeeName.ValidateInput(ValidationType.NotEmptyString))
+            {
+                MessageBox.Show("Invalid input! Please correct the highlighted fields.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             string username = txt_username.Text;
             string password = txt_pwd.Text;
             string hashedPassword = SecurityHelper.HashPassword(password);

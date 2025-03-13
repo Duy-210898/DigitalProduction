@@ -19,7 +19,6 @@ namespace DigitalProduction
         private DataGridView dgvProgressManagement;
         private DateTimePicker dtpStartDate;
         private DateTimePicker dtpEndDate;
-        private Button btnFilter;
         private Label lblStartDate;
         private Label lblEndDate;
         private TextBox txtSearch;
@@ -444,6 +443,7 @@ namespace DigitalProduction
                         dgvProgressManagement.DataSource = distributionDataList;
                         ConfigureDataGridView();
                         TranslateHeaders();
+                        FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, "");
                     });
                 }
                 else

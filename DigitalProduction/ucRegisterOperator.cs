@@ -1,21 +1,30 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
+using DevExpress.Utils.Html.Internal;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
+using DigitalProduction.Validation;
 
 namespace DigitalProduction
 {
     public partial class ucRegisterOperator : UserControl
     {
         public event EventHandler ExitClicked;
-        public event EventHandler<Employee> UserCreated;
+      //  public event EventHandler<Employee> UserCreated;
         public ucRegisterOperator()
         {
             InitializeComponent();
         }
         private void btn_submit_Click(object sender, EventArgs e)
         {
+            if (!txt_employeeID.ValidateInput(ValidationType.NotEmptyString) ||
+               !txt_employeeName.ValidateInput(ValidationType.NotEmptyString))
+            {
+                MessageBox.Show("Invalid input! Please correct the highlighted fields.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
             string employeeName = txt_employeeName.Text.Trim();
             int employeeID = int.Parse(txt_employeeID.Text.Trim());
             int departmentID = 0;

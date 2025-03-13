@@ -471,7 +471,22 @@
   <data name="PiecesPerPair" xml:space="preserve">
     <value>Pieces Per Pair</value>
   </data>
+  <data name="RequiredChooseSize" xml:space="preserve">
+    <value>Please select a valid part before choosing sizes.</value>
+  </data>
+  <data name="SelectionRequired" xml:space="preserve">
+    <value>Selection Required</value>
+  </data>
+  <data name="SelectSize" xml:space="preserve">
+    <value>Select Size</value>
+  </data>
   <data name="TotalPiecesPerPair" xml:space="preserve">
     <value>Total Pieces Per Pair</value>
+  </data>
+  <data name="RequiredPart" xml:space="preserve">
+    <value>Please select Part...</value>
+  </data>
+  <data name="QueueSize" xml:space="preserve">
+    <value>Queue Size</value>
   </data>
 </root>

@@ -4,6 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DigitalProduction.Models;
+using DigitalProduction.Validation;
 using Newtonsoft.Json;
 
 namespace DigitalProduction
@@ -11,7 +12,7 @@ namespace DigitalProduction
     public partial class ucRegisterDevice : UserControl
     {
         public event EventHandler ExitClicked;
-        public event EventHandler<Device> DeviceCreated;
+       // public event EventHandler<Device> DeviceCreated;
         private WebSocketClient _webSocketClient;
 
         public ucRegisterDevice()
@@ -95,6 +96,14 @@ namespace DigitalProduction
 
         private async void btn_submit_Click(object sender, EventArgs e)
         {
+            if (!txt_addressIP.ValidateInput(ValidationType.NotEmptyString) ||
+                !txt_deviceName.ValidateInput(ValidationType.NotEmptyString) ||
+                 !cb_department.ValidateInput(ValidationType.NotNull) ||
+                  !cb_plant.ValidateInput(ValidationType.NotNull))
+            {
+                MessageBox.Show("Invalid input! Please correct the highlighted fields.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             int departmentID = cb_department.EditValue != null ? Convert.ToInt32(cb_department.EditValue) : 0;
             int plantId = cb_plant.EditValue != null ? Convert.ToInt32(cb_plant.EditValue) : 0;
             string ipAddress = txt_addressIP.Text.Trim();

@@ -120,7 +120,6 @@ CREATE TABLE DeviceOutput (
     UpdatedAt DATETIME
 );
 GO
-
 -- Table: DistributionData
 CREATE TABLE DistributionData (
     DistributionID INT PRIMARY KEY IDENTITY(1,1),
@@ -187,7 +186,7 @@ GO
 -- Foreign Key Constraints
 ALTER TABLE DeviceOutput
 	ADD CONSTRAINT FK_DeviceOutput_Size FOREIGN KEY (SizeID) REFERENCES Size(SizeID),
-	  CONSTRAINT FK_DeviceOutput_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID);
+	CONSTRAINT FK_DeviceOutput_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID);
 GO
 ALTER TABLE DefaultInfo
     ADD CONSTRAINT FK_DefaultInfo_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID);

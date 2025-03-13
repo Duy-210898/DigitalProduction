@@ -5,12 +5,16 @@ const ping = require('ping');
 const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setOrderIsComplete, setDistributionIsComplete, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb} = require('./database');
 const { notifyClientsToDeleteOrder } = require('./notifications');
 
-let previousRegister6507Value = null;
 let previousRegister1034 = null;
 let previousRegister1032 = null;
 let previousRegister6510 = null;
 let isDataSentToModbus = false;
-let countCompleteSize = 0;
+let countRemainSizeData = {};
+let storeDistributionData = {};
+let sizeAddress;
+let chooseSizeAddress;
+let reasonCompleteSizeAddress;
+const previousData = {};  // Store previous data for comparison
 
 let modbusClients = {};
 let counter = 0;
@@ -383,6 +387,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
     if (!modbusClients[ipAddress]) {
       modbusClients[ipAddress] = {};
     }
+    countRemainSizeData[ipAddress] = { index: 0 }; 
     modbusClients[ipAddress].orderID = orderID;
 
     // check complete order
@@ -397,144 +402,163 @@ async function checkAndSaveDistribution(client, ipAddress) {
           await saveDistributionDataToModbus(ipAddress, distributionData);
         }
     }
-    let sizeAddress;
-    let chooseSizeAddress;
-    let distribution;
-    let reasonCompleteSizeAddress;
-    deleteDistributionFromRegister(client);
-
+  
+    // Ensure checkDelete exists and is initialized to 0
+    if (!storeDistributionData[ipAddress]) {
+      storeDistributionData[ipAddress] = {};
+    }
+    // check delete order
+    deleteDistributionFromRegister(client, ipAddress);
     if (isLeather !== 0) {
-        if (isLeather === 1) {
-            chooseSizeAddress = 3101;
-            sizeAddress = 3102;
-            reasonCompleteSizeAddress = ['3107', '3108', '3109', '3110', '3111', '3112'];
-            distribution = await getSizeAndDistributionDataFromDb(ipAddress, orderID, 0);
-        } else {
-            chooseSizeAddress = 3103;
-            sizeAddress = 3104;
-            reasonCompleteSizeAddress = ['3113', '3114', '3115'];
-            distribution = await getSizeAndDistributionDataFromDb(ipAddress, orderID, 1);
-        }
 
-        if (distribution !== null) {
-            let results = [];
-            let note = 0;
-            try {
-                // Check choose size
-                const responseChooseSize = await client.readHoldingRegisters(chooseSizeAddress, 1);
-                const registerChooseSizeValue = responseChooseSize.response._body.values[0];
+      //retry get storeDistributionData
+      if (Object.keys(storeDistributionData[ipAddress]).length === 0) {
+        await fetchStoreDistributionData(ipAddress, orderID, isLeather);
+      }
+      if (storeDistributionData[ipAddress] == null) { return }
+      let results = [];
+      let note = 0;
+      try {
+          // Check choose size
+          const responseChooseSize = await client.readHoldingRegisters(chooseSizeAddress, 1);
+          const registerChooseSizeValue = responseChooseSize.response._body.values[0];
 
-                let binaryChooseSizeValue = registerChooseSizeValue.toString(2).padStart(16, '0');
-                console.log(`Output of size at register address ${chooseSizeAddress} = ${registerChooseSizeValue}`);
-                console.log(`Binary representation: ${binaryChooseSizeValue}`);
+          let binaryChooseSizeValue = registerChooseSizeValue.toString(2).padStart(16, '0');
+          console.log(`Output of size at register address ${chooseSizeAddress} = ${registerChooseSizeValue}`);
+          console.log(`Binary representation: ${binaryChooseSizeValue}`);
 
-                const index = findSetBitIndex(binaryChooseSizeValue);
+          const index = findSetBitIndex(binaryChooseSizeValue);
 
-                if (index !== -1 && index < reasonCompleteSizeAddress.length) {
-                    // Dynamically get the correct register address
-                    let reasonCompleteRegister = parseInt(reasonCompleteSizeAddress[index]);
+          if (index !== -1 && index < reasonCompleteSizeAddress.length) {
+              // Dynamically get the correct register address
+              let reasonCompleteRegister = parseInt(reasonCompleteSizeAddress[index]);
 
-                    // Read reason complete size order
-                    let responseReasonCompleteSize = await client.readHoldingRegisters(reasonCompleteRegister, 1);
-                    let reasonComplete = responseReasonCompleteSize.response._body.values[0];
+              // Read reason complete size order
+              let responseReasonCompleteSize = await client.readHoldingRegisters(reasonCompleteRegister, 1);
+              let reasonComplete = responseReasonCompleteSize.response._body.values[0];
 
-                    console.log("ReasonComplete: " + reasonComplete);
-                    console.log(`[IndexSize] ReasonComplete ${reasonComplete} The index of the set bit is: ${index}`);
+              console.log("ReasonComplete: " + reasonComplete);
+              console.log(`[IndexSize] ReasonComplete ${reasonComplete} The index of the set bit is: ${index}`);
 
-                    if (reasonComplete > 0) {
-                        console.log("[SizeID]: " + distribution.SizeData[index].SizeID);
+              if (reasonComplete > 0) {
+                  console.log("[SizeID]: " + storeDistributionData[ipAddress].SizeData[index].SizeID);
 
-                        let distributionIDFromSize = await getDistributionIDFromSizeID(
-                            ipAddress, orderID, isLeather === 1 ? 0 : 1, distribution.SizeData[index].SizeID
-                        );
-                        let message;
-                        if (distributionIDFromSize != null) {
-                            switch (reasonComplete) {
-                                case 1:
-                                    note = 1;
-                                    message = "Not enough materials";
-                                    break;
-                                case 2:
-                                    note = 2;
-                                    message = "Change of plan";
-                                    break;
-                                case 3:
-                                    note = 3;
-                                    message = "Forgot to choose size";
-                                    break;
-                                default:
-                                    message = "Unknown reason";
-                                    break;
-                            }
+                  let distributionIDFromSize = await getDistributionIDFromSizeID(
+                      ipAddress, orderID, isLeather === 1 ? 0 : 1, storeDistributionData[ipAddress].SizeData[index].SizeID
+                  );
+                  let message;
+                  if (distributionIDFromSize != null) {
+                      switch (reasonComplete) {
+                          case 1:
+                              note = 1;
+                              message = "Not enough materials";
+                              break;
+                          case 2:
+                              note = 2;
+                              message = "Change of plan";
+                              break;
+                          case 3:
+                              note = 3;
+                              message = "Forgot to choose size";
+                              break;
+                          default:
+                              message = "Unknown reason";
+                              break;
+                      }
 
-                            for (const item of distributionIDFromSize.DistributionID) {
-                                try {
-                                    await setDistributionIsComplete(item.DistributionID, 'Stop' , note);
-                                    console.log(`Updated DistributionID: ${item.DistributionID} note ${note}`);
-                                } catch (error) {
-                                    console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
-                                }
-                            }
-                            console.log("Reason: " + message);
-                        }
-                    }
-                }
+                      for (const item of distributionIDFromSize.DistributionID) {
+                          try {
+                              await setDistributionIsComplete(item.DistributionID, 'Stop' , note);
+                              console.log(`Updated DistributionID: ${item.DistributionID} note ${note}`);
+                          } catch (error) {
+                              console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
+                          }
+                      }
+                      console.log("Reason: " + message);
+                  }
+              }
+              else {
+                // Continue reading size
+                  const response = await client.readHoldingRegisters(sizeAddress, 1);
+                  const registerValue = response.response._body.values[0];
 
-                let distributionComplete = await getDistributionCompleteFromDb(ipAddress, orderID, isLeather === 1 ? 0 : 1, note);
-
-                if (distribution?.SizeData) {
-                    if (distributionComplete?.length && distribution.SizeData.length === distributionComplete.length) {
-                        modbusClients[ipAddress].sizeDataInfo.sizeID = [];
-                        console.log(`Complete due to reason: Size ${distribution.SizeData.length} and Completed ${distributionComplete.length}`);
-                    } else {
+                // Convert the registerValue to a binary string (16-bit)
+                  let binaryValue = registerValue.toString(2).padStart(16, '0');
+                  console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
+                  console.log(`Binary representation: ${binaryValue}`);
+                  let index =  indexCompleteOnes(binaryValue);
+                  console.log("[Index] CompleteSize" + index);
+                  if (index != -1) {
+                  let distributionIDFromSize  =  await getDistributionIDFromSizeID(
+                    ipAddress, orderID, isLeather === 1 ? 0 : 1, storeDistributionData[ipAddress].SizeData[index].SizeID);
+                  if (distributionIDFromSize != null) 
+                    {
+                      for (const item of distributionIDFromSize.DistributionID) {
                         try {
-                            // Continue reading size
-                            const response = await client.readHoldingRegisters(sizeAddress, 1);
-                            const registerValue = response.response._body.values[0];
-
-                            // Convert the registerValue to a binary string (16-bit)
-                            let binaryValue = registerValue.toString(2).padStart(16, '0');
-                            console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
-                            console.log(`Binary representation: ${binaryValue}`);
-
-                            // Count '1' bits in the binary string
-                            let countCompleteSize = binaryValue.split('').filter(bit => bit === '1').length;
-                            console.log("[Size] Count size of '1' bits:", countCompleteSize);
-
-                            // check size equal to complete
-                            
-
-                            results.push({ address: sizeAddress, value: registerValue });
-
-                            // If all sizes are complete, update DistributionIDs
-                            if (countCompleteSize === distribution.SizeData.length && countCompleteSize === modbusClients[ipAddress].isComplete && Array.isArray(distribution.DistributionID)) {
-                                for (const item of distribution.DistributionID) {
-                                    try {
-                                        await setDistributionIsComplete(item.DistributionID, 'Complete' ,0);
-                                        console.log(`Updated DistributionID: ${item.DistributionID}, countCompleteSize: ${countCompleteSize}, distribution.SizeData: ${distribution.SizeData.length}`);
-
-                                        // Reset sizeID and delete from register
-                                        modbusClients[ipAddress].isComplete = 0;
-                                        modbusClients[ipAddress].sizeDataInfo.sizeID = [];
-                                        deleteDistributionFromRegister(client);
-                                    } catch (error) {
-                                        console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
-                                    }
-                                }
-                            }
-
-                            console.log("Register Values:", results);
+                            note = 0;
+                            await setDistributionIsComplete(item.DistributionID, 'Complete' , note);
+                            console.log(`Updated DistributionID: ${item.DistributionID} note ${note}`);
                         } catch (error) {
-                            console.error("Error reading size register:", error);
+                            console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
                         }
+                      }
                     }
-                } else {
-                    console.log("No valid size data found.");
+                  }
                 }
-            } catch (error) {
-                console.error(`Error reading register ${sizeAddress}:`, error.message);
-            }
-        }
+              }
+
+          let distributionComplete = await getDistributionCompleteFromDb(ipAddress, orderID, isLeather === 1 ? 0 : 1, note);
+
+          if (storeDistributionData[ipAddress]?.SizeData) {
+              if (distributionComplete?.length && storeDistributionData[ipAddress].SizeData.length === distributionComplete.length) {
+                  // Get the remaining SizeData values
+                  console.log(`Complete due to reason: Size ${storeDistributionData[ipAddress].SizeData.length} and Completed ${distributionComplete.length}`);
+                  modbusClients[ipAddress].isComplete = 0;
+                  modbusClients[ipAddress].sizeDataInfo.sizeID = [];
+                  previousData[ipAddress] = {};
+              } else {
+                  try {
+                      // Continue reading size
+                      const response = await client.readHoldingRegisters(sizeAddress, 1);
+                      const registerValue = response.response._body.values[0];
+
+                      // Convert the registerValue to a binary string (16-bit)
+                      let binaryValue = registerValue.toString(2).padStart(16, '0');
+                      console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
+                      console.log(`Binary representation: ${binaryValue}`);
+
+                      // Count '1' bits in the binary string
+                      let countCompleteSize = binaryValue.split('').filter(bit => bit === '1').length;
+                      console.log("[Size] Count size of '1' bits:", countCompleteSize);
+
+                      // check size equal to complete
+                      results.push({ address: sizeAddress, value: registerValue });
+                      // If all sizes are complete, update DistributionIDs
+                      if (countCompleteSize === storeDistributionData[ipAddress].SizeData.length && countCompleteSize === modbusClients[ipAddress].isComplete && Array.isArray(storeDistributionData[ipAddress].DistributionID)) {
+                          for (const item of storeDistributionData[ipAddress].DistributionID) {
+                              try {
+                                  console.log(`Updated DistributionID: ${item.DistributionID}, countCompleteSize: ${countCompleteSize}, distribution.SizeData: ${storeDistributionData[ipAddress].SizeData.length}`);
+                                  // Reset sizeID and delete from register
+                                  modbusClients[ipAddress].isComplete = 0;
+                                  modbusClients[ipAddress].sizeDataInfo.sizeID = []; 
+                                  previousData[ipAddress] = {};
+                              } catch (error) {
+                                  console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
+                              }
+                          }
+                      }
+
+                      console.log("Register Values:", results);
+                  } catch (error) {
+                      console.error("Error reading size register:", error);
+                  }
+              }
+          } else {
+              console.log("No valid size data found.");
+          }
+      } catch (error) {
+          console.error(`Error reading register ${sizeAddress}:`, error.message);
+      }        
     }
 
   }} catch (error) {
@@ -544,6 +568,39 @@ async function checkAndSaveDistribution(client, ipAddress) {
   }
 }
 
+function indexCompleteOnes(binaryString) {
+  let count = binaryString.split('').filter(bit => bit === '1').length;
+
+  if (binaryString === '0000000000000000') {
+      return -1; // Return -1 if all bits are 0
+  }
+  return count > 1 ? count - 1 : 0; // If at least two '1's exist, return count - 1, otherwise return 0
+}
+
+async function fetchStoreDistributionData(ipAddress, orderID, isLeather) {
+  while (true) {
+      if (Object.keys(storeDistributionData[ipAddress]).length === 0) {
+          if (isLeather === 1) {
+              chooseSizeAddress = 3101;
+              sizeAddress = 3102;
+              reasonCompleteSizeAddress = ['3107', '3108', '3109', '3110', '3111', '3112'];
+              storeDistributionData[ipAddress] = await getSizeAndDistributionDataFromDb(ipAddress, orderID, 0);
+          } else {
+              chooseSizeAddress = 3103;
+              sizeAddress = 3104;
+              reasonCompleteSizeAddress = ['3113', '3114', '3115'];
+              storeDistributionData[ipAddress] = await getSizeAndDistributionDataFromDb(ipAddress, orderID, 1);
+          }
+          return storeDistributionData[ipAddress]; // Exit loop after fetching data
+      } else {
+          // If data exists, you might want to log or handle this case differently
+          console.log('Data already exists for IP Address:', ipAddress);
+          
+          // If you want to exit or do something specific for existing data, do it here
+          return storeDistributionData[ipAddress]; // Return existing data
+      }
+  }
+}
 // Find bit index
 function findSetBitIndex(n) {
   let index = 0;
@@ -561,7 +618,7 @@ function findSetBitIndex(n) {
  * @param {Object} client - The Modbus client instance.
  * @returns {Promise<void>} - Resolves when the operation is completed.
  */
-async function deleteDistributionFromRegister(client) {
+async function deleteDistributionFromRegister(client, ipAddress) {
   let results = [];
   let deleteDistribution = 3000;
   const sizeIndex = 1;
@@ -584,9 +641,8 @@ async function deleteDistributionFromRegister(client) {
         // Write the value 1 to register 3001
         await client.writeSingleRegister(deleteDistribution, valueToWrite);
         console.log(`Written value ${valueToWrite} to register 3001`);
-        checkCompleteSize = 0;
+        storeDistributionData[ipAddress] = {};
     }
-
     results.push({ address: deleteDistribution, value: registerValue });
   } catch (error) {
     console.error(`Error reading register ${deleteDistribution}:`, error.message);
@@ -617,7 +673,6 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const previousData = {};  // Store previous data for comparison
 async function readActualData(client, ipAddress) {
   try {
     // Read OrderID from register 1000
@@ -632,7 +687,11 @@ async function readActualData(client, ipAddress) {
     const baseAddress = isLeather ? 886 : 966;
     const baseActual = isLeather ? 794 : 922;
     const baseSizeQtyAddress = isLeather ? 790 : 918;
+
     let completeSizeCount = 0; // Counter for completed sizes
+
+    // Ensure previousData[ipAddress] exists
+    if (!previousData[ipAddress]) previousData[ipAddress] = {};
 
     // Map over all size IDs and read Modbus registers
     const promises = modbusClients[ipAddress].sizeDataInfo.sizeID.map(async (sizeAddressID, index) => {
@@ -670,7 +729,7 @@ async function readActualData(client, ipAddress) {
           return;
         }
 
-         // Check if size is completed
+        // Check if size is completed
         const isComplete = actualCut === sizeQty;
         if (isComplete) completeSizeCount++; // Increment complete size count
         modbusClients[ipAddress].isComplete = completeSizeCount; // Store completion status
@@ -687,11 +746,9 @@ async function readActualData(client, ipAddress) {
           TotalPiecesPerPair: totalPieces
         };
 
-        // Check for changes against previous data
+        // Check for changes against previous data using JSON.stringify
         const prevData = previousData[ipAddress]?.[sizeID] || {};
-        const hasChanges = Object.keys(newData).some(
-          key => newData[key] !== prevData[key]
-        );
+        const hasChanges = JSON.stringify(newData) !== JSON.stringify(prevData);
 
         if (hasChanges) {
           console.log(`Data changed for sizeID ${sizeID}, updating DB...`, newData);
@@ -704,7 +761,6 @@ async function readActualData(client, ipAddress) {
           });
 
           // Update previousData with new values
-          if (!previousData[ipAddress]) previousData[ipAddress] = {};
           previousData[ipAddress][sizeID] = { ...newData };
         } else {
           console.log(`No change for sizeID ${sizeID}, skipping DB update.`);
@@ -725,107 +781,6 @@ async function readActualData(client, ipAddress) {
 }
 
 
-// async function readActualData(client, ipAddress) {
-//   try {
-//     const sizeLabels = [
-//       "10K", "10.5K", "11K", "11.5K", "12K", "12.5K", "13K", "13.5K",
-//       "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "5.5",
-//       "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5",
-//       "11", "11.5", "12", "12.5", "13", "13.5", "14", "14.5"
-//     ];
-
-//     const currentData = {};
-
-//     // Đọc OrderID từ thanh ghi 6507
-//     const orderIDData = await client.readHoldingRegisters(6507, 1);
-//     if (!orderIDData || !orderIDData.response || !orderIDData.response._body) {
-//       throw new Error('Không thể đọc OrderID từ thanh ghi 6507');
-//     }
-//     const OrderID = orderIDData.response._body.values[0];
-
-//     // Lấy PartName từ đối tượng modbusClients
-//     const partName = modbusClients[ipAddress]?.partName;
-//     console.log(`PartName on readActualData: ${partName}`);
-
-//     const promises = sizeLabels.map((label, i) => {
-//       const baseAddress = 6003 + i * 14;
-//       return Promise.all([ // Đọc nhiều thanh ghi
-//         client.readHoldingRegisters(baseAddress + 2, 1),  // PiecesPerPair
-//         client.readHoldingRegisters(baseAddress + 4, 1),  // MaterialLayer
-//         client.readHoldingRegisters(baseAddress + 6, 1),  // CuttingDieQty
-//         client.readHoldingRegisters(baseAddress + 8, 1),  // ActualCut
-//         client.readHoldingRegisters(baseAddress + 10, 1), // ActualPieces
-//         client.readHoldingRegisters(baseAddress + 12, 1)  // ActualSizeQty
-//       ]).then(async ([piecesPerPairData, materialLayerData, cuttingDieQtyData, actualCutData, actualPiecesData, actualSizeQtyData]) => {
-
-//         // Kiểm tra và xử lý dữ liệu từ Modbus cho mỗi thanh ghi
-//         const piecesPerPair = piecesPerPairData?.response?._body?.values[0] ?? 0;
-//         const materialLayer = materialLayerData?.response?._body?.values[0] ?? 0;
-//         const cuttingDieQty = cuttingDieQtyData?.response?._body?.values[0] ?? 0;
-//         const actualCut = actualCutData?.response?._body?.values[0] ?? 0;
-//         const actualPieces = actualPiecesData?.response?._body?.values[0] ?? 0;
-//         const actualSizeQty = actualSizeQtyData?.response?._body?.values[0] ?? 0;
-
-//         // Lưu dữ liệu vào currentData
-//         currentData[label] = {
-//           PiecesPerPair: piecesPerPair,
-//           MaterialLayer: materialLayer,
-//           CuttingDieQty: cuttingDieQty,
-//           ActualCut: actualCut,
-//           ActualPieces: actualPieces,
-//           ActualSizeQty: actualSizeQty
-//         };
-
-//         // Kiểm tra sự thay đổi và chỉ lưu nếu có sự thay đổi
-//         const prevData = previousData ? previousData[label] : null;
-//         let hasChanges = !prevData || (
-//           piecesPerPair !== prevData.PiecesPerPair ||
-//           materialLayer !== prevData.MaterialLayer ||
-//           cuttingDieQty !== prevData.CuttingDieQty ||
-//           actualCut !== prevData.ActualCut ||
-//           actualPieces !== prevData.ActualPieces ||
-//           actualSizeQty !== prevData.ActualSizeQty
-//         );
-
-//         if (hasChanges) {
-//           if (piecesPerPair !== 0 || materialLayer !== 0 ||
-//             cuttingDieQty !== 0 || actualCut !== 0 || actualPieces !== 0 || actualSizeQty !== 0) {
-
-//             console.log(`${label} =`, currentData[label]);
-
-//             await saveActualDataToDB({
-//               OrderID: OrderID,
-//               SizeData: [{
-//                 Size: label,
-//                 PiecesPerPair: piecesPerPair,
-//                 MaterialLayer: materialLayer,
-//                 CuttingDieQty: cuttingDieQty,
-//                 ActualCut: actualCut,
-//                 ActualPieces: actualPieces,
-//                 ActualSizeQty: actualSizeQty
-//               }],
-//             }, partName);
-//           }
-
-//           previousData[label] = {
-//             PiecesPerPair: piecesPerPair,
-//             MaterialLayer: materialLayer,
-//             CuttingDieQty: cuttingDieQty,
-//             ActualCut: actualCut,
-//             ActualPieces: actualPieces,
-//             ActualSizeQty: actualSizeQty
-//           };
-//         }
-//       });
-//     });
-
-//     await Promise.all(promises);
-
-//   } catch (error) {
-//     console.error(`Error reading actual data: ${error.message}`);
-//     logToFile(errorLogPath, `Error reading actual data: ${error.message}`);
-//   }
-// }
 async function writeToModbusRegister(client) {
   try {
     setInterval(async () => {
@@ -979,6 +934,10 @@ async function saveDistributionDataToModbus(ipAddress, data) {
       await connectToDevice(ipAddress);
     }
 
+     // Ensure modbusClients structure exists
+     modbusClients[ipAddress] ||= {};
+     modbusClients[ipAddress].sizeDataInfo ||= {};
+
     // Write Order Info
     const orderInfo = [data.Model, data.ART, data.SO, data.MasterWorkOrder];
     const orderInfoAddresses = [
@@ -1059,7 +1018,6 @@ async function saveDistributionDataToModbus(ipAddress, data) {
     
     await Promise.all(partIDPromises);
     
-
     // Write Part Names
     const partNameStartRegister = data.Leather == 2 ? 320 : 270;
     const partNamePromises = data.MaterialData.slice(0, 20).map(async (material, i) => {
@@ -1118,33 +1076,35 @@ async function saveDistributionDataToModbus(ipAddress, data) {
 
 // Ghi size data vào thanh ghi 
 async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
-  // kiểm tra nếu null or > 6 size
-  if(Array.isArray(sizeData) && sizeData.length > 6) 
-    return;
+  // Ensure sizeData is an array and limit its length based on isLeather
+  if (!Array.isArray(sizeData)) return;
 
-  // Ensure sizeDataInfo exists
-  modbusClients[ipAddress] ||= {};              
-  modbusClients[ipAddress].sizeDataInfo ||= {};
+  const maxSize = isLeather == 2 ? 3 : 6;
+
+  const processedSizeData = sizeData.slice(0, maxSize);
+  // if (!remainingSizeData[ipAddress]) {
+  //   remainingSizeData[ipAddress] = {}; // Initialize if undefined
+  // }
+  // remainingSizeData[ipAddress].sizeData = sizeData.slice(maxSize);
 
   // Assign values correctly
-  modbusClients[ipAddress].sizeDataInfo.sizeCount = sizeData.length;
+  modbusClients[ipAddress].sizeDataInfo.sizeCount = processedSizeData.length;
   modbusClients[ipAddress].sizeDataInfo.isLeather = isLeather;
 
-  console.log(`[sizeDataInfo] Number of size ${modbusClients[ipAddress].sizeDataInfo.sizeCount} and isLeather ${isLeather}`)
+  console.log(`[sizeDataInfo] Number of size ${modbusClients[ipAddress].sizeDataInfo.sizeCount} and isLeather ${isLeather}`);
 
   let registerSize = [];
-  if (isLeather == 2 && sizeData.length <= 3) {
-    // register number of size
-    // size leather
-    await client.writeSingleRegister(1003, sizeData.length);
+  if (isLeather == 2) {
+    // Leather sizes
+    await client.writeSingleRegister(1003, processedSizeData.length);
     registerSize = [
       { SizeID: 900, Size: 906, SizeQty: 918, InventoryQty: 79 },
       { SizeID: 902, Size: 910, SizeQty: 934, InventoryQty: 83 },
       { SizeID: 904, Size: 914, SizeQty: 950, InventoryQty: 87 },
     ];
   } else {
-    // size Raw
-    await client.writeSingleRegister(1002, sizeData.length);
+    // Raw sizes
+    await client.writeSingleRegister(1002, processedSizeData.length);
     registerSize = [
       { SizeID: 750, Size: 762, SizeQty: 790, InventoryQty: 55 },
       { SizeID: 752, Size: 766, SizeQty: 806, InventoryQty: 59 },
@@ -1154,24 +1114,20 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
       { SizeID: 760, Size: 782, SizeQty: 870, InventoryQty: 75 },
     ];
   }
-  for (let i = 0; i < sizeData.length; i++) {
-    const item = sizeData[i];
+
+  for (let i = 0; i < processedSizeData.length; i++) {
+    const item = processedSizeData[i];
 
     // Validate the values before writing
     const isValidValue = (value) => typeof value === 'number' && value >= 0 && value <= 65535;
 
-    // Logging to debug the values
     console.log(`Writing to Modbus: SizeID = ${item.SizeID}, Size = ${item.Size}, SizeQty = ${item.SizeQty}, InventoryQty = ${item.InventoryQty}`);
 
     if (!item.Size || typeof item.Size !== 'string') {
       console.error(`Invalid Size value: ${item.Size}`);
       continue;
     }
-    if (
-      !isValidValue(item.SizeID) ||
-      !isValidValue(item.SizeQty) ||
-      !isValidValue(item.InventoryQty)
-    ) {
+    if (!isValidValue(item.SizeID) || !isValidValue(item.SizeQty) || !isValidValue(item.InventoryQty)) {
       console.error(`Invalid value detected for SizeID ${item.SizeID}: Values must be within the range 0-65535.`);
       continue;  // Skip
     }
@@ -1182,13 +1138,13 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
       const startSizeRegister = registerSize[i].Size; 
       await client.writeSingleRegister(registerSize[i].SizeID, item.SizeID);
 
-      // push sizeID
+      // Ensure sizeID array exists
       if (!Array.isArray(modbusClients[ipAddress].sizeDataInfo.sizeID)) {
         modbusClients[ipAddress].sizeDataInfo.sizeID = [];
       }
       if (!modbusClients[ipAddress].sizeDataInfo.sizeID.includes(registerSize[i].SizeID)) {
         modbusClients[ipAddress].sizeDataInfo.sizeID.push(registerSize[i].SizeID);
-        console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`)
+        console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`);
       }      
 
       console.log(`Writing to register ${registerSize[i].SizeID}, value: ${item.SizeID}`);
@@ -1201,7 +1157,7 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
       console.log(`Writing to register ${registerSize[i].InventoryQty}, value: ${item.InventoryQty}`);
 
       await client.writeSingleRegister(registerSize[i].SizeQty, item.SizeQty || 0);    
-      await client.writeSingleRegister(registerSize[i].InventoryQty, item.InventoryQty  || 0); 
+      await client.writeSingleRegister(registerSize[i].InventoryQty, item.InventoryQty || 0); 
       console.log(`Successfully written to Modbus for SizeID ${item.SizeID}`);
     } catch (error) {
       console.error(`Error writing to Modbus for SizeID ${item.SizeID}:`, error);
@@ -1216,7 +1172,10 @@ async function closeAllConnections() {
       await updateDeviceConnectionStatus(ipAddress, false).catch((err) => {
         console.error(`Error updating device connection status: ${err.message}`);
       });
-      modbusClient.socket.end();
+      if (modbusClient?.socket) {
+        modbusClient.socket.end();
+        console.log("Socket connection closed.");
+      }
       console.log(`Closed connection to device at ${ipAddress}`);
       logToFile(successLogPath, `Closed connection to device at ${ipAddress}`);
     }

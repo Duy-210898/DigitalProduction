@@ -99,6 +99,7 @@ async function getActualOutputData(startDate, endDate) {
       pr.ART,
       do.IsLeather,
       o.OperatorName,
+      p.PartName,
       s.Size,
       dl.MachineName,
       pso.SizeID,
@@ -128,7 +129,7 @@ async function getActualOutputData(startDate, endDate) {
       po.MasterWorkOrder, po.SO, pr.Model, pr.ART, 
       o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
       do.PiecesPerPair, do.MaterialLayer, do.CuttingDieQty, 
-      do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt
+      do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt, p.PartName
       ORDER BY do.CreatedAt DESC;
   `;
   
@@ -150,6 +151,7 @@ async function getActualOutputData(startDate, endDate) {
       const filteredOutputData = result.recordset
         .filter(record => record.SizeQty > 0)
         .map(record => ({
+          PartName: record.PartName,
           MachineName: record.MachineName,
           SO: record.SO,
           IsLeather: record.IsLeather,
@@ -259,15 +261,16 @@ async function setDistributionIsComplete(DistributionID, Status ,Note) {
 
 
 async function saveActualDataToDB(data) {
-  const { OrderID, SizeData , IsLeather} = data;
+  const { OrderID, SizeData, IsLeather } = data;
 
-  // Kiểm tra OrderID và PartName trước khi tiếp tục
+  // Kiểm tra OrderID trước khi tiếp tục
   if (!OrderID || OrderID === 0) {
     throw new Error('OrderID không hợp lệ');
   }
+
   try {
     for (const size of SizeData) {
-      if (!size.SizeID || typeof size.SizeID === 'int') {
+      if (!size.SizeID || typeof size.SizeID !== 'number') {
         throw new Error(`Kích thước không hợp lệ: ${size.SizeID}`);
       }
 
@@ -276,10 +279,14 @@ async function saveActualDataToDB(data) {
         { name: 'SizeID', type: sql.Int, value: size.SizeID },
         { name: 'IsLeather', type: sql.Int, value: IsLeather }
       ];
+
+      // Check if entry exists
       const checkDeviceOutputQuery = `
-            SELECT COUNT(*) AS count FROM DeviceOutput 
-            WHERE OrderID = @OrderID AND SizeID = @SizeID AND IsLeather = @IsLeather
-      `;    
+        SELECT COUNT(*) AS count FROM DeviceOutput 
+        WHERE OrderID = @OrderID AND SizeID = @SizeID AND IsLeather = @IsLeather
+      `;
+
+      // Insert Query
       const DeviceOutputQuery = `
         INSERT INTO DeviceOutput (
             OrderID, SizeID, PiecesPerPair, MaterialLayer, CuttingDieQty, 
@@ -290,19 +297,21 @@ async function saveActualDataToDB(data) {
         );
       `;
 
-      const DeviceOutputInputs = [ 
+      // Inputs for Insert
+      const DeviceOutputInputs = [
         { name: 'OrderID', type: sql.Int, value: OrderID },
         { name: 'SizeID', type: sql.Int, value: size.SizeID },
         { name: 'IsLeather', type: sql.Int, value: IsLeather },
-        { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair },
-        { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer },
-        { name: 'CuttingDieQty', type: sql.Int, value: size.CuttingDieQty },
-        { name: 'ActualCut', type: sql.Int, value: size.ActualCut },
-        { name: 'ActualPieces', type: sql.Int, value: size.ActualPieces },
-        { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty },
-        { name: 'TotalPiecesPerPair', type: sql.Int, value: size.TotalPiecesPerPair }
+        { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair ?? 0 },
+        { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer ?? 0 },
+        { name: 'CuttingDieQty', type: sql.Int, value: size.CuttingDieQty ?? 0 },
+        { name: 'ActualCut', type: sql.Int, value: size.ActualCut ?? 0 },
+        { name: 'ActualPieces', type: sql.Int, value: size.ActualPieces ?? 0 },
+        { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty ?? 0 },
+        { name: 'TotalPiecesPerPair', type: sql.Int, value: size.TotalPiecesPerPair ?? 0 }
       ];
 
+      // Update Query
       const updateDeviceOutputQuery = `
         UPDATE DeviceOutput
         SET
@@ -321,36 +330,38 @@ async function saveActualDataToDB(data) {
           AND IsLeather = @IsLeather
       `;
 
-        const updateDeviceOutputInputs = [
-          { name: 'OrderID', type: sql.Int, value: OrderID },
-          { name: 'SizeID', type: sql.Int, value: size.SizeID },
-          { name: 'IsLeather', type: sql.Int, value: IsLeather },
-          { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair },
-          { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer },
-          { name: 'CuttingDieQty', type: sql.Int, value: size.CuttingDieQty },
-          { name: 'ActualCut', type: sql.Int, value: size.ActualCut },
-          { name: 'ActualPieces', type: sql.Int, value: size.ActualPieces },
-          { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty },
-          { name: 'TotalPiecesPerPair', type: sql.Int, value: size.TotalPiecesPerPair }
-        ];
+      // Inputs for Update
+      const updateDeviceOutputInputs = [
+        { name: 'OrderID', type: sql.Int, value: OrderID },
+        { name: 'SizeID', type: sql.Int, value: size.SizeID },
+        { name: 'IsLeather', type: sql.Int, value: IsLeather },
+        { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair },
+        { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer },
+        { name: 'CuttingDieQty', type: sql.Int, value: size.CuttingDieQty },
+        { name: 'ActualCut', type: sql.Int, value: size.ActualCut },
+        { name: 'ActualPieces', type: sql.Int, value: size.ActualPieces },
+        { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty },
+        { name: 'TotalPiecesPerPair', type: sql.Int, value: size.TotalPiecesPerPair }
+      ];
 
-     // Log each parameter in a readable format
+      // Log input parameters for debugging
       DeviceOutputInputs.forEach(param => {
         console.log(`${param.name}: ${param.value} (Type: ${param.type?.name || param.type})`);
       });
+
+      // Execute check query
       const result = await executeQuery(checkDeviceOutputQuery, inputs);
+
       if (result[0].count === 0) {
-        // 🔄 Step 2: If not exists, INSERT
+        // If not exists, INSERT
         await executeQuery(DeviceOutputQuery, DeviceOutputInputs);
         console.log(`✅ Inserted DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
       } else {
-        // ➕ Step 3: If exists, UPDATE
-        await  executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
-        console.log(`✅ Updated new DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
+        // If exists, UPDATE
+        await executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
+        console.log(`✅ Updated DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
       }
     }
-
-    //console.log('Dữ liệu Actual đã được cập nhật thành công');
   } catch (error) {
     console.error('Lỗi khi cập nhật Actual data:', error.message);
     throw error;
@@ -600,7 +611,7 @@ async function getDistributionDataFromDb(ipAddress) {
 async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather, reasonComplete) {
   try {
     const query =
-          `SELECT  
+          `SELECT TOP 6
               dd.DistributionID, 
               se.SizeID
           FROM 
@@ -616,7 +627,8 @@ async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather, r
           JOIN 
               ProductOrder AS pr ON ps.OrderId = pr.OrderID
           WHERE 
-              dd.IsDelete = 0  
+              dd.Status = 'Pending'
+              AND dd.IsDelete = 0  
               AND d.IpAddress = @ipAddress
               AND ps.OrderId = @OrderId
               AND dd.IsLeather = @IsLeather
@@ -681,7 +693,7 @@ async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather, note
             JOIN 
                 PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
             WHERE 
-			        dd.Status = 'Complete'
+			        dd.Status = 'Stop'
               AND dd.IsDelete = 0  
               AND d.IpAddress = @IpAddress
               AND ps.OrderId = @OrderId

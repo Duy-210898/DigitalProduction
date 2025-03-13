@@ -9,6 +9,7 @@ namespace DigitalProduction.Models
         private string _so;
         private string _size;
         private bool _isLeather;
+        private string _partName;
         private string _operatorName;
         private int? _sizeQty;
         private int? _piecesPerPair;
@@ -48,6 +49,11 @@ namespace DigitalProduction.Models
         {
             get => _materialType;
             set { _materialType = value; OnPropertyChanged(nameof(MaterialType)); }
+        }
+        public string PartName
+        {
+            get => _partName;
+            set { _partName = value; OnPropertyChanged(nameof(PartName)); }
         }
 
         public string Size

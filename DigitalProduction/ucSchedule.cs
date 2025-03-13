@@ -106,7 +106,15 @@ namespace DigitalProduction
                 var response = JsonConvert.DeserializeObject<ResponseMessage<List<ProductionSchedule>>>(jsonData);
                 if (response != null && response.Status == "success" && response.Schedule != null)
                 {
-                    Invoke(new Action(() => UpdateGrid(response.Schedule)));
+                    // Ensure UI update happens on the main thread
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() => UpdateGrid(response.Schedule)));
+                    }
+                    else
+                    {
+                        UpdateGrid(response.Schedule);
+                    }
                 }
             }
             catch (Exception ex)

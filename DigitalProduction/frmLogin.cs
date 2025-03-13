@@ -2,6 +2,8 @@
 using System.Resources;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DigitalProduction.Validation;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static DigitalProduction.frmMain;
 
 namespace DigitalProduction
@@ -70,6 +72,12 @@ namespace DigitalProduction
 
         private void btn_Login_Click(object sender, EventArgs e)
         {
+            if (!txt_username.ValidateInput(ValidationType.NotEmptyString) ||
+                !txt_pwd.ValidateInput(ValidationType.NotEmptyString))
+            {
+                MessageBox.Show("Invalid input! Please correct the highlighted fields.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             bool checkLogin = DbHelper.loginUser(txt_username.Text, SecurityHelper.HashPassword(txt_pwd.Text));
             if (checkLogin)
             {

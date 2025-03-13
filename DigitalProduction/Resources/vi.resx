@@ -412,7 +412,7 @@
     <value>Tên người vận hành</value>
   </data>
   <data name="CuttingDieQty" xml:space="preserve">
-    <value>Số lần chặt</value>
+    <value>Số dao chặt</value>
   </data>
   <data name="Infomation" xml:space="preserve">
     <value>Thông báo</value>
@@ -427,7 +427,7 @@
     <value>Số lớp vật liệu</value>
   </data>
   <data name="PeicesPerPair" xml:space="preserve">
-    <value>Số đôi</value>
+    <value>Số miếng trên đôi:</value>
   </data>
   <data name="TotalPeicesPerPair" xml:space="preserve">
     <value>Tổng số đôi</value>
@@ -499,9 +499,24 @@
     <value>Loại liệu</value>
   </data>
   <data name="PiecesPerPair" xml:space="preserve">
-    <value>Số miếng</value>
+    <value>Số miếng trên đôi</value>
   </data>
   <data name="TotalPiecesPerPair" xml:space="preserve">
     <value>Tổng số miếng</value>
+  </data>
+  <data name="RequiredChooseSize" xml:space="preserve">
+    <value>Vui lòng chọn bộ vị hợp lệ trước khi chọn kích thước.</value>
+  </data>
+  <data name="SelectionRequired" xml:space="preserve">
+    <value>Yêu cầu lựa chọn</value>
+  </data>
+  <data name="SelectSize" xml:space="preserve">
+    <value>Chọn kích thước</value>
+  </data>
+  <data name="RequiredPart" xml:space="preserve">
+    <value>Vui lòng chọn bộ vị...</value>
+  </data>
+  <data name="QueueSize" xml:space="preserve">
+    <value>Kích thước đang chờ</value>
   </data>
 </root>
