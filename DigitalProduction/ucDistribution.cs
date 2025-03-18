@@ -1109,5 +1109,12 @@ namespace DigitalProduction
             var sizeData = sizeDataList.FirstOrDefault(s => s.SizeID == sizeId);
             return sizeData != null ? sizeData.Size : string.Empty;
         }
+        public void ReceiveFilteredData(List<ProductionSchedule> filteredSchedules)
+        {
+            foreach (var schedule in filteredSchedules)
+            {
+                Console.WriteLine($"Received: {schedule.SO} - {schedule.PartName} - {schedule.Size}");
+            }
+        }
     }
 }

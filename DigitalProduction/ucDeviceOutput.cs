@@ -176,6 +176,12 @@ namespace DigitalProduction
                     }
                 }
 
+                // Hide _isLeather if it appears in headers
+                var column = gridView_DeviceOutput.Columns["is Leather"];
+                if (column != null)
+                {
+                    column.Visible = false;
+                }
                 gridView_DeviceOutput.Columns["Is Group Header"].Visible = false;
                 gridView_DeviceOutput.Columns["Is Leather"].Visible = false;
 

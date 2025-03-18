@@ -20,6 +20,8 @@ namespace DigitalProduction
         private Label lblTotalRecords;
         private GridControl gridControl;
         private GridView gridView;
+        private Button btnSendData;
+        private readonly string[] columnsToHide = { "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process" };
 
         public ucSchedule()
         {
@@ -28,6 +30,50 @@ namespace DigitalProduction
             InitializeTotalLabel();
             InitializeMonthFilter();
         }
+ 
+        private void BtnSendData_Click(object sender, EventArgs e)
+        {
+            List<ProductionSchedule> filteredSchedules = GetFilteredData();
+
+            if (filteredSchedules.Count == 0)
+            {
+                MessageBox.Show("No data available to send.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Assuming ucDistribution is already created and accessible
+            ucDistribution distributionControl = new ucDistribution();
+            distributionControl.ReceiveFilteredData(filteredSchedules);
+
+            MessageBox.Show($"Sent {filteredSchedules.Count} records to Distribution!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private List<ProductionSchedule> GetFilteredData()
+        {
+            var filteredData = new List<ProductionSchedule>();
+
+            if (gridView == null || gridView.DataSource == null)
+                return filteredData;
+
+            // Ensure the grid view is refreshed to reflect the latest filter changes
+            gridView.RefreshData();
+
+            // Iterate through filtered (visible) rows
+            for (int i = 0; i < gridView.RowCount; i++)
+            {
+                int rowHandle = gridView.GetVisibleRowHandle(i);
+                if (gridView.IsDataRow(rowHandle))
+                {
+                    var row = gridView.GetRow(rowHandle) as ProductionSchedule;
+                    if (row != null)
+                    {
+                        filteredData.Add(row);
+                    }
+                }
+            }
+
+            return filteredData;
+        }
+
 
         private void SetupGridControl()
         {
@@ -54,22 +100,73 @@ namespace DigitalProduction
             gridView.OptionsView.ShowGroupedColumns = true;
 
             Controls.Add(gridControl);
-
+            GroupGridViewColumns();
+            gridView.ColumnFilterChanged += (sender, e) => UpdateTotalLabel();
         }
 
+        private void GroupGridViewColumns()
+        {
+            gridView.ClearGrouping();
 
+            GridColumn partNameColumn = gridView.Columns["PartName"];
+            GridColumn sizeColumn = gridView.Columns["Size"];
+            GridColumn soColumn = gridView.Columns["SO"];
+            if (soColumn != null)
+            {
+                soColumn.GroupIndex = 0;
+            }
+            if (partNameColumn != null)
+            {
+                partNameColumn.GroupIndex = 1;
+            }
+
+            if (sizeColumn != null)
+            {
+                sizeColumn.GroupIndex = 2;
+            }
+
+            gridView.ExpandAllGroups(); // Expand all groups after setting
+        }
 
         private void InitializeTotalLabel()
         {
-            lblTotalRecords = new Label
+            FlowLayoutPanel bottomPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Bottom,
-                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
-                Text = "Total Records: 0",
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = true,
+                Padding = new Padding(5),
                 BackColor = System.Drawing.Color.Transparent
             };
-            Controls.Add(lblTotalRecords);
+
+            lblTotalRecords = new Label
+            {
+                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
+                Text = $" {LocalizationManager.GetString("TotalRecords")} 0",
+                AutoSize = true,
+                BackColor = System.Drawing.Color.AntiqueWhite,
+                ForeColor = System.Drawing.Color.Green,
+                Padding = new Padding(5)
+            };
+
+            btnSendData = new Button
+            {
+                Text = "Send to Distribution",
+                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
+                BackColor = System.Drawing.Color.LightBlue,
+                AutoSize = true,
+                Margin = new Padding(10, 0, 0, 0) // Adds space between label and button
+            };
+            btnSendData.Click += BtnSendData_Click;
+
+            // Add components to FlowLayoutPanel
+            bottomPanel.Controls.Add(lblTotalRecords);
+            bottomPanel.Controls.Add(btnSendData);
+
+            // Add to UserControl
+            Controls.Add(bottomPanel);
         }
+
 
         private void InitializeMonthFilter()
         {
@@ -152,17 +249,13 @@ namespace DigitalProduction
 
         private void HideGridColumns()
         {
-            if (gridView.Columns.Count > 0)
+            foreach (var columnName in columnsToHide)
             {
-                gridView.Columns["Factory"].Visible = false;
-                gridView.Columns["OrderID"].Visible = false;
-                gridView.Columns["LastNo"].Visible = false;
-                gridView.Columns["PartSizeUnit"].Visible = false;
-                gridView.Columns[18].Visible = false; //Part ID
-                gridView.Columns["SizeID"].Visible = false;
-                gridView.Columns["MaterialUnit"].Visible = false;
-                gridView.Columns["MaterialID"].Visible = false;
-                gridView.Columns["Process"].Visible = false;
+                var column = gridView.Columns[columnName];
+                if (column != null)
+                {
+                    column.Visible = false;
+                }
             }
 
             TranslateHeaders();
@@ -189,23 +282,37 @@ namespace DigitalProduction
 
         private void ApplyMonthFilter()
         {
-            if (selectedMonth == null)
+            var filteredData = productionSchedules
+                .Where(schedule => selectedMonth == null ||
+                                  (schedule.CreatedAt.Year == selectedMonth.Value.Year &&
+                                   schedule.CreatedAt.Month == selectedMonth.Value.Month))
+                .ToList();
+
+            // Update the grid control's data point
+            gridControl.DataSource = filteredData;
+
+            // Reset and apply grouping
+            gridView.ClearGrouping();
+            GroupGridViewColumns();
+            gridView.ExpandAllGroups();
+            gridView.RefreshData();
+
+            if (!filteredData.Any())
             {
-                gridControl.DataSource = productionSchedules.ToList();
+                MessageBox.Show("No records found for the selected month.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            else
-            {
-                var filteredData = productionSchedules
-                    .Where(schedule => schedule.CreatedAt.Year == selectedMonth.Value.Year && schedule.CreatedAt.Month == selectedMonth.Value.Month)
-                    .ToList();
-                gridControl.DataSource = filteredData;
-            }
+
             UpdateTotalLabel();
         }
 
+
+
         private void UpdateTotalLabel()
         {
-            int totalCount = (gridControl.DataSource as List<ProductionSchedule>)?.Count ?? 0;
+            if (gridView == null)
+                return;
+
+            int totalCount = gridView.DataRowCount; // Get only filtered rows
             lblTotalRecords.Text = $"{LocalizationManager.GetString("TotalRecords")} {totalCount}";
             lblTotalRecords.BackColor = System.Drawing.Color.AntiqueWhite;
             lblTotalRecords.ForeColor = System.Drawing.Color.Green;

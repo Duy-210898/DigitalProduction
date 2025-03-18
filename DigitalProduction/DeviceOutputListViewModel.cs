@@ -400,7 +400,6 @@ namespace DigitalProduction.ViewModels
                             BindingDeviceOutputs.Add(newItem);
                         }
                     }
-
                     index++;
                 }
 
