@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms;
+using System.Threading.Tasks;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -13,7 +13,7 @@ namespace DigitalProduction.ViewModels
     {
         private WebSocketClient _webSocketClient;
         private BindingList<DeviceOutput> _bindingDeviceOutputs = new BindingList<DeviceOutput>();
-        private System.Windows.Forms.Timer _timer;
+        private Timer _pollingTimer; // Dùng Timer chạy nền thay vì WinForms Timer
         private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
 
         // Filter properties for API
@@ -41,6 +41,8 @@ namespace DigitalProduction.ViewModels
                 {
                     FilterService.Instance.FilterStartDate = value ?? DateTime.Today;
                     OnPropertyChanged(nameof(FilterStartDate));
+                    // Call RequestData when the date changes
+                    RequestData();
                 }
             }
         }
@@ -54,6 +56,8 @@ namespace DigitalProduction.ViewModels
                 {
                     FilterService.Instance.FilterEndDate = value ?? DateTime.Today;
                     OnPropertyChanged(nameof(FilterEndDate));
+                    // Call RequestData when the date changes
+                    RequestData();
                 }
             }
         }
@@ -115,19 +119,42 @@ namespace DigitalProduction.ViewModels
 
             // Initialize the BindingList.
             _bindingDeviceOutputs = new BindingList<DeviceOutput>();
-
-            // Initialize Timer with a 2-second interval.
-            _timer = new System.Windows.Forms.Timer { Interval = 2000 };
-            _timer.Tick += Timer_Tick;
         }
 
         public void SetWebSocketClient(WebSocketClient webSocket)
         {
             _webSocketClient = webSocket ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseRealTime += WebSocket_OnMessage;
-            // Start the timer to request data every 2 seconds.
-            _timer.Start();
+
+            // Bắt đầu polling kiểm tra thay đổi trong SQL Server
+            StartPolling();
         }
+
+        private void StartPolling()
+        {
+            _pollingTimer = new Timer(async _ =>
+            {
+                await CheckForSqlUpdates();
+            }, null, 0, 2000);
+        }
+
+        private async Task CheckForSqlUpdates()
+        {
+            try
+            {
+                bool hasUpdates = await DbHelper.CheckForSqlUpdates();
+                if (hasUpdates)
+                {
+                    Console.WriteLine("SQL data changed, requesting new data...");
+                    RequestData();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking SQL updates: {ex.Message}");
+            }
+        }
+
 
         public async void RequestData()
         {
@@ -169,11 +196,6 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-        // Timer tick event handler to request data.
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            RequestData();
-        }
 
         private void WebSocket_OnMessage(string jsonData)
         {
@@ -396,11 +418,6 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-
-
-
-
-
         public static void UpdateProperties<T>(T existing, T updated, params string[] propertyNames)
         {
             if (existing == null || updated == null)
@@ -432,20 +449,12 @@ namespace DigitalProduction.ViewModels
 
         public void Dispose()
         {
-            if (_timer != null)
-            {
-                _timer.Stop();
-                _timer.Tick -= Timer_Tick;
-                _timer.Dispose();
-                _timer = null;
-            }
-
+            _pollingTimer?.Dispose();
             if (_webSocketClient != null)
             {
                 _webSocketClient.OnResponseRealTime -= WebSocket_OnMessage;
             }
-
-            Console.WriteLine("DeviceOutputListViewModel disposed successfully.");
+            Console.WriteLine("ViewModel disposed.");
         }
 
 

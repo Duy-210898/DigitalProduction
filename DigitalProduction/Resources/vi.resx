@@ -477,7 +477,7 @@
   <data name="IsLeather" xml:space="preserve">
     <value>Loại liệu </value>
   </data>
-  <data name="Note" xml:space="preserve">
+  <data name="NoteDescription" xml:space="preserve">
     <value>Ghi chú</value>
   </data>
   <data name="PartName" xml:space="preserve">
@@ -518,5 +518,17 @@
   </data>
   <data name="QueueSize" xml:space="preserve">
     <value>Kích thước đang chờ</value>
+  </data>
+  <data name="MaterialCode" xml:space="preserve">
+    <value>Mã liệu</value>
+  </data>
+  <data name="MaterialName" xml:space="preserve">
+    <value>Tên liệu</value>
+  </data>
+  <data name="PartCode" xml:space="preserve">
+    <value>Mã bộ vị</value>
+  </data>
+  <data name="TotalRecords" xml:space="preserve">
+    <value>Tổng bản ghi:</value>
   </data>
 </root>

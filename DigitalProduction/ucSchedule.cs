@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -33,18 +34,30 @@ namespace DigitalProduction
             gridControl = new GridControl { Dock = DockStyle.Fill };
             gridView = new GridView(gridControl)
             {
-                OptionsView = { ShowGroupPanel = false, ColumnAutoWidth = true }
+                OptionsView = { ShowGroupPanel = true, ColumnAutoWidth = true },
+                OptionsBehavior = { AutoExpandAllGroups = true } // Automatically expands all groups
             };
+
             gridControl.MainView = gridView;
             gridControl.DataSource = productionSchedules;
-            gridView.OptionsBehavior.Editable = false;
+            gridView.OptionsBehavior.Editable = true;
+
+            // Customize headers
             gridView.Appearance.HeaderPanel.Font = new System.Drawing.Font("Arial", 8, System.Drawing.FontStyle.Bold);
             gridView.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
             gridView.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
             gridView.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
 
+            // Ensure groups are always expanded
+            gridView.OptionsView.ShowGroupPanel = true;
+            gridView.OptionsView.GroupDrawMode = DevExpress.XtraGrid.Views.Grid.GroupDrawMode.Office;
+            gridView.OptionsView.ShowGroupedColumns = true;
+
             Controls.Add(gridControl);
+
         }
+
+
 
         private void InitializeTotalLabel()
         {
@@ -147,9 +160,31 @@ namespace DigitalProduction
                 gridView.Columns["PartSizeUnit"].Visible = false;
                 gridView.Columns[18].Visible = false; //Part ID
                 gridView.Columns["SizeID"].Visible = false;
+                gridView.Columns["MaterialUnit"].Visible = false;
+                gridView.Columns["MaterialID"].Visible = false;
                 gridView.Columns["Process"].Visible = false;
             }
+
+            TranslateHeaders();
         }
+
+
+        private void TranslateHeaders()
+        {
+            if (gridControl.MainView is GridView gridView && gridView.Columns.Count > 0)
+            {
+                foreach (GridColumn col in gridView.Columns)
+                {
+                    string translatedText = LocalizationManager.GetString(col.FieldName);
+                    if (!string.IsNullOrEmpty(translatedText))
+                    {
+                        col.Caption = translatedText;
+                    }
+                }
+                gridView.LayoutChanged(); // Force update to reflect changes
+            }
+        }
+
 
 
         private void ApplyMonthFilter()
@@ -171,7 +206,7 @@ namespace DigitalProduction
         private void UpdateTotalLabel()
         {
             int totalCount = (gridControl.DataSource as List<ProductionSchedule>)?.Count ?? 0;
-            lblTotalRecords.Text = $"Total Records: {totalCount}";
+            lblTotalRecords.Text = $"{LocalizationManager.GetString("TotalRecords")} {totalCount}";
             lblTotalRecords.BackColor = System.Drawing.Color.AntiqueWhite;
             lblTotalRecords.ForeColor = System.Drawing.Color.Green;
         }

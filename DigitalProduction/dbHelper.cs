@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.Data.Filtering;
-using DevExpress.DocumentServices.ServiceModel.DataContracts;
 using DigitalProduction.Models;
 
 namespace DigitalProduction
@@ -15,6 +12,7 @@ namespace DigitalProduction
     internal class DbHelper
     {
         private static string connectionString;
+        private static DateTime _lastCheckTime = DateTime.MinValue;
 
         static DbHelper()
         {
@@ -884,6 +882,43 @@ namespace DigitalProduction
 
                     int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
+                }
+            }
+        }
+        public static async Task<bool> CheckForSqlUpdates()
+        {
+            // Câu truy vấn để lấy timestamp mới nhất trong bảng DeviceOutputs
+            string query = "SELECT MAX(UpdatedAt) FROM DeviceOutput";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                try
+                {
+                    await conn.OpenAsync(); // Mở kết nối đến cơ sở dữ liệu
+
+                    // Thực thi truy vấn và lấy kết quả
+                    var result = await cmd.ExecuteScalarAsync();
+
+                    // Kiểm tra giá trị trả về
+                    if (result != DBNull.Value && result != null)
+                    {
+                        DateTime latestTimestamp = Convert.ToDateTime(result);
+
+                        // So sánh timestamp mới nhất với thời gian đã lưu
+                        if (latestTimestamp > _lastCheckTime)
+                        {
+                            _lastCheckTime = latestTimestamp; // Cập nhật thời gian kiểm tra mới nhất
+                            return true; // Trả về true nếu có thay đổi
+                        }
+                    }
+
+                    return false; // Trả về false nếu không có thay đổi
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error checking SQL updates: {ex.Message}");
+                    return false; // Xử lý lỗi và trả về false
                 }
             }
         }

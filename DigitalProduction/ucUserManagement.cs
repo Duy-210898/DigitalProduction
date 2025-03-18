@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -239,7 +238,7 @@ namespace DigitalProduction
             if (paginationPanel != null)
             {
                 // Update the existing label instead of creating a new one
-                lblPageInfo.Text = $"Total Records: {employees.Count}";
+                lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")}  {employees.Count}";
             }
             else
             {
@@ -316,11 +315,21 @@ namespace DigitalProduction
             });
         }
 
-        public void SetWebSocketClient()
+        private bool _isDataLoaded = false;
+        public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-            _webSocketClient = WebSocketClient.Instance;
-            _ = GetDataAndLoadToGridAsync();
+            if (_webSocketClient != null)
+            {
+                _webSocketClient.OnResponseReceived -= WebSocket_OnMessage;
+            }
+
+            _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
+
+            if (!_isDataLoaded)
+            {
+                _ = GetDataAndLoadToGridAsync();
+            }
         }
 
         public async Task GetDataAndLoadToGridAsync()
@@ -330,14 +339,19 @@ namespace DigitalProduction
 
             try
             {
-                await _webSocketClient.SendAsync(jsonRequest);
-            }
-            catch (Exception ex)
-            {
-                this.Invoke((MethodInvoker)delegate
+                string response = await _webSocketClient.SendAsync(jsonRequest);
+                if (string.IsNullOrEmpty(response))
                 {
-                    MessageBox.Show($"Error fetching data: {ex.Message}");
-                });
+                    MessageBox.Show("No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                WebSocket_OnMessage(response);
+                _isDataLoaded = true;
+            }
+            catch (TimeoutException)
+            {
+                MessageBox.Show("Request timed out.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

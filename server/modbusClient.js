@@ -491,13 +491,17 @@ async function checkAndSaveDistribution(client, ipAddress) {
                   if (index != -1) {
                   let distributionIDFromSize  =  await getDistributionIDFromSizeID(
                     ipAddress, orderID, isLeather === 1 ? 0 : 1, storeDistributionData[ipAddress].SizeData[index].SizeID);
-                  if (distributionIDFromSize != null) 
+                  if (distributionIDFromSize !== null && 
+                      Array.isArray(modbusClients[ipAddress].sizeCompleteID) && 
+                      modbusClients[ipAddress].sizeCompleteID.length > 0 &&
+                      storeDistributionData[ipAddress].SizeData[index].SizeID !== 0 &&
+                      modbusClients[ipAddress].sizeCompleteID.includes(storeDistributionData[ipAddress].SizeData[index].SizeID))
                     {
                       for (const item of distributionIDFromSize.DistributionID) {
                         try {
                             note = 0;
                             await setDistributionIsComplete(item.DistributionID, 'Complete' , note);
-                            console.log(`Updated DistributionID: ${item.DistributionID} note ${note}`);
+                            console.log(`Complete DistributionID: ${item.DistributionID} note ${note}`);
                         } catch (error) {
                             console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
                         }
@@ -729,9 +733,24 @@ async function readActualData(client, ipAddress) {
           return;
         }
 
-        // Check if size is completed
-        const isComplete = actualCut === sizeQty;
-        if (isComplete) completeSizeCount++; // Increment complete size count
+       // Check if size is completed
+      const isComplete = actualCut === sizeQty;
+
+      // Ensure sizeCompleteID is an array
+      if (!Array.isArray(modbusClients[ipAddress].sizeCompleteID)) {
+          modbusClients[ipAddress].sizeCompleteID = [];
+      }
+
+      if (isComplete) {
+          completeSizeCount++; // Increment complete size count
+
+          // Add new unique sizeID if not already present
+          if (!modbusClients[ipAddress].sizeCompleteID.includes(sizeID)) {
+              modbusClients[ipAddress].sizeCompleteID.push(sizeID);
+              console.log(`[sizeCompleteID] Added: ${sizeID}`);
+          }
+      }
+
         modbusClients[ipAddress].isComplete = completeSizeCount; // Store completion status
 
         // Construct the new data object

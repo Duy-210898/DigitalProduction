@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using DigitalProduction.ViewModels;
 
@@ -12,40 +15,69 @@ namespace DigitalProduction
         private DateTimePicker dateTimePickerStart;
         private DateTimePicker dateTimePickerEnd;
         private TextBox txtFilter;
+        private GridControl gridControl_DeviceOutput;
+        private GridView gridView_DeviceOutput;
+        private Panel mainPanel;
+        private FlowLayoutPanel filterPanel;
 
         public ucDeviceOutput()
         {
             InitializeComponent();
             _viewModel = new DeviceOutputListViewModel();
             Console.WriteLine("Uc is loading");
+
+            // Create a main panel for layout management
+            mainPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(5) // Add some padding for better spacing
+            };
+
+            // Initialize filter controls
             initFilterDate();
             LoadFilters();
-            // Bind UI elements to ViewModel properties
-            dataGrid_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
-            dataGrid_DeviceOutput.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGrid_DeviceOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
-            dataGrid_DeviceOutput.CellFormatting += DataGrid_DeviceOutput_CellFormatting;
+            // Initialize DevExpress GridControl and GridView
+            gridControl_DeviceOutput = new GridControl
+            {
+                Dock = DockStyle.Fill, // Fill remaining space
+                Margin = new Padding(5) // Add margin to separate from filters
+            };
+
+            gridView_DeviceOutput = new GridView(gridControl_DeviceOutput)
+            {
+                OptionsView = { ShowGroupPanel = false },
+                OptionsBehavior = { Editable = false }
+            };
+
+            gridControl_DeviceOutput.MainView = gridView_DeviceOutput;
+            gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
+
+            gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
+            gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
             this.Resize += UcDeviceOutput_Resize;
-            dataGrid_DeviceOutput.DataBindingComplete += DataGrid_DeviceOutput_DataBindingComplete;
-            // Assuming _viewModel is your DeviceOutputListViewModel instance.
+
             dateTimePickerStart.DataBindings.Add("Value", _viewModel, "FilterStartDate", true, DataSourceUpdateMode.OnPropertyChanged);
             dateTimePickerEnd.DataBindings.Add("Value", _viewModel, "FilterEndDate", true, DataSourceUpdateMode.OnPropertyChanged);
             txtFilter.DataBindings.Add("Text", _viewModel, "FilterKeyword", false, DataSourceUpdateMode.OnPropertyChanged);
             dateTimePickerStart.ValueChanged += DateTimePickerStart_ValueChanged;
             dateTimePickerEnd.ValueChanged += DateTimePickerEnd_ValueChanged;
+
+            // Add controls to the main panel
+            mainPanel.Controls.Add(gridControl_DeviceOutput);
+            this.Controls.Add(mainPanel);
+            this.Controls.Add(filterPanel); // Ensure filters stay at the top
+
             TranslateHeaders();
         }
 
         private void LoadFilters()
         {
-            // Assuming you have TextBoxes or DateTimePickers bound to these properties
             txtFilter.Text = FilterService.Instance.FilterKeyword;
             dateTimePickerStart.Value = FilterService.Instance.FilterStartDate ?? DateTime.Today;
             dateTimePickerEnd.Value = FilterService.Instance.FilterEndDate ?? DateTime.Today;
-            // Similar for other controls
         }
-        // **Ensure start date is never greater than end date**
+
         private void DateTimePickerStart_ValueChanged(object sender, EventArgs e)
         {
             if (dateTimePickerStart.Value > dateTimePickerEnd.Value)
@@ -55,7 +87,6 @@ namespace DigitalProduction
             }
         }
 
-        // **Ensure end date is never less than start date**
         private void DateTimePickerEnd_ValueChanged(object sender, EventArgs e)
         {
             if (dateTimePickerEnd.Value < dateTimePickerStart.Value)
@@ -67,41 +98,20 @@ namespace DigitalProduction
 
         private void initFilterDate()
         {
-            // Create a FlowLayoutPanel to hold the filter controls and dock it at the top.
-            FlowLayoutPanel filterPanel = new FlowLayoutPanel
+            filterPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Top,
-                Height = 50, // Adjust height as needed.
+                Height = 50,
                 Padding = new Padding(10),
                 FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false, // Keep controls on a single line.
+                WrapContents = false,
                 AutoSize = true
             };
 
-            // Initialize DateTimePicker for Start Date.
-            dateTimePickerStart = new DateTimePicker
-            {
-                Format = DateTimePickerFormat.Short,
-                Margin = new Padding(5)
-            };
+            dateTimePickerStart = new DateTimePicker { Format = DateTimePickerFormat.Short, Margin = new Padding(5) };
+            dateTimePickerEnd = new DateTimePicker { Format = DateTimePickerFormat.Short, Margin = new Padding(5) };
+            txtFilter = new TextBox { Width = 150, Margin = new Padding(5), ForeColor = Color.Gray, Text = LocalizationManager.GetString("Search") };
 
-            // Initialize DateTimePicker for End Date.
-            dateTimePickerEnd = new DateTimePicker
-            {
-                Format = DateTimePickerFormat.Short,
-                Margin = new Padding(5)
-            };
-
-            // Initialize txtFilter for searching.
-            txtFilter = new TextBox
-            {
-                Width = 150,
-                Margin = new Padding(5),
-                ForeColor = Color.Gray,
-                Text = LocalizationManager.GetString("Search")
-            };
-
-            // Remove placeholder text when focused
             txtFilter.GotFocus += (s, e) =>
             {
                 if (txtFilter.Text == LocalizationManager.GetString("Search"))
@@ -111,7 +121,6 @@ namespace DigitalProduction
                 }
             };
 
-            // Restore placeholder if empty when losing focus
             txtFilter.LostFocus += (s, e) =>
             {
                 if (string.IsNullOrWhiteSpace(txtFilter.Text))
@@ -121,37 +130,32 @@ namespace DigitalProduction
                 }
             };
 
-            // Add controls to the FlowLayoutPanel.
             filterPanel.Controls.Add(dateTimePickerStart);
             filterPanel.Controls.Add(dateTimePickerEnd);
-            filterPanel.Controls.Add(txtFilter); // Add the text filter box
-
-            // Add the panel to the top of the UserControl.
-            this.Controls.Add(filterPanel);
+            filterPanel.Controls.Add(txtFilter);
         }
 
-
-        private void DataGrid_DeviceOutput_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        private void GridView_DeviceOutput_RowStyle(object sender, RowStyleEventArgs e)
         {
-            if (dataGrid_DeviceOutput.Columns.Contains("IsLeather"))
+            var row = gridView_DeviceOutput.GetRow(e.RowHandle) as DeviceOutput;
+            if (row != null && row.IsGroupHeader)
             {
-                dataGrid_DeviceOutput.Columns["IsLeather"].Visible = false;
+                e.Appearance.BackColor = Color.LightGray;
+                e.Appearance.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Bold);
             }
-            if (dataGrid_DeviceOutput.Columns.Contains("IsGroupHeader"))
+        }
+
+        private void GridView_DeviceOutput_CustomColumnDisplayText(object sender, DevExpress.XtraGrid.Views.Base.CustomColumnDisplayTextEventArgs e)
+        {
+            if (e.Column.FieldName == "IpAddress" && e.ListSourceRowIndex >= 0)
             {
-                dataGrid_DeviceOutput.Columns["IsGroupHeader"].Visible = false;
+                e.DisplayText = string.Empty; // Hide IpAddress
             }
         }
 
         private void UcDeviceOutput_Resize(object sender, EventArgs e)
         {
-            if (dataGrid_DeviceOutput.Columns.Count > 0)
-            {
-                foreach (DataGridViewColumn column in dataGrid_DeviceOutput.Columns)
-                {
-                    column.Width = dataGrid_DeviceOutput.Width / dataGrid_DeviceOutput.Columns.Count;
-                }
-            }
+            gridView_DeviceOutput.BestFitColumns();
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -159,36 +163,23 @@ namespace DigitalProduction
             _viewModel.SetWebSocketClient(webSocketClient);
         }
 
-        private void DataGrid_DeviceOutput_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            try
-            {
-                var row = dataGrid_DeviceOutput.Rows[e.RowIndex].DataBoundItem as DeviceOutput;
-                if (row != null)
-                {
-                    if (row.IsGroupHeader)
-                    {
-                        e.CellStyle.BackColor = Color.LightGray;
-                        e.CellStyle.Font = new Font(dataGrid_DeviceOutput.Font, FontStyle.Bold);
-                    }
-                    else if (dataGrid_DeviceOutput.Columns[e.ColumnIndex].Name == "IpAddress")
-                    {
-                        e.Value = string.Empty; // Hide IpAddress for normal rows
-                        e.FormattingApplied = true;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowMessage.ShowError("Exception: " + ex.Message);
-            }
-        }
         private void TranslateHeaders()
         {
-            foreach (DataGridViewColumn col in dataGrid_DeviceOutput.Columns)
+            if (gridView_DeviceOutput.Columns.Count > 0)
             {
-                // Use the appropriate property depending on how you identify headers
-                col.HeaderText = LocalizationManager.GetString(col.Name) ?? col.Name; // Assuming you're using column Name as key
+                foreach (GridColumn col in gridView_DeviceOutput.Columns)
+                {
+                    string translatedText = LocalizationManager.GetString(col.FieldName);
+                    if (!string.IsNullOrEmpty(translatedText))
+                    {
+                        col.Caption = translatedText;
+                    }
+                }
+
+                gridView_DeviceOutput.Columns["Is Group Header"].Visible = false;
+                gridView_DeviceOutput.Columns["Is Leather"].Visible = false;
+
+                gridView_DeviceOutput.LayoutChanged(); // Force update to reflect changes
             }
         }
     }

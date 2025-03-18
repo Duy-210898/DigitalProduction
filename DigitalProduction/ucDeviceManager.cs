@@ -558,7 +558,7 @@ namespace DigitalProduction
             paginationPanel = new Panel { Dock = DockStyle.Bottom, Height = 50, Padding = new Padding(10) };
             lblPageInfo = new Label
             {
-                Text = $"Total Records: {devices.Count}",
+                Text = $"{LocalizationManager.GetString("TotalRecords")} {devices.Count}",
                 Size = new Size(200, 30),
                 ForeColor = Color.Green,
                 Font = new Font("Arial", 10, FontStyle.Bold),

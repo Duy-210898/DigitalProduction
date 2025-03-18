@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using Newtonsoft.Json;
 
@@ -16,13 +18,13 @@ namespace DigitalProduction
         private WebSocketClient _webSocketClient;
         private Panel paginationPanel;
         private Label lblPageInfo;
-        private DataGridView dgvProgressManagement;
+        private GridControl gridProgressManagement; // Use GridControl
+        private GridView gridViewProgressManagement; // Use GridView
         private DateTimePicker dtpStartDate;
         private DateTimePicker dtpEndDate;
         private Label lblStartDate;
         private Label lblEndDate;
         private TextBox txtSearch;
-
 
         public ucProgress()
         {
@@ -99,49 +101,24 @@ namespace DigitalProduction
             filterPanel.Controls.Add(dtpEndDate);
             filterPanel.Controls.Add(txtSearch);
 
-            // Initialize DataGridView
-            dgvProgressManagement = new DataGridView
+            // Initialize GridControl
+            gridProgressManagement = new GridControl
             {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                EnableHeadersVisualStyles = false,
-                BackgroundColor = Color.White
+                Dock = DockStyle.Fill
             };
 
-            var headerStyle = new DataGridViewCellStyle
+            gridViewProgressManagement = new GridView(gridProgressManagement)
             {
-                Font = new Font("Arial", 12, FontStyle.Bold),
-                Alignment = DataGridViewContentAlignment.MiddleCenter,
-                BackColor = Color.AntiqueWhite,
-                ForeColor = Color.Black
+                OptionsBehavior = { Editable = false },
+                OptionsView = { ShowGroupPanel = false }
             };
 
-            dgvProgressManagement.ColumnHeadersDefaultCellStyle = headerStyle;
-            dgvProgressManagement.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
-            dgvProgressManagement.ColumnHeadersHeight = 35;
+            gridProgressManagement.MainView = gridViewProgressManagement;
 
-            // Ensure columns exist before applying styles
-            dgvProgressManagement.DataBindingComplete += (s, e) =>
-            {
-                dgvProgressManagement.ColumnHeadersDefaultCellStyle = headerStyle;
-                dgvProgressManagement.Refresh();
-            };
-            // Create a new TextBox column for "IsLeather"
-            DataGridViewTextBoxColumn isLeatherTextColumn = new DataGridViewTextBoxColumn
-            {
-                Name = "IsLeather",
-                HeaderText = "Material Type",
-                DataPropertyName = "IsLeather"
-            };
-
-            // Insert "IsLeather" column at the last position
-            dgvProgressManagement.Columns.Add(isLeatherTextColumn);
-
-            dgvProgressManagement.CellFormatting += DgvProgressManagement_CellFormatting;
+            // Set grid control columns
+            ConfigureGridControl();
 
             // Initialize Pagination Panel
-            // Pagination Panel
             paginationPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
@@ -167,23 +144,52 @@ namespace DigitalProduction
 
             refreshButton.Click += async (sender, e) =>
             {
-                refreshButton.Enabled = false;
-                refreshButton.Text = "Loading...";
-                await GetDataAndLoadToGridAsync();
-                refreshButton.Enabled = true;
-                refreshButton.Text = "Refresh";
+                try
+                {
+                    refreshButton.Enabled = false;
+                    refreshButton.Text = "Loading...";
+
+                    await Task.Run(async () => await GetDataAndLoadToGridAsync());
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    refreshButton.Enabled = true;
+                    refreshButton.Text = "Refresh";
+                }
             };
 
-            paginationPanel.Controls.Add(lblPageInfo);
             paginationPanel.Controls.Add(refreshButton);
+            paginationPanel.Controls.Add(lblPageInfo);
 
             // Add components to container panel
-            containerPanel.Controls.Add(dgvProgressManagement);
+            containerPanel.Controls.Add(gridProgressManagement);
             containerPanel.Controls.Add(filterPanel);
             containerPanel.Controls.Add(paginationPanel);
 
             // Add container panel to the UserControl
             this.Controls.Add(containerPanel);
+
+            // Subscribe to the RowStyle event
+            gridViewProgressManagement.RowCellStyle += GridViewProgressManagement_RowCellStyle;
+        }
+
+        private void ConfigureGridControl()
+        {
+            // Clear existing columns
+            gridViewProgressManagement.Columns.Clear();
+
+            gridViewProgressManagement.Appearance.HeaderPanel.Font = new System.Drawing.Font("Arial", 8, System.Drawing.FontStyle.Bold);
+            gridViewProgressManagement.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
+            gridViewProgressManagement.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
+            gridViewProgressManagement.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            // Set data source
+            gridProgressManagement.DataSource = distributionDataList;
+
         }
 
         // Event handlers for placeholder functionality
@@ -208,11 +214,9 @@ namespace DigitalProduction
 
         private void DateTimePicker_ValueChanged(object sender, EventArgs e)
         {
-            // Get current values from DateTimePickers
             DateTime newStartDate = dtpStartDate.Value.Date;
             DateTime newEndDate = dtpEndDate.Value.Date;
 
-            // Check for invalid date range
             if (newStartDate > newEndDate)
             {
                 AdjustDates(sender, ref newStartDate, ref newEndDate);
@@ -220,26 +224,23 @@ namespace DigitalProduction
             }
             else
             {
-                // If dates are valid, filter data
-                Console.WriteLine("Text search: " + txtSearch.Text);
                 FilterData(newStartDate, newEndDate, txtSearch.Text == LocalizationManager.GetString("Search") ? "" : txtSearch.Text.Trim());
             }
         }
 
         private void AdjustDates(object sender, ref DateTime newStartDate, ref DateTime newEndDate)
         {
-            // Temporarily unsubscribe from the ValueChanged event to prevent recursion
             if (sender == dtpStartDate)
             {
                 dtpStartDate.ValueChanged -= DateTimePicker_ValueChanged;
-                newStartDate = newEndDate; // Roll back to endDate
+                newStartDate = newEndDate;
                 dtpStartDate.Value = newStartDate;
                 dtpStartDate.ValueChanged += DateTimePicker_ValueChanged;
             }
             else if (sender == dtpEndDate)
             {
                 dtpEndDate.ValueChanged -= DateTimePicker_ValueChanged;
-                newEndDate = newStartDate; // Roll back to startDate
+                newEndDate = newStartDate;
                 dtpEndDate.Value = newEndDate;
                 dtpEndDate.ValueChanged += DateTimePicker_ValueChanged;
             }
@@ -247,27 +248,18 @@ namespace DigitalProduction
 
         private void ShowInvalidDateMessage()
         {
-            MessageBox.Show("Invalid date range! Start date cannot be after End date.",
-                            "Date Selection Error",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show("Invalid date range! Start date cannot be after End date.", "Date Selection Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
+
         private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
-            // This will ensure search text has no placeholders and is trimmed.
             string searchInput = txtSearch.Text.Trim();
-            if (!string.IsNullOrEmpty(searchInput) && searchInput != "Search...")
-            {
-                FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, searchInput);
-            }
-            else
-            {
-                FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, "");
-            }
+            FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, string.IsNullOrEmpty(searchInput) || searchInput == "Search..." ? "" : searchInput);
         }
 
         private void FilterData(DateTime startDate, DateTime endDate, string searchText)
         {
-            endDate = endDate.AddDays(1).AddTicks(-1); // Include the full end day
+            endDate = endDate.AddDays(1).AddTicks(-1);
             searchText = searchText.ToLower();
 
             var filteredData = new BindingList<Distribution>(
@@ -275,105 +267,38 @@ namespace DigitalProduction
                     distribution.CreatedAt >= startDate &&
                     distribution.CreatedAt <= endDate &&
                     (string.IsNullOrEmpty(searchText) ||
-                    distribution.IpAddress.ToLower().Contains(searchText) ||
-                    distribution.MachineName.ToLower().Contains(searchText) ||
-                    distribution.OperatorName.ToLower().Contains(searchText) ||
-                    distribution.EmployeeName.ToLower().Contains(searchText))
+                     distribution.IpAddress.ToLower().Contains(searchText) ||
+                     distribution.MachineName.ToLower().Contains(searchText) ||
+                     distribution.OperatorName.ToLower().Contains(searchText) ||
+                     distribution.EmployeeName.ToLower().Contains(searchText))
                 ).ToList()
             );
 
-            UpdateDataGridView(filteredData);
+            UpdateGridControl(filteredData);
         }
 
-        private void UpdateDataGridView(BindingList<Distribution> filteredData)
+
+        private void UpdateGridControl(BindingList<Distribution> filteredData)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action(() => UpdateDataGridView(filteredData)));
+                this.Invoke(new Action(() => UpdateGridControl(filteredData)));
                 return;
             }
 
-            dgvProgressManagement.DataSource = filteredData;
-            lblPageInfo.Text = $"Total Records: {filteredData.Count}";
+            gridProgressManagement.DataSource = filteredData;
+            gridProgressManagement.Refresh();  // Ensure UI updates
+            TranslateHeaders();
+            lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")} {filteredData.Count}";
         }
 
-        private void DgvProgressManagement_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-            {
-                DataGridViewRow row = dgvProgressManagement.Rows[e.RowIndex];
-
-                // Apply style if "Status" is "Complete"
-                if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-                {
-                    DataGridViewColumn column = dgvProgressManagement.Columns[e.ColumnIndex];
-
-                    // Apply green text only to the "Status" column
-                    if (column.Name == "Status")
-                    {
-                        string status = e.Value?.ToString();
-                        if (status == "Complete")
-                        {
-                            e.CellStyle.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
-                            e.CellStyle.ForeColor = Color.Green; // Apply green text only to "Status" column
-                        }
-                        else if (status == "Pending") {
-                            // Reset style if not "Complete"
-                            e.CellStyle.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
-                            e.CellStyle.ForeColor = Color.Orange;
-                        }
-                        else
-                        {
-                            // Reset style if not "Complete"
-                            e.CellStyle.Font = new Font(dgvProgressManagement.Font, FontStyle.Bold);
-                            e.CellStyle.ForeColor = Color.Red;
-                        }
-                        e.FormattingApplied = true;
-                    }
-                }
-            }
-
-            if (dgvProgressManagement.Columns[e.ColumnIndex].Name == "IsLeather")
-            {
-                e.Value = (Convert.ToBoolean(e.Value)) ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
-                e.FormattingApplied = true;
-            }
-
-            // Format the 'Note' column.
-            if (dgvProgressManagement.Columns[e.ColumnIndex].Name == "Note" && e.Value is int)
-            {
-                int noteValue = (int)e.Value;
-                switch (noteValue)
-                {
-                    case 1:
-                        e.Value = LocalizationManager.GetString("NotEnoughMaterials");
-                        break;
-                    case 2:
-                        e.Value = LocalizationManager.GetString("ChangeOfPlan");
-                        break;
-                    case 3:
-                        e.Value = LocalizationManager.GetString("ForgotToChooseSize");
-                        break;
-                    case 0:
-                        e.Value = String.Empty;
-                        break;
-                    default:
-                        e.Value = "N/A";
-                        break;
-                }
-                e.FormattingApplied = true;
-            }
-        }
-
-
-
-        private bool _isDataLoaded = false; // Track if data has been loaded
+        private bool _isDataLoaded = false;
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
             if (_webSocketClient != null)
             {
-                _webSocketClient.OnResponseReceived -= WebSocket_OnMessage; // Unsubscribe previous instance
+                _webSocketClient.OnResponseReceived -= WebSocket_OnMessage;
             }
 
             _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
@@ -385,7 +310,6 @@ namespace DigitalProduction
             }
         }
 
-
         public async Task GetDataAndLoadToGridAsync()
         {
             var request = new { app = Global.App, action = "getDistributions" };
@@ -396,55 +320,43 @@ namespace DigitalProduction
                 string response = await _webSocketClient.SendAsync(jsonRequest);
                 if (string.IsNullOrEmpty(response))
                 {
-                    Console.WriteLine("Received null or empty response from WebSocket.");
                     MessageBox.Show("No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                Console.WriteLine($"Response received: {response}");
-                WebSocket_OnMessage(response); // Process WebSocket response
-
-                _isDataLoaded = true; // Mark data as loaded (but we will reset it in Refresh)
+                WebSocket_OnMessage(response);
+                _isDataLoaded = true;
             }
             catch (TimeoutException)
             {
-                Console.WriteLine("WebSocket request timed out.");
-                MessageBox.Show("Request timed out for UserControlA.");
+                MessageBox.Show("Request timed out.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-
         private void WebSocket_OnMessage(string jsonData)
         {
-            if (this.IsDisposed || !this.IsHandleCreated) return; // Prevent accessing disposed controls
-
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(new Action(() => WebSocket_OnMessage(jsonData)));
+                Invoke(new Action<string>(WebSocket_OnMessage), jsonData);
                 return;
             }
 
             try
             {
-                ResponseMessage<List<Distribution>> response = ResponseMessage<List<Distribution>>.FromJson(jsonData);
-
+                var response = ResponseMessage<List<Distribution>>.FromJson(jsonData);
                 if (response?.DistributionData != null && response.DistributionData.Count > 0)
                 {
-                    distributionDataList.Clear();
-                    distributionDataList = new BindingList<Distribution>(response.DistributionData);
+                    distributionDataList.Clear();  // Ensure the list is cleared only when necessary
 
-                    this.Invoke((MethodInvoker)delegate
+                    foreach (var distribution in response.DistributionData)
                     {
-                        if (this.IsDisposed || !this.IsHandleCreated) return;
+                        if (distribution != null)
+                        {
+                            distributionDataList.Add(distribution);
+                        }
+                    }
 
-                        CreateLabelTotalControls();
-
-                        dgvProgressManagement.DataSource = null;  // ✅ Prevent binding issues
-                        dgvProgressManagement.DataSource = distributionDataList;
-                        ConfigureDataGridView();
-                        TranslateHeaders();
-                        FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, "");
-                    });
+                    UpdateGridControl(new BindingList<Distribution>(distributionDataList));
                 }
                 else
                 {
@@ -456,99 +368,60 @@ namespace DigitalProduction
                 MessageBox.Show($"Error receiving WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        private void CreateLabelTotalControls()
+        // Implement the RowStyle event handler
+        private void GridViewProgressManagement_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
         {
-            if (paginationPanel != null)
+            var view = sender as GridView;
+            if (view != null)
             {
-                this.Controls.Remove(paginationPanel);
-                paginationPanel.Dispose();
+                // Get the current row data
+                var rowData = view.GetRow(e.RowHandle) as Distribution;
+
+                // Ensure rowData is valid and the column is "Status"
+                if (rowData != null && e.Column.FieldName == "Status")
+                {
+                    // Customize only the "Status" column background color
+                    if (rowData.Status == "Complete")
+                    {
+                        e.Appearance.BackColor = Color.LightGreen; // Green for complete
+                    }
+                    else if (rowData.Status == "Pending")
+                    {
+                        e.Appearance.BackColor = Color.LightYellow; // Yellow for pending
+                    }
+                    else
+                    {
+                        e.Appearance.BackColor = Color.LightCoral; // Red for other statuses
+                    }
+
+                }
             }
-
-            paginationPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Padding = new Padding(10)
-            };
-
-            lblPageInfo = new Label
-            {
-                Text = $"Total Records: {distributionDataList.Count}",
-                ForeColor = Color.Green,
-                Font = new Font("Arial", 10, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(20, 10)
-            };
-
-            Button refreshButton = new Button
-            {
-                Text = "Refresh",
-                Size = new Size(80, 30),
-                Location = new Point(250, 10)
-            };
-
-            refreshButton.Click += async (sender, e) =>
-            {
-                refreshButton.Enabled = false;
-                refreshButton.Text = "Loading...";
-
-                try
-                {
-                    _isDataLoaded = false; // ✅ Allow data reload
-                    await GetDataAndLoadToGridAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error refreshing data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    refreshButton.Enabled = true;
-                    refreshButton.Text = "Refresh";
-                }
-            };
-
-
-
-            paginationPanel.Controls.Add(lblPageInfo);
-            paginationPanel.Controls.Add(refreshButton);
-
-            // Ensure pagination panel is added at the bottom
-            this.Controls.Add(paginationPanel);
         }
-        private void ConfigureDataGridView()
+
+
+        private void TranslateHeaders()
         {
-            dgvProgressManagement.AutoGenerateColumns = false;
-            dgvProgressManagement.Columns["DistributionID"].Visible = false;
-            dgvProgressManagement.Columns["InventoryQty"].HeaderText = "Inventory Quantity";
-            dgvProgressManagement.Columns["Status"].HeaderText = "Status";
-
-            // Formatting DateTime columns
-            foreach (DataGridViewColumn column in dgvProgressManagement.Columns)
+            if (gridProgressManagement.MainView is GridView gridView && gridView.Columns.Count > 0)
             {
-                if (column.Name == "CreatedAt")
+                foreach (GridColumn col in gridView.Columns)
                 {
-                    column.DefaultCellStyle.Format = "dd/MM/yyyy hh:mm";
+                    string translatedText = LocalizationManager.GetString(col.FieldName);
+                    if (!string.IsNullOrEmpty(translatedText))
+                    {
+                        col.Caption = translatedText;
+                    }
                 }
+                gridView.LayoutChanged(); // Force update to reflect changes
             }
-
-            // Optionally, set auto-resizing for rows
-            dgvProgressManagement.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
+            gridViewProgressManagement.Columns["Note"].Visible = false;
+            gridViewProgressManagement.Columns["DistributionID"].Visible = false;
+            gridViewProgressManagement.Columns["IsLeather"].Visible = false;
+            gridViewProgressManagement.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
         }
 
         private void LoadTextLabel()
         {
-            // Assuming LocalizationManager returns strings based on your localization needs
             this.Text = LocalizationManager.GetString("ListOfDistributions");
-        }
-        private void TranslateHeaders()
-        {
-            foreach (DataGridViewColumn col in dgvProgressManagement.Columns)
-            {
-                // Use the appropriate property depending on how you identify headers
-                col.HeaderText = LocalizationManager.GetString(col.Name) ?? col.Name; // Assuming you're using column Name as key
-            }
         }
         public class Distribution
         {
@@ -567,7 +440,27 @@ namespace DigitalProduction
             public string Status { get; set; }
             public DateTime CreatedAt { get; set; }
             public bool IsLeather { get; set; }
+            // New read-only property
+            public string MaterialType => IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
+
             public int? Note { get; set; }
+
+            // New read-only property for NoteDescription
+            public string NoteDescription
+            {
+                get
+                {
+                    switch (Note)
+                    {
+                        case 1: return LocalizationManager.GetString("NotEnoughMaterials");
+                        case 2: return LocalizationManager.GetString("ChangeOfPlan");
+                        case 3: return LocalizationManager.GetString("ForgotToChooseSize");
+                        case 0: return string.Empty;
+                        default: return string.Empty;
+                    }
+                }
+            }
+
         }
     }
 }

@@ -348,7 +348,7 @@ namespace DigitalProduction
                 this.Controls.Add(paginationPanel); // Finally add Panel to control collection
             }
 
-            lblPageInfo.Text = $"Total Records: {employees.Count}"; // Update the label text
+            lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")} {employees.Count}"; // Update the label text
         }
         private async void SyncButton_Click(object sender, EventArgs e)
         {
