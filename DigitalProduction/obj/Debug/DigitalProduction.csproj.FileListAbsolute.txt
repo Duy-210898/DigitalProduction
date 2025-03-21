@@ -189,3 +189,4 @@ D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.Buffers.xml
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.Memory.xml
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.Numerics.Vectors.xml
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses

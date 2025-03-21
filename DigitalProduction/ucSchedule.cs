@@ -30,8 +30,8 @@ namespace DigitalProduction
             InitializeTotalLabel();
             InitializeMonthFilter();
         }
- 
-        private void BtnSendData_Click(object sender, EventArgs e)
+
+        private async void BtnSendData_Click(object sender, EventArgs e)
         {
             List<ProductionSchedule> filteredSchedules = GetFilteredData();
 
@@ -41,12 +41,30 @@ namespace DigitalProduction
                 return;
             }
 
-            // Assuming ucDistribution is already created and accessible
-            ucDistribution distributionControl = new ucDistribution();
-            distributionControl.ReceiveFilteredData(filteredSchedules);
+            // Get reference to frmMain
+            Form parentForm = this.FindForm();
+            if (parentForm is frmMain mainForm)
+            {
+                // Switch to ucDistribution
+                await mainForm.ShowUserControlAsync<ucDistribution>();
 
-            MessageBox.Show($"Sent {filteredSchedules.Count} records to Distribution!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Send filtered data to ucDistribution
+                if (mainForm._userControls.TryGetValue(typeof(ucDistribution), out UserControl userControl))
+                {
+                    if (userControl is ucDistribution distributionControl)
+                    {
+                        distributionControl.ReceiveFilteredData(filteredSchedules);
+                    }
+                }
+
+                // 🔥 Highlight "Distribution" in Accordion Menu
+                mainForm.HighlightSelectedItem(mainForm.btnDistribution);
+
+                MessageBox.Show($"Sent {filteredSchedules.Count} records to Distribution!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
+
+
         private List<ProductionSchedule> GetFilteredData()
         {
             var filteredData = new List<ProductionSchedule>();

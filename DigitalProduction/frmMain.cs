@@ -19,7 +19,7 @@ namespace DigitalProduction
 
         private WebSocketClient _webSocketClient;
         private ResourceManager resourceManager;
-        private Dictionary<Type, UserControl> _userControls = new Dictionary<Type, UserControl>();
+        public Dictionary<Type, UserControl> _userControls = new Dictionary<Type, UserControl>();
 
         private Dictionary<string, string> statusMapping;
 
@@ -125,7 +125,7 @@ namespace DigitalProduction
             }
         }
 
-        private void HighlightSelectedItem(AccordionControlElement selectedElement)
+        public void HighlightSelectedItem(AccordionControlElement selectedElement)
         {
             if (selectedElement.Style != ElementStyle.Item)
                 return;
@@ -158,7 +158,7 @@ namespace DigitalProduction
             HighlightSelectedItem(e.Element);
         }
 
-        private async Task ShowUserControlAsync<T>() where T : UserControl, new()
+        public async Task ShowUserControlAsync<T>() where T : UserControl, new()
         {
             if (pnlControl.InvokeRequired)
             {

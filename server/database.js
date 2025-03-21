@@ -386,7 +386,6 @@ async function saveDistributionDataToDB(dataList) {
 
       try {
         const distributionConditions = {
-          DeviceID: { type: sql.Int, value: data.DeviceID },
           PartSizeOrderID: { type: sql.Int, value: data.PartSizeOrderID }
         };
 
@@ -548,55 +547,82 @@ async function getDistributionDataFromDb(ipAddress) {
     
     if (result.recordset.length > 0) {
       const row = result.recordset[0];
-      
+
+      // Group OrderID with its corresponding SOs
+      const orderMap = new Map();
+      result.recordset.forEach(r => {
+        if (!orderMap.has(r.OrderID)) {
+          orderMap.set(r.OrderID, new Set());
+        }
+        orderMap.get(r.OrderID).add(r.SO);
+      });
+
+      // Convert map to an array of objects
+      const orderIDWithSOs = Array.from(orderMap.entries()).map(([OrderID, SO]) => ({
+        OrderID: parseInt(OrderID, 10),
+        SOs: Array.from(SO)
+      }));
+
       const orderID = parseInt(row.OrderID, 10);
-      // Lấy thông tin MaterialData (PartID, PartName và MaterialID) mà không thay đổi gì
+
+      // Process MaterialData
       const materialData = result.recordset
         .map(r => ({
           PartID: r.PartID,
           PartName: r.PartName,
           MaterialID: r.MaterialID,
           MaterialCode: r.MaterialCode,
-          MaterialsName: r.MaterialName  // Giữ nguyên MaterialID mà không thay đổi
+          MaterialsName: r.MaterialName
         }))
-        .filter((value, index, self) => self.findIndex(t => t.PartID === value.PartID && t.PartName === value.PartName && t.MaterialID === value.MaterialID) === index);  // Loại bỏ trùng lặp PartID, PartName và MaterialID
-      
-      // Lấy thông tin SizeData
-      const sizeData = result.recordset
-      .map(item => ({
-        SizeID: item.SizeID,
-        Size: item.Size,
-        SizeQty: item.SizeQty,
-        InventoryQty: item.InventoryQty
-      }))
-      .filter((value, index, self) =>
-        index === self.findIndex(
-          t => t.SizeID === value.SizeID && t.Size === value.Size && t.SizeQty === value.SizeQty && t.InventoryQty === value.InventoryQty
-        )
-      );
-      // Lấy thông tin DefaultValue
+        .filter((value, index, self) =>
+          self.findIndex(t => 
+            t.PartID === value.PartID &&
+            t.PartName === value.PartName &&
+            t.MaterialID === value.MaterialID
+          ) === index
+        );
+
+      // Process SizeData - Sum `SizeQty` if the same SizeID exists
+      const sizeDataMap = new Map();
+
+      result.recordset.forEach(item => {
+        const key = `${item.SizeID}-${item.Size}`;
+        if (!sizeDataMap.has(key)) {
+          sizeDataMap.set(key, { SizeID: item.SizeID, Size: item.Size, SizeQty: 0, InventoryQty: item.InventoryQty });
+        }
+        sizeDataMap.get(key).SizeQty += item.SizeQty; // Sum all occurrences of the same SizeID
+      });
+
+      const sizeData = Array.from(sizeDataMap.values());
+
+      // Process DefaultValue
       const defaultValue = result.recordset
-      .map(item => ({
-        PiecesPerPair: item.PiecesPerPair,
-        CuttingDieQty: item.CuttingDieQty,
-        MaterialLayer: item.MaterialLayer,
-        TotalPiecesPerPair: item.TotalPiecesPerPair
-      }))
-      .filter((value, index, self) =>
-        index === self.findIndex(
-          t => t.PiecesPerPair === value.PiecesPerPair && t.CuttingDieQty === value.CuttingDieQty && t.MaterialLayer === value.MaterialLayer && t.TotalPiecesPerPair === value.TotalPiecesPerPair
-        )
-      );
-      // Trả về dữ liệu theo cấu trúc yêu cầu
+        .map(item => ({
+          PiecesPerPair: item.PiecesPerPair,
+          CuttingDieQty: item.CuttingDieQty,
+          MaterialLayer: item.MaterialLayer,
+          TotalPiecesPerPair: item.TotalPiecesPerPair
+        }))
+        .filter((value, index, self) =>
+          index === self.findIndex(t => 
+            t.PiecesPerPair === value.PiecesPerPair &&
+            t.CuttingDieQty === value.CuttingDieQty &&
+            t.MaterialLayer === value.MaterialLayer &&
+            t.TotalPiecesPerPair === value.TotalPiecesPerPair
+          )
+        );
+
+      // Return the formatted data
       return {
         OrderID: orderID,
-        MasterWorkOrder: row.MasterWorkOrder,
+        OrderIDWithSOs: orderIDWithSOs, // Mapping OrderIDs to their corresponding SOs
         SO: row.SO,
+        MasterWorkOrder: row.MasterWorkOrder,
         Leather: row.IsLeather ? 2 : 1,
         Model: row.Model,
         ART: row.ART,
         MaterialData: materialData,
-        SizeData: sizeData,
+        SizeData: sizeData, // Now sums `SizeQty` for the same SizeID
         DefaultValue: defaultValue
       };
     } else {
@@ -608,6 +634,7 @@ async function getDistributionDataFromDb(ipAddress) {
     throw error;
   }
 }
+
 async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather, reasonComplete) {
   try {
     const query =

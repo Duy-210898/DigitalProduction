@@ -275,7 +275,7 @@
         private System.Windows.Forms.Panel pnlControl;
         private DevExpress.XtraBars.BarSubItem barSubItem1;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnMonthlyPlan;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement btnDistribution;
+        public DevExpress.XtraBars.Navigation.AccordionControlElement btnDistribution;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnDeviceOutput;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnDeviceManager;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnUserManager;

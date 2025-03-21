@@ -10,6 +10,7 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 
 namespace DigitalProduction
 {
@@ -18,7 +19,7 @@ namespace DigitalProduction
         private DbHelper dbHelper;
         private WebSocketClient _webSocketClient;
         private List<MaterialData> materialDataList;
-        private int orderID = 0;
+        private HashSet<int> orderIDs = new HashSet<int>();
         private int operatorID = 0;
         private int deviceID = 0;
         private int userID = 0;
@@ -36,77 +37,9 @@ namespace DigitalProduction
             dbHelper = new DbHelper();
             InitializeComponent();
             ApplyLocalization();
-            SetupSearchSOLookup();
-            cbxSO.Focus();
             lbl_operatorName.Visible = false;
-            // Subscribe to the CellValueChanged event
-            dgvSize.CellValueChanged += dgvSize_CellValueChanged;
-            dgvSize.CurrentCellDirtyStateChanged += dgvSize_CurrentCellDirtyStateChanged;
             loadDeviceDistribution();
-
-            // Attach event handler for GridLookUpEdit
-            cbxPart.EditValueChanged += cbxPart_EditValueChanged;
-            SetDataGridViewState(false);
         }
-        private void cbxPart_EditValueChanged(object sender, EventArgs e)
-        {
-            bool isEnabled = cbxPart.EditValue != null
-                             && !string.IsNullOrWhiteSpace(cbxPart.Text);
-
-            SetDataGridViewState(isEnabled);
-        }
-        private void SetDataGridViewState(bool isEnabled)
-        {
-            dgvSize.Enabled = isEnabled;
-
-            if (!isEnabled)
-            {
-                // Disable color styling
-                dgvSize.DefaultCellStyle.BackColor = Color.LightGray;
-                dgvSize.DefaultCellStyle.ForeColor = Color.DarkGray;
-                dgvSize.ColumnHeadersDefaultCellStyle.BackColor = Color.Gray;
-                dgvSize.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-
-                // Clear all checkboxes and reset sizeIDs
-                dgvSize.SuspendLayout(); // Prevent flickering
-                                         // Uncheck all checkboxes and clear the SizeIDs list
-                foreach (DataGridViewRow row in dgvSize.Rows)
-                {
-                    if (row.Cells["SelectSize"] is DataGridViewCheckBoxCell checkBoxCell)
-                    {
-                        checkBoxCell.Value = false; // Uncheck all
-                        checkBoxCell.EditingCellFormattedValue = false; // Force update
-                    }
-                }
-                dgvSize.ResumeLayout(); // Resume layout updates
-
-                // Uncheck the header checkbox
-                headerCheckBox.Checked = false; 
-
-                // Reset part selection
-                cbxPart.Properties.NullText = LocalizationManager.GetString("RequiredPart");
-                cbxPart.EditValue = null;
-
-                // Clear selected lists
-                sizeIDs.Clear();
-                partIDs.Clear();
-            }
-            else
-            {
-                // Enable color styling
-                dgvSize.DefaultCellStyle.BackColor = Color.White;
-                dgvSize.DefaultCellStyle.ForeColor = Color.Black;
-                dgvSize.ColumnHeadersDefaultCellStyle.BackColor = Color.LightGray;
-                dgvSize.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
-            }
-
-            dgvSize.ReadOnly = !isEnabled;
-            dgvSize.EnableHeadersVisualStyles = false;
-            dgvSize.ClearSelection();
-
-            dgvSize.Refresh();
-        }
-
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
@@ -114,62 +47,6 @@ namespace DigitalProduction
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
         }
 
-        private List<string> soList = new List<string>();
-
-        private void SetupSearchSOLookup()
-        {
-            soList = DbHelper.GetSOList();
-
-            cbxSO.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
-            cbxSO.Properties.ImmediatePopup = true;
-            cbxSO.Properties.Items.AddRange(soList);
-
-            cbxSO.EditValueChanged += CbxSO_EditValueChanged;
-            cbxSO.Leave += CbxSO_Leave; // Gán sự kiện Leave
-        }
-
-        private void CbxSO_Leave(object sender, EventArgs e)
-        {
-            ReloadSOList();
-        }
-
-        private void ReloadSOList()
-        {
-            soList = DbHelper.GetSOList(); // Lấy lại danh sách mới
-
-            cbxSO.Properties.Items.Clear(); // Xóa danh sách cũ
-            cbxSO.Properties.Items.AddRange(soList); // Cập nhật danh sách mới
-
-            dataGrid_overviewDistribution.DataSource = null;
-            sizeIDs.Clear();
-            partIDs.Clear();
-            Console.WriteLine("SO List reloaded on leave."); // Debug log
-        }
-
-        private void CbxSO_EditValueChanged(object sender, EventArgs e)
-        {
-            ComboBoxEdit combo = sender as ComboBoxEdit;
-            if (combo == null) return;
-
-            string inputText = combo.Text.Trim();
-
-            if (string.IsNullOrEmpty(inputText))
-            {
-                combo.Properties.Items.Clear();
-                combo.Properties.Items.AddRange(soList);
-                return;
-            }
-
-            var filteredList = soList.Where(so => so.StartsWith(inputText, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            combo.Properties.Items.Clear();
-            combo.Properties.Items.AddRange(filteredList);
-
-            if (filteredList.Count > 0)
-                combo.ShowPopup();
-            else
-                combo.ClosePopup();
-        }
         private DataTable ConvertSizeDataToDataTable(List<SizeData> sizeDataList)
         {
             DataTable table = new DataTable();
@@ -188,155 +65,6 @@ namespace DigitalProduction
 
             return table;
         }
-        private CheckBox headerCheckBox = new CheckBox();
-
-        private void ConfigureDataGridView()
-        {
-            dgvSize.AllowUserToAddRows = false;
-            dgvSize.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvSize.MultiSelect = true;
-            dgvSize.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvSize.ColumnHeadersHeight = 40;
-
-            // Header appearance
-            dgvSize.EnableHeadersVisualStyles = false;
-            dgvSize.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                ForeColor = Color.Black,
-                Alignment = DataGridViewContentAlignment.MiddleCenter,
-                Font = new Font("Arial", 10, FontStyle.Bold)
-            };
-
-            // Center align text in all cells
-            foreach (DataGridViewColumn column in dgvSize.Columns)
-            {
-                column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            }
-
-            // Make specific columns read-only
-            if (dgvSize.Columns.Count > 4)
-            {
-                dgvSize.Columns[0].Visible = false;
-                dgvSize.Columns[1].ReadOnly = true;
-                dgvSize.Columns[2].ReadOnly = true;
-                dgvSize.Columns[3].ReadOnly = true;
-                dgvSize.Columns[4].ReadOnly = true;
-            }
-
-            // Set row height dynamically
-            int gridHeight = dgvSize.Height;
-            int rowHeight = gridHeight / 6;
-            dgvSize.RowTemplate.Height = rowHeight;
-
-            // Auto-size columns to fit content
-            dgvSize.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            // Add STT Column (Row Index)
-            if (dgvSize.Columns["STT"] == null)
-            {
-                DataGridViewTextBoxColumn sttColumn = new DataGridViewTextBoxColumn
-                {
-                    Name = "STT",
-                    HeaderText = "STT",
-                    ReadOnly = true,
-                    Width = 50
-                };
-                dgvSize.Columns.Insert(0, sttColumn);
-            }
-
-            // Add Checkbox Column
-            if (dgvSize.Columns["SelectSize"] == null)
-            {
-                DataGridViewCheckBoxColumn checkColumn = new DataGridViewCheckBoxColumn
-                {
-                    Name = "SelectSize",
-                    HeaderText = "SelectSize",
-                    Width = 50,
-                    TrueValue = true,
-                    FalseValue = false
-                };
-                dgvSize.Columns.Insert(1, checkColumn);
-            }
-
-            // Ensure STT is updated when data changes
-            dgvSize.RowPostPaint += dgvSize_RowPostPaint;
-
-            // Ensure the header checkbox is added after the column is created
-            dgvSize.Paint += new PaintEventHandler(DataGridView_Paint);
-            dgvSize.ColumnHeaderMouseClick += DataGridView_ColumnHeaderMouseClick;
-            dgvSize.CellPainting += dgvSize_CellPainting;
-            headerCheckBox.CheckedChanged += HeaderCheckBox_CheckedChanged;
-            dgvSize.Controls.Add(headerCheckBox);
-        }
-
-        // Automatically update STT column numbers
-        private void dgvSize_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
-        {
-            dgvSize.Rows[e.RowIndex].Cells["STT"].Value = (e.RowIndex + 1).ToString();
-        }
-
-
-        // Custom Paint event to adjust header text and checkbox alignment
-        private void dgvSize_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
-        {
-            if (e.RowIndex == -1 && e.ColumnIndex == dgvSize.Columns["SelectSize"].Index)
-            {
-                e.PaintBackground(e.ClipBounds, true);
-                e.Handled = true;
-
-                // Get translated text
-                string translatedHeader = LocalizationManager.GetString("SelectSize") ?? "SelectSize";
-
-                using (StringFormat sf = new StringFormat())
-                {
-                    sf.Alignment = StringAlignment.Center;
-                    sf.LineAlignment = StringAlignment.Near;
-
-                    Rectangle textRect = e.CellBounds;
-                    textRect.Height -= 15; // Adjust for checkbox space
-
-                    using (Font headerFont = new Font("Arial", 10, FontStyle.Bold))
-                    {
-                        e.Graphics.DrawString(translatedHeader, headerFont, Brushes.Black, textRect, sf);
-                    }
-                }
-            }
-        }
-
-
-        // Handles checkbox position inside the header
-        private void DataGridView_Paint(object sender, PaintEventArgs e)
-        {
-            Rectangle rect = dgvSize.GetCellDisplayRectangle(dgvSize.Columns["SelectSize"].Index, -1, true);
-            headerCheckBox.Size = new Size(15, 15);
-
-            // Set checkbox position under the text
-            int x = rect.Left + (rect.Width - headerCheckBox.Width) / 2;
-            int y = rect.Top + 18; // Adjust below "Select" text
-            headerCheckBox.Location = new Point(x, y);
-        }
-
-        // Allow clicking on header to toggle "Select All"
-        private void DataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.ColumnIndex == dgvSize.Columns["SelectSize"].Index)
-            {
-                headerCheckBox.Checked = !headerCheckBox.Checked;
-                HeaderCheckBox_CheckedChanged(headerCheckBox, EventArgs.Empty);
-            }
-        }
-
-        private void TranslateHeaders()
-        {
-            foreach (DataGridViewColumn col in dgvSize.Columns)
-            {
-                string translatedHeader = LocalizationManager.GetString(col.Name) ?? col.Name;
-                col.HeaderText = translatedHeader;
-            }
-            // Force UI refresh to apply new headers
-            dgvSize.Refresh();
-            dgvSize.Invalidate();
-        }
 
         private void HandleReceivedSchedule(List<ProductionSchedule> schedules)
         {
@@ -351,9 +79,9 @@ namespace DigitalProduction
                 Invoke(new Action(() => HandleReceivedSchedule(schedules)));
                 return;
             }
-            orderID = schedules[0].OrderID;
 
-            pnlSize.Visible = true;
+            // collect orderIDs
+            orderIDs.UnionWith(schedules.Select(s => s.OrderID));
 
             sizeDataList = new List<SizeData>();
             materialDataList = new List<MaterialData>();
@@ -388,11 +116,6 @@ namespace DigitalProduction
             //  DataTable transformedTable = TransformSizeData(originalTable);
             // Gán dữ liệu vào gridControl_Size
 
-            dgvSize.DataSource = ConvertDataTableToList(originalTable); ;
-
-            // Cấu hình hiển thị của gridView_Size
-            ConfigureDataGridView();
-            TranslateHeaders();
 
             // Duyệt qua các phần vật liệu và thêm vào materialDataList
             foreach (var schedule in uniqueParts)
@@ -435,160 +158,17 @@ namespace DigitalProduction
             lblPO.Text = $"PO: {schedules.FirstOrDefault()?.PO ?? string.Empty}";
             lblModel.Text = $"Model: {schedules.FirstOrDefault()?.Model ?? string.Empty}";
             lblArt.Text = $"ART: {schedules.FirstOrDefault()?.ART ?? string.Empty}";
-            cbxPart.Properties.NullText = LocalizationManager.GetString("SelectPart");
 
-            cbxPart.Properties.DataSource = materialDataList;
-
-            FormatGridLookUpEdit();
-        }
-        private void FormatGridLookUpEdit()
-        {
-            cbxPart.Properties.DisplayMember = "PartName";
-            cbxPart.Properties.ValueMember = "PartID";
-
-            GridView view = cbxPart.Properties.View;
-            view.Columns.Clear();
-
-            // Thêm các cột
-            view.Columns.AddVisible("PartCode", "Part Code");
-            view.Columns.AddVisible("PartName", "Part Name");
-            view.Columns.AddVisible("VietnameseName", "Vietnamese Name");
-            view.Columns.AddVisible("MaterialCode", "Material Code");
-            view.Columns.AddVisible("MaterialName", "Material Name");
-
-            // 🔹 Định dạng tiêu đề cột (Header)
-            foreach (GridColumn col in view.Columns)
+            // set defaultInfo
+            DefaultInfo defaultInfo = dbHelper.getDefaultValueFromART(lblArt.Text.Split(':')[1]);
+            if (defaultInfo != null)
             {
-                col.AppearanceHeader.Font = new Font("Tahoma", 9F, FontStyle.Bold);
-                col.AppearanceHeader.Options.UseFont = true;
-                col.AppearanceHeader.Options.UseTextOptions = true;
-                col.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-
-                // Không cho chỉnh sửa nội dung
-                col.OptionsColumn.AllowEdit = false;
-                col.OptionsColumn.ReadOnly = true;
+                numPiecesPerPair.Text = defaultInfo.PiecesPerPair.ToString();
+                numCuttingDieQty.Text = defaultInfo.CuttingDieQty.ToString();
+                numMaterialLayer.Text = defaultInfo.MaterialLayer.ToString();
+                numericTotalPeicesPerPair.Text = defaultInfo.TotalPiecesPerPair.ToString();
             }
 
-            if (!string.IsNullOrEmpty(cbxSO.Text))
-            {
-                // SO is empty, set rdRawMaterial as checked
-                rdRawMaterial.Checked = true;
-            }
-
-            // 🔹 Enable Multi-Selection with Checkboxes
-
-            view.OptionsSelection.EnableAppearanceFocusedCell = true;
-            view.FocusRectStyle = DrawFocusRectStyle.CellFocus;
-
-            // 🔹 Giữ chế độ chọn dòng bằng checkbox nhưng cho phép chọn ô riêng lẻ
-            view.OptionsBehavior.Editable = false;
-            view.OptionsBehavior.AllowIncrementalSearch = true;
-
-            // 🔹 Bật filter tìm kiếm
-            view.OptionsView.ShowAutoFilterRow = true;
-
-            // 🔹 Highlight hàng khi di chuột
-            view.Appearance.FocusedRow.BackColor = Color.LightSkyBlue;
-            view.Appearance.FocusedRow.Options.UseBackColor = true;
-
-            // 🔹 Bật chế độ auto-fit cho cột
-            view.OptionsView.ColumnAutoWidth = false;
-
-            // Đặt chiều rộng popup bằng với kích thước control chứa nó
-            int popupWidth = this.Width - 50;
-            cbxPart.Properties.PopupFormSize = new Size(popupWidth, 300);
-
-            // 🔹 Tô màu xen kẽ các dòng
-            view.OptionsView.EnableAppearanceEvenRow = true;
-            view.OptionsView.EnableAppearanceOddRow = true;
-            view.Appearance.OddRow.BackColor = Color.AliceBlue;
-            view.Appearance.EvenRow.BackColor = Color.White;
-
-            // 🔹 Đặt tỷ lệ % cho từng cột
-            view.Columns["PartCode"].Width = (int)(popupWidth * 0.05);
-            view.Columns["PartName"].Width = (int)(popupWidth * 0.20);
-            view.Columns["VietnameseName"].Width = (int)(popupWidth * 0.25);
-            view.Columns["MaterialCode"].Width = (int)(popupWidth * 0.05);
-            view.Columns["MaterialName"].Width = (int)(popupWidth * 0.45);
-
-            // 🔹 Định dạng lại cột checkbox để nhỏ lại
-            view.Columns[0].Width = 30; // Thu nhỏ cột chứa checkbox
-
-            // Áp dụng view vào GridLookUpEdit
-            cbxPart.Properties.PopupView = view;
-            // Subscribe to Popup Opened event
-            cbxPart.QueryPopUp += (s, e) =>
-            {
-                view.ClearSelection();
-                foreach (int id in partIDs)
-                {
-                    int rowHandle = view.LocateByValue("PartID", id);
-                    if (rowHandle >= 0)
-                    {
-                        view.SelectRow(rowHandle);
-                    }
-                }
-            };
-
-            // Subscribe to SelectionChanged to update value based on selections
-            view.SelectionChanged += (sender, e) =>
-            {
-                int rowHandle = e.ControllerRow;
-                if (rowHandle >= 0)
-                {
-                    object partIdObj = view.GetRowCellValue(rowHandle, "PartID");
-                    if (partIdObj != null)
-                    {
-                        int partId = Convert.ToInt32(partIdObj);
-
-                        if (view.IsRowSelected(rowHandle))  // Checked
-                        {
-                            if (!partIDs.Contains(partId))
-                                partIDs.Add(partId);
-                        }
-                        else  // Unchecked
-                        {
-                            partIDs.Remove(partId);
-                        }
-                    }
-                }
-
-                // Update ComboBox Display
-                string selectedParts = string.Join(", ", partIDs.Select(id => view.GetRowCellValue(view.LocateByValue("PartID", id), "PartName")));
-                lblPartValue.Text = selectedParts;
-                lblPartValue.ForeColor = Color.Green;
-                // Enable/Disable DataGridView based on partIDs count
-                SetDataGridViewState(partIDs.Count > 0);
-            };
-
-            // Detach event handler when the popup closes
-            cbxPart.CloseUp += (s, e) =>
-            {
-                view.SelectionChanged -= (sender, ee) => { /* Your logic */ };
-            };
-        }
-
-        private void tableLayoutPanel1_SizeChanged(object sender, EventArgs e)
-        {
-            int popupWidth = this.Width - 50; // Adjust for any padding or margins
-            cbxPart.Properties.PopupFormSize = new Size(popupWidth, 300);
-
-            GridView view = cbxPart.Properties.View;
-            if (view != null && view.Columns.Count < 0)
-            {
-                // Set specific widths for other columns
-                view.Columns["PartCode"].Width = (int)(popupWidth * 0.05); // 5% for PartCode
-                view.Columns["PartName"].Width = (int)(popupWidth * 0.20); // 20% for PartName
-                view.Columns["VietnameseName"].Width = (int)(popupWidth * 0.25); // 25% for VietnameseName
-                view.Columns["MaterialCode"].Width = (int)(popupWidth * 0.05); // 5% for MaterialCode
-
-                // Make the MaterialName column take up the remaining space
-                view.Columns["MaterialName"].Width = popupWidth -
-                    (view.Columns["PartCode"].Width +
-                     view.Columns["PartName"].Width +
-                     view.Columns["VietnameseName"].Width +
-                     view.Columns["MaterialCode"].Width + 30); // Adjust for padding or spacing
-            }
         }
 
         private void WebSocket_OnMessage(object data)
@@ -673,15 +253,6 @@ namespace DigitalProduction
             ShowMessage.ShowError("Error" + message);
         }
 
-        private void cbxSO_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string so = cbxSO.SelectedItem.ToString();
-
-            if (!string.IsNullOrEmpty(so))
-            {
-                SendGetOpertaionAndScheduleRequestAsync(so, String.Empty, "getSchedule");
-            }
-        }
 
         private async void cbxDevice_SelectedValueChanged(object sender, EventArgs e)
         {
@@ -743,51 +314,64 @@ namespace DigitalProduction
             totalPiecesPerPair = int.Parse(numericTotalPeicesPerPair.Text);
             int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
             bool isLeather = false;
-            int partID;
 
-            // 1 part has many sizes - care part
-            if (rdRawMaterial.Checked)
+            foreach (int orderID in orderIDs)
             {
-                partID = (int)cbxPart.EditValue;
-                // get partoderID
-                foreach (int i in sizeIDs)
+                // 1 part has many sizes - care part
+                if (rdRawMaterial.Checked)
                 {
-                    partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partID, i, orderID));
-                }
-            }
-            // 1-3 size has many parts - care size
-            else
-            {
-                isLeather = true;
-                foreach (int i in sizeIDs)
-                {
-                    foreach (int partId in partIDs)
+                    if (partIDs.Count > 1)
                     {
-                        partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partId, i, orderID));
+                        ShowMessage.ShowWarning("PartName no longer than 1", "Warning");
+                        break;
+                    }
+                    else
+                    {
+                        // get partoderID
+                        foreach (int i in sizeIDs)
+                        {
+                            partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partIDs.FirstOrDefault(), i, orderID));
+                        }
+                    }
+                }
+                // 1-3 size has many parts - care size
+                else
+                {
+                    isLeather = true;
+                    foreach (int i in sizeIDs)
+                    {
+                        foreach (int partId in partIDs)
+                        {
+                            partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partId, i, orderID));
+                        }
                     }
                 }
             }
 
-            // save on DB
-            foreach (int i in partSizeOrderIDs) {
-                var distributionData = new DistributionData
+            if (partSizeOrderIDs.Count != 0)
+            {
+                // save on DB
+                foreach (int i in partSizeOrderIDs)
                 {
-                    DeviceID = deviceID,
-                    OperatorID = operatorID,
-                    UserID = userID,
-                    ProductID = productId,
-                    PartSizeOrderID = i,
-                    CuttingDieQty = cuttingDieQty,
-                    PiecesPerPair = piecesPerPair,
-                    MaterialLayer = materialLayer,
-                    InventoryQty = inventory,
-                    TotalPiecesPerPair = totalPiecesPerPair,
-                    IsLeather = isLeather,
-                    CreatedAt = DateTime.Now,
-                    IsDelete = false,
-                    Status = "Pending",
-                };
-                results.Add(distributionData);
+                    var distributionData = new DistributionData
+                    {
+                        DeviceID = deviceID,
+                        OperatorID = operatorID,
+                        UserID = userID,
+                        ProductID = productId,
+                        PartSizeOrderID = i,
+                        CuttingDieQty = cuttingDieQty,
+                        PiecesPerPair = piecesPerPair,
+                        MaterialLayer = materialLayer,
+                        InventoryQty = inventory,
+                        TotalPiecesPerPair = totalPiecesPerPair,
+                        IsLeather = isLeather,
+                        CreatedAt = DateTime.Now,
+                        IsDelete = false,
+                        Status = "Pending",
+                    };
+                    results.Add(distributionData);
+                }
             }
             return results;
         }
@@ -795,23 +379,23 @@ namespace DigitalProduction
         private void ApplyLocalization()
         {
             var controls = new Dictionary<Control, string>
-        {
-            { lblFactory, "Factory" },
-            { lblLastNo, "LastNo" },
-            { lblMasterWorkOrder, "MasterWorkOrder" },
-            { lblSO, "SO" },
-            { lblPO, "PO" },
-            { lblModel, "Model" },
-            { lblArt, "ART" },
-            { btnSend, "Send" },
-            { lblInventoryQty, "InventoryQty" },
-            {lblPeicesPerPair, "PeicesPerPair" },
-            {lblCuttingDie, "CuttingDieQty" },
-            {lblMaterialLayer, "MaterialLayer" },
-            {lblTotalPeicesPerPair, "TotalPeicesPerPair" },
-            {lblSelectMachine, "SelectMachine" },
-            {lbl_Name, "NameOperator" },
-        };
+            {
+                { lblFactory, "Factory" },
+                { lblLastNo, "LastNo" },
+                { lblMasterWorkOrder, "MasterWorkOrder" },
+                { lblSO, "SO" },
+                { lblPO, "PO" },
+                { lblModel, "Model" },
+                { lblArt, "ART" },
+                { btnSend, "Send" },
+                { lblInventoryQty, "InventoryQty" },
+                {lblPeicesPerPair, "PeicesPerPair" },
+                {lblCuttingDie, "CuttingDieQty" },
+                {lblMaterialLayer, "MaterialLayer" },
+                {lblTotalPeicesPerPair, "TotalPeicesPerPair" },
+                {lblSelectMachine, "SelectMachine" },
+                {lbl_Name, "NameOperator" },
+            };
 
             foreach (var control in controls)
             {
@@ -819,10 +403,8 @@ namespace DigitalProduction
             }
 
             cbxDevice.Text = LocalizationManager.GetString("SelectDevice");
-            cbxPart.Properties.NullText = LocalizationManager.GetString("SelectPart");
             rdLeather.Text = LocalizationManager.GetString("leatherMaterial");
             rdRawMaterial.Text = LocalizationManager.GetString("rawMaterial");
-            lblInputSO.Text = LocalizationManager.GetString("InputSO");
         }
 
         private async void SendDistributionDataToServer()
@@ -830,34 +412,37 @@ namespace DigitalProduction
             try
             {
                 List<DistributionData> distributionData = getDistributionDataFromControls();
-                var request = new
+                if (distributionData != null && distributionData.Count > 0)
                 {
-                    app =  Global.App,
-                    action = "saveDistributionData",
-                    data = distributionData
-                };
-
-                string jsonRequestWrapper = JsonConvert.SerializeObject(request);
-
-                // Gửi yêu cầu và nhận phản hồi từ máy chủ
-                string jsonResponse = await _webSocketClient.SendAsync(jsonRequestWrapper);
-
-                if (!string.IsNullOrEmpty(jsonResponse))
-                {
-                    var response = JsonConvert.DeserializeObject<Response>(jsonResponse);
-
-                    if (response != null && response.Status == "success")
+                    var request = new
                     {
-                        ShowMessage.ShowInfo(response.Message, "Sucess");
+                        app = Global.App,
+                        action = "saveDistributionData",
+                        data = distributionData
+                    };
+
+                    string jsonRequestWrapper = JsonConvert.SerializeObject(request);
+
+                    // Gửi yêu cầu và nhận phản hồi từ máy chủ
+                    string jsonResponse = await _webSocketClient.SendAsync(jsonRequestWrapper);
+
+                    if (!string.IsNullOrEmpty(jsonResponse))
+                    {
+                        var response = JsonConvert.DeserializeObject<Response>(jsonResponse);
+
+                        if (response != null && response.Status == "success")
+                        {
+                            ShowMessage.ShowInfo(response.Message, "Sucess");
+                        }
+                        else
+                        {
+                            ShowMessage.ShowError(response.Message, "Error");
+                        }
                     }
                     else
                     {
-                        ShowMessage.ShowError(response.Message, "Error");
+                        MessageBox.Show("No response received from the server.");
                     }
-                }
-                else
-                {
-                    MessageBox.Show("No response received from the server.");
                 }
             }
             catch (Exception ex)
@@ -869,148 +454,31 @@ namespace DigitalProduction
 
         private void btnSend_Click(object sender, EventArgs e)
         {
+            bool isAnyChecked = panelMaterialType.Controls.OfType<System.Windows.Forms.RadioButton>().Any(r => r.Checked);
+
+            if (!isAnyChecked)
+            {
+                ShowMessage.ShowWarning("Please select an material type option before proceeding.", "Warning");
+                return;
+            }
+            if (cbxDevice.Text == "") {
+                ShowMessage.ShowWarning("Please select an material type option before proceeding.", "Warning");
+                return;
+            }
             SendDistributionDataToServer();
         }
 
         private void rdLeather_CheckedChanged(object sender, EventArgs e)
         {
-            SetDataGridViewState(false);
             setControlVisibility(false, numCuttingDieQty, numMaterialLayer, numPiecesPerPair, lblCuttingDie, lblMaterialLayer, lblPeicesPerPair);
             setControlVisibility(true, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
-            if (rdLeather.Checked)
-            {
-                dataGrid_overviewDistribution.DataSource = null;
-                if (cbxPart.Properties.DataSource != null)
-                {
-                    cbxPart.Properties.DataSource = materialDataList;
-                    //cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "FT2").ToList();
-                // Allow multi-selection for cbxPart
-                cbxPart.Properties.View.OptionsSelection.MultiSelect = true;
-                cbxPart.Properties.View.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CheckBoxRowSelect;
-                }
-            }
         }
 
         private void rdRawMaterial_CheckedChanged(object sender, EventArgs e)
         {
-            SetDataGridViewState(false);
             setControlVisibility(false, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
             setControlVisibility(true, numCuttingDieQty, numMaterialLayer, numPiecesPerPair, lblCuttingDie, lblMaterialLayer, lblPeicesPerPair);
-            if (rdRawMaterial.Checked)
-            {
-                dataGrid_overviewDistribution.DataSource = null;
-                lblPartValue.ResetText();
-                if (cbxPart.Properties.DataSource != null)
-                {
-                    cbxPart.Properties.DataSource = materialDataList;
-                    //cbxPart.Properties.DataSource = materialDataList.Where(m => m.Unit == "YD").ToList();
-                    // Allow single selection for cbxPart
-                    cbxPart.Properties.View.OptionsSelection.MultiSelect = false;
-                }
-            }
         }
-        private List<SizeData> ConvertDataTableToList(DataTable originalTable)
-        {
-            List<SizeData> sizeDataList = new List<SizeData>();
-
-            // Iterate through each row in the DataTable
-            foreach (DataRow row in originalTable.Rows)
-            {
-                // Create a new SizeData object for each row
-                SizeData sizeData = new SizeData
-                {
-                    SizeID = Convert.ToInt32(row["SizeID"]),
-                    Size = row["Size"].ToString(),
-                    SizeQty = Convert.ToInt32(row["SizeQty"]),
-                    UnitUsage = Convert.ToSingle(row["UnitUsage"]),
-                    TotalUsage = Convert.ToSingle(row["TotalUsage"]),
-                    SelectSize = Convert.ToBoolean(row["SelectSize"])
-                };
-
-                // Add the SizeData object to the list
-                sizeDataList.Add(sizeData);
-            }
-
-            return sizeDataList;
-        }
-        private void dgvSize_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0 && dgvSize.Columns[e.ColumnIndex].Name == "SelectSize")
-            {
-                DataGridViewCheckBoxCell checkBoxCell = (DataGridViewCheckBoxCell)dgvSize.Rows[e.RowIndex].Cells["SelectSize"];
-                bool isChecked = (bool)(checkBoxCell.Value ?? false); // ✅ Now gets the correct value
-
-                int sizeId = Convert.ToInt32(dgvSize.Rows[e.RowIndex].Cells["SizeID"].Value);
-
-                if (isChecked)
-                {
-                    if (!sizeIDs.Contains(sizeId))
-                        sizeIDs.Add(sizeId);
-                }
-                else
-                {
-                    sizeIDs.Remove(sizeId);
-                }
-
-                UpdateOverviewDistributionGrid();
-            }
-        }
-
-        // ✅ Make sure you subscribe to the event
-        private void dgvSize_CurrentCellDirtyStateChanged(object sender, EventArgs e)
-        {
-            if (dgvSize.CurrentCell is DataGridViewCheckBoxCell)
-            {
-                dgvSize.CommitEdit(DataGridViewDataErrorContexts.Commit); // ✅ Forces the change to be committed
-            }
-        }
-
-        private void HeaderCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            bool isChecked = headerCheckBox.Checked;
-
-            dgvSize.SuspendLayout(); // ✅ Prevent flickering
-
-            sizeIDs.Clear(); // ✅ Clear the list before updating
-
-            foreach (DataGridViewRow row in dgvSize.Rows)
-            {
-                if (row.Cells["SelectSize"] != null)
-                {
-                    row.Cells["SelectSize"].Value = isChecked;
-                    int sizeId = Convert.ToInt32(row.Cells["SizeID"].Value);
-
-                    if (isChecked)
-                    {
-                        if (!sizeIDs.Contains(sizeId))
-                            sizeIDs.Add(sizeId);
-                    }
-                }
-            }
-
-            dgvSize.EndEdit(); // ✅ Ensure checkboxes apply values properly
-            dgvSize.Refresh();
-
-            // ✅ Ensure the overview grid updates properly when selecting/unselecting all sizes
-            if (isChecked)
-            {
-                UpdateOverviewDistributionGrid();
-            }
-            else
-            {
-                ClearOverviewDistributionGrid(); // ✅ Clear the overview if all sizes are unchecked
-            }
-        }
-
-        private void ClearOverviewDistributionGrid()
-        {
-            dataGrid_overviewDistribution.DataSource = null;  // Clear the data source
-            dataGrid_overviewDistribution.Rows.Clear();
-        }
-
-
-
-
         private void setControlVisibility(bool isVisible, params Control[] controls)
         {
             foreach (var control in controls)
@@ -1018,63 +486,10 @@ namespace DigitalProduction
                 control.Visible = isVisible;
             }
         }
-        private void UpdateOverviewDistributionGrid()
+
+        private void updateUIDataGridOverView(List<ProductionSchedule> filteredSchedules)
         {
-            DataTable overviewTable = new DataTable();
-            overviewTable.Columns.Add("PartName", typeof(string));
-            overviewTable.Columns.Add("Size", typeof(string));
-            overviewTable.Columns.Add("QueueSize", typeof(string)); // New column for extra sizes
-
-            Dictionary<string, List<int>> partSizeMap = new Dictionary<string, List<int>>();
-
-            if (rdRawMaterial.Checked && cbxPart.EditValue != null)
-            {
-                partIDs.Add((int)cbxPart.EditValue);
-            }
-
-            // Define the split limit based on material type
-            int sizeLimit = rdLeather.Checked ? 3 : 6;
-
-            // Loop over the selected parts and sizes
-            foreach (int partId in partIDs)
-            {
-                var part = materialDataList.FirstOrDefault(m => m.PartID == partId);
-                if (part == null)
-                    continue;
-
-                if (!partSizeMap.ContainsKey(part.PartName))
-                {
-                    partSizeMap[part.PartName] = new List<int>(); // Store sizes in order
-                }
-
-                partSizeMap[part.PartName].AddRange(sizeIDs);
-            }
-
-            // Add grouped data to DataTable
-            foreach (var entry in partSizeMap)
-            {
-                string partName = entry.Key;
-                List<int> sizes = entry.Value;
-
-                // Split sizes: first (sizeLimit) go to "Size", remaining to "Queue Size"
-                var selectedSizes = sizes.Take(sizeLimit).Select(GetSizeName).ToList();
-                var queueSizes = sizes.Skip(sizeLimit).Select(GetSizeName).ToList();
-
-                string sizeList = string.Join(", ", selectedSizes);
-                string queueSizeList = queueSizes.Any() ? string.Join(", ", queueSizes) : "-";
-
-                overviewTable.Rows.Add(partName, sizeList, queueSizeList);
-            }
-
-            // Bind the table to your overview grid.
-            dataGrid_overviewDistribution.DataSource = overviewTable;
-            updateUIDataGridOverView();
-            TranslateDataGridOverviewDistributionHeaders();
-        }
-
-
-
-        private void updateUIDataGridOverView() {
+            // Ensure DataGridView settings
             dataGrid_overviewDistribution.Dock = DockStyle.Fill;
             dataGrid_overviewDistribution.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGrid_overviewDistribution.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
@@ -1088,13 +503,59 @@ namespace DigitalProduction
             dataGrid_overviewDistribution.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             dataGrid_overviewDistribution.DefaultCellStyle.Font = new Font("Segoe UI", 10);
 
-        
             // Allow selection of entire rows
             dataGrid_overviewDistribution.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGrid_overviewDistribution.MultiSelect = false;
             dataGrid_overviewDistribution.ReadOnly = true;  // Prevent editing if needed
 
+            // Convert filteredSchedules to a DataTable for binding
+            DataTable table = new DataTable();
+            table.Columns.Add("SO", typeof(string));
+            table.Columns.Add("PartName", typeof(string));
+            table.Columns.Add("Size", typeof(string));
+            table.Columns.Add("SizeQty", typeof(int)); // Added SizeQuantity column
+
+            // Dictionary to merge PartName & Size while summing SizeQuantity
+            Dictionary<string, (List<string> SOs, int TotalSizeQuantity)> mergedData = new Dictionary<string, (List<string>, int)>();
+
+            foreach (var schedule in filteredSchedules)
+            {
+                string partName = schedule.PartName;
+                string size = GetSizeName(schedule.SizeID);
+                string key = $"{partName}|{size}";
+
+                if (!mergedData.ContainsKey(key))
+                {
+                    mergedData[key] = (new List<string>(), 0);
+                }
+
+                // Add SO to the list if not already present
+                if (!mergedData[key].SOs.Contains(schedule.SO))
+                {
+                    mergedData[key].SOs.Add(schedule.SO);
+                }
+
+                // Sum the SizeQuantity
+                mergedData[key] = (mergedData[key].SOs, mergedData[key].TotalSizeQuantity + schedule.SizeQty);
+            }
+
+            // Convert merged data into DataTable
+            foreach (var entry in mergedData)
+            {
+                string[] splitKey = entry.Key.Split('|');
+                string mergedSO = string.Join(", ", entry.Value.SOs); // Merge SOs into a single string
+                table.Rows.Add(mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQuantity);
+            }
+
+            // Bind data to DataGridView
+            dataGrid_overviewDistribution.DataSource = table;
+
+            // Translate headers if needed
+            TranslateDataGridOverviewDistributionHeaders();
         }
+
+
+
         private void TranslateDataGridOverviewDistributionHeaders()
         {
             foreach (DataGridViewColumn col in dataGrid_overviewDistribution.Columns)
@@ -1111,10 +572,12 @@ namespace DigitalProduction
         }
         public void ReceiveFilteredData(List<ProductionSchedule> filteredSchedules)
         {
-            foreach (var schedule in filteredSchedules)
-            {
-                Console.WriteLine($"Received: {schedule.SO} - {schedule.PartName} - {schedule.Size}");
-            }
+            HandleReceivedSchedule(filteredSchedules);
+            Console.WriteLine($"Received {filteredSchedules.Count} schedules.");
+            // Collect unique SizeIDs and PartIDs
+            sizeIDs = new HashSet<int>(filteredSchedules.Select(s => s.SizeID));
+            partIDs = new HashSet<int>(filteredSchedules.Select(s => s.PartId));
+            updateUIDataGridOverView(filteredSchedules);
         }
     }
 }

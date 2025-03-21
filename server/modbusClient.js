@@ -228,7 +228,9 @@ async function startReadingRegisters(client, ipAddress) {
     //readAndCheckBits(client, ipAddress);
     readOperatorID(client, ipAddress);
     checkAndSaveDistribution(client, ipAddress);
-    if (modbusClients[ipAddress]?.sizeDataInfo != null) 
+    if (modbusClients[ipAddress]?.sizeDataInfo && 
+      typeof modbusClients[ipAddress].sizeDataInfo === 'object' &&
+      Object.keys(modbusClients[ipAddress].sizeDataInfo || {}).length > 0) 
       {
           readActualData(client, ipAddress);
       }      
@@ -374,6 +376,13 @@ async function checkAndSaveDistribution(client, ipAddress) {
         await client.writeSingleRegister(1000, distributionData.OrderID);
         await delay(1000);
 
+        // case mutiple SO
+        if (distributionData.OrderIDWithSOs.length != 0) {
+          modbusClients[ipAddress].OrderIDWithSOs  = distributionData.OrderIDWithSOs.map(item => ({
+            Data: item,
+            Status: false
+          }));          
+        }
         console.log('Saving distribution data to Modbus...');
         await saveDistributionDataToModbus(ipAddress, distributionData);
       } else {
@@ -394,9 +403,11 @@ async function checkAndSaveDistribution(client, ipAddress) {
     let responseLeather = await client.readHoldingRegisters(1001, 1); // Reusing the variable name 'response'
     let isLeather = responseLeather.response._body.values[0];
     console.log(`Register 1001 value: ${isLeather}`);
-  
+         
     // interrupt HMI set distributionData again
-    if (modbusClients[ipAddress].sizeDataInfo == null) {
+    if (!modbusClients[ipAddress].sizeDataInfo ||
+       typeof modbusClients[ipAddress].sizeDataInfo !== 'object' || 
+       Object.keys(modbusClients[ipAddress].sizeDataInfo).length === 0) {
         const distributionData = await getDistributionDataFromDb(ipAddress);
         if (distributionData != null) {
           await saveDistributionDataToModbus(ipAddress, distributionData);
@@ -682,7 +693,7 @@ async function readActualData(client, ipAddress) {
     // Read OrderID from register 1000
     const orderIDData = await client.readHoldingRegisters(1000, 1);
     if (!orderIDData?.response?._body?.values?.[0]) {
-      console.log('Không thể đọc OrderID từ thanh ghi 1000');
+      console.log("Không thể đọc OrderID từ thanh ghi 1000");
       return;
     }
 
@@ -692,40 +703,51 @@ async function readActualData(client, ipAddress) {
     const baseActual = isLeather ? 794 : 922;
     const baseSizeQtyAddress = isLeather ? 790 : 918;
 
-    let completeSizeCount = 0; // Counter for completed sizes
+    let completeSizeCount = 0;
 
-    // Ensure previousData[ipAddress] exists
     if (!previousData[ipAddress]) previousData[ipAddress] = {};
 
-    // Map over all size IDs and read Modbus registers
-    const promises = modbusClients[ipAddress].sizeDataInfo.sizeID.map(async (sizeAddressID, index) => {
-      try {
-        // Helper function for safe reading
-        const safeRead = async (address) => {
-          try {
-            const response = await client.readHoldingRegisters(address, 1);
-            console.log(`Reading Address: ${address} for sizeID ${sizeAddressID}`);
-            return response?.response?._body?.values?.[0] ?? 0;
-          } catch (err) {
-            console.error(`Error reading register ${address}:`, err.message);
-            return null;
-          }
-        };
+    const sizeInfo = modbusClients[ipAddress].sizeDataInfo;
+    const sizeCompleteID = modbusClients[ipAddress].sizeCompleteID || [];
 
-        // Read Modbus registers
+    // Function to read registers safely
+    const safeRead = async (address) => {
+      try {
+        const response = await client.readHoldingRegisters(address, 1);
+        return response?.response?._body?.values?.[0] ?? 0;
+      } catch (err) {
+        console.error(`Error reading register ${address}:`, err.message);
+        return 0; // Default to 0 in case of error
+      }
+    };
+
+    if (sizeInfo.SizeID == undefined) { return }
+    const promises = sizeInfo.sizeID.map(async (sizeAddressID, index) => {
+      try {
+        const sizeQtyAddress = baseSizeQtyAddress + 16 * index;
+        const actualAddress = baseActual + 16 * index;
+
+        // Read required registers in parallel
         const [
-          sizeID, sizeQty, piecesPerPair, materialLayer, cuttingDieQty,
-          actualCut, actualPieces, actualSizeQty, totalPieces
+          sizeID,
+          sizeQty = 0,
+          piecesPerPair = 0,
+          materialLayer = 0,
+          cuttingDieQty = 0,
+          actualCut = 0,
+          actualPieces = 0,
+          actualSizeQty = 0,
+          totalPieces = 0,
         ] = await Promise.all([
           safeRead(sizeAddressID),
-          isLeather ? safeRead(baseSizeQtyAddress + (16 * index)) : Promise.resolve(null),
-          isLeather ? safeRead(baseAddress) : Promise.resolve(null),
-          isLeather ? safeRead(baseAddress + 4) : Promise.resolve(null),
-          isLeather ? safeRead(baseAddress + 8) : Promise.resolve(null),
-          safeRead(baseActual + (16 * index)),
-          safeRead(baseActual + 4 + (16 * index)),
-          safeRead(baseActual + 8 + (16 * index)),
-          !isLeather ? safeRead(baseAddress) : Promise.resolve(null)
+          isLeather ? safeRead(sizeQtyAddress) : Promise.resolve(0),
+          isLeather ? safeRead(baseAddress) : Promise.resolve(0),
+          isLeather ? safeRead(baseAddress + 4) : Promise.resolve(0),
+          isLeather ? safeRead(baseAddress + 8) : Promise.resolve(0),
+          safeRead(actualAddress),
+          safeRead(actualAddress + 4),
+          safeRead(actualAddress + 8),
+          !isLeather ? safeRead(baseAddress) : Promise.resolve(0),
         ]);
 
         if (sizeID === null) {
@@ -733,27 +755,14 @@ async function readActualData(client, ipAddress) {
           return;
         }
 
-       // Check if size is completed
-      const isComplete = actualCut === sizeQty;
+        const isComplete = actualCut === sizeQty;
+        if (isComplete && !sizeCompleteID.includes(sizeID)) {
+          sizeCompleteID.push(sizeID);
+          console.log(`[sizeCompleteID] Added: ${sizeID}`);
+        }
 
-      // Ensure sizeCompleteID is an array
-      if (!Array.isArray(modbusClients[ipAddress].sizeCompleteID)) {
-          modbusClients[ipAddress].sizeCompleteID = [];
-      }
+        completeSizeCount++;
 
-      if (isComplete) {
-          completeSizeCount++; // Increment complete size count
-
-          // Add new unique sizeID if not already present
-          if (!modbusClients[ipAddress].sizeCompleteID.includes(sizeID)) {
-              modbusClients[ipAddress].sizeCompleteID.push(sizeID);
-              console.log(`[sizeCompleteID] Added: ${sizeID}`);
-          }
-      }
-
-        modbusClients[ipAddress].isComplete = completeSizeCount; // Store completion status
-
-        // Construct the new data object
         const newData = {
           SizeID: sizeID,
           PiecesPerPair: piecesPerPair,
@@ -762,42 +771,37 @@ async function readActualData(client, ipAddress) {
           ActualCut: actualCut,
           ActualPieces: actualPieces,
           ActualSizeQty: actualSizeQty,
-          TotalPiecesPerPair: totalPieces
+          TotalPiecesPerPair: totalPieces,
         };
 
-        // Check for changes against previous data using JSON.stringify
         const prevData = previousData[ipAddress]?.[sizeID] || {};
-        const hasChanges = JSON.stringify(newData) !== JSON.stringify(prevData);
+        const isNewData = !previousData[ipAddress][sizeID]; // Detect first-time load
+        const hasChanges = isNewData || JSON.stringify(newData) !== JSON.stringify(prevData);
 
         if (hasChanges) {
-          console.log(`Data changed for sizeID ${sizeID}, updating DB...`, newData);
+          console.log(`Data changed or first-time load for sizeID ${sizeID}, updating DB...`, newData);
 
-          // Save to database
           await saveActualDataToDB({
-            OrderID: OrderID,
+            OrderID,
             IsLeather: isLeather ? 0 : 1,
-            SizeData: [newData]
+            SizeData: [newData],
           });
 
-          // Update previousData with new values
           previousData[ipAddress][sizeID] = { ...newData };
-        } else {
-          console.log(`No change for sizeID ${sizeID}, skipping DB update.`);
         }
-
       } catch (error) {
         console.error(`Error processing sizeID ${sizeAddressID}:`, error.message);
       }
     });
 
-    // Wait for all data processing to complete
     await Promise.all(promises);
-
+    modbusClients[ipAddress].isComplete = completeSizeCount;
   } catch (error) {
     console.error(`Error reading actual data: ${error.message}`);
     logToFile(errorLogPath, `Error reading actual data: ${error.message}`);
   }
 }
+
 
 
 async function writeToModbusRegister(client) {
@@ -952,11 +956,9 @@ async function saveDistributionDataToModbus(ipAddress, data) {
       console.log(`Reconnecting to device at ${ipAddress}`);
       await connectToDevice(ipAddress);
     }
-
-     // Ensure modbusClients structure exists
-     modbusClients[ipAddress] ||= {};
-     modbusClients[ipAddress].sizeDataInfo ||= {};
-
+    // Ensure modbusClients structure exists
+    modbusClients[ipAddress] ||= {};
+    modbusClients[ipAddress].sizeDataInfo ||= {};
     // Write Order Info
     const orderInfo = [data.Model, data.ART, data.SO, data.MasterWorkOrder];
     const orderInfoAddresses = [

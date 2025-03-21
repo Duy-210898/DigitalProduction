@@ -8,7 +8,7 @@ using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using OfficeOpenXml;
-using OfficeOpenXml.Style; // For styling
+using OfficeOpenXml.Style;
 
 namespace DigitalProduction
 {
@@ -60,7 +60,7 @@ namespace DigitalProduction
 
             btnLoadData = new Button
             {
-                Text = "Load Data",
+                Text = LocalizationManager.GetString("Sync"),
                 Width = 100,
                 Font = new Font("Arial", 10, FontStyle.Bold),
                 BackColor = Color.LightGray,
@@ -213,8 +213,8 @@ namespace DigitalProduction
                             // **Data Rows**
                             for (int i = 0; i < data.Count; i++)
                             {
-                                worksheet.Cells[i + 2, 1].Value = data[i].CreatedAt; // Keep it as DateTime
-                                worksheet.Cells[i + 2, 1].Style.Numberformat.Format = "MM/dd/yyyy"; // Apply Excel date format
+                                worksheet.Cells[i + 2, 1].Value = data[i].CreatedAt;
+                                worksheet.Cells[i + 2, 1].Style.Numberformat.Format = "MM/dd/yyyy";
                                 worksheet.Cells[i + 2, 2].Value = data[i].MachineName;
                                 worksheet.Cells[i + 2, 3].Value = data[i].SO;
                                 worksheet.Cells[i + 2, 4].Value = data[i].OrderID;
