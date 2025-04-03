@@ -255,7 +255,6 @@ namespace DigitalProduction.ViewModels
         }
 
 
-        // Update only the values so that the UI only refreshes changed cells.
         private void UpdateData(RealTimeData realTimeData)
         {
             if (realTimeData.OutputData == null || !realTimeData.OutputData.Any())
@@ -265,52 +264,104 @@ namespace DigitalProduction.ViewModels
                 return;
             }
 
-            // Group the output data.
+            // Dictionary to track existing headers by their unique key (PartName, MachineName, SO, OperatorName)
+            var headersDictionary = new Dictionary<string, DeviceOutput>();
+
             var groupedData = realTimeData.OutputData
                 .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName, d.PartName })
                 .SelectMany(g =>
                 {
-                    bool machineNameUniform = g.All(x => x.MachineName == g.Key.MachineName);
-                    bool soUniform = g.All(x => x.SO == g.Key.SO);
-                    bool operatorUniform = g.All(x => x.OperatorName == g.Key.OperatorName);
-                    int totalActualCut = (int)g.Sum(x => x.ActualCut);
-                    int totalActualPieces = (int)g.Sum(x => x.ActualPieces);
-                    int totalActualSizeQty = (int)g.Sum(x => x.ActualSizeQty);
+                    // Create a unique key for this group based on PartName and other attributes
+                    string groupKey = $"{g.Key.PartName}-{g.Key.MachineName}-{g.Key.SO}-{g.Key.OperatorName}";
 
-                    // Determine if any item in the group is leather
-                    bool isLeatherGroup = g.Any(x => x.IsLeather);
-
-                    // Create the header row using the group key.
-                    var header = new DeviceOutput
+                    // Check if header already exists, otherwise create a new one
+                    if (!headersDictionary.TryGetValue(groupKey, out var header))
                     {
-                        PartName = g.Key.PartName,
-                        MachineName = g.Key.MachineName,
-                        SO = g.Key.SO,
-                        OperatorName = g.Key.OperatorName,
-                        IsGroupHeader = true,
-                        ActualCut = totalActualCut,
-                        ActualPieces = totalActualPieces,
-                        ActualSizeQty = totalActualSizeQty,
-                        IsLeather = isLeatherGroup, // Ensure header reflects leather status
-                        MaterialType = isLeatherGroup ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial")
-                    };
+                        header = new DeviceOutput
+                        {
+                            PartName = g.Key.PartName,
+                            MachineName = g.Key.MachineName,
+                            SO = g.Key.SO,
+                            OperatorName = g.Key.OperatorName,
+                            IsGroupHeader = true,
+                            IsLeather = g.Any(x => x.IsLeather),
+                            MaterialType = g.Any(x => x.IsLeather)
+                                ? LocalizationManager.GetString("leatherMaterial")
+                                : LocalizationManager.GetString("rawMaterial"),
+                            ActualCut = 0,
+                            ActualPieces = 0,
+                            ActualSizeQty = 0
+                        };
 
-                    // For each item in the group, update the MaterialType and clear common values if uniform.
+                        headersDictionary[groupKey] = header; // Store for reuse
+                    }
+
+                    // Calculate total values for the group
+                    int totalActualCut = g.Sum(x => x.ActualCut ?? 0);
+                    int totalActualPieces = g.Sum(x => x.ActualPieces ?? 0);
+                    int totalActualSizeQty = g.Sum(x => x.ActualSizeQty ?? 0);
+
+                    // Update header totals only if they have changed
+                    if (header.ActualCut != totalActualCut)
+                    {
+                        header.ActualCut = totalActualCut;
+                        header.OnPropertyChanged(nameof(header.ActualCut));
+                    }
+                    if (header.ActualPieces != totalActualPieces)
+                    {
+                        header.ActualPieces = totalActualPieces;
+                        header.OnPropertyChanged(nameof(header.ActualPieces));
+                    }
+                    if (header.ActualSizeQty != totalActualSizeQty)
+                    {
+                        header.ActualSizeQty = totalActualSizeQty;
+                        header.OnPropertyChanged(nameof(header.ActualSizeQty));
+                    }
+
+                    // Process items in the group
                     var items = g.Select(item =>
                     {
-                        item.MaterialType = item.IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
-                        if (machineNameUniform) item.MachineName = string.Empty;
-                        if (soUniform) item.SO = string.Empty;
-                        if (operatorUniform) item.OperatorName = string.Empty;
-                        return item;
-                    });
+                        item.MaterialType = item.IsLeather
+                            ? LocalizationManager.GetString("leatherMaterial")
+                            : LocalizationManager.GetString("rawMaterial");
 
-                    // Return header followed by items.
+                        // Clear redundant values to avoid repetition for grouped items
+                        if (g.Count() > 1)
+                        {
+                            item.MachineName = string.Empty;
+                            item.SO = string.Empty;
+                            item.OperatorName = string.Empty;
+                        }
+
+                        // Subscribe to property changes in child items to dynamically update totals
+                        item.PropertyChanged += (sender, e) =>
+                        {
+                            if (e.PropertyName == nameof(DeviceOutput.ActualCut) ||
+                                e.PropertyName == nameof(DeviceOutput.ActualPieces) ||
+                                e.PropertyName == nameof(DeviceOutput.ActualSizeQty))
+                            {
+                                // Recalculate totals when child values change
+                                header.ActualCut = g.Sum(x => x.ActualCut ?? 0);
+                                header.ActualPieces = g.Sum(x => x.ActualPieces ?? 0);
+                                header.ActualSizeQty = g.Sum(x => x.ActualSizeQty ?? 0);
+
+                                // Notify UI only if values changed
+                                header.OnPropertyChanged(nameof(header.ActualCut));
+                                header.OnPropertyChanged(nameof(header.ActualPieces));
+                                header.OnPropertyChanged(nameof(header.ActualSizeQty));
+                            }
+                        };
+
+                        return item;
+                    }).ToList();
+
+                    // Ensure only one header per unique key (PartName, MachineName, SO, OperatorName)
                     return new[] { header }.Concat(items);
                 })
                 .ToList();
 
             Console.WriteLine($"Updating DeviceOutputs with {groupedData.Count} items.");
+
             try
             {
                 UpdateBindingDeviceOutputs(groupedData);
@@ -320,6 +371,8 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"InvalidOperationException in UpdateBindingDeviceOutputs: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
+
 
 
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
@@ -346,7 +399,7 @@ namespace DigitalProduction.ViewModels
 
                 var existingGroups = BindingDeviceOutputs
                .Where(d => d.IsGroupHeader)
-               .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName })
+               .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName, d.PartName })
                .ToDictionary(g => g.Key, g => g.First());
 
                 int index = 0;
@@ -356,7 +409,7 @@ namespace DigitalProduction.ViewModels
                     if (newItem.IsGroupHeader)
                     {
                         // If group header exists, update values
-                        var key = new { newItem.MachineName, newItem.SO, newItem.OperatorName };
+                        var key = new { newItem.MachineName, newItem.SO, newItem.OperatorName, newItem.PartName };
                         if (existingGroups.TryGetValue(key, out var existingHeader))
                         {
                             // Update group header values

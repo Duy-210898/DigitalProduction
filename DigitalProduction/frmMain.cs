@@ -338,7 +338,7 @@ namespace DigitalProduction
 
         public static class LanguageSettings
         {
-            private static string _currentLanguage = "en";
+            private static string _currentLanguage = "vi";
 
             public static string CurrentLanguage
             {

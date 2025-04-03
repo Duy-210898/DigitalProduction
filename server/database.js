@@ -1,28 +1,30 @@
 const sql = require('mssql');
 
-// Cấu hình cơ sở dữ liệu
+// Database Configuration
 const dbConfig = {
   user: 'sa',
   password: '12345',
   server: '10.30.0.116',
   database: 'CuttingProjectData',
   options: {
-    encrypt: false,
-    trustServerCertificate: true,
+    encrypt: false, // Disable encryption (use `true` for Azure)
+    trustServerCertificate: true, // Trust self-signed certificates
   },
 };
 
-let pool;
+let pool; // Global connection pool
 
 // Khởi tạo kết nối cơ sở dữ liệu
 async function initDatabase() {
-  if (pool) return pool; // Nếu đã có kết nối, trả về kết nối hiện tại
   try {
-    pool = await sql.connect(dbConfig);
-    console.log('Kết nối cơ sở dữ liệu thành công');
+    if (!pool || !pool.connected) {
+      pool = await sql.connect(dbConfig);
+      console.log('✅ Kết nối cơ sở dữ liệu thành công');
+    }
     return pool;
   } catch (err) {
-    console.error('Lỗi kết nối cơ sở dữ liệu:', err.message);
+    console.error('❌ Lỗi kết nối cơ sở dữ liệu:', err.message);
+    pool = null; // Reset pool to allow reconnection
     throw err;
   }
 }
@@ -491,80 +493,138 @@ async function getDistributionDataFromDb(ipAddress) {
   try {
     const query = `
         SELECT  
-            pr.OrderID,
-            pr.MasterWorkOrder,
-            pr.SO,
-            d.IpAddress,
-            dd.IsLeather,
-            p.Model,
-            o.OperatorName AS UserName,
-            p.ART,
-            pa.PartID,
-            pa.PartName,
-            m.MaterialCode,
-            m.MaterialID,
-            m.MaterialName,
-            se.SizeID,
-            se.Size,
-            ps.SizeQty,
-            dd.InventoryQty,
-            di.PiecesPerPair,
-            di.CuttingDieQty,
-            di.MaterialLayer,
-            di.TotalPiecesPerPair
-        FROM 
-            DistributionData AS dd
-        JOIN 
-            DeviceList AS d ON dd.DeviceID = d.DeviceID 
-        JOIN 
-            PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
-        JOIN 
-            Part AS pa ON pa.PartID = ps.PartID
-        JOIN 
-            Size AS se ON se.SizeID = ps.SizeID
-        JOIN 
-            Material AS m ON m.MaterialID = ps.MaterialID
-        JOIN 
-            Operator AS o ON dd.OperatorID = o.OperatorID  
-        JOIN 
-            ProductOrder AS pr ON ps.OrderId = pr.OrderID
-        JOIN 
-            Product AS p ON pr.ProductId = p.ProductId
-        LEFT JOIN 
-            DefaultInfo AS di ON di.ProductID = p.ProductId
-        WHERE 
-            dd.IsDelete = 0  
-            AND d.IpAddress = @IpAddress
-            AND dd.Status = 'Pending'
-        ORDER BY 
-            dd.CreatedAt ASC;
+          pr.OrderID,
+          pr.MasterWorkOrder,
+          pr.SO,
+          d.IpAddress,
+          dd.IsLeather,
+          p.Model,
+          o.OperatorName AS UserName,
+          p.ART,
+          pa.PartID,
+          pa.PartName,
+          m.MaterialCode,
+          m.MaterialID,
+          m.MaterialName,
+          se.SizeID,
+          se.Size,
+          ps.SizeQty,
+          dd.InventoryQty,
+          di.PiecesPerPair,
+          di.CuttingDieQty,
+          di.MaterialLayer,
+          di.TotalPiecesPerPair,
+          dd.Status,
+          dd.CreatedAt
+      FROM 
+          DistributionData AS dd
+      JOIN 
+          DeviceList AS d ON dd.DeviceID = d.DeviceID 
+      JOIN 
+          PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+      JOIN 
+          Part AS pa ON pa.PartID = ps.PartID
+      JOIN 
+          Size AS se ON se.SizeID = ps.SizeID
+      JOIN 
+          Material AS m ON m.MaterialID = ps.MaterialID
+      JOIN 
+          Operator AS o ON dd.OperatorID = o.OperatorID  
+      JOIN 
+          ProductOrder AS pr ON ps.OrderId = pr.OrderID
+      JOIN 
+          Product AS p ON pr.ProductId = p.ProductId
+      LEFT JOIN 
+          DefaultInfo AS di ON di.ProductID = p.ProductId
+      WHERE 
+          dd.IsDelete = 0  
+          AND d.IpAddress = @IpAddress
+          AND dd.Status IN ('Complete', 'Pending') 
+          AND EXISTS (
+              SELECT *
+              FROM DistributionData AS sub_dd
+              WHERE sub_dd.Status = 'Pending' AND dd.CreatedAt = sub_dd.CreatedAt
+          )
+      ORDER BY 
+          dd.CreatedAt ASC;
     `;
-    
+
     const request = new sql.Request();
     request.input('IpAddress', sql.VarChar, ipAddress);
     
     const result = await request.query(query);
     
     if (result.recordset.length > 0) {
+      
       const row = result.recordset[0];
 
-      // Group OrderID with its corresponding SOs
+      // Group records by timestamp
+      const groupedByTimestamp = result.recordset.reduce((acc, item) => {
+      const createdAtTimestamp = new Date(item.CreatedAt).toISOString().replace("T", " ").slice(0, 19); // Format as YYYY-MM-DD HH:MM:SS
+
+      if (!acc[createdAtTimestamp]) {
+          acc[createdAtTimestamp] = [];
+      }
+      acc[createdAtTimestamp].push(item);
+      return acc;
+      }, {});
+
+      // Convert object to an array of grouped records
+      const soGroups = Object.keys(groupedByTimestamp).map(timestamp => ({
+          Timestamp: timestamp,
+          Data: groupedByTimestamp[timestamp]
+      }));
+      console.log(soGroups);
+
+      // Step 1: Group data by OrderID → SO → Sizes
       const orderMap = new Map();
+      const sizeCountMap = new Map();
+
       result.recordset.forEach(r => {
         if (!orderMap.has(r.OrderID)) {
-          orderMap.set(r.OrderID, new Set());
+          orderMap.set(r.OrderID, new Map()); // SO Map
         }
-        orderMap.get(r.OrderID).add(r.SO);
-      });
+        const soMap = orderMap.get(r.OrderID);
 
-      // Convert map to an array of objects
-      const orderIDWithSOs = Array.from(orderMap.entries()).map(([OrderID, SO]) => ({
-        OrderID: parseInt(OrderID, 10),
-        SOs: Array.from(SO)
-      }));
+        if (!soMap.has(r.SO)) {
+          soMap.set(r.SO, new Map()); // Size Map
+        }
+        const sizeMap = soMap.get(r.SO);
+
+        const sizeKey = `${r.SizeID}-${r.Size}`;
+
+        if (!sizeMap.has(sizeKey)) {
+          sizeMap.set(sizeKey, {
+            SizeID: r.SizeID,
+            Size: r.Size,
+            SizeQty: r.SizeQty
+          });
+        } else {
+          sizeMap.get(sizeKey).SizeQty += r.SizeQty; // Sum up the same size within an SO
+        }
+
+        // Track how many SOs contain each size
+        if (!sizeCountMap.has(sizeKey)) {
+          sizeCountMap.set(sizeKey, new Set());
+        }
+        sizeCountMap.get(sizeKey).add(r.SO);
+      });
 
       const orderID = parseInt(row.OrderID, 10);
 
+     // Keep `SizeData` unchanged (original sum per SizeID)
+     const sizeDataMap = new Map();
+
+     result.recordset.forEach(item => {
+       const key = `${item.SizeID}-${item.Size}`;
+       if (!sizeDataMap.has(key)) {
+         sizeDataMap.set(key, { SizeID: item.SizeID, Size: item.Size, SizeQty: 0, InventoryQty: item.InventoryQty });
+       }
+       sizeDataMap.get(key).SizeQty += item.SizeQty; // Sum all occurrences of the same SizeID
+     });
+
+     const sizeDataSosGroups = Array.from(sizeDataMap.values()); // Keep original sizeData
+        
       // Process MaterialData
       const materialData = result.recordset
         .map(r => ({
@@ -582,19 +642,20 @@ async function getDistributionDataFromDb(ipAddress) {
           ) === index
         );
 
-      // Process SizeData - Sum `SizeQty` if the same SizeID exists
-      const sizeDataMap = new Map();
-
-      result.recordset.forEach(item => {
-        const key = `${item.SizeID}-${item.Size}`;
-        if (!sizeDataMap.has(key)) {
-          sizeDataMap.set(key, { SizeID: item.SizeID, Size: item.Size, SizeQty: 0, InventoryQty: item.InventoryQty });
-        }
-        sizeDataMap.get(key).SizeQty += item.SizeQty; // Sum all occurrences of the same SizeID
-      });
-
-      const sizeData = Array.from(sizeDataMap.values());
-
+        // Lấy thông tin SizeData
+      const sizeData = result.recordset
+      .map(item => ({
+        OrderID: item.OrderID,
+        SizeID: item.SizeID,
+        Size: item.Size,
+        SizeQty: item.SizeQty,
+        InventoryQty: item.InventoryQty
+      }))
+      .filter((value, index, self) =>
+        index === self.findIndex(
+          t => t.SizeID === value.SizeID && t.Size === value.Size && t.SizeQty === value.SizeQty && t.InventoryQty === value.InventoryQty
+        )
+      );
       // Process DefaultValue
       const defaultValue = result.recordset
         .map(item => ({
@@ -615,14 +676,15 @@ async function getDistributionDataFromDb(ipAddress) {
       // Return the formatted data
       return {
         OrderID: orderID,
-        OrderIDWithSOs: orderIDWithSOs, // Mapping OrderIDs to their corresponding SOs
+        OrderIDWithSOs: soGroups,
         SO: row.SO,
         MasterWorkOrder: row.MasterWorkOrder,
         Leather: row.IsLeather ? 2 : 1,
         Model: row.Model,
         ART: row.ART,
+        SizeDataDB: sizeData,
+        SizeData: sizeDataSosGroups,
         MaterialData: materialData,
-        SizeData: sizeData, // Now sums `SizeQty` for the same SizeID
         DefaultValue: defaultValue
       };
     } else {

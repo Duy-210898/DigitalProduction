@@ -501,4 +501,7 @@
   <data name="TotalRecords" xml:space="preserve">
     <value>Total Records:</value>
   </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
 </root>

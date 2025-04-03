@@ -10,7 +10,7 @@ public static class LocalizationManager
     static LocalizationManager()
     {
         // Set default culture (English) at startup
-        SetLanguage("en");
+        SetLanguage("vi");
     }
 
     // Set the application language dynamically

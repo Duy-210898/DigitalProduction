@@ -21,7 +21,7 @@ namespace DigitalProduction
         private GridControl gridControl;
         private GridView gridView;
         private Button btnSendData;
-        private readonly string[] columnsToHide = { "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process" };
+        private readonly string[] columnsToHide = { "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId" };
 
         public ucSchedule()
         {
@@ -38,6 +38,19 @@ namespace DigitalProduction
             if (filteredSchedules.Count == 0)
             {
                 MessageBox.Show("No data available to send.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            bool allSame = filteredSchedules
+                .GroupBy(s => new { s.ART, s.Model })
+                .Count() == 1;
+
+            if (!allSame) {
+                MessageBox.Show("Please sure ART, Model is the same", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+          
+            if (filteredSchedules.Count >= 20) {
+                MessageBox.Show("Only allow 20 SO", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -169,7 +182,7 @@ namespace DigitalProduction
 
             btnSendData = new Button
             {
-                Text = "Send to Distribution",
+                Text = "Save data to distribution",
                 Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
                 BackColor = System.Drawing.Color.LightBlue,
                 AutoSize = true,

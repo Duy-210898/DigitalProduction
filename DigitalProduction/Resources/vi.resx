@@ -531,4 +531,7 @@
   <data name="TotalRecords" xml:space="preserve">
     <value>Tổng bản ghi:</value>
   </data>
+  <data name="Save" xml:space="preserve">
+    <value>Lưu</value>
+  </data>
 </root>

@@ -107,6 +107,13 @@ namespace DigitalProduction
         {
             try
             {
+                // Validate dateTimePicker's value
+                if (dateTimePicker.Value == null || dateTimePicker.Value == DateTime.MinValue)
+                {
+                    MessageBox.Show("Please select a valid date.");
+                    return;
+                }
+
                 int selectedYear = dateTimePicker.Value.Year;
                 int selectedMonth = dateTimePicker.Value.Month;
 

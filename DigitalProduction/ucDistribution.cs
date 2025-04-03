@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Net;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Columns;
-using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 
 namespace DigitalProduction
 {
@@ -153,7 +149,7 @@ namespace DigitalProduction
 
             lblFactory.Text = $"Factory: {factoryName}";
             lblLastNo.Text = $"Last No: {schedules.FirstOrDefault()?.LastNo ?? string.Empty}";
-            lblMasterWorkOrder.Text = $"Master Work Order: {schedules.FirstOrDefault()?.MasterWorkOrder ?? string.Empty}";
+            lblMasterWorkOrder.Text = $"Master Work Order: {string.Join(", ", schedules.Select(s => s.MasterWorkOrder).Distinct())}";
             lblSO.Text = $"SO: {schedules.FirstOrDefault()?.SO ?? string.Empty}";
             lblPO.Text = $"PO: {schedules.FirstOrDefault()?.PO ?? string.Empty}";
             lblModel.Text = $"Model: {schedules.FirstOrDefault()?.Model ?? string.Empty}";
@@ -317,21 +313,18 @@ namespace DigitalProduction
 
             foreach (int orderID in orderIDs)
             {
+                if (partIDs.Count >= 20)
+                {
+                    ShowMessage.ShowWarning("PartName no longer than 20", "Warning");
+                    break;
+                }
                 // 1 part has many sizes - care part
                 if (rdRawMaterial.Checked)
                 {
-                    if (partIDs.Count > 1)
+                    // get partoderID
+                    foreach (int i in sizeIDs)
                     {
-                        ShowMessage.ShowWarning("PartName no longer than 1", "Warning");
-                        break;
-                    }
-                    else
-                    {
-                        // get partoderID
-                        foreach (int i in sizeIDs)
-                        {
-                            partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partIDs.FirstOrDefault(), i, orderID));
-                        }
+                        partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partIDs.FirstOrDefault(), i, orderID));
                     }
                 }
                 // 1-3 size has many parts - care size
@@ -387,6 +380,7 @@ namespace DigitalProduction
                 { lblPO, "PO" },
                 { lblModel, "Model" },
                 { lblArt, "ART" },
+                { btnSaveInventory, "Save" },
                 { btnSend, "Send" },
                 { lblInventoryQty, "InventoryQty" },
                 {lblPeicesPerPair, "PeicesPerPair" },
@@ -579,5 +573,6 @@ namespace DigitalProduction
             partIDs = new HashSet<int>(filteredSchedules.Select(s => s.PartId));
             updateUIDataGridOverView(filteredSchedules);
         }
+
     }
 }

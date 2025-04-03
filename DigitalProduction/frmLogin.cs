@@ -3,7 +3,6 @@ using System.Resources;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DigitalProduction.Validation;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static DigitalProduction.frmMain;
 
 namespace DigitalProduction
@@ -17,8 +16,8 @@ namespace DigitalProduction
             InitializeComponent();
             resourceManager = new ResourceManager("DigitalProduction.Resource", typeof(frmMain).Assembly);
             txt_pwd.Properties.UseSystemPasswordChar = true;
-            toggleLanguage.Properties.OnText = LocalizationManager.GetString("  Tiếng Việt");
-            toggleLanguage.Properties.OffText = LocalizationManager.GetString("  English");
+            toggleLanguage.Properties.OnText = LocalizationManager.GetString("  English");
+            toggleLanguage.Properties.OffText = LocalizationManager.GetString("  Tiếng Việt");
             picEye.Click += PicEye_Click;
             UpdateUI();
             // Load saved credentials if "Remember Me" is checked
@@ -129,7 +128,7 @@ namespace DigitalProduction
                 Cursor.Current = Cursors.WaitCursor;
 
                 bool isChecked = toggleLanguage.IsOn;
-                string selectedLanguage = isChecked ? "vi" : "en";
+                string selectedLanguage = isChecked ? "en" : "vi";
 
                 LanguageSettings.ChangeLanguage(selectedLanguage);
                 LocalizationManager.SetLanguage(selectedLanguage);
@@ -148,6 +147,9 @@ namespace DigitalProduction
 
         private void UpdateUI()
         {
+            bool isChecked = toggleLanguage.IsOn;
+            string selectedLanguage = isChecked ? "en" : "vi";
+            LocalizationManager.SetLanguage(selectedLanguage);
             this.Text = LocalizationManager.GetString("frmLogin_Title");
             btn_Login.Text = LocalizationManager.GetString("Login");
             lblExit.Text = LocalizationManager.GetString("Exit");

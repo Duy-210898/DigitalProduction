@@ -51,8 +51,8 @@ namespace DigitalProduction
             };
 
             gridControl_DeviceOutput.MainView = gridView_DeviceOutput;
+         
             gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
-
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
             gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
             this.Resize += UcDeviceOutput_Resize;
@@ -68,6 +68,8 @@ namespace DigitalProduction
             this.Controls.Add(mainPanel);
             this.Controls.Add(filterPanel); // Ensure filters stay at the top
 
+            gridControl_DeviceOutput.ForceInitialize();
+            // Translate headers (after binding data)
             TranslateHeaders();
         }
 
@@ -165,28 +167,41 @@ namespace DigitalProduction
 
         private void TranslateHeaders()
         {
-            if (gridView_DeviceOutput.Columns.Count > 0)
+            // Ensure the GridControl is not null and has a valid main view (typically a GridView)
+            var gridView = gridControl_DeviceOutput.MainView as GridView;
+
+            if (gridView != null && gridView.Columns.Count > 0)
             {
-                foreach (GridColumn col in gridView_DeviceOutput.Columns)
+                // Iterate through each column in the GridView
+                foreach (GridColumn col in gridView.Columns)
                 {
+                    // Get the translated text for each column header based on the FieldName
                     string translatedText = LocalizationManager.GetString(col.FieldName);
                     if (!string.IsNullOrEmpty(translatedText))
                     {
+                        // Apply the translated text to the column's caption
                         col.Caption = translatedText;
                     }
                 }
 
-                // Hide _isLeather if it appears in headers
-                var column = gridView_DeviceOutput.Columns["is Leather"];
-                if (column != null)
+                // Hide specific columns if necessary (example for "isLeather" and "Is Group Header")
+                var isLeatherColumn = gridView.Columns[4];
+                if (isLeatherColumn != null)
                 {
-                    column.Visible = false;
+                    // Set visibility to false to hide the column
+                    isLeatherColumn.Visible = false;
                 }
-                gridView_DeviceOutput.Columns["Is Group Header"].Visible = false;
-                gridView_DeviceOutput.Columns["Is Leather"].Visible = false;
 
-                gridView_DeviceOutput.LayoutChanged(); // Force update to reflect changes
+                var isGroupHeaderColumn = gridView.Columns["IsGroupHeader"];
+                if (isGroupHeaderColumn != null)
+                {
+                    isGroupHeaderColumn.Visible = false;
+                }
+
+                // Trigger layout refresh to apply changes immediately
+                gridView.LayoutChanged();
             }
         }
+
     }
 }
