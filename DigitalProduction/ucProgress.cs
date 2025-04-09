@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -24,7 +25,8 @@ namespace DigitalProduction
         private DateTimePicker dtpEndDate;
         private Label lblStartDate;
         private Label lblEndDate;
-        private TextBox txtSearch;
+        private DevExpress.XtraEditors.Repository.RepositoryItemComboBox noteComboBoxEditor;
+
 
         public ucProgress()
         {
@@ -80,16 +82,35 @@ namespace DigitalProduction
                 Margin = new Padding(5, 10, 10, 5)
             };
 
-            txtSearch = new TextBox
+            // Sync Data button
+            SimpleButton syncButton = new SimpleButton()
             {
-                Text = LocalizationManager.GetString("Search"),
-                Width = 200,
+                Text = LocalizationManager.GetString("Sync"),
+                Width = 90,
+                Height = 35,
                 Margin = new Padding(10, 10, 10, 5)
             };
+            syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
+            syncButton.Click += async (sender, e) =>
+            {
+                try
+                {
+                    syncButton.Enabled = false;
+                    syncButton.Text = "Loading...";
 
-            txtSearch.Enter += TxtSearch_Enter;
-            txtSearch.Leave += TxtSearch_Leave;
-            txtSearch.TextChanged += TxtSearch_TextChanged;
+                    await Task.Run(async () => await GetDataAndLoadToGridAsync());
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    syncButton.Enabled = true;
+                    syncButton.Text = LocalizationManager.GetString("Sync");
+                }
+            };
 
             dtpStartDate.ValueChanged += DateTimePicker_ValueChanged;
             dtpEndDate.ValueChanged += DateTimePicker_ValueChanged;
@@ -99,7 +120,7 @@ namespace DigitalProduction
             filterPanel.Controls.Add(dtpStartDate);
             filterPanel.Controls.Add(lblEndDate);
             filterPanel.Controls.Add(dtpEndDate);
-            filterPanel.Controls.Add(txtSearch);
+            filterPanel.Controls.Add(syncButton);
 
             // Initialize GridControl
             gridProgressManagement = new GridControl
@@ -109,7 +130,7 @@ namespace DigitalProduction
 
             gridViewProgressManagement = new GridView(gridProgressManagement)
             {
-                OptionsBehavior = { Editable = false },
+                OptionsBehavior = { Editable = true },
                 OptionsView = { ShowGroupPanel = false }
             };
 
@@ -135,35 +156,6 @@ namespace DigitalProduction
                 Location = new Point(20, 10)
             };
 
-            Button refreshButton = new Button
-            {
-                Text = "Refresh",
-                Size = new Size(80, 30),
-                Location = new Point(250, 10)
-            };
-
-            refreshButton.Click += async (sender, e) =>
-            {
-                try
-                {
-                    refreshButton.Enabled = false;
-                    refreshButton.Text = "Loading...";
-
-                    await Task.Run(async () => await GetDataAndLoadToGridAsync());
-
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    refreshButton.Enabled = true;
-                    refreshButton.Text = "Refresh";
-                }
-            };
-
-            paginationPanel.Controls.Add(refreshButton);
             paginationPanel.Controls.Add(lblPageInfo);
 
             // Add components to container panel
@@ -187,29 +179,10 @@ namespace DigitalProduction
             gridViewProgressManagement.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
             gridViewProgressManagement.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
             gridViewProgressManagement.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+
             // Set data source
             gridProgressManagement.DataSource = distributionDataList;
 
-        }
-
-        // Event handlers for placeholder functionality
-        private void TxtSearch_Enter(object sender, EventArgs e)
-        {
-            if (txtSearch.Text == LocalizationManager.GetString("Search"))
-            {
-                txtSearch.Text = "";
-                txtSearch.ForeColor = Color.Black;
-            }
-        }
-
-        private void TxtSearch_Leave(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtSearch.Text))
-            {
-                txtSearch.Text = LocalizationManager.GetString("Search");
-                txtSearch.ForeColor = Color.Gray;
-                FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, "");
-            }
         }
 
         private void DateTimePicker_ValueChanged(object sender, EventArgs e)
@@ -224,7 +197,7 @@ namespace DigitalProduction
             }
             else
             {
-                FilterData(newStartDate, newEndDate, txtSearch.Text == LocalizationManager.GetString("Search") ? "" : txtSearch.Text.Trim());
+                FilterData(newStartDate, newEndDate);
             }
         }
 
@@ -251,26 +224,15 @@ namespace DigitalProduction
             MessageBox.Show("Invalid date range! Start date cannot be after End date.", "Date Selection Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        private void TxtSearch_TextChanged(object sender, EventArgs e)
+        private void FilterData(DateTime startDate, DateTime endDate)
         {
-            string searchInput = txtSearch.Text.Trim();
-            FilterData(dtpStartDate.Value.Date, dtpEndDate.Value.Date, string.IsNullOrEmpty(searchInput) || searchInput == "Search..." ? "" : searchInput);
-        }
-
-        private void FilterData(DateTime startDate, DateTime endDate, string searchText)
-        {
+            Task.Run(async () => await GetDataAndLoadToGridAsync());
             endDate = endDate.AddDays(1).AddTicks(-1);
-            searchText = searchText.ToLower();
 
             var filteredData = new BindingList<Distribution>(
                 distributionDataList.Where(distribution =>
                     distribution.CreatedAt >= startDate &&
-                    distribution.CreatedAt <= endDate &&
-                    (string.IsNullOrEmpty(searchText) ||
-                     distribution.IpAddress.ToLower().Contains(searchText) ||
-                     distribution.MachineName.ToLower().Contains(searchText) ||
-                     distribution.OperatorName.ToLower().Contains(searchText) ||
-                     distribution.EmployeeName.ToLower().Contains(searchText))
+                    distribution.CreatedAt <= endDate
                 ).ToList()
             );
 
@@ -287,7 +249,6 @@ namespace DigitalProduction
             }
 
             gridProgressManagement.DataSource = filteredData;
-            gridProgressManagement.Refresh();  // Ensure UI updates
             TranslateHeaders();
             lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")} {filteredData.Count}";
         }
@@ -312,7 +273,15 @@ namespace DigitalProduction
 
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new { app = Global.App, action = "getDistributions" };
+            var request = new { app = Global.App,
+                action = "getDistributions",
+                filter = new
+                {
+                    // Format dates as "yyyy-MM-dd" or adjust as required.
+                    startDate = dtpStartDate.Value.ToString("yyyy-MM-dd"),
+                    endDate = dtpEndDate.Value.ToString("yyyy-MM-dd"),
+                }
+            };
             string jsonRequest = JsonConvert.SerializeObject(request);
 
             try
@@ -360,7 +329,7 @@ namespace DigitalProduction
                 }
                 else
                 {
-                    MessageBox.Show("No Data Found", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Console.WriteLine("No Data Found");
                 }
             }
             catch (Exception ex)
@@ -368,6 +337,7 @@ namespace DigitalProduction
                 MessageBox.Show($"Error receiving WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         // Implement the RowStyle event handler
         private void GridViewProgressManagement_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
         {
@@ -393,7 +363,6 @@ namespace DigitalProduction
                     {
                         e.Appearance.BackColor = Color.LightCoral; // Red for other statuses
                     }
-
                 }
             }
         }
@@ -417,8 +386,111 @@ namespace DigitalProduction
             gridViewProgressManagement.Columns["DistributionID"].Visible = false;
             gridViewProgressManagement.Columns["IsLeather"].Visible = false;
             gridViewProgressManagement.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
+
+            var existedNoted = gridViewProgressManagement.Columns.ColumnByFieldName(LocalizationManager.GetString("Reason"));
+            if (existedNoted == null)
+            {
+                // Initialize 
+                noteComboBoxEditor = new DevExpress.XtraEditors.Repository.RepositoryItemComboBox();
+                Dictionary<int, string> noteDescriptions = new Dictionary<int, string>
+                {
+                    { 0, "1 - " + LocalizationManager.GetString("NotEnoughMaterials") },
+                    { 1, "2 - " + LocalizationManager.GetString("ChangeOfPlan") },
+                    { 2, "3 - " + LocalizationManager.GetString("ForgotToChooseSize") }
+                };
+                noteComboBoxEditor.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+                foreach (var pair in noteDescriptions)
+                {
+                    noteComboBoxEditor.Items.Add(pair.Value);
+                }
+                // Initialize the GridColumn
+                GridColumn noteColumn = new GridColumn
+                {
+                    FieldName = LocalizationManager.GetString("Reason"),
+                    Visible = true
+                };
+                noteColumn.ColumnEdit = noteComboBoxEditor;
+                noteColumn.OptionsColumn.AllowEdit = true;
+
+                // Add the column to the grid view
+                gridViewProgressManagement.Columns.Add(noteColumn);
+                gridViewProgressManagement.ShowingEditor += GridViewProgressManagement_ShowingEditor;
+                gridProgressManagement.Refresh();
+
+                noteColumn.UnboundType = DevExpress.Data.UnboundColumnType.String;
+                gridViewProgressManagement.CustomUnboundColumnData += (s, e) =>
+                {
+                    if (e.Column.FieldName == LocalizationManager.GetString("Reason"))
+                    {
+                        var model = (Distribution)e.Row;
+                        if (e.IsGetData)
+                        {
+                            if (model.Note.HasValue && noteDescriptions.TryGetValue(model.Note.Value, out string description))
+                            {
+                                e.Value = description;
+                            }
+                        }
+                        else if (e.IsSetData)
+                        {
+                            var desc = e.Value?.ToString();
+                            var match = noteDescriptions.FirstOrDefault(x => x.Value == desc);
+                            model.Note = match.Key;
+                        }
+                    }
+                };
+                gridViewProgressManagement.ShownEditor += (s, e) =>
+                {
+                    if (gridViewProgressManagement.FocusedColumn.FieldName == LocalizationManager.GetString("Reason"))
+                    {
+                        int rowHandle = gridViewProgressManagement.FocusedRowHandle;
+                        var distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+
+                        // Check if the distribution object exists and its status is not "Complete"
+                        if (distribution != null && distribution.Status != "Complete")
+                        {
+                            var editor = gridViewProgressManagement.ActiveEditor as ComboBoxEdit;
+                            if (editor != null)
+                            {
+                                // Handle the SelectedIndexChanged event
+                                editor.SelectedIndexChanged += (s2, e2) =>
+                                {
+                                    int selectedIndex = editor.SelectedIndex;
+                                    if (noteDescriptions.TryGetValue(selectedIndex, out string selectedDesc))
+                                    {
+                                        int distributionId = distribution.DistributionID;
+
+                                        // update status distribution
+                                        DbHelper.UpdateDistributionNoteAndStatus(distributionId, selectedIndex, "Stop");
+                                        Console.WriteLine($"Selected Note Key: {selectedIndex}, Description: {selectedDesc}, DistributionID: {distributionId}");
+                                    }
+                                };
+                            }
+                        }
+                        else
+                        {
+                            // not allow eduit when status complete
+                            gridViewProgressManagement.HideEditor();
+                            Console.WriteLine("Editing is disabled for rows with status 'Complete'.");
+                        }
+                    }
+                };
+            }
         }
 
+        private void GridViewProgressManagement_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            GridView view = sender as GridView;
+
+            // Check if the current column is the noteColumn
+            if (view.FocusedColumn.FieldName == LocalizationManager.GetString("Reason"))
+            {
+                e.Cancel = false; // Allow editing if the focused column is "Note"
+            }
+            else
+            {
+                e.Cancel = true; // Prevent editing for all other columns
+            }
+        }
         private void LoadTextLabel()
         {
             this.Text = LocalizationManager.GetString("ListOfDistributions");
@@ -445,22 +517,21 @@ namespace DigitalProduction
 
             public int? Note { get; set; }
 
-            // New read-only property for NoteDescription
-            public string NoteDescription
-            {
-                get
-                {
-                    switch (Note)
-                    {
-                        case 1: return LocalizationManager.GetString("NotEnoughMaterials");
-                        case 2: return LocalizationManager.GetString("ChangeOfPlan");
-                        case 3: return LocalizationManager.GetString("ForgotToChooseSize");
-                        case 0: return string.Empty;
-                        default: return string.Empty;
-                    }
-                }
-            }
-
+            //// New read-only property for NoteDescription
+            //public string NoteDescription
+            //{
+            //    get
+            //    {
+            //        switch (Note)
+            //        {
+            //            case 1: return LocalizationManager.GetString("NotEnoughMaterials");
+            //            case 2: return LocalizationManager.GetString("ChangeOfPlan");
+            //            case 3: return LocalizationManager.GetString("ForgotToChooseSize");
+            //            case 0: return "Com";
+            //            default: return string.Empty;
+            //        }
+            //    }
+            //}
         }
     }
 }

@@ -534,4 +534,7 @@
   <data name="Save" xml:space="preserve">
     <value>Lưu</value>
   </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Lý do</value>
+  </data>
 </root>

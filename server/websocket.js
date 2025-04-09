@@ -201,11 +201,35 @@ async function handleGetActualData(ws, request) {
 
 
 // Xử lý yêu cầu lấy thông tin phân phối của thiết bị
-async function handleGetDistributions(ws) {
-  console.log("Nhan duoc");
+async function handleGetDistributions(ws, request) {
+  const { filter } = request;
   try {
+    // Get the current date in YYYY-MM-DD format
+    const currentDate = new Date();
+    const formattedCurrentDate = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    // Ensure startDate and endDate are Date objects
+    const startDate = filter?.startDate ? new Date(filter.startDate) : new Date(formattedCurrentDate);
+    let endDate = filter?.endDate ? new Date(filter.endDate) : new Date(formattedCurrentDate);
+    
+    // Set endDate to 23:59:59.999 in local time
+    endDate.setHours(23, 59, 59, 999);
+    // Add 1 day to the endDate
+    endDate.setDate(endDate.getDate() + 1);
+    
+    // Format dates for SQL (YYYY-MM-DD HH:mm:ss.SSS) - LOCAL TIME
+    const formatDateForSQL = (date) => {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ` +
+             `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}.${String(date.getMilliseconds()).padStart(3, '0')}`;
+    };
+    
+    const formattedStartDate = formatDateForSQL(startDate);
+    const formattedEndDate = formatDateForSQL(endDate);
+    
+    console.log("Start Date:", formattedStartDate); // 2025-03-04 00:00:00.000
+    console.log("End Date:", formattedEndDate);     // 2025-03-04 23:59:59.999
     // Gọi hàm getDistributionByDevice từ database.js để lấy dữ liệu phân phối
-    const distributionData = await getDistributions();
+    const distributionData = await getDistributions(startDate, endDate);
 
     if (!distributionData) {
       return ws.send(JSON.stringify({

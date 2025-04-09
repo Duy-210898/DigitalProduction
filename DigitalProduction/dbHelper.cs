@@ -922,6 +922,35 @@ namespace DigitalProduction
                 }
             }
         }
+        public static bool UpdateDistributionNoteAndStatus(int distributionId, int note, string status)
+        {
+            string query = @"
+            UPDATE DistributionData
+            SET Note = @Note, Status = @Status
+            WHERE DistributionID = @DistributionID;
+            ";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Note", note);
+                    command.Parameters.AddWithValue("@Status", status);
+                    command.Parameters.AddWithValue("@DistributionID", distributionId);
+
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log or handle error as needed
+                Console.WriteLine("Error updating distribution: " + ex.Message);
+                return false;
+            }
+        }
     }
 }
 

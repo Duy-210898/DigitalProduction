@@ -514,6 +514,9 @@ async function getDistributionDataFromDb(ipAddress) {
           di.CuttingDieQty,
           di.MaterialLayer,
           di.TotalPiecesPerPair,
+          do.ActualCut,
+	        do.ActualPieces,
+	        do.ActualSizeQty,
           dd.Status,
           dd.CreatedAt
       FROM 
@@ -534,6 +537,9 @@ async function getDistributionDataFromDb(ipAddress) {
           ProductOrder AS pr ON ps.OrderId = pr.OrderID
       JOIN 
           Product AS p ON pr.ProductId = p.ProductId
+      LEFT JOIN 
+          DeviceOutput AS do ON do.SizeID = se.SizeID
+                      AND do.OrderID = pr.OrderID 
       LEFT JOIN 
           DefaultInfo AS di ON di.ProductID = p.ProductId
       WHERE 
@@ -895,59 +901,66 @@ async function getAllDeviceData() {
 
 
 // Fetch data from SQL Server
-async function getDistributions() {
-    try {
-       // Kết nối tới cơ sở dữ liệu với cấu hình dbConfig
-        const pool = await sql.connect(dbConfig);
-        // SQL Query
-        const query = `
-            SELECT 
-                dd.DistributionID,
-                d.IpAddress,
-                d.MachineName,
-                o.OperatorName,
-				        u.EmployeeName,
-                pa.PartName,
-                se.Size,
-                ps.Unit,
-                ps.UnitUsage,
-                ps.SizeQty,
-                m.MaterialName,
-                dd.InventoryQty,
-                dd.Status,
-                dd.CreatedAt,
-                dd.IsLeather,
-                dd.IsDelete,
-                dd.Note
-            FROM 
-                DistributionData dd
-            JOIN 
-                DeviceList d ON dd.DeviceID = d.DeviceID 
-            JOIN 
-                PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
-            JOIN 
-                Part pa ON pa.PartID = ps.PartID
-            JOIN 
-                Size se ON se.SizeID = ps.SizeID
-            JOIN 
-                Material m ON m.MaterialID = ps.MaterialID
-            JOIN 
-                Operator o ON dd.OperatorID = o.OperatorID  
-            JOIN 
-                Users u ON dd.UserID = u.UserID
-            WHERE 
-                dd.IsDelete = 0
-            ORDER BY 
-                dd.CreatedAt ASC
-        `;
-        // Execute the query and return the result
-        const result = await pool.request().query(query);
-        
-        // Return the result rows
-        return result.recordset; 
-    } catch (err) {
-        throw new Error('Database query failed: ' + err.message);
-    }
+async function getDistributions(startDate, endDate) {
+  try {
+      // Kết nối tới cơ sở dữ liệu với cấu hình dbConfig
+      const pool = await sql.connect(dbConfig);
+      // SQL Query
+      const query = `
+          SELECT 
+              dd.DistributionID,
+              d.IpAddress,
+              d.MachineName,
+              o.OperatorName,
+              u.EmployeeName,
+              pa.PartName,
+              se.Size,
+              ps.Unit,
+              ps.UnitUsage,
+              ps.SizeQty,
+              m.MaterialName,
+              dd.InventoryQty,
+              dd.Status,
+              dd.CreatedAt,
+              dd.IsLeather,
+              dd.IsDelete,
+              dd.Note
+          FROM 
+              DistributionData dd
+          JOIN 
+              DeviceList d ON dd.DeviceID = d.DeviceID 
+          JOIN 
+              PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+          JOIN 
+              Part pa ON pa.PartID = ps.PartID
+          JOIN 
+              Size se ON se.SizeID = ps.SizeID
+          JOIN 
+              Material m ON m.MaterialID = ps.MaterialID
+          JOIN 
+              Operator o ON dd.OperatorID = o.OperatorID  
+          JOIN 
+              Users u ON dd.UserID = u.UserID
+          WHERE 
+              dd.IsDelete = 0 AND 
+              dd.CreatedAt >= @startDate AND dd.CreatedAt < @endDate
+          ORDER BY 
+              dd.CreatedAt ASC;
+      `;
+      
+      // Execute the query with parameters
+      const request = pool.request();
+      request.input('startDate', sql.DateTime, startDate);
+      request.input('endDate', sql.DateTime, endDate);
+      
+      // Get the result
+      const result = await request.query(query);
+      
+      // Return the result rows
+      return result.recordset; 
+  } catch (err) {
+      throw new Error('Database query failed: ' + err.message);
+  }
 }
 
 async function getDistributionByDevice(ipAddress) {
