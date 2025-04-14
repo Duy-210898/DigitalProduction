@@ -534,6 +534,7 @@
             this.btnSaveInventory.Size = new System.Drawing.Size(55, 24);
             this.btnSaveInventory.TabIndex = 5;
             this.btnSaveInventory.Text = "Save";
+            this.btnSaveInventory.Click += new System.EventHandler(this.btnSaveInventory_Click);
             // 
             // txtInventory
             // 

@@ -29,6 +29,8 @@ namespace DigitalProduction.Models
         public string PartCode { get; set; }
         public string VietnameseName { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int InventoryQty { get; set; } = 0;
+
     }
 
 }

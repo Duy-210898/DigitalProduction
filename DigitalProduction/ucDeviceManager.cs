@@ -63,7 +63,8 @@ namespace DigitalProduction
             dgvDevices.Columns["Machine Name"].HeaderText = LocalizationManager.GetString("MachineName"); 
             dgvDevices.Columns["Plant Name"].HeaderText = LocalizationManager.GetString("PlantName");
             dgvDevices.Columns["Department Name"].HeaderText = LocalizationManager.GetString("DepartmentName");
-            dgvDevices.Columns["ConnectionStatus"].HeaderText = LocalizationManager.GetString("Status");
+            dgvDevices.Columns["ConnectionStatus"].HeaderText = LocalizationManager.GetString("ConnectionStatus");
+            dgvDevices.Columns["IsActive"].HeaderText = LocalizationManager.GetString("IsActive");
             dgvDevices.Columns["DeviceID"].Visible = false;
 
 

@@ -182,7 +182,6 @@ namespace DigitalProduction
 
             // Set data source
             gridProgressManagement.DataSource = distributionDataList;
-
         }
 
         private void DateTimePicker_ValueChanged(object sender, EventArgs e)

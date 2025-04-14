@@ -27,6 +27,7 @@ namespace DigitalProduction
         private HashSet<int> partIDs = new HashSet<int>();
         private HashSet<int> partSizeOrderIDs = new HashSet<int>();
         private List<SizeData> sizeDataList;
+        private List<ProductionSchedule> productionSchedules = new List<ProductionSchedule>();
 
         public ucDistribution()
         {
@@ -303,7 +304,6 @@ namespace DigitalProduction
             userID = Global.CurrentUser != null ? Global.CurrentUser.UserID : 0;
             deviceID = int.Parse(cbxDevice.SelectedValue.ToString());
             operatorID = int.Parse(lbl_operatorID.Text);
-            int inventory = int.TryParse(txtInventory.Text, out int result) ? result : 0;
             cuttingDieQty = int.Parse(numCuttingDieQty.Text);
             piecesPerPair = int.Parse(numPiecesPerPair.Text);
             materialLayer = int.Parse(numMaterialLayer.Text);
@@ -311,60 +311,111 @@ namespace DigitalProduction
             int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
             bool isLeather = false;
 
-            foreach (int orderID in orderIDs)
+            // Use a HashSet to avoid duplicate PartSizeOrderIDs
+            HashSet<int> uniquePSOIDs = new HashSet<int>();
+            // Clear previous results
+            partSizeOrderIDs.Clear();
+
+            if (partIDs.Count <= 20)
             {
-                if (partIDs.Count >= 20)
+
+                foreach (var schedule in productionSchedules)
                 {
-                    ShowMessage.ShowWarning("PartName no longer than 20", "Warning");
-                    break;
-                }
-                // 1 part has many sizes - care part
-                if (rdRawMaterial.Checked)
-                {
-                    // get partoderID
-                    foreach (int i in sizeIDs)
+                    if (schedule == null) { continue; }
+                    int partID = schedule.PartId;
+                    int sizeID = schedule.SizeID;
+                    int orderID = schedule.OrderID;
+                    int inventory = schedule.InventoryQty;
+
+                    int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
+
+                    if (psoID != -1)
                     {
-                        partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partIDs.FirstOrDefault(), i, orderID));
-                    }
-                }
-                // 1-3 size has many parts - care size
-                else
-                {
-                    isLeather = true;
-                    foreach (int i in sizeIDs)
-                    {
-                        foreach (int partId in partIDs)
+                        // Avoid duplicate entries
+                        if (!uniquePSOIDs.Contains(psoID))
                         {
-                            partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partId, i, orderID));
+                            var distributionData = new DistributionData
+                            {
+                                DeviceID = deviceID,
+                                OperatorID = operatorID,
+                                UserID = userID,
+                                ProductID = productId,
+                                PartSizeOrderID = psoID,
+                                CuttingDieQty = cuttingDieQty,
+                                PiecesPerPair = piecesPerPair,
+                                MaterialLayer = materialLayer,
+                                InventoryQty = inventory,
+                                TotalPiecesPerPair = totalPiecesPerPair,
+                                IsLeather = isLeather,
+                                CreatedAt = DateTime.Now,
+                                IsDelete = false,
+                                Status = "Pending",
+                            };
+                            results.Add(distributionData);
+                            uniquePSOIDs.Add(psoID);
+                            //partSizeOrderIDs.Add(psoID);
                         }
                     }
                 }
-            }
 
-            if (partSizeOrderIDs.Count != 0)
-            {
-                // save on DB
-                foreach (int i in partSizeOrderIDs)
-                {
-                    var distributionData = new DistributionData
-                    {
-                        DeviceID = deviceID,
-                        OperatorID = operatorID,
-                        UserID = userID,
-                        ProductID = productId,
-                        PartSizeOrderID = i,
-                        CuttingDieQty = cuttingDieQty,
-                        PiecesPerPair = piecesPerPair,
-                        MaterialLayer = materialLayer,
-                        InventoryQty = inventory,
-                        TotalPiecesPerPair = totalPiecesPerPair,
-                        IsLeather = isLeather,
-                        CreatedAt = DateTime.Now,
-                        IsDelete = false,
-                        Status = "Pending",
-                    };
-                    results.Add(distributionData);
-                }
+                //foreach (int orderID in orderIDs)
+                //{
+                //    if (partIDs.Count >= 20)
+                //    {
+                //        ShowMessage.ShowWarning("PartName no longer than 20", "Warning");
+                //        break;
+                //    }
+                //    // 1 part has many sizes - care part
+                //    if (rdRawMaterial.Checked)
+                //    {
+                //        // get partoderID
+                //        foreach (int i in sizeIDs)
+                //        {
+                //            partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partIDs.FirstOrDefault(), i, orderID));
+                //        }
+                //    }
+                //    // 1-3 size has many parts - care size
+                //    else
+                //    {
+                //        isLeather = true;
+                //        foreach (int i in sizeIDs)
+                //        {
+                //            foreach (int partId in partIDs)
+                //            {
+                //                partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partId, i, orderID));
+                //            }
+                //        }
+                //    }
+                //}
+
+                //if (partSizeOrderIDs.Count != 0)
+                //{
+                //    // save on DB
+                //    foreach (int i in partSizeOrderIDs)
+                //    {
+                //        var distributionData = new DistributionData
+                //        {
+                //            DeviceID = deviceID,
+                //            OperatorID = operatorID,
+                //            UserID = userID,
+                //            ProductID = productId,
+                //            PartSizeOrderID = i,
+                //            CuttingDieQty = cuttingDieQty,
+                //            PiecesPerPair = piecesPerPair,
+                //            MaterialLayer = materialLayer,
+                //            InventoryQty = inventory,
+                //            TotalPiecesPerPair = totalPiecesPerPair,
+                //            IsLeather = isLeather,
+                //            CreatedAt = DateTime.Now,
+                //            IsDelete = false,
+                //            Status = "Pending",
+                //        };
+                //        results.Add(distributionData);
+                //    }
+                //}
+            }
+            else {
+                ShowMessage.ShowWarning("PartName no longer than 20", "Warning");;
             }
             return results;
         }
@@ -507,7 +558,8 @@ namespace DigitalProduction
             table.Columns.Add("SO", typeof(string));
             table.Columns.Add("PartName", typeof(string));
             table.Columns.Add("Size", typeof(string));
-            table.Columns.Add("SizeQty", typeof(int)); // Added SizeQuantity column
+            table.Columns.Add("SizeQty", typeof(int)); // SizeQuantity column
+            table.Columns.Add("InventoryQty", typeof(int));
 
             // Dictionary to merge PartName & Size while summing SizeQuantity
             Dictionary<string, (List<string> SOs, int TotalSizeQuantity)> mergedData = new Dictionary<string, (List<string>, int)>();
@@ -538,7 +590,8 @@ namespace DigitalProduction
             {
                 string[] splitKey = entry.Key.Split('|');
                 string mergedSO = string.Join(", ", entry.Value.SOs); // Merge SOs into a single string
-                table.Rows.Add(mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQuantity);
+                int inventory = 0;
+                table.Rows.Add(mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQuantity , inventory);
             }
 
             // Bind data to DataGridView
@@ -546,8 +599,30 @@ namespace DigitalProduction
 
             // Translate headers if needed
             TranslateDataGridOverviewDistributionHeaders();
+            // Automatically select the first row if available
+            if (dataGrid_overviewDistribution.Rows.Count > 0)
+            {
+                dataGrid_overviewDistribution.ClearSelection();
+            }
+          //  dataGrid_overviewDistribution.SelectionChanged += DataGrid_overviewDistribution_SelectionChanged;
         }
 
+        //private void DataGrid_overviewDistribution_SelectionChanged(object sender, EventArgs e)
+        //{
+        //    if (dataGrid_overviewDistribution.SelectedRows.Count > 0)
+        //    {
+        //        DataGridViewRow selectedRow = dataGrid_overviewDistribution.SelectedRows[0];
+
+        //        // Example: Get values from specific columns
+        //        string so = selectedRow.Cells["SO"].Value?.ToString();
+        //        string partName = selectedRow.Cells["PartName"].Value?.ToString();
+        //        string size = selectedRow.Cells["Size"].Value?.ToString();
+        //        int sizeQty = Convert.ToInt32(selectedRow.Cells["SizeQty"].Value ?? 0);
+
+        //        // You can use or display these values as needed
+        //        Console.WriteLine($"Selected: SO = {so}, PartName = {partName}, Size = {size}, Qty = {sizeQty}");
+        //    }
+        //}
 
 
         private void TranslateDataGridOverviewDistributionHeaders()
@@ -567,6 +642,7 @@ namespace DigitalProduction
         public void ReceiveFilteredData(List<ProductionSchedule> filteredSchedules)
         {
             HandleReceivedSchedule(filteredSchedules);
+            productionSchedules = filteredSchedules;
             Console.WriteLine($"Received {filteredSchedules.Count} schedules.");
             // Collect unique SizeIDs and PartIDs
             sizeIDs = new HashSet<int>(filteredSchedules.Select(s => s.SizeID));
@@ -574,5 +650,35 @@ namespace DigitalProduction
             updateUIDataGridOverView(filteredSchedules);
         }
 
+        private void btnSaveInventory_Click(object sender, EventArgs e)
+        {
+            int inventory = int.TryParse(txtInventory.Text, out int result) ? result : 0;
+            if (dataGrid_overviewDistribution.SelectedRows.Count > 0) {
+                DataGridViewRow selectedRow = dataGrid_overviewDistribution.SelectedRows[0];
+
+                string partName = selectedRow.Cells["PartName"].Value?.ToString();
+                string size = selectedRow.Cells["Size"].Value?.ToString();
+                int sizeQty = Convert.ToInt32(selectedRow.Cells["SizeQty"].Value ?? 0);
+
+                if (inventory >= sizeQty) {
+                    ShowMessage.ShowInfo("Number of Inventory not larger or equal to SizeQty");
+                    return;
+                }
+                selectedRow.Cells["InventoryQty"].Value = inventory;
+                string normalizedSize = size?.Trim();
+
+                // Update InventoryQty in productionSchedules
+                foreach (var schedule in productionSchedules)
+                {
+                    if (schedule.PartName == partName && GetSizeName(schedule.SizeID) == normalizedSize)
+                    {
+                        schedule.InventoryQty = inventory;
+                    }
+                }
+                // Log the results
+                Console.WriteLine($"Selected PartName: {partName}");
+                Console.WriteLine($"Selected Size: {normalizedSize}");
+            }
+        }
     }
 }

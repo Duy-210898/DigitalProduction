@@ -121,12 +121,12 @@ async function getActualOutputData(startDate, endDate) {
     JOIN Part p ON pso.PartId = p.PartId
     JOIN Size s ON pso.SizeId = s.SizeID
     JOIN Material m ON pso.MaterialID = m.MaterialID
-    JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID
-    JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId 
+    JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID AND do.PartID = p.PartID
+    JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId
     JOIN DeviceList dl ON dl.DeviceID = dd.DeviceID
     JOIN Operator o ON dd.OperatorID = o.OperatorID
     WHERE do.CreatedAt >= @startDate AND do.CreatedAt < @endDate
-    GROUP BY 
+    GROUP BY
       po.OrderID, do.IsLeather, do.TotalPiecesPerPair, 
       po.MasterWorkOrder, po.SO, pr.Model, pr.ART, 
       o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
@@ -224,7 +224,7 @@ async function setOrderIsComplete(OrderID) {
 }
 
 
-async function setDistributionIsComplete(DistributionID, Status ,Note) {
+async function setDistributionIsComplete(DistributionID, Status) {
   // Kiểm tra DistributionID hợp lệ
   if (!DistributionID || DistributionID <= 0) {
     throw new Error('DistributionID không hợp lệ. Nó phải là số nguyên dương.');
@@ -233,14 +233,12 @@ async function setDistributionIsComplete(DistributionID, Status ,Note) {
   try {
     const updateQuery = `
       UPDATE DistributionData
-      SET Status = @Status,
-      [Note] = @Note
+      SET Status = @Status
       WHERE DistributionID = @DistributionID;
     `;
 
     const request = (await initDatabase()).request();
     request.input('DistributionID', sql.Int, DistributionID);
-    request.input('Note', sql.Int, parseInt(Note, 10));
     request.input('Status', sql.VarChar, Status);
 
     // Thực hiện truy vấn cập nhật
@@ -279,22 +277,23 @@ async function saveActualDataToDB(data) {
       const inputs = [
         { name: 'OrderID', type: sql.Int, value: OrderID },
         { name: 'SizeID', type: sql.Int, value: size.SizeID },
+        { name: 'PartID', type: sql.Int, value: size.PartID },
         { name: 'IsLeather', type: sql.Int, value: IsLeather }
       ];
 
       // Check if entry exists
       const checkDeviceOutputQuery = `
         SELECT COUNT(*) AS count FROM DeviceOutput 
-        WHERE OrderID = @OrderID AND SizeID = @SizeID AND IsLeather = @IsLeather
+        WHERE OrderID = @OrderID AND SizeID = @SizeID AND PartID = @PartID AND IsLeather = @IsLeather
       `;
 
       // Insert Query
       const DeviceOutputQuery = `
         INSERT INTO DeviceOutput (
-            OrderID, SizeID, PiecesPerPair, MaterialLayer, CuttingDieQty, 
+            OrderID, SizeID, PartID, PiecesPerPair, MaterialLayer, CuttingDieQty, 
             ActualCut, ActualPieces, ActualSizeQty, TotalPiecesPerPair, IsLeather, CreatedAt
         ) VALUES (
-            @OrderID, @SizeID, @PiecesPerPair, @MaterialLayer, @CuttingDieQty, 
+            @OrderID, @SizeID, @PartID, @PiecesPerPair, @MaterialLayer, @CuttingDieQty, 
             @ActualCut, @ActualPieces, @ActualSizeQty, @TotalPiecesPerPair, @IsLeather, GETDATE()
         );
       `;
@@ -303,6 +302,7 @@ async function saveActualDataToDB(data) {
       const DeviceOutputInputs = [
         { name: 'OrderID', type: sql.Int, value: OrderID },
         { name: 'SizeID', type: sql.Int, value: size.SizeID },
+        { name: 'PartID', type: sql.Int, value: size.PartID },
         { name: 'IsLeather', type: sql.Int, value: IsLeather },
         { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair ?? 0 },
         { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer ?? 0 },
@@ -329,6 +329,7 @@ async function saveActualDataToDB(data) {
         WHERE
           OrderID = @OrderID
           AND SizeID = @SizeID
+          AND PartID = @PartID
           AND IsLeather = @IsLeather
       `;
 
@@ -336,6 +337,7 @@ async function saveActualDataToDB(data) {
       const updateDeviceOutputInputs = [
         { name: 'OrderID', type: sql.Int, value: OrderID },
         { name: 'SizeID', type: sql.Int, value: size.SizeID },
+        { name: 'PartID', type: sql.Int, value: size.PartID },
         { name: 'IsLeather', type: sql.Int, value: IsLeather },
         { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair },
         { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer },
@@ -357,11 +359,11 @@ async function saveActualDataToDB(data) {
       if (result[0].count === 0) {
         // If not exists, INSERT
         await executeQuery(DeviceOutputQuery, DeviceOutputInputs);
-        console.log(`✅ Inserted DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
+        console.log(`✅ Inserted DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
       } else {
         // If exists, UPDATE
         await executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
-        console.log(`✅ Updated DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}`);
+        console.log(`✅ Updated DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
       }
     }
   } catch (error) {
@@ -539,7 +541,7 @@ async function getDistributionDataFromDb(ipAddress) {
           Product AS p ON pr.ProductId = p.ProductId
       LEFT JOIN 
           DeviceOutput AS do ON do.SizeID = se.SizeID
-                      AND do.OrderID = pr.OrderID 
+                      AND do.OrderID = pr.OrderID AND do.PartID = pa.PartID
       LEFT JOIN 
           DefaultInfo AS di ON di.ProductID = p.ProductId
       WHERE 
@@ -582,54 +584,28 @@ async function getDistributionDataFromDb(ipAddress) {
       }));
       console.log(soGroups);
 
-      // Step 1: Group data by OrderID → SO → Sizes
-      const orderMap = new Map();
-      const sizeCountMap = new Map();
-
-      result.recordset.forEach(r => {
-        if (!orderMap.has(r.OrderID)) {
-          orderMap.set(r.OrderID, new Map()); // SO Map
-        }
-        const soMap = orderMap.get(r.OrderID);
-
-        if (!soMap.has(r.SO)) {
-          soMap.set(r.SO, new Map()); // Size Map
-        }
-        const sizeMap = soMap.get(r.SO);
-
-        const sizeKey = `${r.SizeID}-${r.Size}`;
-
-        if (!sizeMap.has(sizeKey)) {
-          sizeMap.set(sizeKey, {
-            SizeID: r.SizeID,
-            Size: r.Size,
-            SizeQty: r.SizeQty
-          });
-        } else {
-          sizeMap.get(sizeKey).SizeQty += r.SizeQty; // Sum up the same size within an SO
-        }
-
-        // Track how many SOs contain each size
-        if (!sizeCountMap.has(sizeKey)) {
-          sizeCountMap.set(sizeKey, new Set());
-        }
-        sizeCountMap.get(sizeKey).add(r.SO);
-      });
-
       const orderID = parseInt(row.OrderID, 10);
 
      // Keep `SizeData` unchanged (original sum per SizeID)
      const sizeDataMap = new Map();
 
      result.recordset.forEach(item => {
-       const key = `${item.SizeID}-${item.Size}`;
+       const key = `${item.SizeID}-${item.Size}-${item.PartName}`;
+     
        if (!sizeDataMap.has(key)) {
-         sizeDataMap.set(key, { SizeID: item.SizeID, Size: item.Size, SizeQty: 0, InventoryQty: item.InventoryQty });
+         sizeDataMap.set(key, {
+           SizeID: item.SizeID,
+           Size: item.Size,
+           PartName: item.PartName,
+           SizeQty: 0,
+           InventoryQty: item.InventoryQty
+         });
        }
-       sizeDataMap.get(key).SizeQty += item.SizeQty; // Sum all occurrences of the same SizeID
+     
+       sizeDataMap.get(key).SizeQty += item.SizeQty;
      });
-
-     const sizeDataSosGroups = Array.from(sizeDataMap.values()); // Keep original sizeData
+     
+     const sizeDataSosGroups = Array.from(sizeDataMap.values());     
         
       // Process MaterialData
       const materialData = result.recordset
@@ -703,7 +679,7 @@ async function getDistributionDataFromDb(ipAddress) {
   }
 }
 
-async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather, reasonComplete) {
+async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather) {
   try {
     const query =
           `SELECT TOP 6
@@ -823,33 +799,35 @@ async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather, note
 }
 
 
-async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID) {
+async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID, partID) {
   try {
-    const query =
-          `SELECT  
+    const query = `
+      	  SELECT  
               dd.DistributionID, 
+              ps.PartSizeOrderId,
               se.SizeID
           FROM 
               DistributionData AS dd
           JOIN 
-              DeviceList AS d ON dd.DeviceID = d.DeviceID 
+              DeviceList AS d ON dd.DeviceID = d.DeviceID
           JOIN 
-              PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+              PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
           JOIN 
               Part AS pa ON pa.PartID = ps.PartID
           JOIN 
               Size AS se ON se.SizeID = ps.SizeID
           JOIN 
-              ProductOrder AS pr ON ps.OrderId = pr.OrderID
+              ProductOrder AS pr ON pr.OrderId = ps.OrderID
           WHERE 
               dd.IsDelete = 0  
-              AND d.IpAddress = @ipAddress
+              AND d.IpAddress = @IpAddress
               AND dd.Status = 'Pending'
               AND ps.OrderId = @OrderId
-              AND dd.IsLeather = @IsLeather
+              AND dd.IsLeather = 0
               AND se.SizeID = @SizeID
+              AND pa.PartID = @PartID
           GROUP BY 
-              dd.DistributionID, se.SizeID;
+              dd.DistributionID, ps.PartSizeOrderId, se.SizeID;
     `;
     
     const request = new sql.Request();
@@ -857,25 +835,25 @@ async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID
     request.input('OrderId', sql.Int, orderId);
     request.input('IsLeather', sql.Int, isLeather);
     request.input('SizeID', sql.Int, sizeID);
+    request.input('PartID', sql.Int, partID);
     
     const result = await request.query(query);
     
     if (result.recordset.length > 0) {
-      
-       // Lấy thông tin distributionIDData 
-       const distributionID = result.recordset
-       .map(item => ({
-         DistributionID: item.DistributionID
-       }))
-       .filter((value, index, self) =>
-         index === self.findIndex(
-           t => t.DistributionID === value.DistributionID
-         )
-       );
-  
-      // Trả về dữ liệu theo cấu trúc yêu cầu
+      const distributionIDData = result.recordset
+        .map(item => ({
+          DistributionID: item.DistributionID,
+          SizeID: item.PartSizeID
+        }))
+        .filter((value, index, self) =>
+          index === self.findIndex(
+            t => t.DistributionID === value.DistributionID &&
+                 t.SizeID === value.SizeID
+          )
+        );
+
       return {
-        DistributionID: distributionID
+        DistributionID: distributionIDData
       };
     } else {
       return null; 
