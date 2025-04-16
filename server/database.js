@@ -568,7 +568,7 @@ async function getDistributionDataFromDb(ipAddress) {
 
       // Group records by timestamp
       const groupedByTimestamp = result.recordset.reduce((acc, item) => {
-      const createdAtTimestamp = new Date(item.CreatedAt).toISOString().replace("T", " ").slice(0, 19); // Format as YYYY-MM-DD HH:MM:SS
+        const createdAtTimestamp = new Date(item.CreatedAt).toISOString().replace("T", " ").slice(0, 23); // Format as YYYY-MM-DD HH:MM:SS:sss
 
       if (!acc[createdAtTimestamp]) {
           acc[createdAtTimestamp] = [];
@@ -823,7 +823,7 @@ async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID
               AND d.IpAddress = @IpAddress
               AND dd.Status = 'Pending'
               AND ps.OrderId = @OrderId
-              AND dd.IsLeather = 0
+              AND dd.IsLeather = @IsLeather
               AND se.SizeID = @SizeID
               AND pa.PartID = @PartID
           GROUP BY 
@@ -887,6 +887,7 @@ async function getDistributions(startDate, endDate) {
       const query = `
           SELECT 
               dd.DistributionID,
+              pr.SO,
               d.IpAddress,
               d.MachineName,
               o.OperatorName,
@@ -919,6 +920,8 @@ async function getDistributions(startDate, endDate) {
               Operator o ON dd.OperatorID = o.OperatorID  
           JOIN 
               Users u ON dd.UserID = u.UserID
+          JOIN 
+              ProductOrder pr ON pr.OrderId = ps.OrderID
           WHERE 
               dd.IsDelete = 0 AND 
               dd.CreatedAt >= @startDate AND dd.CreatedAt < @endDate

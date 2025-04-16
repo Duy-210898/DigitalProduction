@@ -27,7 +27,9 @@ namespace DigitalProduction
         private HashSet<int> partIDs = new HashSet<int>();
         private HashSet<int> partSizeOrderIDs = new HashSet<int>();
         private List<SizeData> sizeDataList;
-        private List<ProductionSchedule> productionSchedules = new List<ProductionSchedule>();
+        private List<List<ProductionSchedule>> productionSchedules = new List<List<ProductionSchedule>>();
+        private DataTable table = new DataTable();
+        private int countSO = 0;
 
         public ucDistribution()
         {
@@ -316,12 +318,16 @@ namespace DigitalProduction
             // Clear previous results
             partSizeOrderIDs.Clear();
 
-            if (partIDs.Count <= 20)
+            if (rdLeather.Checked)
             {
-
-                foreach (var schedule in productionSchedules)
+                isLeather = true;
+            }
+            foreach (var group in productionSchedules)
+            {
+                foreach (var schedule in group)
                 {
-                    if (schedule == null) { continue; }
+                    if (schedule == null) continue;
+
                     int partID = schedule.PartId;
                     int sizeID = schedule.SizeID;
                     int orderID = schedule.OrderID;
@@ -329,34 +335,32 @@ namespace DigitalProduction
 
                     int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
 
-                    if (psoID != -1)
+                    if (psoID != -1 && !uniquePSOIDs.Contains(psoID))
                     {
-                        // Avoid duplicate entries
-                        if (!uniquePSOIDs.Contains(psoID))
+                        var distributionData = new DistributionData
                         {
-                            var distributionData = new DistributionData
-                            {
-                                DeviceID = deviceID,
-                                OperatorID = operatorID,
-                                UserID = userID,
-                                ProductID = productId,
-                                PartSizeOrderID = psoID,
-                                CuttingDieQty = cuttingDieQty,
-                                PiecesPerPair = piecesPerPair,
-                                MaterialLayer = materialLayer,
-                                InventoryQty = inventory,
-                                TotalPiecesPerPair = totalPiecesPerPair,
-                                IsLeather = isLeather,
-                                CreatedAt = DateTime.Now,
-                                IsDelete = false,
-                                Status = "Pending",
-                            };
-                            results.Add(distributionData);
-                            uniquePSOIDs.Add(psoID);
-                            //partSizeOrderIDs.Add(psoID);
-                        }
+                            DeviceID = deviceID,
+                            OperatorID = operatorID,
+                            UserID = userID,
+                            ProductID = productId,
+                            PartSizeOrderID = psoID,
+                            CuttingDieQty = cuttingDieQty,
+                            PiecesPerPair = piecesPerPair,
+                            MaterialLayer = materialLayer,
+                            InventoryQty = inventory,
+                            TotalPiecesPerPair = totalPiecesPerPair,
+                            IsLeather = isLeather,
+                            CreatedAt = DateTime.Now,
+                            IsDelete = false,
+                            Status = "Pending",
+                        };
+
+                        results.Add(distributionData);
+                        uniquePSOIDs.Add(psoID);
                     }
                 }
+            }
+
 
                 //foreach (int orderID in orderIDs)
                 //{
@@ -413,10 +417,6 @@ namespace DigitalProduction
                 //        results.Add(distributionData);
                 //    }
                 //}
-            }
-            else {
-                ShowMessage.ShowWarning("PartName no longer than 20", "Warning");;
-            }
             return results;
         }
 
@@ -542,7 +542,7 @@ namespace DigitalProduction
             dataGrid_overviewDistribution.AllowUserToResizeColumns = false;
 
             // Set alternating row colors for better readability
-            dataGrid_overviewDistribution.AlternatingRowsDefaultCellStyle.BackColor = Color.LightGray;
+            //dataGrid_overviewDistribution.AlternatingRowsDefaultCellStyle.BackColor = Color.LightGray;
 
             // Center align content in cells
             dataGrid_overviewDistribution.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -553,17 +553,24 @@ namespace DigitalProduction
             dataGrid_overviewDistribution.MultiSelect = false;
             dataGrid_overviewDistribution.ReadOnly = true;  // Prevent editing if needed
 
-            // Convert filteredSchedules to a DataTable for binding
-            DataTable table = new DataTable();
-            table.Columns.Add("SO", typeof(string));
-            table.Columns.Add("PartName", typeof(string));
-            table.Columns.Add("Size", typeof(string));
-            table.Columns.Add("SizeQty", typeof(int)); // SizeQuantity column
-            table.Columns.Add("InventoryQty", typeof(int));
+            if (table.Columns.Count == 0)
+            {
+                // Convert filteredSchedules to a DataTable for binding
+                table.Columns.Add("SO", typeof(string));
+                table.Columns.Add("PartName", typeof(string));
+                table.Columns.Add("Size", typeof(string));
+                table.Columns.Add("SizeQty", typeof(int)); // SizeQuantity column
+                table.Columns.Add("InventoryQty", typeof(int));
+            }
 
             // Dictionary to merge PartName & Size while summing SizeQuantity
             Dictionary<string, (List<string> SOs, int TotalSizeQuantity)> mergedData = new Dictionary<string, (List<string>, int)>();
 
+
+            // Add an empty row as separator
+            countSO++;
+            string sttSO = $"SO {countSO}";
+            table.Rows.Add(sttSO, "", "", DBNull.Value, DBNull.Value);
             foreach (var schedule in filteredSchedules)
             {
                 string partName = schedule.PartName;
@@ -591,7 +598,7 @@ namespace DigitalProduction
                 string[] splitKey = entry.Key.Split('|');
                 string mergedSO = string.Join(", ", entry.Value.SOs); // Merge SOs into a single string
                 int inventory = 0;
-                table.Rows.Add(mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQuantity , inventory);
+                table.Rows.Add(mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQuantity, inventory);
             }
 
             // Bind data to DataGridView
@@ -604,26 +611,17 @@ namespace DigitalProduction
             {
                 dataGrid_overviewDistribution.ClearSelection();
             }
-          //  dataGrid_overviewDistribution.SelectionChanged += DataGrid_overviewDistribution_SelectionChanged;
+            // Color specific rows after binding
+            foreach (DataGridViewRow row in dataGrid_overviewDistribution.Rows)
+            {
+                var soCell = row.Cells["SO"];
+                if (soCell.Value != null && soCell.Value.ToString().StartsWith("SO"))
+                {
+                    row.DefaultCellStyle.BackColor = Color.LightBlue; // or any color you prefer
+                    row.DefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+                }
+            }
         }
-
-        //private void DataGrid_overviewDistribution_SelectionChanged(object sender, EventArgs e)
-        //{
-        //    if (dataGrid_overviewDistribution.SelectedRows.Count > 0)
-        //    {
-        //        DataGridViewRow selectedRow = dataGrid_overviewDistribution.SelectedRows[0];
-
-        //        // Example: Get values from specific columns
-        //        string so = selectedRow.Cells["SO"].Value?.ToString();
-        //        string partName = selectedRow.Cells["PartName"].Value?.ToString();
-        //        string size = selectedRow.Cells["Size"].Value?.ToString();
-        //        int sizeQty = Convert.ToInt32(selectedRow.Cells["SizeQty"].Value ?? 0);
-
-        //        // You can use or display these values as needed
-        //        Console.WriteLine($"Selected: SO = {so}, PartName = {partName}, Size = {size}, Qty = {sizeQty}");
-        //    }
-        //}
-
 
         private void TranslateDataGridOverviewDistributionHeaders()
         {
@@ -642,12 +640,19 @@ namespace DigitalProduction
         public void ReceiveFilteredData(List<ProductionSchedule> filteredSchedules)
         {
             HandleReceivedSchedule(filteredSchedules);
-            productionSchedules = filteredSchedules;
             Console.WriteLine($"Received {filteredSchedules.Count} schedules.");
             // Collect unique SizeIDs and PartIDs
             sizeIDs = new HashSet<int>(filteredSchedules.Select(s => s.SizeID));
             partIDs = new HashSet<int>(filteredSchedules.Select(s => s.PartId));
-            updateUIDataGridOverView(filteredSchedules);
+            if (partIDs.Count > 20) {
+               ShowMessage.ShowWarning("PartName no longer than 20", "Warning");
+            }
+            else
+            {
+                productionSchedules.Add(filteredSchedules);
+                updateUIDataGridOverView(filteredSchedules);
+            }
+
         }
 
         private void btnSaveInventory_Click(object sender, EventArgs e)
@@ -668,11 +673,17 @@ namespace DigitalProduction
                 string normalizedSize = size?.Trim();
 
                 // Update InventoryQty in productionSchedules
-                foreach (var schedule in productionSchedules)
+                foreach (var group in productionSchedules)
                 {
-                    if (schedule.PartName == partName && GetSizeName(schedule.SizeID) == normalizedSize)
+                    foreach (var schedule in group)
                     {
-                        schedule.InventoryQty = inventory;
+                        string scheduleSize = GetSizeName(schedule.SizeID);
+
+                        if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
+                        {
+                            schedule.InventoryQty = inventory;
+                        }
                     }
                 }
                 // Log the results

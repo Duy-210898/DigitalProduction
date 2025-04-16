@@ -382,6 +382,7 @@ namespace DigitalProduction
                 gridView.LayoutChanged(); // Force update to reflect changes
             }
             gridViewProgressManagement.Columns["Note"].Visible = false;
+            gridViewProgressManagement.Columns["IpAddress"].Visible = false;
             gridViewProgressManagement.Columns["DistributionID"].Visible = false;
             gridViewProgressManagement.Columns["IsLeather"].Visible = false;
             gridViewProgressManagement.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
@@ -497,6 +498,7 @@ namespace DigitalProduction
         public class Distribution
         {
             public int DistributionID { get; set; }
+            public string SO { get; set; }
             public string IpAddress { get; set; }
             public string MachineName { get; set; }
             public string PartName { get; set; }
