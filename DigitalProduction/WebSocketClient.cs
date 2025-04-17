@@ -52,6 +52,8 @@ namespace DigitalProduction
                 }
             }
         }
+
+
         // Connect to the WebSocket server
         public async Task Connect(string url)
         {
@@ -64,19 +66,37 @@ namespace DigitalProduction
                 }
             }
 
-            try
+            while (true) // Loop to keep trying to reconnect
             {
-                _url = url;
-                _webSocket = new ClientWebSocket();
-                await _webSocket.ConnectAsync(new Uri(url), System.Threading.CancellationToken.None);
+                try
+                {
+                    _url = url;
+                    _webSocket = new ClientWebSocket();
+                    await _webSocket.ConnectAsync(new Uri(url), System.Threading.CancellationToken.None);
 
-                ConnectionManager.Instance.IsConnected = true;
-            }
-            catch (Exception ex)
-            {
-                ConnectionManager.Instance.IsConnected = false;
-                OnErrorOccurred?.Invoke(ex.Message);
-                StartReconnect();
+                    ConnectionManager.Instance.IsConnected = true;
+                    Console.WriteLine("WebSocket connected.");
+                    break; // Exit the loop on successful connection
+                }
+                catch (WebSocketException ex)
+                {
+                    ConnectionManager.Instance.IsConnected = false;
+                    OnErrorOccurred?.Invoke($"WebSocket error: {ex.Message}");
+
+                    // Optional: Add specific logic to check the type of error
+                    // For instance, if the error indicates that the server is temporarily unavailable,
+                    // you might want to wait before trying to reconnect.
+                    Console.WriteLine("Failed to connect. Retrying in 2 seconds...");
+
+                    await Task.Delay(2000); // Wait before retrying. Increase if necessary
+                }
+                catch (Exception ex)
+                {
+                    ConnectionManager.Instance.IsConnected = false;
+                    OnErrorOccurred?.Invoke($"General error: {ex.Message}");
+                    // Optionally implement a delay before retrying
+                    await Task.Delay(2000); // Wait before trying to reconnect.
+                }
             }
         }
         public void RegisterHandler(string requestId, Action<string> handler)

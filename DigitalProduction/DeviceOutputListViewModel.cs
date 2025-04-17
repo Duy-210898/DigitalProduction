@@ -15,6 +15,7 @@ namespace DigitalProduction.ViewModels
         private BindingList<DeviceOutput> _bindingDeviceOutputs = new BindingList<DeviceOutput>();
         private Timer _pollingTimer; // Dùng Timer chạy nền thay vì WinForms Timer
         private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
+        private string _lastJsonData;
 
         // Filter properties for API
         private string _filterKeyword = LocalizationManager.GetString("Search");
@@ -27,6 +28,18 @@ namespace DigitalProduction.ViewModels
                 {
                     _filterKeyword = value;
                     OnPropertyChanged(nameof(FilterKeyword));
+                    // Re-filter using cached WebSocket data
+                    if (!string.IsNullOrEmpty(_lastJsonData))
+                    {
+                        if (_syncContext != null)
+                        {
+                            _syncContext.Post(_ => ProcessWebSocketMessage(_lastJsonData), null);
+                        }
+                        else
+                        {
+                            ProcessWebSocketMessage(_lastJsonData);
+                        }
+                    }
                 }
             }
         }
@@ -126,6 +139,7 @@ namespace DigitalProduction.ViewModels
             _webSocketClient = webSocket ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseRealTime += WebSocket_OnMessage;
 
+            RequestData();
             // Bắt đầu polling kiểm tra thay đổi trong SQL Server
             StartPolling();
         }
@@ -183,6 +197,7 @@ namespace DigitalProduction.ViewModels
                 }
                 catch (System.Net.WebSockets.WebSocketException ex)
                 {
+                    ConnectionManager.Instance.IsConnected = false;
                     Console.WriteLine("WebSocket exception in RequestData: " + ex.Message);
                 }
                 catch (InvalidOperationException ex)
@@ -192,6 +207,7 @@ namespace DigitalProduction.ViewModels
             }
             else
             {
+                ConnectionManager.Instance.IsConnected = false;
                 Console.WriteLine("WebSocket is not open or is null in RequestData.");
             }
         }
@@ -199,14 +215,13 @@ namespace DigitalProduction.ViewModels
 
         private void WebSocket_OnMessage(string jsonData)
         {
-            // Use the captured synchronization context to ensure UI updates occur on the UI thread.
+            _lastJsonData = jsonData; // cache last received data
             if (_syncContext != null)
             {
                 _syncContext.Post(_ => ProcessWebSocketMessage(jsonData), null);
             }
             else
             {
-                // Fallback if no synchronization context is available.
                 ProcessWebSocketMessage(jsonData);
             }
         }

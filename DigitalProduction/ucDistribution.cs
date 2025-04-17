@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.ButtonPanel;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -318,45 +319,48 @@ namespace DigitalProduction
             // Clear previous results
             partSizeOrderIDs.Clear();
 
-            if (rdLeather.Checked)
+            if (productionSchedules.Count != 0)
             {
-                isLeather = true;
-            }
-            foreach (var group in productionSchedules)
-            {
-                foreach (var schedule in group)
+                if (rdLeather.Checked)
                 {
-                    if (schedule == null) continue;
-
-                    int partID = schedule.PartId;
-                    int sizeID = schedule.SizeID;
-                    int orderID = schedule.OrderID;
-                    int inventory = schedule.InventoryQty;
-
-                    int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
-
-                    if (psoID != -1 && !uniquePSOIDs.Contains(psoID))
+                    isLeather = true;
+                }
+                foreach (var group in productionSchedules)
+                {
+                    foreach (var schedule in group)
                     {
-                        var distributionData = new DistributionData
-                        {
-                            DeviceID = deviceID,
-                            OperatorID = operatorID,
-                            UserID = userID,
-                            ProductID = productId,
-                            PartSizeOrderID = psoID,
-                            CuttingDieQty = cuttingDieQty,
-                            PiecesPerPair = piecesPerPair,
-                            MaterialLayer = materialLayer,
-                            InventoryQty = inventory,
-                            TotalPiecesPerPair = totalPiecesPerPair,
-                            IsLeather = isLeather,
-                            CreatedAt = DateTime.Now,
-                            IsDelete = false,
-                            Status = "Pending",
-                        };
+                        if (schedule == null) continue;
 
-                        results.Add(distributionData);
-                        uniquePSOIDs.Add(psoID);
+                        int partID = schedule.PartId;
+                        int sizeID = schedule.SizeID;
+                        int orderID = schedule.OrderID;
+                        int inventory = schedule.InventoryQty;
+
+                        int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
+
+                        if (psoID != -1 && !uniquePSOIDs.Contains(psoID))
+                        {
+                            var distributionData = new DistributionData
+                            {
+                                DeviceID = deviceID,
+                                OperatorID = operatorID,
+                                UserID = userID,
+                                ProductID = productId,
+                                PartSizeOrderID = psoID,
+                                CuttingDieQty = cuttingDieQty,
+                                PiecesPerPair = piecesPerPair,
+                                MaterialLayer = materialLayer,
+                                InventoryQty = inventory,
+                                TotalPiecesPerPair = totalPiecesPerPair,
+                                IsLeather = isLeather,
+                                CreatedAt = DateTime.Now,
+                                IsDelete = false,
+                                Status = "Pending",
+                            };
+
+                            results.Add(distributionData);
+                            uniquePSOIDs.Add(psoID);
+                        }
                     }
                 }
             }
@@ -433,6 +437,7 @@ namespace DigitalProduction
                 { lblArt, "ART" },
                 { btnSaveInventory, "Save" },
                 { btnSend, "Send" },
+                { btnDeleteData, "Refresh" },
                 { lblInventoryQty, "InventoryQty" },
                 {lblPeicesPerPair, "PeicesPerPair" },
                 {lblCuttingDie, "CuttingDieQty" },
@@ -487,6 +492,7 @@ namespace DigitalProduction
                     else
                     {
                         MessageBox.Show("No response received from the server.");
+                        ConnectionManager.Instance.IsConnected = false;
                     }
                 }
             }
@@ -690,6 +696,17 @@ namespace DigitalProduction
                 Console.WriteLine($"Selected PartName: {partName}");
                 Console.WriteLine($"Selected Size: {normalizedSize}");
             }
+        }
+
+        private void btnDeleteData_Click(object sender, EventArgs e)
+        {
+            loadDeviceDistribution();
+            lbl_operatorID.ResetText();
+            lbl_operatorName.ResetText();
+            countSO = 0;
+            table.Clear();
+            productionSchedules.Clear();
+            dataGrid_overviewDistribution.DataSource = null;
         }
     }
 }

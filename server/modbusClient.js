@@ -227,7 +227,7 @@ async function startReadingRegisters(client, ipAddress) {
       Object.keys(modbusClients[ipAddress].sizeDataInfo || {}).length > 0) 
       {
           readActualData(client, ipAddress);
-      }      
+      } 
   }, 2000);
 }
 
@@ -235,7 +235,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
   try {
     // Read register 1000
     let response = await client.readHoldingRegisters(1000, 1);
-    let orderID = response.response._body.values[0]; // Extract the actual value
+    let orderID = response.response._body.values[0];
     console.log(`Register 1000 value: ${orderID}`);
 
     // check complete order
@@ -278,6 +278,8 @@ async function checkAndSaveDistribution(client, ipAddress) {
           storeDistributionData[ipAddress] = {};
           modbusClients[ipAddress].previousSizeData = [];
           modbusClients[ipAddress].previousData = {};
+          modbusClients[ipAddress].indexMultipleSOs = 0;
+          modbusClients[ipAddress].indexMultiplePartNames = 0;
         }
         processDistributionData(client, ipAddress, distributionData, true);
     }
@@ -451,6 +453,10 @@ async function processDistributionData(client, ipAddress, distributionData, retr
     return;
   }
 
+  // let index = await safeRead(1020, client);
+
+  // modbusClients[ipAddress].indexMultipleSOs = index >= 1 ? index - 1 : 0;
+
   const writeRegister = async (address, value) => {
     await client.writeSingleRegister(address, value);
     await delay(1000);
@@ -465,7 +471,7 @@ async function processDistributionData(client, ipAddress, distributionData, retr
   // Check for multiple Sales Orders
   const hasMultipleSOs = distributionData.OrderIDWithSOs && distributionData.OrderIDWithSOs.length >= 1;
   if (hasMultipleSOs) {
-    if (!modbusClients[ipAddress]?.indexMultipleSOs || modbusClients[ipAddress].indexMultipleSOs === 0) {
+    if (!modbusClients[ipAddress]?.indexMultipleSOs || modbusClients[ipAddress].indexMultipleSOs === 0 || modbusClients[ipAddress].indexMultipleSOs == undefined) {
       modbusClients[ipAddress].indexMultipleSOs = 0;
     }
     modbusClients[ipAddress].hasMultipleSOs = true;
@@ -519,7 +525,6 @@ async function processDistributionData(client, ipAddress, distributionData, retr
       if(uniqueSOs.length > 0) {
         for (let i = 0; i < uniqueSOs.length; i++) {
             try {
-
                 // Convert SO to 5-bit values
                 const registerValues = stringTo16BitArrayLittleEndian(uniqueSOs[i]); 
                 for (let j = 0; j < registerValues.length; j++) {
@@ -527,7 +532,6 @@ async function processDistributionData(client, ipAddress, distributionData, retr
                     await client.writeSingleRegister(registerAddress, registerValues[j]);
                     console.log(`Wrote SO ${uniqueSOs[i]} part to register ${registerAddress}: ${registerValues[j]}`);
                 }
-
                 // Move to the next available register set
                 currentRegisterIndex += registerValues.length;
             } catch (error) {
@@ -557,17 +561,19 @@ async function processDistributionData(client, ipAddress, distributionData, retr
         await client.writeSingleRegister(1022, modbusClients[ipAddress].indexMultiplePartNames + 1);
         await client.writeSingleRegister(1023, uniquePartSOsMap.length);
 
+
+         // display partName name
+         const partDisplayStartRegister = distributionData.Leather === 2 ? 115 : 270;
+
         // filter out partName index
-        const selectedPart = uniquePartSOsMap[modbusClients[ipAddress].indexMultiplePartNames];
-        distributionData.SizeData = distributionData.SizeData.filter(item => item.PartName === selectedPart.PartName);
-
-        // display partName name
-        const partDisplayStartRegister = distributionData.Leather === 2 ? 115 : 270;
-        let registerDisplayData = stringTo16BitArrayLittleEndian(selectedPart.PartName).slice(0, 10 * 2);
-
         if (distributionData.Leather === 2) {
+          distributionData.SizeData = distributionData.SizeDataDB;
           await client.writeSingleRegister(partDisplayStartRegister, uniquePartSOsMap.length);
-        } else {
+        }
+        else {
+          const selectedPart = uniquePartSOsMap[modbusClients[ipAddress].indexMultiplePartNames];
+          distributionData.SizeData = distributionData.SizeData.filter(item => item.PartName === selectedPart.PartName);
+          let registerDisplayData = stringTo16BitArrayLittleEndian(selectedPart.PartName).slice(0, 10 * 2);
           // Write part name to registers sequentially
           for (let j = 0; j < registerDisplayData.length; j++) {
             await client.writeSingleRegister(partDisplayStartRegister + j, registerDisplayData[j]);
@@ -697,12 +703,13 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
     console.log(`Binary 3000: ${binaryValue3000}`);
      // delete if complete order
     if (modbusClients[ipAddress].SOs !== undefined && modbusClients[ipAddress].SOs.length !== 0) {
-      const allComplete = (
-        modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data || []
-      ).every(item => item.Status === 'Complete'
-      );
-    
-      if (allComplete) {
+      const distributionData = await getDistributionDataFromDb(ipAddress);
+      const data = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data;
+      const allComplete = Array.isArray(data)
+        ? data.every(item => item.Status === 'Complete' || item.Status === 'Stop')
+        : false;
+
+      if (allComplete || distributionData == null) {
         const mask = 1 << deleteIndex;
         const valueToWrite = registerValue | mask;
     
@@ -710,6 +717,8 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
         storeDistributionData[ipAddress] = {};
         modbusClients[ipAddress].previousSizeData = [];
         modbusClients[ipAddress].previousData = {};
+        modbusClients[ipAddress].indexMultipleSOs = 0;
+        modbusClients[ipAddress].indexMultiplePartNames = 0;
       }
     }
     
@@ -810,6 +819,7 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
   if (!modbusClients[ipAddress].hasMultipleSOs) return;
 
   const currentSO = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
+  if(currentSO == undefined) return;
   let uniquePartNameSOs = [];
   if (currentSO && Array.isArray(currentSO.Data)) {
     uniquePartNameSOs = [...new Set(currentSO.Data.map(p => p.PartName))];
@@ -973,7 +983,9 @@ const safeRead = async (address, client) => {
 async function readActualData(client, ipAddress) {
   // deplay time to read first
   //await delay(1000);
-  const isLeather = modbusClients[ipAddress].sizeDataInfo.isLeather == 1;
+
+  const rawLeather = await safeRead(1001, client);
+  const isLeather = rawLeather === 2 ? 1 : 0;  
   try {
     if (modbusClients[ipAddress].hasMultipleSOs)
     {
@@ -1212,7 +1224,7 @@ async function processActualDataChange(
     TotalPiecesPerPair: totalPieces,
   };
 
-  // Ensure modbusClients[ipAddress] and previousData exist
+  // previousData exist
   if (!modbusClients[ipAddress]) {
     console.warn(`modbusClients[${ipAddress}] is undefined.`);
     return;

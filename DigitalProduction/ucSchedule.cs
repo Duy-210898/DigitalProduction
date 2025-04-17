@@ -182,7 +182,7 @@ namespace DigitalProduction
 
             btnSendData = new Button
             {
-                Text = "Save data to distribution",
+                Text = LocalizationManager.GetString("SelectData"),
                 Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
                 BackColor = System.Drawing.Color.LightBlue,
                 AutoSize = true,
@@ -260,6 +260,7 @@ namespace DigitalProduction
             }
             catch (Exception ex)
             {
+                ConnectionManager.Instance.IsConnected = false;
                 MessageBox.Show($"Error processing WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

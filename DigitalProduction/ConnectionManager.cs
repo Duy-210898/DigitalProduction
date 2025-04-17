@@ -11,8 +11,9 @@ namespace DigitalProduction
         public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
 
         public event Action<bool> ConnectionStatusChanged;
-        public event Action<bool> ReconnectionStatusChanged; 
+        public event Action<bool> ReconnectionStatusChanged;
 
+        private ConnectionManager() { } // Prevent direct instantiation
         public bool IsConnected
         {
             get => _isConnected;

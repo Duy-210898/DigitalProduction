@@ -147,7 +147,7 @@ async function handleGetActualData(ws, request) {
     // Set endDate to 23:59:59.999 in local time
     endDate.setHours(23, 59, 59, 999);
     // Add 1 day to the endDate
-    endDate.setDate(endDate.getDate() + 1);
+    endDate.setDate(endDate.getDate());
     
     // Format dates for SQL (YYYY-MM-DD HH:mm:ss.SSS) - LOCAL TIME
     const formatDateForSQL = (date) => {
@@ -215,7 +215,7 @@ async function handleGetDistributions(ws, request) {
     // Set endDate to 23:59:59.999 in local time
     endDate.setHours(23, 59, 59, 999);
     // Add 1 day to the endDate
-    endDate.setDate(endDate.getDate() + 1);
+    endDate.setDate(endDate.getDate());
     
     // Format dates for SQL (YYYY-MM-DD HH:mm:ss.SSS) - LOCAL TIME
     const formatDateForSQL = (date) => {

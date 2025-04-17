@@ -68,6 +68,7 @@
             this.txtInventory = new System.Windows.Forms.TextBox();
             this.lblInventoryQty = new System.Windows.Forms.Label();
             this.dataGrid_overviewDistribution = new System.Windows.Forms.DataGridView();
+            this.btnDeleteData = new DevExpress.XtraEditors.SimpleButton();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -280,6 +281,7 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.btnDeleteData);
             this.panel2.Controls.Add(this.lbl_operatorID);
             this.panel2.Controls.Add(this.lbl_operatorName);
             this.panel2.Controls.Add(this.lbl_Name);
@@ -568,6 +570,20 @@
             this.dataGrid_overviewDistribution.Size = new System.Drawing.Size(965, 436);
             this.dataGrid_overviewDistribution.TabIndex = 3;
             // 
+            // btnDeleteData
+            // 
+            this.btnDeleteData.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDeleteData.Appearance.Options.UseFont = true;
+            this.btnDeleteData.Location = new System.Drawing.Point(21, 81);
+            this.btnDeleteData.LookAndFeel.SkinName = "Dark Side";
+            this.btnDeleteData.LookAndFeel.UseDefaultLookAndFeel = false;
+            this.btnDeleteData.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
+            this.btnDeleteData.Name = "btnDeleteData";
+            this.btnDeleteData.Size = new System.Drawing.Size(121, 29);
+            this.btnDeleteData.TabIndex = 9;
+            this.btnDeleteData.Text = "Delete";
+            this.btnDeleteData.Click += new System.EventHandler(this.btnDeleteData_Click);
+            // 
             // ucDistribution
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -636,5 +652,6 @@
         private System.Windows.Forms.Label lblCreatedDate;
         private System.Windows.Forms.Panel panel4;
         private DevExpress.XtraEditors.SimpleButton btnSaveInventory;
+        private DevExpress.XtraEditors.SimpleButton btnDeleteData;
     }
 }

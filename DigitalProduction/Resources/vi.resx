@@ -537,4 +537,10 @@
   <data name="Reason" xml:space="preserve">
     <value>Lý do</value>
   </data>
+  <data name="SelectData" xml:space="preserve">
+    <value>Chọn SO cần gộp</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Làm mới dữ liệu</value>
+  </data>
 </root>

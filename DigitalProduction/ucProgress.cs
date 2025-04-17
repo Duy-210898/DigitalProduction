@@ -289,6 +289,7 @@ namespace DigitalProduction
                 if (string.IsNullOrEmpty(response))
                 {
                     MessageBox.Show("No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ConnectionManager.Instance.IsConnected = false;
                     return;
                 }
 
