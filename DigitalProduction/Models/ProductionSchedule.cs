@@ -6,7 +6,8 @@ namespace DigitalProduction.Models
     {
         private ProductionSchedule() { }
 
-        public int OrderID { get; set; } 
+        public int OrderID { get; set; }
+        public string GroupSO { get; set; }
         public string Factory { get; set; }
         public string SO { get; set; }
         public string PO { get; set; }
@@ -30,7 +31,10 @@ namespace DigitalProduction.Models
         public string VietnameseName { get; set; }
         public DateTime CreatedAt { get; set; }
         public int InventoryQty { get; set; } = 0;
-
+        public int PeicesPerPair { get; set; } = 0;
+        public int CuttingDieQty { get; set; } = 0;
+        public int MaterialLayer { get; set; } = 0;
+        public int TotalPiecesPerPair { get; set; } = 0;
     }
 
 }

@@ -132,11 +132,11 @@ CREATE TABLE DistributionData (
     InventoryQty INT,
     Status VARCHAR(50) DEFAULT 'Pending',
     CreatedAt DATETIME DEFAULT GETDATE(),
+	UpdatedAt DATETIME,
     IsLeather BIT,
     IsDelete BIT,
 	Note INT
 );
-
 
 GO
 -- Table: ProductionSchedule

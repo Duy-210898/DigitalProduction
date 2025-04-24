@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media.Media3D;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -31,9 +32,24 @@ namespace DigitalProduction
             InitializeMonthFilter();
         }
 
+        public class ProductionScheduleComparer : IEqualityComparer<ProductionSchedule>
+        {
+            public bool Equals(ProductionSchedule x, ProductionSchedule y)
+            {
+                return x != null && y != null && x.PartId == y.PartId && x.SizeID == y.SizeID && x.OrderID == y.OrderID;
+            }
+
+            public int GetHashCode(ProductionSchedule obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
         private async void BtnSendData_Click(object sender, EventArgs e)
         {
-            List<ProductionSchedule> filteredSchedules = GetFilteredData();
+
+            // avoid dupliacte
+            List<ProductionSchedule> filteredSchedules = GetFilteredData().Distinct(new ProductionScheduleComparer()).ToList();
 
             if (filteredSchedules.Count == 0)
             {
@@ -41,18 +57,23 @@ namespace DigitalProduction
                 return;
             }
             bool allSame = filteredSchedules
-                .GroupBy(s => new { s.ART, s.Model })
+                .GroupBy(s => new {s.Model })
                 .Count() == 1;
 
             if (!allSame) {
-                MessageBox.Show("Please sure ART, Model is the same", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please sure Model is the same", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-          
-            if (filteredSchedules.Count >= 20) {
-                MessageBox.Show("Only allow 20 SO", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            HashSet<int> sizeIDs = new HashSet<int>(filteredSchedules.Select(s => s.SizeID));
+            if (sizeIDs.Count > 6) {
+                MessageBox.Show("Only allow minimun or equal to 6 sizes", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            //if (filteredSchedules.Count >= 20) {
+            //    MessageBox.Show("Only allow 20 SO", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
 
             // Get reference to frmMain
             Form parentForm = this.FindForm();
@@ -310,8 +331,6 @@ namespace DigitalProduction
             }
         }
 
-
-
         private void ApplyMonthFilter()
         {
             var filteredData = productionSchedules
@@ -336,8 +355,6 @@ namespace DigitalProduction
 
             UpdateTotalLabel();
         }
-
-
 
         private void UpdateTotalLabel()
         {

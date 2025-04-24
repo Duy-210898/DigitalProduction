@@ -513,4 +513,7 @@
   <data name="Refresh" xml:space="preserve">
     <value>Refresh</value>
   </data>
+  <data name="TransferDevice" xml:space="preserve">
+    <value>Transfer Device</value>
+  </data>
 </root>

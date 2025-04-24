@@ -9,6 +9,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using DigitalProduction.Models;
 using Newtonsoft.Json;
 
 namespace DigitalProduction
@@ -26,6 +27,9 @@ namespace DigitalProduction
         private Label lblStartDate;
         private Label lblEndDate;
         private DevExpress.XtraEditors.Repository.RepositoryItemComboBox noteComboBoxEditor;
+        private Rectangle _reasonHeaderCheckBoxRect;
+        private bool _reasonHeaderChecked = false;
+        private System.Windows.Forms.ComboBox cbxDevice;
 
 
         public ucProgress()
@@ -115,12 +119,29 @@ namespace DigitalProduction
             dtpStartDate.ValueChanged += DateTimePicker_ValueChanged;
             dtpEndDate.ValueChanged += DateTimePicker_ValueChanged;
 
+            cbxDevice = new System.Windows.Forms.ComboBox
+            {
+                Width = 150,
+                Margin = new Padding(5, 10, 10, 5)
+            };
+
+            SimpleButton btnApplyDevice = new SimpleButton
+            {
+                Text = LocalizationManager.GetString("TransferDevice"),
+                Width = 100,
+                Height = 35,
+                Margin = new Padding(5, 10, 10, 5)
+            };
+            btnApplyDevice.Click += BtnApplyDevice_Click;
+
             // Add controls to filter panel
             filterPanel.Controls.Add(lblStartDate);
             filterPanel.Controls.Add(dtpStartDate);
             filterPanel.Controls.Add(lblEndDate);
             filterPanel.Controls.Add(dtpEndDate);
             filterPanel.Controls.Add(syncButton);
+            filterPanel.Controls.Add(cbxDevice);
+            filterPanel.Controls.Add(btnApplyDevice);
 
             // Initialize GridControl
             gridProgressManagement = new GridControl
@@ -168,6 +189,56 @@ namespace DigitalProduction
 
             // Subscribe to the RowStyle event
             gridViewProgressManagement.RowCellStyle += GridViewProgressManagement_RowCellStyle;
+        }
+
+        private void BtnApplyDevice_Click(object sender, EventArgs e)
+        {
+            if (cbxDevice.SelectedValue == null || (int)cbxDevice.SelectedValue == 0)
+            {
+                MessageBox.Show("Please select a valid device.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int selectedDeviceId = (int)cbxDevice.SelectedValue;
+            string selectedDeviceName = cbxDevice.Text;
+
+            int appliedCount = 0;
+
+            for (int rowHandle = 0; rowHandle < gridViewProgressManagement.RowCount; rowHandle++)
+            {
+                var distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+                if (distribution != null && distribution.Status == "Pending")
+                {
+                    bool success = DbHelper.UpdateDistributionDevice(distribution.DistributionID, selectedDeviceId);
+
+                    if (success)
+                    {
+                        distribution.DeviceID = selectedDeviceId;
+                        gridViewProgressManagement.SetRowCellValue(rowHandle, "DeviceID", selectedDeviceId);
+                        appliedCount++;
+                    }
+                }
+            }
+
+            MessageBox.Show(
+                appliedCount > 0
+                    ? $"Device '{selectedDeviceName}' applied to {appliedCount} row(s) with status 'Pending'."
+                    : "No 'Pending' rows found in the grid.",
+                "Result",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
+
+        private void loadDeviceDistribution()
+        {
+            List<Device> machines = DbHelper.getlistMachines();
+            machines.Insert(0, new Device { DeviceID = 0, MachineName = "" });
+            cbxDevice.DataSource = machines;
+            cbxDevice.DisplayMember = "MachineName";
+            cbxDevice.ValueMember = "DeviceID";
+            cbxDevice.SelectedIndex = 0;
+            cbxDevice.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         private void ConfigureGridControl()
@@ -326,6 +397,7 @@ namespace DigitalProduction
                     }
 
                     UpdateGridControl(new BindingList<Distribution>(distributionDataList));
+                    loadDeviceDistribution();
                 }
                 else
                 {
@@ -382,6 +454,7 @@ namespace DigitalProduction
                 }
                 gridView.LayoutChanged(); // Force update to reflect changes
             }
+            gridViewProgressManagement.Columns["DeviceID"].Visible = false;
             gridViewProgressManagement.Columns["Note"].Visible = false;
             gridViewProgressManagement.Columns["IpAddress"].Visible = false;
             gridViewProgressManagement.Columns["DistributionID"].Visible = false;
@@ -439,6 +512,9 @@ namespace DigitalProduction
                         }
                     }
                 };
+                gridViewProgressManagement.CustomDrawColumnHeader += GridViewProgressManagement_CustomDrawColumnHeader;
+                gridViewProgressManagement.MouseDown += GridViewProgressManagement_MouseDown;
+
                 gridViewProgressManagement.ShownEditor += (s, e) =>
                 {
                     if (gridViewProgressManagement.FocusedColumn.FieldName == LocalizationManager.GetString("Reason"))
@@ -477,6 +553,44 @@ namespace DigitalProduction
                 };
             }
         }
+        private void GridViewProgressManagement_CustomDrawColumnHeader(object sender, ColumnHeaderCustomDrawEventArgs e)
+        {
+            if (e.Column != null && e.Column.FieldName == LocalizationManager.GetString("Reason"))
+            {
+                e.Info.InnerElements.Clear();
+                e.Painter.DrawObject(e.Info);
+                e.Handled = true;
+
+                // Draw checkbox
+                _reasonHeaderCheckBoxRect = new Rectangle(e.Bounds.X + e.Bounds.Width - 20, e.Bounds.Y + 5, 15, 15);
+                ButtonState state = _reasonHeaderChecked ? ButtonState.Checked : ButtonState.Normal;
+                ControlPaint.DrawCheckBox(e.Graphics, _reasonHeaderCheckBoxRect, state);
+            }
+        }
+
+        // mode stop or pending
+        private void GridViewProgressManagement_MouseDown(object sender, MouseEventArgs e)
+        {
+
+            if (_reasonHeaderCheckBoxRect.Contains(e.Location))
+            {
+                _reasonHeaderChecked = !_reasonHeaderChecked;
+                gridViewProgressManagement.InvalidateColumnHeader(gridViewProgressManagement.Columns[LocalizationManager.GetString("Reason")]);
+
+                for (int i = 0; i < gridViewProgressManagement.RowCount; i++)
+                {
+                    var row = gridViewProgressManagement.GetRow(i) as Distribution;
+                    if (row != null && row.Status != "Complete")
+                    {
+                        row.Note = _reasonHeaderChecked ? 1 : (int?)null;
+                        row.Status = _reasonHeaderChecked ? "Stop" : "Pending";
+                        DbHelper.UpdateDistributionNoteAndStatus(row.DistributionID, row.Note ?? -1, row.Status);
+                    }
+                }
+                gridViewProgressManagement.RefreshData();
+            }
+        }
+
 
         private void GridViewProgressManagement_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -500,6 +614,7 @@ namespace DigitalProduction
         {
             public int DistributionID { get; set; }
             public string SO { get; set; }
+            public int DeviceID { get; set; }
             public string IpAddress { get; set; }
             public string MachineName { get; set; }
             public string PartName { get; set; }
@@ -513,6 +628,7 @@ namespace DigitalProduction
             public int InventoryQty { get; set; }
             public string Status { get; set; }
             public DateTime CreatedAt { get; set; }
+            public DateTime UpdatedAt { get; set; }
             public bool IsLeather { get; set; }
             // New read-only property
             public string MaterialType => IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");

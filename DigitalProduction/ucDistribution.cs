@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.ButtonPanel;
+using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -27,7 +32,7 @@ namespace DigitalProduction
         private HashSet<int> sizeIDs = new HashSet<int>();
         private HashSet<int> partIDs = new HashSet<int>();
         private HashSet<int> partSizeOrderIDs = new HashSet<int>();
-        private List<SizeData> sizeDataList;
+        private List<SizeData> sizeDataList = new List<SizeData>();
         private List<List<ProductionSchedule>> productionSchedules = new List<List<ProductionSchedule>>();
         private DataTable table = new DataTable();
         private int countSO = 0;
@@ -83,7 +88,6 @@ namespace DigitalProduction
             // collect orderIDs
             orderIDs.UnionWith(schedules.Select(s => s.OrderID));
 
-            sizeDataList = new List<SizeData>();
             materialDataList = new List<MaterialData>();
 
             // Lọc và sắp xếp các kích thước duy nhất
@@ -291,7 +295,7 @@ namespace DigitalProduction
         }
         private void loadDeviceDistribution()
         {
-            List<Device> machines = dbHelper.getlistMachines();
+            List<Device> machines = DbHelper.getlistMachines();
             machines.Insert(0, new Device { DeviceID = 0, MachineName = "" });
             cbxDevice.DataSource = machines;
             cbxDevice.DisplayMember = "MachineName";
@@ -311,7 +315,8 @@ namespace DigitalProduction
             piecesPerPair = int.Parse(numPiecesPerPair.Text);
             materialLayer = int.Parse(numMaterialLayer.Text);
             totalPiecesPerPair = int.Parse(numericTotalPeicesPerPair.Text);
-            int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
+
+                        int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
             bool isLeather = false;
 
             // Use a HashSet to avoid duplicate PartSizeOrderIDs
@@ -325,7 +330,7 @@ namespace DigitalProduction
                 {
                     isLeather = true;
                 }
-                foreach (var group in productionSchedules)
+                foreach (var (group, index) in productionSchedules.Select((g, i) => (g, i)))
                 {
                     foreach (var schedule in group)
                     {
@@ -335,6 +340,10 @@ namespace DigitalProduction
                         int sizeID = schedule.SizeID;
                         int orderID = schedule.OrderID;
                         int inventory = schedule.InventoryQty;
+                        //int cuttingDieQty = schedule.CuttingDieQty;
+                        //int piecesPerPair = schedule.PeicesPerPair;
+                        //int materialLayer = schedule.MaterialLayer;
+                        //int TotalPiecesPerPair = schedule.TotalPiecesPerPair;
 
                         int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
 
@@ -353,7 +362,7 @@ namespace DigitalProduction
                                 InventoryQty = inventory,
                                 TotalPiecesPerPair = totalPiecesPerPair,
                                 IsLeather = isLeather,
-                                CreatedAt = DateTime.Now,
+                                CreatedAt = DateTime.Now.AddSeconds(index),
                                 IsDelete = false,
                                 Status = "Pending",
                             };
@@ -482,6 +491,7 @@ namespace DigitalProduction
 
                         if (response != null && response.Status == "success")
                         {
+                            ResetSendDistribution();
                             ShowMessage.ShowInfo(response.Message, "Sucess");
                         }
                         else
@@ -538,105 +548,100 @@ namespace DigitalProduction
             }
         }
 
-        private void updateUIDataGridOverView(List<ProductionSchedule> filteredSchedules)
+        private void UpdateUIGridViewOverview(List<List<ProductionSchedule>> filteredSchedulesGroups)
         {
-            // Ensure DataGridView settings
-            dataGrid_overviewDistribution.Dock = DockStyle.Fill;
-            dataGrid_overviewDistribution.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGrid_overviewDistribution.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-            dataGrid_overviewDistribution.AllowUserToResizeRows = false;
-            dataGrid_overviewDistribution.AllowUserToResizeColumns = false;
+            gridControlOverview.Dock = DockStyle.Fill;
+            gridViewOverview.OptionsView.ColumnAutoWidth = true;
+            gridViewOverview.OptionsView.RowAutoHeight = true;
+            gridViewOverview.OptionsView.ShowGroupPanel = false;
+            gridViewOverview.OptionsBehavior.Editable = true;
+            gridViewOverview.OptionsSelection.MultiSelect = false;
+            gridViewOverview.Appearance.Row.TextOptions.HAlignment = HorzAlignment.Center;
+            gridViewOverview.Appearance.HeaderPanel.TextOptions.HAlignment = HorzAlignment.Center;
+            gridViewOverview.Appearance.Row.Font = new Font("Segoe UI", 10);
 
-            // Set alternating row colors for better readability
-            //dataGrid_overviewDistribution.AlternatingRowsDefaultCellStyle.BackColor = Color.LightGray;
+            //    DataTable table = new DataTable();
+          
+            table = new DataTable();
+            table.Columns.Add("GroupSO", typeof(string));
+            table.Columns.Add("SO", typeof(string));
+            table.Columns.Add("PartName", typeof(string));
+            table.Columns.Add("Size", typeof(string));
+            table.Columns.Add("SizeQty", typeof(int));
+            table.Columns.Add("PeicesPerPair", typeof(int));
+            table.Columns.Add("CuttingDieQty", typeof(int));
+            table.Columns.Add("MaterialLayer", typeof(int));
+            table.Columns.Add("InventoryQty", typeof(int));
 
-            // Center align content in cells
-            dataGrid_overviewDistribution.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dataGrid_overviewDistribution.DefaultCellStyle.Font = new Font("Segoe UI", 10);
+            int countSO = 0;
 
-            // Allow selection of entire rows
-            dataGrid_overviewDistribution.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGrid_overviewDistribution.MultiSelect = false;
-            dataGrid_overviewDistribution.ReadOnly = true;  // Prevent editing if needed
-
-            if (table.Columns.Count == 0)
+            gridControlOverview.DataSource = null;
+            foreach (var (scheduleGroup, index) in filteredSchedulesGroups.Select((g, i) => (g, i)))
+               // foreach (var scheduleGroup in filteredSchedulesGroups)
             {
-                // Convert filteredSchedules to a DataTable for binding
-                table.Columns.Add("SO", typeof(string));
-                table.Columns.Add("PartName", typeof(string));
-                table.Columns.Add("Size", typeof(string));
-                table.Columns.Add("SizeQty", typeof(int)); // SizeQuantity column
-                table.Columns.Add("InventoryQty", typeof(int));
-            }
+                if (scheduleGroup.Count == 0)
+                    continue;
 
-            // Dictionary to merge PartName & Size while summing SizeQuantity
-            Dictionary<string, (List<string> SOs, int TotalSizeQuantity)> mergedData = new Dictionary<string, (List<string>, int)>();
+                countSO++;
+                string groupSO = $"{countSO}";
 
+                var mergedData = new Dictionary<string, (List<string> SOs, int TotalSizeQty)>();
 
-            // Add an empty row as separator
-            countSO++;
-            string sttSO = $"SO {countSO}";
-            table.Rows.Add(sttSO, "", "", DBNull.Value, DBNull.Value);
-            foreach (var schedule in filteredSchedules)
-            {
-                string partName = schedule.PartName;
-                string size = GetSizeName(schedule.SizeID);
-                string key = $"{partName}|{size}";
-
-                if (!mergedData.ContainsKey(key))
+                foreach (var schedule in scheduleGroup)
                 {
-                    mergedData[key] = (new List<string>(), 0);
+                    string partName = schedule.PartName;
+                    string size = GetSizeName(schedule.SizeID);
+                    string key = $"{partName}|{size}";
+
+                    if (size.Equals(""))
+                    {
+                        continue;
+                    }
+
+                    if (!mergedData.ContainsKey(key))
+                        mergedData[key] = (new List<string>(), 0);
+
+                    if (!mergedData[key].SOs.Contains(schedule.SO))
+                        mergedData[key].SOs.Add(schedule.SO);
+
+                    mergedData[key] = (mergedData[key].SOs, mergedData[key].TotalSizeQty + schedule.SizeQty);
                 }
 
-                // Add SO to the list if not already present
-                if (!mergedData[key].SOs.Contains(schedule.SO))
+                foreach (var entry in mergedData)
                 {
-                    mergedData[key].SOs.Add(schedule.SO);
+                    string[] splitKey = entry.Key.Split('|');
+                    string mergedSO = string.Join(", ", entry.Value.SOs);
+                    table.Rows.Add(groupSO, mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQty, numPiecesPerPair.Value, numCuttingDieQty.Value, numMaterialLayer.Value ,0);
                 }
-
-                // Sum the SizeQuantity
-                mergedData[key] = (mergedData[key].SOs, mergedData[key].TotalSizeQuantity + schedule.SizeQty);
             }
 
-            // Convert merged data into DataTable
-            foreach (var entry in mergedData)
-            {
-                string[] splitKey = entry.Key.Split('|');
-                string mergedSO = string.Join(", ", entry.Value.SOs); // Merge SOs into a single string
-                int inventory = 0;
-                table.Rows.Add(mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQuantity, inventory);
-            }
+            gridControlOverview.DataSource = table;
 
-            // Bind data to DataGridView
-            dataGrid_overviewDistribution.DataSource = table;
+            TranslateGridControlOverviewHeaders();
+            gridViewOverview.ClearSelection();
 
-            // Translate headers if needed
-            TranslateDataGridOverviewDistributionHeaders();
-            // Automatically select the first row if available
-            if (dataGrid_overviewDistribution.Rows.Count > 0)
+            // Group by GroupSO column
+            //gridViewOverview.GroupCount = 1;
+            gridViewOverview.Columns["GroupSO"].GroupIndex = 0;
+            gridViewOverview.OptionsSelection.MultiSelect = true;
+            gridViewOverview.OptionsSelection.MultiSelectMode = GridMultiSelectMode.RowSelect;
+
+            // gridViewOverview.Columns["GroupSO"].GroupIndex = 0;
+            gridViewOverview.ExpandAllGroups();
+        }
+
+        private void TranslateGridControlOverviewHeaders()
+        {
+            foreach (GridColumn col in gridViewOverview.Columns)
             {
-                dataGrid_overviewDistribution.ClearSelection();
-            }
-            // Color specific rows after binding
-            foreach (DataGridViewRow row in dataGrid_overviewDistribution.Rows)
-            {
-                var soCell = row.Cells["SO"];
-                if (soCell.Value != null && soCell.Value.ToString().StartsWith("SO"))
+                string localizedHeader = LocalizationManager.GetString(col.FieldName);
+                if (!string.IsNullOrEmpty(localizedHeader))
                 {
-                    row.DefaultCellStyle.BackColor = Color.LightBlue; // or any color you prefer
-                    row.DefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+                    col.Caption = localizedHeader;
                 }
             }
         }
 
-        private void TranslateDataGridOverviewDistributionHeaders()
-        {
-            foreach (DataGridViewColumn col in dataGrid_overviewDistribution.Columns)
-            {
-                // Use the appropriate property depending on how you identify headers
-                col.HeaderText = LocalizationManager.GetString(col.Name) ?? col.Name; // Assuming you're using column Name as key
-            }
-        }
 
         private string GetSizeName(int sizeId)
         {
@@ -655,36 +660,121 @@ namespace DigitalProduction
             }
             else
             {
-                productionSchedules.Add(filteredSchedules);
-                updateUIDataGridOverView(filteredSchedules);
+                countSO = 0;
+                foreach (var group in filteredSchedules)
+                {
+                    group.GroupSO = countSO.ToString();
+                }
+                bool exists = false;
+
+                foreach (var ps in productionSchedules)
+                {
+                    if (AreSchedulesEqual(ps, filteredSchedules))
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists)
+                {
+                    for (int i = filteredSchedules.Count - 1; i >= 0; i--) // Loop backwards to avoid skipping items after removal
+                    {
+                        var productionSchedule = filteredSchedules[i];
+
+                        // Skip the check if productionSchedules is empty
+                        if (productionSchedules.Count == 0)
+                            continue;
+
+                        bool existed = false;
+
+                        // Check if productionSchedule matches any list in productionSchedules
+                        foreach (var scheduleGroup in productionSchedules)
+                        {
+                            if (scheduleGroup.Contains(productionSchedule))
+                            {
+                                existed = true;
+                                break; // Found a match, no need to check further
+                            }
+                        }
+
+                        if (existed)
+                        {
+                            filteredSchedules.RemoveAt(i); // Safely remove the item from filteredSchedules
+                        }
+                    }
+
+                    if (filteredSchedules.Count != 0)
+                    {
+                        productionSchedules.Add(filteredSchedules);
+                    }
+                }
             }
+
+            UpdateUIGridViewOverview(productionSchedules);
 
         }
 
+        bool AreSchedulesEqual(List<ProductionSchedule> list1, List<ProductionSchedule> list2)
+        {
+            if (list1.Count != list2.Count)
+                return false;
+
+            // Create dictionaries to count identical items
+            var dict1 = list1.GroupBy(s => $"{s.OrderID}|{s.PartName}|{s.SizeID}|{s.SizeQty}")
+                             .ToDictionary(g => g.Key, g => g.Count());
+
+            var dict2 = list2.GroupBy(s => $"{s.OrderID}|{s.PartName}|{s.SizeID}|{s.SizeQty}")
+                             .ToDictionary(g => g.Key, g => g.Count());
+
+            // Compare dictionaries
+            if (dict1.Count != dict2.Count)
+                return false;
+
+            foreach (var kvp in dict1)
+            {
+                if (!dict2.ContainsKey(kvp.Key) || dict2[kvp.Key] != kvp.Value)
+                    return false;
+            }
+
+            return true;
+
+        }
         private void btnSaveInventory_Click(object sender, EventArgs e)
         {
-            int inventory = int.TryParse(txtInventory.Text, out int result) ? result : 0;
-            if (dataGrid_overviewDistribution.SelectedRows.Count > 0) {
-                DataGridViewRow selectedRow = dataGrid_overviewDistribution.SelectedRows[0];
+            // Refresh the grid to ensure it reflects the latest changes
+            gridViewOverview.RefreshData();
 
-                string partName = selectedRow.Cells["PartName"].Value?.ToString();
-                string size = selectedRow.Cells["Size"].Value?.ToString();
-                int sizeQty = Convert.ToInt32(selectedRow.Cells["SizeQty"].Value ?? 0);
+            // Parse the input inventory value
+            int inventoryInput = string.IsNullOrEmpty(txtInventory.Text) ? 0 : int.Parse(txtInventory.Text);
 
-                if (inventory >= sizeQty) {
-                    ShowMessage.ShowInfo("Number of Inventory not larger or equal to SizeQty");
+            int[] selectedRows = gridViewOverview.GetSelectedRows();
+
+            if (selectedRows.Length > 0)
+            {
+                int inventory = int.TryParse(txtInventory.Text, out int result) ? result : 0;
+
+                int selectedRowHandle = selectedRows[0];
+                string partName = gridViewOverview.GetRowCellValue(selectedRowHandle, "PartName")?.ToString();
+                string size = gridViewOverview.GetRowCellValue(selectedRowHandle, "Size")?.ToString();
+
+                object sizeQtyObj = gridViewOverview.GetRowCellValue(selectedRowHandle, "SizeQty");
+                int sizeQty = sizeQtyObj != DBNull.Value ? Convert.ToInt32(sizeQtyObj) : 0;
+
+                if (sizeQty != 0 && inventory >= sizeQty)
+                {
+                    ShowMessage.ShowInfo("Number of Inventory must be less than SizeQty");
                     return;
                 }
-                selectedRow.Cells["InventoryQty"].Value = inventory;
-                string normalizedSize = size?.Trim();
 
-                // Update InventoryQty in productionSchedules
+                gridViewOverview.SetRowCellValue(selectedRowHandle, "InventoryQty", inventory);
+
+                string normalizedSize = size?.Trim();
                 foreach (var group in productionSchedules)
                 {
                     foreach (var schedule in group)
                     {
                         string scheduleSize = GetSizeName(schedule.SizeID);
-
                         if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
                             string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
                         {
@@ -696,9 +786,93 @@ namespace DigitalProduction
                 Console.WriteLine($"Selected PartName: {partName}");
                 Console.WriteLine($"Selected Size: {normalizedSize}");
             }
+
+            //// Iterate through the selected rows
+            //foreach (int row in selectedRows)
+            //{
+            //    if (gridViewOverview.IsGroupRow(row))
+            //    {
+            //        // This is a group row, you can handle the logic if row
+            //        string groupSOHeader = gridViewOverview.GetGroupRowValue(row)?.ToString();
+
+
+            //        // Iterate through all the rows in the grid
+            //        for (int i = 0; i < gridViewOverview.RowCount; i++)
+            //        {
+            //            int rowHandle = gridViewOverview.GetVisibleRowHandle(i);
+
+            //            // Skip non-data rows
+            //            if (!gridViewOverview.IsDataRow(rowHandle)) continue;
+
+            //            // Get GroupSO value for the current row
+            //            string groupSO = gridViewOverview.GetRowCellValue(rowHandle, "GroupSO")?.ToString();
+            //            if (!string.Equals(groupSO, groupSOHeader, StringComparison.OrdinalIgnoreCase))
+            //                continue; // Only process rows that belong to Group SO 1
+
+            //            // Get other values from the current row
+            //            string partName = gridViewOverview.GetRowCellValue(rowHandle, "PartName")?.ToString();
+            //            string size = gridViewOverview.GetRowCellValue(rowHandle, "Size")?.ToString()?.Trim();
+
+            //         //   int inventory = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "InventoryQty") ?? 0);
+            //            int sizeQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "SizeQty") ?? 0);
+            //            int piecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "PeicesPerPair") ?? 0);
+            //            int cuttingDieQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "CuttingDieQty") ?? 0);
+            //            int materialLayer = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "MaterialLayer") ?? 0);
+            //            int totalPiecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "TotalPiecesPerPair") ?? 0);
+
+
+            //            // Loop through production schedules and find the matching schedule
+            //            foreach (var group in productionSchedules)
+            //            {
+            //                foreach (var schedule in group)
+            //                {
+            //                    string scheduleSize = GetSizeName(schedule.SizeID);
+
+            //                    // Check if the schedule matches the current row's partName and size
+            //                    if (string.Equals(schedule.GroupSO, "0", StringComparison.OrdinalIgnoreCase) &&
+            //                        string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
+            //                        string.Equals(scheduleSize, size, StringComparison.OrdinalIgnoreCase))
+            //                    {
+            //                        // Check if values are different before updating
+            //                        if ((int)numPiecesPerPair.Value != piecesPerPair ||
+            //                            (int)numCuttingDieQty.Value != cuttingDieQty ||
+            //                            (int)numMaterialLayer.Value != materialLayer ||
+            //                            (int)numericTotalPeicesPerPair.Value != totalPiecesPerPair)
+            //                        {
+            //                            // Update the schedule with new values
+            //                          //  schedule.InventoryQty = inventoryInput;
+            //                            schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
+            //                            schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
+            //                            schedule.MaterialLayer = (int)numMaterialLayer.Value;
+
+            //                            // Now, directly update the grid's cells for this row
+            //                       //     gridViewOverview.SetRowCellValue(rowHandle, "InventoryQty", schedule.InventoryQty);
+            //                            gridViewOverview.SetRowCellValue(rowHandle, "PeicesPerPair", schedule.PeicesPerPair);
+            //                            gridViewOverview.SetRowCellValue(rowHandle, "CuttingDieQty", schedule.CuttingDieQty);
+            //                            gridViewOverview.SetRowCellValue(rowHandle, "MaterialLayer", schedule.MaterialLayer);
+            //                        }
+            //                    }
+            //                }
+            //            }
+
+            //            Console.WriteLine($"[Updated] Group SO 1: {partName} - {size} =>  Pairs: {numPiecesPerPair.Value.ToString()}, Die: {numCuttingDieQty.Value.ToString()}, Layer: {numMaterialLayer.Value.ToString()}");
+            //        }
+
+            //        // Refresh the grid to reflect all changes
+            //        gridViewOverview.RefreshData();
+
+            //        // Show success message
+            //        ShowMessage.ShowInfo($"Group SO {groupSOHeader} data updated successfully.");
+            //    }
+            //}
         }
 
         private void btnDeleteData_Click(object sender, EventArgs e)
+        {
+            ResetSendDistribution();
+        }
+
+        private void ResetSendDistribution()
         {
             loadDeviceDistribution();
             lbl_operatorID.ResetText();
@@ -706,7 +880,8 @@ namespace DigitalProduction
             countSO = 0;
             table.Clear();
             productionSchedules.Clear();
-            dataGrid_overviewDistribution.DataSource = null;
+            gridControlOverview.DataSource = null;
+            sizeDataList = new List<SizeData>();
         }
     }
 }

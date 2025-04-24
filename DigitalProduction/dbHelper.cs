@@ -449,7 +449,7 @@ namespace DigitalProduction
             return ipAddress;
         }
         // Phương thức để lấy danh sách các MachineName từ bảng DeviceList
-        public List<Device> getlistMachines()
+        public static List<Device> getlistMachines()
         {
             List<Device> machines = new List<Device>();
 
@@ -811,14 +811,30 @@ namespace DigitalProduction
                         {
                             summaryList.Add(new CuttingReportModel
                             {
-                                CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]).ToString("MM/dd/yyyy") : "N/A",
-                                MachineName = reader["MachineName"].ToString(),
-                                SO = reader["SO"].ToString(),
-                                OrderID = Convert.ToInt32(reader["OrderID"]),
-                                OperatorName = reader["OperatorName"].ToString(),
-                                TotalActualCut = Convert.ToInt32(reader["TotalActualCut"]),
-                                TotalPieces = Convert.ToInt32(reader["TotalPieces"]),
-                                TotalSizeQty = Convert.ToInt32(reader["TotalSizeQty"])
+                                CreatedAt = reader["CreatedAt"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["CreatedAt"]).ToString("MM/dd/yyyy")
+                                    : "N/A",
+                                MachineName = reader["MachineName"] != DBNull.Value
+                                    ? reader["MachineName"].ToString()
+                                    : string.Empty,
+                                SO = reader["SO"] != DBNull.Value
+                                    ? reader["SO"].ToString()
+                                    : string.Empty,
+                                OrderID = reader["OrderID"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["OrderID"])
+                                    : 0,
+                                OperatorName = reader["OperatorName"] != DBNull.Value
+                                    ? reader["OperatorName"].ToString()
+                                    : string.Empty,
+                                TotalActualCut = reader["TotalActualCut"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["TotalActualCut"])
+                                    : 0,
+                                TotalPieces = reader["TotalPieces"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["TotalPieces"])
+                                    : 0,
+                                TotalSizeQty = reader["TotalSizeQty"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["TotalSizeQty"])
+                                    : 0
                             });
                         }
                     }
@@ -948,6 +964,32 @@ namespace DigitalProduction
             {
                 // Log or handle error as needed
                 Console.WriteLine("Error updating distribution: " + ex.Message);
+                return false;
+            }
+        }
+        public static bool UpdateDistributionDevice(int distributionId, int deviceId)
+        {
+            string query = @"
+                    UPDATE DistributionData
+                    SET DeviceID = @DeviceID
+                    WHERE DistributionID = @DistributionID AND Status = 'Pending'; -- Ensure only pending rows are affected
+                ";
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@DeviceID", deviceId);
+                    command.Parameters.AddWithValue("@DistributionID", distributionId);
+
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error updating DeviceID: " + ex.Message);
                 return false;
             }
         }

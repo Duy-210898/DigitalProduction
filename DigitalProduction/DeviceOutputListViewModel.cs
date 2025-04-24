@@ -114,6 +114,11 @@ namespace DigitalProduction.ViewModels
             }
         }
 
+        public void SyncData()
+        {
+            // Re-fetch or refresh the BindingDeviceOutputs
+            RequestData(); // Or however your logic pulls data
+        }
 
         public BindingList<DeviceOutput> BindingDeviceOutputs
         {
@@ -283,7 +288,7 @@ namespace DigitalProduction.ViewModels
             var headersDictionary = new Dictionary<string, DeviceOutput>();
 
             var groupedData = realTimeData.OutputData
-                .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName, d.PartName })
+                .GroupBy(d => new {d.PartName, d.MachineName, d.SO, d.OperatorName })
                 .SelectMany(g =>
                 {
                     // Create a unique key for this group based on PartName and other attributes
@@ -341,17 +346,23 @@ namespace DigitalProduction.ViewModels
                             : LocalizationManager.GetString("rawMaterial");
 
                         // Clear redundant values to avoid repetition for grouped items
-                        if (g.Count() > 1)
+                        if (g.Count() > 0)
                         {
                             item.MachineName = string.Empty;
                             item.SO = string.Empty;
                             item.OperatorName = string.Empty;
+                            item.PartName = string.Empty;
+                            item.MaterialType = string.Empty;
                         }
 
                         // Subscribe to property changes in child items to dynamically update totals
                         item.PropertyChanged += (sender, e) =>
                         {
-                            if (e.PropertyName == nameof(DeviceOutput.ActualCut) ||
+                            if (e.PropertyName == nameof(DeviceOutput.CuttingDieQty) ||
+                                e.PropertyName == nameof(DeviceOutput.PiecesPerPair) ||
+                                e.PropertyName == nameof(DeviceOutput.MaterialLayer) ||
+                                e.PropertyName == nameof(DeviceOutput.TotalPiecesPerPair) ||
+                                e.PropertyName == nameof(DeviceOutput.ActualCut) ||
                                 e.PropertyName == nameof(DeviceOutput.ActualPieces) ||
                                 e.PropertyName == nameof(DeviceOutput.ActualSizeQty))
                             {
@@ -428,6 +439,10 @@ namespace DigitalProduction.ViewModels
                         if (existingGroups.TryGetValue(key, out var existingHeader))
                         {
                             // Update group header values
+                            existingHeader.CuttingDieQty = newItem.CuttingDieQty;
+                            existingHeader.PiecesPerPair = newItem.PiecesPerPair;
+                            existingHeader.MaterialLayer = newItem.MaterialLayer;
+                            existingHeader.TotalPiecesPerPair = newItem.TotalPiecesPerPair;
                             existingHeader.ActualCut = newItem.ActualCut;
                             existingHeader.ActualPieces = newItem.ActualPieces;
                             existingHeader.ActualSizeQty = newItem.ActualSizeQty;

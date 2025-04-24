@@ -44,6 +44,7 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.btnDeleteData = new DevExpress.XtraEditors.SimpleButton();
             this.lbl_operatorID = new System.Windows.Forms.Label();
             this.lbl_operatorName = new System.Windows.Forms.Label();
             this.lbl_Name = new System.Windows.Forms.Label();
@@ -67,8 +68,8 @@
             this.btnSaveInventory = new DevExpress.XtraEditors.SimpleButton();
             this.txtInventory = new System.Windows.Forms.TextBox();
             this.lblInventoryQty = new System.Windows.Forms.Label();
-            this.dataGrid_overviewDistribution = new System.Windows.Forms.DataGridView();
-            this.btnDeleteData = new DevExpress.XtraEditors.SimpleButton();
+            this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
+            this.gridViewOverview = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -82,7 +83,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).BeginInit();
             this.tableLayoutPanel5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGrid_overviewDistribution)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).BeginInit();
             this.SuspendLayout();
             // 
             // lblFactory
@@ -245,7 +247,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.dataGrid_overviewDistribution, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.gridControlOverview, 0, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
@@ -292,6 +294,20 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(432, 129);
             this.panel2.TabIndex = 6;
+            // 
+            // btnDeleteData
+            // 
+            this.btnDeleteData.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDeleteData.Appearance.Options.UseFont = true;
+            this.btnDeleteData.Location = new System.Drawing.Point(21, 81);
+            this.btnDeleteData.LookAndFeel.SkinName = "Dark Side";
+            this.btnDeleteData.LookAndFeel.UseDefaultLookAndFeel = false;
+            this.btnDeleteData.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
+            this.btnDeleteData.Name = "btnDeleteData";
+            this.btnDeleteData.Size = new System.Drawing.Size(121, 29);
+            this.btnDeleteData.TabIndex = 9;
+            this.btnDeleteData.Text = "Delete";
+            this.btnDeleteData.Click += new System.EventHandler(this.btnDeleteData_Click);
             // 
             // lbl_operatorID
             // 
@@ -560,29 +576,21 @@
             this.lblInventoryQty.Text = "Inventory Quanity:";
             this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // dataGrid_overviewDistribution
+            // gridControlOverview
             // 
-            this.dataGrid_overviewDistribution.BackgroundColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.dataGrid_overviewDistribution.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGrid_overviewDistribution.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGrid_overviewDistribution.Location = new System.Drawing.Point(3, 297);
-            this.dataGrid_overviewDistribution.Name = "dataGrid_overviewDistribution";
-            this.dataGrid_overviewDistribution.Size = new System.Drawing.Size(965, 436);
-            this.dataGrid_overviewDistribution.TabIndex = 3;
+            this.gridControlOverview.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridControlOverview.Location = new System.Drawing.Point(3, 297);
+            this.gridControlOverview.MainView = this.gridViewOverview;
+            this.gridControlOverview.Name = "gridControlOverview";
+            this.gridControlOverview.Size = new System.Drawing.Size(965, 436);
+            this.gridControlOverview.TabIndex = 3;
+            this.gridControlOverview.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gridViewOverview});
             // 
-            // btnDeleteData
+            // gridViewOverview
             // 
-            this.btnDeleteData.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDeleteData.Appearance.Options.UseFont = true;
-            this.btnDeleteData.Location = new System.Drawing.Point(21, 81);
-            this.btnDeleteData.LookAndFeel.SkinName = "Dark Side";
-            this.btnDeleteData.LookAndFeel.UseDefaultLookAndFeel = false;
-            this.btnDeleteData.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
-            this.btnDeleteData.Name = "btnDeleteData";
-            this.btnDeleteData.Size = new System.Drawing.Size(121, 29);
-            this.btnDeleteData.TabIndex = 9;
-            this.btnDeleteData.Text = "Delete";
-            this.btnDeleteData.Click += new System.EventHandler(this.btnDeleteData_Click);
+            this.gridViewOverview.GridControl = this.gridControlOverview;
+            this.gridViewOverview.Name = "gridViewOverview";
             // 
             // ucDistribution
             // 
@@ -606,7 +614,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).EndInit();
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGrid_overviewDistribution)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -635,7 +644,6 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ComboBox cbxDevice;
         private System.Windows.Forms.Label lblSelectMachine;
-        private System.Windows.Forms.DataGridView dataGrid_overviewDistribution;
         private System.Windows.Forms.Label lblMaterialLayer;
         private System.Windows.Forms.Label lblPeicesPerPair;
         private System.Windows.Forms.Label lblCuttingDie;
@@ -653,5 +661,7 @@
         private System.Windows.Forms.Panel panel4;
         private DevExpress.XtraEditors.SimpleButton btnSaveInventory;
         private DevExpress.XtraEditors.SimpleButton btnDeleteData;
+        private DevExpress.XtraGrid.GridControl gridControlOverview;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridViewOverview;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -71,7 +72,23 @@ namespace DigitalProduction
             gridControl_DeviceOutput.ForceInitialize();
             // Translate headers (after binding data)
             TranslateHeaders();
+
+            // refresh data
+            SimpleButton syncButton = new SimpleButton()
+            {
+                Text = LocalizationManager.GetString("Sync"),
+                Size = new Size(100, 40)
+            };
+            syncButton.Click += BtnSyncData_Click;
+            syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
+            filterPanel.Controls.Add(syncButton); 
+
         }
+        private void BtnSyncData_Click(object sender, EventArgs e)
+        {
+            _viewModel.SyncData();
+        }
+
 
         private void LoadFilters()
         {

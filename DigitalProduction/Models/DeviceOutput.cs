@@ -24,6 +24,8 @@ namespace DigitalProduction.Models
         private string _materialType;
         public DateTime Timestamp { get; set; }
 
+        public DateTime UpdatedAt { get; set; }
+
         public string MachineName
         {
             get => _machineName;

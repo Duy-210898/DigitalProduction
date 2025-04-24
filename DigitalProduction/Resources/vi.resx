@@ -244,7 +244,7 @@
     <value>Đăng xuất</value>
   </data>
   <data name="MonthlyPlan" xml:space="preserve">
-    <value>Kế hoạch hằng tháng</value>
+    <value>Kế hoạch hàng tháng</value>
   </data>
   <data name="Plant" xml:space="preserve">
     <value>Xưởng</value>
@@ -542,5 +542,8 @@
   </data>
   <data name="Refresh" xml:space="preserve">
     <value>Làm mới dữ liệu</value>
+  </data>
+  <data name="TransferDevice" xml:space="preserve">
+    <value>Chuyển thiết bị</value>
   </data>
 </root>

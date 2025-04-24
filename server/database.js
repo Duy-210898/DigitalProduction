@@ -114,7 +114,8 @@ async function getActualOutputData(startDate, endDate) {
       do.ActualPieces,
       do.TotalPiecesPerPair,
       do.InventoryQty,
-      do.CreatedAt AS Timestamp
+      do.CreatedAt AS Timestamp,
+      do.UpdatedAt AS UpdatedAt
     FROM ProductOrder po
     JOIN Product pr ON po.ProductId = pr.ProductId
     JOIN PartSizeOrder pso ON po.OrderID = pso.OrderId
@@ -125,14 +126,14 @@ async function getActualOutputData(startDate, endDate) {
     JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId
     JOIN DeviceList dl ON dl.DeviceID = dd.DeviceID
     JOIN Operator o ON dd.OperatorID = o.OperatorID
-    WHERE do.CreatedAt >= @startDate AND do.CreatedAt < @endDate
+    WHERE do.UpdatedAt >= @startDate AND do.UpdatedAt < @endDate
     GROUP BY
       po.OrderID, do.IsLeather, do.TotalPiecesPerPair, 
       po.MasterWorkOrder, po.SO, pr.Model, pr.ART, 
       o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
       do.PiecesPerPair, do.MaterialLayer, do.CuttingDieQty, 
-      do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt, p.PartName
-      ORDER BY do.CreatedAt DESC;
+      do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt, do.UpdatedAt, p.PartName
+      ORDER BY do.UpdatedAt ASC;
   `;
   
   let transaction;
@@ -167,7 +168,8 @@ async function getActualOutputData(startDate, endDate) {
           ActualSizeQty: record.ActualSizeQty,
           ActualPieces: record.ActualPieces,
           TotalPiecesPerPair: record.TotalPiecesPerPair,
-          Timestamp: record.Timestamp
+          Timestamp: record.Timestamp,
+          UpdatedAt: record.UpdatedAt
         }));
       
       return {
@@ -291,10 +293,10 @@ async function saveActualDataToDB(data) {
       const DeviceOutputQuery = `
         INSERT INTO DeviceOutput (
             OrderID, SizeID, PartID, PiecesPerPair, MaterialLayer, CuttingDieQty, 
-            ActualCut, ActualPieces, ActualSizeQty, TotalPiecesPerPair, IsLeather, CreatedAt
+            ActualCut, ActualPieces, ActualSizeQty, TotalPiecesPerPair, IsLeather, CreatedAt, UpdatedAt
         ) VALUES (
             @OrderID, @SizeID, @PartID, @PiecesPerPair, @MaterialLayer, @CuttingDieQty, 
-            @ActualCut, @ActualPieces, @ActualSizeQty, @TotalPiecesPerPair, @IsLeather, GETDATE()
+            @ActualCut, @ActualPieces, @ActualSizeQty, @TotalPiecesPerPair, @IsLeather, GETDATE(), GETDATE() 
         );
       `;
 
@@ -364,6 +366,39 @@ async function saveActualDataToDB(data) {
         // If exists, UPDATE
         await executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
         console.log(`✅ Updated DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
+        
+        const findPartSizeOrderIdQuery = `
+          SELECT PartSizeOrderId 
+          FROM PartSizeOrder 
+          WHERE PartId = @PartID AND SizeId = @SizeID AND OrderId = @OrderID
+        `;
+
+        const partSizeOrderInputs = [
+          { name: 'PartID', type: sql.Int, value: size.PartID },
+          { name: 'SizeID', type: sql.Int, value: size.SizeID },
+          { name: 'OrderID', type: sql.Int, value: OrderID }
+        ];
+
+        const partSizeResult = await executeQuery(findPartSizeOrderIdQuery, partSizeOrderInputs);
+
+        if (partSizeResult.length > 0) {
+          const partSizeOrderId = partSizeResult[0].PartSizeOrderId;
+
+          const updateDistributionQuery = `
+            UPDATE DistributionData
+            SET UpdatedAt = GETDATE()
+            WHERE PartSizeOrderId = @PartSizeOrderId
+          `;
+
+          const updateDistributionInputs = [
+            { name: 'PartSizeOrderId', type: sql.Int, value: partSizeOrderId }
+          ];
+
+          await executeQuery(updateDistributionQuery, updateDistributionInputs);
+          console.log(`🟢 Updated DistributionData UpdatedAt for PartSizeOrderID=${partSizeOrderId}`);
+        } else {
+          console.warn(`⚠️ No PartSizeOrder found for OrderID=${OrderID}, SizeID=${size.SizeID}, PartID=${size.PartID}`);
+        }
       }
     }
   } catch (error) {
@@ -405,9 +440,9 @@ async function saveDistributionDataToDB(dataList) {
           // Insert into DistributionData table
           const distributionQuery = `
             INSERT INTO DistributionData (
-              DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt, IsLeather, IsDelete, UserID
+              DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt , UpdatedAt, IsLeather, IsDelete, UserID
             ) VALUES (
-              @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @IsLeather, @IsDelete, @UserID
+              @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @UpdatedAt, @IsLeather, @IsDelete, @UserID
             );
           `;
 
@@ -418,6 +453,7 @@ async function saveDistributionDataToDB(dataList) {
           request.input('InventoryQty', sql.Int, data.InventoryQty);
           request.input('Status', sql.NVarChar, data.Status || 'Pending');
           request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
+          request.input('UpdatedAt', sql.DateTime, data.UpdatedAt || new Date());
           request.input('IsLeather', sql.Bit, data.IsLeather);
           request.input('IsDelete', sql.Bit, data.IsDelete || 0);
           request.input('UserID', sql.Int, data.UserID);
@@ -551,8 +587,7 @@ async function getDistributionDataFromDb(ipAddress) {
           AND EXISTS (
               SELECT *
               FROM DistributionData AS sub_dd
-              WHERE sub_dd.Status = 'Pending' AND dd.CreatedAt = sub_dd.CreatedAt
-          )
+              WHERE sub_dd.Status = 'Pending' AND FORMAT(dd.CreatedAt, 'dd/MM/yyyy HH:mm:ss') = FORMAT(sub_dd.CreatedAt, 'dd/MM/yyyy HH:mm:ss'))
       ORDER BY 
           dd.CreatedAt ASC;
     `;
@@ -568,7 +603,7 @@ async function getDistributionDataFromDb(ipAddress) {
 
       // Group records by timestamp
       const groupedByTimestamp = result.recordset.reduce((acc, item) => {
-        const createdAtTimestamp = new Date(item.CreatedAt).toISOString().replace("T", " ").slice(0, 23); // Format as YYYY-MM-DD HH:MM:SS:sss
+        const createdAtTimestamp = new Date(item.CreatedAt).toISOString().replace("T", " ").slice(0, 19); // Format as YYYY-MM-DD HH:MM:SS
 
       if (!acc[createdAtTimestamp]) {
           acc[createdAtTimestamp] = [];
@@ -887,6 +922,7 @@ async function getDistributions(startDate, endDate) {
       const query = `
           SELECT 
               dd.DistributionID,
+              dd.DeviceID,
               pr.SO,
               d.IpAddress,
               d.MachineName,
@@ -901,6 +937,7 @@ async function getDistributions(startDate, endDate) {
               dd.InventoryQty,
               dd.Status,
               dd.CreatedAt,
+              dd.UpdatedAt,
               dd.IsLeather,
               dd.IsDelete,
               dd.Note
@@ -924,9 +961,9 @@ async function getDistributions(startDate, endDate) {
               ProductOrder pr ON pr.OrderId = ps.OrderID
           WHERE 
               dd.IsDelete = 0 AND 
-              dd.CreatedAt >= @startDate AND dd.CreatedAt < @endDate
+              dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
           ORDER BY 
-              dd.CreatedAt ASC;
+              dd.UpdatedAt ASC;
       `;
       
       // Execute the query with parameters
