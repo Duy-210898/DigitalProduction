@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Resources;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.Utils.CodedUISupport;
 using DevExpress.XtraBars;
 using DevExpress.XtraBars.FluentDesignSystem;
 using DevExpress.XtraBars.Navigation;
@@ -36,7 +35,14 @@ namespace DigitalProduction
             UpdateFormTexts();
             ConnectionManager.Instance.ConnectionStatusChanged += OnConnectionStatusChanged;
             ConnectionManager.Instance.ReconnectionStatusChanged += OnReconnectionStatusChanged;
+            this.FormClosing += frmMain_FormClosing;
         }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Application.Exit();
+        }
+
 
         private void OnReconnectionStatusChanged(bool isReconnecting)
         {

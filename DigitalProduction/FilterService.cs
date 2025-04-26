@@ -14,6 +14,7 @@ namespace DigitalProduction
         public DateTime? FilterEndDate { get; set; } = DateTime.Today;
         public string FilterMachineName { get; set; }
         public string FilterSO { get; set; }
+        public string PartName { get; set; }
         public string FilterOperatorName { get; set; }
 
         private FilterService() { }

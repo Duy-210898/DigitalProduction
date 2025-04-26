@@ -113,6 +113,18 @@ namespace DigitalProduction.ViewModels
                 }
             }
         }
+        public string FilterPartName
+        {
+            get => FilterService.Instance.PartName;
+            set
+            {
+                if (FilterService.Instance.PartName != value)
+                {
+                    FilterService.Instance.PartName = value;
+                    OnPropertyChanged(nameof(FilterPartName));
+                }
+            }
+        }
 
         public void SyncData()
         {
@@ -190,6 +202,7 @@ namespace DigitalProduction.ViewModels
                         // Format dates as "yyyy-MM-dd" or adjust as required.
                         startDate = FilterStartDate.HasValue ? FilterStartDate.Value.ToString("yyyy-MM-dd") : null,
                         endDate = FilterEndDate.HasValue ? FilterEndDate.Value.ToString("yyyy-MM-dd") : null,
+                        partName = string.IsNullOrEmpty(FilterPartName) ? null : FilterPartName,
                         machineName = string.IsNullOrEmpty(FilterMachineName) ? null : FilterMachineName,
                         so = string.IsNullOrEmpty(FilterSO) ? null : FilterSO,
                         operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName
@@ -246,6 +259,7 @@ namespace DigitalProduction.ViewModels
                     var filteredData = response.RealTime.OutputData
                         .Where(d =>
                             string.IsNullOrEmpty(keyword) || // Show all if no keyword
+                            (d.PartName?.ToLower().Contains(cleanedKeyword) ?? false) ||
                             (d.MachineName?.ToLower().Contains(cleanedKeyword) ?? false) ||
                             (d.SO?.ToLower().Contains(cleanedKeyword) ?? false) ||
                             (d.OperatorName?.ToLower().Contains(cleanedKeyword) ?? false))

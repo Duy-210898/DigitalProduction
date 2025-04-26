@@ -189,4 +189,3 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalP.A2EA8899.Up2Date
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.pdb
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DigitalProduction.pdb
-D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses

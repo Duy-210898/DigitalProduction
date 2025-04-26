@@ -516,4 +516,10 @@
   <data name="TransferDevice" xml:space="preserve">
     <value>Transfer Device</value>
   </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date:</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date:</value>
+  </data>
 </root>

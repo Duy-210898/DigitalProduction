@@ -546,4 +546,10 @@
   <data name="TransferDevice" xml:space="preserve">
     <value>Chuyển thiết bị</value>
   </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>Ngày kết thúc:</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Ngày bắt đầu:</value>
+  </data>
 </root>
