@@ -46,7 +46,7 @@
             // 
             this.picEye.Cursor = System.Windows.Forms.Cursors.Hand;
             this.picEye.Image = global::DigitalProduction.Properties.Resources.icon_eye_close;
-            this.picEye.Location = new System.Drawing.Point(769, 352);
+            this.picEye.Location = new System.Drawing.Point(801, 367);
             this.picEye.Name = "picEye";
             this.picEye.Size = new System.Drawing.Size(20, 20);
             this.picEye.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -56,7 +56,7 @@
             // txt_pwd
             // 
             this.txt_pwd.EditValue = "";
-            this.txt_pwd.Location = new System.Drawing.Point(539, 346);
+            this.txt_pwd.Location = new System.Drawing.Point(578, 361);
             this.txt_pwd.Name = "txt_pwd";
             this.txt_pwd.Properties.Appearance.BackColor = System.Drawing.Color.Gainsboro;
             this.txt_pwd.Properties.Appearance.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -66,13 +66,13 @@
             this.txt_pwd.Properties.Appearance.Options.UseForeColor = true;
             this.txt_pwd.Properties.AutoHeight = false;
             this.txt_pwd.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            this.txt_pwd.Size = new System.Drawing.Size(220, 30);
+            this.txt_pwd.Size = new System.Drawing.Size(206, 30);
             this.txt_pwd.TabIndex = 25;
             // 
             // txt_username
             // 
             this.txt_username.EditValue = "";
-            this.txt_username.Location = new System.Drawing.Point(539, 276);
+            this.txt_username.Location = new System.Drawing.Point(578, 287);
             this.txt_username.Name = "txt_username";
             this.txt_username.Properties.Appearance.BackColor = System.Drawing.Color.Gainsboro;
             this.txt_username.Properties.Appearance.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -82,7 +82,7 @@
             this.txt_username.Properties.Appearance.Options.UseForeColor = true;
             this.txt_username.Properties.AutoHeight = false;
             this.txt_username.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            this.txt_username.Size = new System.Drawing.Size(220, 30);
+            this.txt_username.Size = new System.Drawing.Size(206, 30);
             this.txt_username.TabIndex = 24;
             // 
             // lblExit
@@ -91,7 +91,7 @@
             this.lblExit.BackColor = System.Drawing.Color.Transparent;
             this.lblExit.Font = new System.Drawing.Font("Tahoma", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Italic | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblExit.ForeColor = System.Drawing.Color.Black;
-            this.lblExit.Location = new System.Drawing.Point(849, 9);
+            this.lblExit.Location = new System.Drawing.Point(853, 13);
             this.lblExit.Name = "lblExit";
             this.lblExit.Size = new System.Drawing.Size(27, 16);
             this.lblExit.TabIndex = 30;
@@ -106,7 +106,7 @@
             this.btn_Login.Appearance.ForeColor = System.Drawing.Color.White;
             this.btn_Login.Appearance.Options.UseFont = true;
             this.btn_Login.Appearance.Options.UseForeColor = true;
-            this.btn_Login.Location = new System.Drawing.Point(551, 413);
+            this.btn_Login.Location = new System.Drawing.Point(555, 434);
             this.btn_Login.LookAndFeel.SkinMaskColor = System.Drawing.Color.Black;
             this.btn_Login.LookAndFeel.SkinMaskColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
             this.btn_Login.LookAndFeel.SkinName = "WXI";
@@ -124,7 +124,7 @@
             this.lblShowPassword.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lblShowPassword.Font = new System.Drawing.Font("Times New Roman", 11.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblShowPassword.ForeColor = System.Drawing.Color.Gray;
-            this.lblShowPassword.Location = new System.Drawing.Point(607, 458);
+            this.lblShowPassword.Location = new System.Drawing.Point(618, 472);
             this.lblShowPassword.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblShowPassword.Name = "lblShowPassword";
             this.lblShowPassword.Size = new System.Drawing.Size(93, 17);
@@ -134,20 +134,20 @@
             // 
             // toggleLanguage
             // 
-            this.toggleLanguage.Location = new System.Drawing.Point(685, 8);
+            this.toggleLanguage.Location = new System.Drawing.Point(722, 12);
             this.toggleLanguage.Name = "toggleLanguage";
             this.toggleLanguage.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toggleLanguage.Properties.Appearance.Options.UseFont = true;
             this.toggleLanguage.Properties.OffText = "Off";
             this.toggleLanguage.Properties.OnText = "On";
-            this.toggleLanguage.Size = new System.Drawing.Size(158, 19);
+            this.toggleLanguage.Size = new System.Drawing.Size(125, 19);
             this.toggleLanguage.TabIndex = 33;
             this.toggleLanguage.Toggled += new System.EventHandler(this.toggleLanguage_Toggled);
             // 
             // chkRememberMe
             // 
             this.chkRememberMe.AutoSize = true;
-            this.chkRememberMe.Location = new System.Drawing.Point(610, 390);
+            this.chkRememberMe.Location = new System.Drawing.Point(608, 411);
             this.chkRememberMe.Name = "chkRememberMe";
             this.chkRememberMe.Size = new System.Drawing.Size(94, 17);
             this.chkRememberMe.TabIndex = 34;
@@ -162,8 +162,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayoutStore = System.Windows.Forms.ImageLayout.Stretch;
-            this.BackgroundImageStore = global::DigitalProduction.Properties.Resources.bg;
-            this.ClientSize = new System.Drawing.Size(905, 628);
+            this.BackgroundImageStore = global::DigitalProduction.Properties.Resources.Untitled_design__1_;
+            this.ClientSize = new System.Drawing.Size(905, 634);
             this.Controls.Add(this.chkRememberMe);
             this.Controls.Add(this.toggleLanguage);
             this.Controls.Add(this.btn_Login);

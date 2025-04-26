@@ -347,6 +347,10 @@ namespace DigitalProduction
                         int cuttingDieQty = schedule.CuttingDieQty;
                         int piecesPerPair = schedule.PeicesPerPair;
                         int materialLayer = schedule.MaterialLayer;
+                        if (cuttingDieQty == 0 || piecesPerPair == 0 || materialLayer == 0) {
+                            ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
+                            return null;
+                        }
                         int productId = dbHelper.getProductIdByArt(schedule.ART);
                         int TotalPiecesPerPair = schedule.TotalPiecesPerPair;
 

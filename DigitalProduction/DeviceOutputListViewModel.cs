@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -17,6 +19,21 @@ namespace DigitalProduction.ViewModels
         private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
         private string _lastJsonData;
 
+
+        private bool _isRecentlyUpdated;
+
+        public bool IsRecentlyUpdated
+        {
+            get => _isRecentlyUpdated;
+            set
+            {
+                if (_isRecentlyUpdated != value)
+                {
+                    _isRecentlyUpdated = value;
+                    OnPropertyChanged(nameof(IsRecentlyUpdated)); 
+                }
+            }
+        }
         // Filter properties for API
         private string _filterKeyword = LocalizationManager.GetString("Search");
         public string FilterKeyword
@@ -179,12 +196,16 @@ namespace DigitalProduction.ViewModels
                     Console.WriteLine("SQL data changed, requesting new data...");
                     RequestData();
                 }
+                else {
+                    Console.WriteLine("No SQL updates found.");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error checking SQL updates: {ex.Message}");
             }
         }
+
 
 
         public async void RequestData()
@@ -302,7 +323,7 @@ namespace DigitalProduction.ViewModels
             var headersDictionary = new Dictionary<string, DeviceOutput>();
 
             var groupedData = realTimeData.OutputData
-                .GroupBy(d => new {d.PartName, d.MachineName, d.SO, d.OperatorName })
+                .GroupBy(d => new {d.PartName, d.MachineName, d.SO, d.OperatorName})
                 .SelectMany(g =>
                 {
                     // Create a unique key for this group based on PartName and other attributes
@@ -313,6 +334,8 @@ namespace DigitalProduction.ViewModels
                     {
                         header = new DeviceOutput
                         {
+                            Timestamp = null,
+                            UpdatedAt = null,
                             PartName = g.Key.PartName,
                             MachineName = g.Key.MachineName,
                             SO = g.Key.SO,
@@ -334,6 +357,8 @@ namespace DigitalProduction.ViewModels
                     int totalActualCut = g.Sum(x => x.ActualCut ?? 0);
                     int totalActualPieces = g.Sum(x => x.ActualPieces ?? 0);
                     int totalActualSizeQty = g.Sum(x => x.ActualSizeQty ?? 0);
+                    DateTime createdAt = g.First().Timestamp.Value;
+                    DateTime updatedAt = g.First().UpdatedAt.Value;
 
                     // Update header totals only if they have changed
                     if (header.ActualCut != totalActualCut)
@@ -351,6 +376,16 @@ namespace DigitalProduction.ViewModels
                         header.ActualSizeQty = totalActualSizeQty;
                         header.OnPropertyChanged(nameof(header.ActualSizeQty));
                     }
+                    if (header.Timestamp != createdAt)
+                    {
+                        header.Timestamp = createdAt;
+                        header.OnPropertyChanged(nameof(header.Timestamp));
+                    }
+                    if (header.UpdatedAt != updatedAt)
+                    {
+                        header.UpdatedAt = updatedAt;
+                        header.OnPropertyChanged(nameof(header.UpdatedAt));
+                    }
 
                     // Process items in the group
                     var items = g.Select(item =>
@@ -362,6 +397,8 @@ namespace DigitalProduction.ViewModels
                         // Clear redundant values to avoid repetition for grouped items
                         if (g.Count() > 0)
                         {
+                            item.Timestamp = null;
+                            item.UpdatedAt = null;
                             item.MachineName = string.Empty;
                             item.SO = string.Empty;
                             item.OperatorName = string.Empty;
@@ -516,6 +553,8 @@ namespace DigitalProduction.ViewModels
 
         public static void UpdateProperties<T>(T existing, T updated, params string[] propertyNames)
         {
+            bool hasChanged = false;
+
             if (existing == null || updated == null)
                 throw new ArgumentNullException("Neither the existing nor updated object can be null.");
 
@@ -532,6 +571,7 @@ namespace DigitalProduction.ViewModels
                         try
                         {
                             prop.SetValue(existing, newValue);
+                            hasChanged = true;
                         }
                         catch (Exception ex)
                         {
@@ -541,7 +581,20 @@ namespace DigitalProduction.ViewModels
                     }
                 }
             }
+
+            // Mark as updated (for animation/highlight)
+            if (hasChanged && typeof(T).GetProperty("IsRecentlyUpdated") != null)
+            {
+                typeof(T).GetProperty("IsRecentlyUpdated")?.SetValue(existing, true);
+                // Reset after a short delay
+                Task.Delay(1000).ContinueWith(_ =>
+                {
+                    typeof(T).GetProperty("IsRecentlyUpdated")?.SetValue(existing, false);
+                });
+            }
         }
+
+    
 
         public void Dispose()
         {

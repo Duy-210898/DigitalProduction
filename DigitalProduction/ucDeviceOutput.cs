@@ -202,11 +202,18 @@ namespace DigitalProduction
                 }
 
                 // Hide specific columns if necessary (example for "isLeather" and "Is Group Header")
-                var isLeatherColumn = gridView.Columns[5];
+                var isLeatherColumn = gridView.Columns[6];
                 if (isLeatherColumn != null)
                 {
                     // Set visibility to false to hide the column
                     isLeatherColumn.Visible = false;
+                }
+                // Hide specific columns if necessary (example for "isLeather" and "Is Group Header")
+                var IsRecentlyUpdated = gridView.Columns[0];
+                if (IsRecentlyUpdated != null)
+                {
+                    // Set visibility to false to hide the column
+                    IsRecentlyUpdated.Visible = false;
                 }
 
                 var isGroupHeaderColumn = gridView.Columns["IsGroupHeader"];
@@ -236,6 +243,18 @@ namespace DigitalProduction
             {
                 e.Appearance.ForeColor = Color.ForestGreen;
                 e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+            }
+            var view = sender as GridView;
+            if (view == null || e.RowHandle < 0) return;
+
+            var row = view.GetRow(e.RowHandle) as DeviceOutput;
+            if (row != null && row.IsRecentlyUpdated)
+            {
+                e.Appearance.BackColor = Color.LightYellow;
+            }
+            else
+            {
+                e.Appearance.BackColor = Color.Transparent;           
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraGrid;
@@ -95,13 +96,30 @@ namespace DigitalProduction
             gridControl_CuttingReport = new GridControl { Dock = DockStyle.Fill };
             gridView_CuttingReport = new GridView(gridControl_CuttingReport)
             {
-                OptionsView = { ShowGroupPanel = false }
+                OptionsView = { ShowGroupPanel = false, AllowCellMerge = true }
             };
-
             gridControl_CuttingReport.MainView = gridView_CuttingReport;
             gridView_CuttingReport.OptionsBehavior.Editable = false;
             gridView_CuttingReport.Appearance.Row.Font = new Font("Arial", 12, FontStyle.Regular);
+
+            gridView_CuttingReport.CellMerge += GridView_CuttingReport_CellMerge;
         }
+
+        private void GridView_CuttingReport_CellMerge(object sender, CellMergeEventArgs e)
+        {
+            var view = sender as GridView;
+            string f = e.Column.FieldName;
+            if (f == "CreatedAt" || f == "MachineName" || f == "SO" ||
+                f == "OrderID" || f == "OperatorName")
+            {
+                var v1 = view.GetRowCellValue(e.RowHandle1, f);
+                var v2 = view.GetRowCellValue(e.RowHandle2, f);
+                e.Merge = Equals(v1, v2);
+            }
+            else e.Merge = false;
+            e.Handled = true;
+        }
+
 
         private async Task LoadCuttingReportAsync()
         {
@@ -119,14 +137,19 @@ namespace DigitalProduction
 
                 List<CuttingReportModel> data = await Task.Run(() => DbHelper.getProductionSummary(selectedYear, selectedMonth));
 
+                // aggregate duplicates
+                var aggregated = AggregateCuttingData(data);
+
+                // now bind
                 if (gridControl_CuttingReport.InvokeRequired)
                 {
-                    gridControl_CuttingReport.Invoke(new Action(() => UpdateGrid(data)));
+                    gridControl_CuttingReport.Invoke((Action)(() => UpdateGrid(aggregated)));
                 }
                 else
                 {
-                    UpdateGrid(data);
+                    UpdateGrid(aggregated);
                 }
+
             }
             catch (Exception ex)
             {
@@ -147,6 +170,32 @@ namespace DigitalProduction
                 gridView_CuttingReport.ClearColumnsFilter();
                 gridView_CuttingReport.Columns.Clear();
             }
+        }
+
+        private List<CuttingReportModel> AggregateCuttingData(List<CuttingReportModel> data)
+        {
+            var grouped = data
+              .GroupBy(x => new {
+                  Date = x.CreatedAt,
+                  x.MachineName,
+                  x.SO,
+                  x.OrderID,
+                  x.OperatorName
+              })
+              .Select(g => new CuttingReportModel
+              {
+                  CreatedAt = g.Key.Date,
+                  MachineName = g.Key.MachineName,
+                  SO = g.Key.SO,
+                  OrderID = g.Key.OrderID,
+                  OperatorName = g.Key.OperatorName,
+                  TotalActualCut = g.Sum(x => x.TotalActualCut),
+                  TotalPieces = g.Sum(x => x.TotalPieces),
+                  TotalSizeQty = g.Sum(x => x.TotalSizeQty)
+              })
+              .ToList();
+
+            return grouped;
         }
 
         private void TranslateHeaders()
@@ -181,6 +230,27 @@ namespace DigitalProduction
 
                     if (gridView_CuttingReport.Columns["TotalSizeQty"] != null)
                         gridView_CuttingReport.Columns["TotalSizeQty"].Caption = LocalizationManager.GetString("TotalSizeQty");
+                    gridView_CuttingReport.OptionsView.AllowCellMerge = true;
+                    gridView_CuttingReport.CellMerge += (s, e) => {
+                        // only merge on key columns
+                        string field = e.Column.FieldName;
+                        if (field == "CreatedAt")
+                            //field == "MachineName" )
+                          //  field == "SO" ||
+                         //   field == "OrderID" ||
+                          //  field == "OperatorName")
+                        {
+                            var v1 = gridView_CuttingReport.GetRowCellValue(e.RowHandle1, field);
+                            var v2 = gridView_CuttingReport.GetRowCellValue(e.RowHandle2, field);
+                            e.Merge = Equals(v1, v2);
+                        }
+                        else
+                        {
+                            e.Merge = false;
+                        }
+                        e.Handled = true;
+                    };
+
                 }
             }
         }
@@ -198,6 +268,13 @@ namespace DigitalProduction
 
                         using (ExcelPackage package = new ExcelPackage(fileInfo))
                         {
+                            // Remove existing worksheet if it exists
+                            var existingSheet = package.Workbook.Worksheets["Cutting Report"];
+                            if (existingSheet != null)
+                            {
+                                package.Workbook.Worksheets.Delete(existingSheet);
+                            }
+
                             ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Cutting Report");
 
                             // **Header Row**
@@ -217,18 +294,31 @@ namespace DigitalProduction
                                 range.Style.Fill.BackgroundColor.SetColor(Color.LightBlue);
                             }
 
-                            // **Data Rows**
-                            for (int i = 0; i < data.Count; i++)
+                            // **Data Rows** - Only export visible (filtered) rows
+                            int rowIndex = 2; // start from the second row after headers
+                            for (int i = 0; i < gridView_CuttingReport.DataRowCount; i++)
                             {
-                                worksheet.Cells[i + 2, 1].Value = data[i].CreatedAt;
-                                worksheet.Cells[i + 2, 1].Style.Numberformat.Format = "MM/dd/yyyy";
-                                worksheet.Cells[i + 2, 2].Value = data[i].MachineName;
-                                worksheet.Cells[i + 2, 3].Value = data[i].SO;
-                                worksheet.Cells[i + 2, 4].Value = data[i].OrderID;
-                                worksheet.Cells[i + 2, 5].Value = data[i].OperatorName;
-                                worksheet.Cells[i + 2, 6].Value = data[i].TotalActualCut;
-                                worksheet.Cells[i + 2, 7].Value = data[i].TotalPieces;
-                                worksheet.Cells[i + 2, 8].Value = data[i].TotalSizeQty;
+                                // Get the row handle of the visible row
+                                if (gridView_CuttingReport.IsRowVisible(i) == DevExpress.XtraGrid.Views.Grid.RowVisibleState.Visible)
+                                {
+                                    var item = (CuttingReportModel)gridView_CuttingReport.GetRow(i);
+
+                                    // Check if the row has valid data
+                                    if (item.CreatedAt != null && !string.IsNullOrEmpty(item.MachineName))
+                                    {
+                                        worksheet.Cells[rowIndex, 1].Value = item.CreatedAt;
+                                        worksheet.Cells[rowIndex, 1].Style.Numberformat.Format = "MM/dd/yyyy";
+                                        worksheet.Cells[rowIndex, 2].Value = item.MachineName;
+                                        worksheet.Cells[rowIndex, 3].Value = item.SO;
+                                        worksheet.Cells[rowIndex, 4].Value = item.OrderID;
+                                        worksheet.Cells[rowIndex, 5].Value = item.OperatorName;
+                                        worksheet.Cells[rowIndex, 6].Value = item.TotalActualCut;
+                                        worksheet.Cells[rowIndex, 7].Value = item.TotalPieces;
+                                        worksheet.Cells[rowIndex, 8].Value = item.TotalSizeQty;
+
+                                        rowIndex++; // move to the next row
+                                    }
+                                }
                             }
 
                             worksheet.Cells.AutoFitColumns();

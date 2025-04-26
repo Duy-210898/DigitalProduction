@@ -5,6 +5,7 @@ namespace DigitalProduction.Models
 {
     public class DeviceOutput : INotifyPropertyChanged
     {
+        public bool IsRecentlyUpdated { get; set; } // Temporary flag
         private string _machineName;
         private string _so;
         private string _size;
@@ -22,9 +23,9 @@ namespace DigitalProduction.Models
         private int? _totalPiecesPerPair;
         private bool _isGroupHeader;
         private string _materialType;
-        public DateTime Timestamp { get; set; }
+        public DateTime? Timestamp { get; set; }
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         public string MachineName
         {

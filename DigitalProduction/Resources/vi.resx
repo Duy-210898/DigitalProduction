@@ -400,7 +400,7 @@
     <value>Liệu da</value>
   </data>
   <data name="rawMaterial" xml:space="preserve">
-    <value>Liệu thường</value>
+    <value>Liệu nhân tạo</value>
   </data>
   <data name="NumberOfOrder" xml:space="preserve">
     <value>Số lượng đơn hàng</value>
@@ -551,5 +551,8 @@
   </data>
   <data name="StartDate" xml:space="preserve">
     <value>Ngày bắt đầu:</value>
+  </data>
+  <data name="RequiredDataCutting" xml:space="preserve">
+    <value>Vui lòng nhập dữ liệu số đôi cắt, số miếng, số lớp !!!</value>
   </data>
 </root>

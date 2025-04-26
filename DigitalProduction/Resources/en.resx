@@ -370,7 +370,7 @@
     <value>Leather Material</value>
   </data>
   <data name="rawMaterial" xml:space="preserve">
-    <value>Raw Material</value>
+    <value>Synthetic Material</value>
   </data>
   <data name="NumberOfOrder" xml:space="preserve">
     <value>Number Of Order</value>
@@ -521,5 +521,8 @@
   </data>
   <data name="StartDate" xml:space="preserve">
     <value>Start Date:</value>
+  </data>
+  <data name="RequiredDataCutting" xml:space="preserve">
+    <value>Please input the Cutting Die, Pieces Perpair, Material Layer !!!</value>
   </data>
 </root>
