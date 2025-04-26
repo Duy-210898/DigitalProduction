@@ -67,6 +67,11 @@ namespace DigitalProduction
             dgvDevices.Columns["IsActive"].HeaderText = LocalizationManager.GetString("IsActive");
             dgvDevices.Columns["DeviceID"].Visible = false;
 
+            // custom header
+            dgvDevices.EnableHeadersVisualStyles = false;
+            dgvDevices.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+            dgvDevices.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            dgvDevices.ColumnHeadersHeight = 30;
 
             // ✅ Add Action Column if it does not exist
             if (!dgvDevices.Columns.Contains("Action"))
@@ -74,7 +79,7 @@ namespace DigitalProduction
                 DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn
                 {
                     Name = "Action",
-                    HeaderText = "Action",
+                    HeaderText = LocalizationManager.GetString("Action"),
                     UseColumnTextForButtonValue = false  // ✅ Set to false to allow dynamic text change
                 };
                 dgvDevices.Columns.Add(actionColumn);

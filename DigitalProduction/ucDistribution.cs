@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
-using DevExpress.XtraEditors.ButtonPanel;
-using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
@@ -25,9 +22,6 @@ namespace DigitalProduction
         private int operatorID = 0;
         private int deviceID = 0;
         private int userID = 0;
-        private int cuttingDieQty = 0;
-        private int piecesPerPair = 0;
-        private int materialLayer = 0;
         private int totalPiecesPerPair = 0;
         private HashSet<int> sizeIDs = new HashSet<int>();
         private HashSet<int> partIDs = new HashSet<int>();
@@ -44,6 +38,15 @@ namespace DigitalProduction
             ApplyLocalization();
             lbl_operatorName.Visible = false;
             loadDeviceDistribution();
+            txtInventory.KeyPress += TxtInventory_KeyPress;
+        }
+        private void TxtInventory_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Chỉ cho phép ký tự số và phím điều hướng như backspace
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true; // Ngăn ký tự không hợp lệ
+            }
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -311,12 +314,12 @@ namespace DigitalProduction
             userID = Global.CurrentUser != null ? Global.CurrentUser.UserID : 0;
             deviceID = int.Parse(cbxDevice.SelectedValue.ToString());
             operatorID = int.Parse(lbl_operatorID.Text);
-            cuttingDieQty = int.Parse(numCuttingDieQty.Text);
-            piecesPerPair = int.Parse(numPiecesPerPair.Text);
-            materialLayer = int.Parse(numMaterialLayer.Text);
-            totalPiecesPerPair = int.Parse(numericTotalPeicesPerPair.Text);
+            //cuttingDieQty = int.Parse(numCuttingDieQty.Text);
+            //piecesPerPair = int.Parse(numPiecesPerPair.Text);
+            //materialLayer = int.Parse(numMaterialLayer.Text);
+            //totalPiecesPerPair = int.Parse(numericTotalPeicesPerPair.Text);
 
-                        int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
+          //  int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
             bool isLeather = false;
 
             // Use a HashSet to avoid duplicate PartSizeOrderIDs
@@ -339,11 +342,13 @@ namespace DigitalProduction
                         int partID = schedule.PartId;
                         int sizeID = schedule.SizeID;
                         int orderID = schedule.OrderID;
+                        string model = schedule.Model;
                         int inventory = schedule.InventoryQty;
-                        //int cuttingDieQty = schedule.CuttingDieQty;
-                        //int piecesPerPair = schedule.PeicesPerPair;
-                        //int materialLayer = schedule.MaterialLayer;
-                        //int TotalPiecesPerPair = schedule.TotalPiecesPerPair;
+                        int cuttingDieQty = schedule.CuttingDieQty;
+                        int piecesPerPair = schedule.PeicesPerPair;
+                        int materialLayer = schedule.MaterialLayer;
+                        int productId = dbHelper.getProductIdByArt(schedule.ART);
+                        int TotalPiecesPerPair = schedule.TotalPiecesPerPair;
 
                         int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
 
@@ -355,6 +360,8 @@ namespace DigitalProduction
                                 OperatorID = operatorID,
                                 UserID = userID,
                                 ProductID = productId,
+                                PartID = partID,
+                                Model = model,
                                 PartSizeOrderID = psoID,
                                 CuttingDieQty = cuttingDieQty,
                                 PiecesPerPair = piecesPerPair,
@@ -573,7 +580,6 @@ namespace DigitalProduction
             table.Columns.Add("MaterialLayer", typeof(int));
             table.Columns.Add("InventoryQty", typeof(int));
 
-            int countSO = 0;
 
             gridControlOverview.DataSource = null;
             foreach (var (scheduleGroup, index) in filteredSchedulesGroups.Select((g, i) => (g, i)))
@@ -593,6 +599,11 @@ namespace DigitalProduction
                     string size = GetSizeName(schedule.SizeID);
                     string key = $"{partName}|{size}";
 
+                    schedule.GroupSO = groupSO;
+                    schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
+                    schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
+                    schedule.MaterialLayer = (int)numMaterialLayer.Value;
+                    schedule.TotalPiecesPerPair = (int)numericTotalPeicesPerPair.Value;
                     if (size.Equals(""))
                     {
                         continue;
@@ -787,84 +798,84 @@ namespace DigitalProduction
                 Console.WriteLine($"Selected Size: {normalizedSize}");
             }
 
-            //// Iterate through the selected rows
-            //foreach (int row in selectedRows)
-            //{
-            //    if (gridViewOverview.IsGroupRow(row))
-            //    {
-            //        // This is a group row, you can handle the logic if row
-            //        string groupSOHeader = gridViewOverview.GetGroupRowValue(row)?.ToString();
+            // Iterate through the selected rows
+            foreach (int row in selectedRows)
+            {
+                if (gridViewOverview.IsGroupRow(row))
+                {
+                    // This is a group row, you can handle the logic if row
+                    string groupSOHeader = gridViewOverview.GetGroupRowValue(row)?.ToString();
 
 
-            //        // Iterate through all the rows in the grid
-            //        for (int i = 0; i < gridViewOverview.RowCount; i++)
-            //        {
-            //            int rowHandle = gridViewOverview.GetVisibleRowHandle(i);
+                    // Iterate through all the rows in the grid
+                    for (int i = 0; i < gridViewOverview.RowCount; i++)
+                    {
+                        int rowHandle = gridViewOverview.GetVisibleRowHandle(i);
 
-            //            // Skip non-data rows
-            //            if (!gridViewOverview.IsDataRow(rowHandle)) continue;
+                        // Skip non-data rows
+                        if (!gridViewOverview.IsDataRow(rowHandle)) continue;
 
-            //            // Get GroupSO value for the current row
-            //            string groupSO = gridViewOverview.GetRowCellValue(rowHandle, "GroupSO")?.ToString();
-            //            if (!string.Equals(groupSO, groupSOHeader, StringComparison.OrdinalIgnoreCase))
-            //                continue; // Only process rows that belong to Group SO 1
+                        // Get GroupSO value for the current row
+                        string groupSO = gridViewOverview.GetRowCellValue(rowHandle, "GroupSO")?.ToString();
+                        if (!string.Equals(groupSO, groupSOHeader, StringComparison.OrdinalIgnoreCase))
+                            continue; // Only process rows that belong to Group SO 1
 
-            //            // Get other values from the current row
-            //            string partName = gridViewOverview.GetRowCellValue(rowHandle, "PartName")?.ToString();
-            //            string size = gridViewOverview.GetRowCellValue(rowHandle, "Size")?.ToString()?.Trim();
+                        // Get other values from the current row
+                        string partName = gridViewOverview.GetRowCellValue(rowHandle, "PartName")?.ToString();
+                        string size = gridViewOverview.GetRowCellValue(rowHandle, "Size")?.ToString()?.Trim();
 
-            //         //   int inventory = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "InventoryQty") ?? 0);
-            //            int sizeQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "SizeQty") ?? 0);
-            //            int piecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "PeicesPerPair") ?? 0);
-            //            int cuttingDieQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "CuttingDieQty") ?? 0);
-            //            int materialLayer = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "MaterialLayer") ?? 0);
-            //            int totalPiecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "TotalPiecesPerPair") ?? 0);
+                        //   int inventory = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "InventoryQty") ?? 0);
+                        int sizeQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "SizeQty") ?? 0);
+                        int piecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "PeicesPerPair") ?? 0);
+                        int cuttingDieQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "CuttingDieQty") ?? 0);
+                        int materialLayer = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "MaterialLayer") ?? 0);
+                        int totalPiecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "TotalPiecesPerPair") ?? 0);
 
 
-            //            // Loop through production schedules and find the matching schedule
-            //            foreach (var group in productionSchedules)
-            //            {
-            //                foreach (var schedule in group)
-            //                {
-            //                    string scheduleSize = GetSizeName(schedule.SizeID);
+                        // Loop through production schedules and find the matching schedule
+                        foreach (var group in productionSchedules)
+                        {
+                            foreach (var schedule in group)
+                            {
+                                string scheduleSize = GetSizeName(schedule.SizeID);
 
-            //                    // Check if the schedule matches the current row's partName and size
-            //                    if (string.Equals(schedule.GroupSO, "0", StringComparison.OrdinalIgnoreCase) &&
-            //                        string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
-            //                        string.Equals(scheduleSize, size, StringComparison.OrdinalIgnoreCase))
-            //                    {
-            //                        // Check if values are different before updating
-            //                        if ((int)numPiecesPerPair.Value != piecesPerPair ||
-            //                            (int)numCuttingDieQty.Value != cuttingDieQty ||
-            //                            (int)numMaterialLayer.Value != materialLayer ||
-            //                            (int)numericTotalPeicesPerPair.Value != totalPiecesPerPair)
-            //                        {
-            //                            // Update the schedule with new values
-            //                          //  schedule.InventoryQty = inventoryInput;
-            //                            schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
-            //                            schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
-            //                            schedule.MaterialLayer = (int)numMaterialLayer.Value;
+                                // Check if the schedule matches the current row's partName and size
+                                if (string.Equals(schedule.GroupSO, groupSOHeader, StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(scheduleSize, size, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    // Check if values are different before updating
+                                    if ((int)numPiecesPerPair.Value != piecesPerPair ||
+                                        (int)numCuttingDieQty.Value != cuttingDieQty ||
+                                        (int)numMaterialLayer.Value != materialLayer ||
+                                        (int)numericTotalPeicesPerPair.Value != totalPiecesPerPair)
+                                    {
+                                        // Update the schedule with new values
+                                        //  schedule.InventoryQty = inventoryInput;
+                                        schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
+                                        schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
+                                        schedule.MaterialLayer = (int)numMaterialLayer.Value;
 
-            //                            // Now, directly update the grid's cells for this row
-            //                       //     gridViewOverview.SetRowCellValue(rowHandle, "InventoryQty", schedule.InventoryQty);
-            //                            gridViewOverview.SetRowCellValue(rowHandle, "PeicesPerPair", schedule.PeicesPerPair);
-            //                            gridViewOverview.SetRowCellValue(rowHandle, "CuttingDieQty", schedule.CuttingDieQty);
-            //                            gridViewOverview.SetRowCellValue(rowHandle, "MaterialLayer", schedule.MaterialLayer);
-            //                        }
-            //                    }
-            //                }
-            //            }
+                                        // Now, directly update the grid's cells for this row
+                                        //     gridViewOverview.SetRowCellValue(rowHandle, "InventoryQty", schedule.InventoryQty);
+                                        gridViewOverview.SetRowCellValue(rowHandle, "PeicesPerPair", schedule.PeicesPerPair);
+                                        gridViewOverview.SetRowCellValue(rowHandle, "CuttingDieQty", schedule.CuttingDieQty);
+                                        gridViewOverview.SetRowCellValue(rowHandle, "MaterialLayer", schedule.MaterialLayer);
+                                    }
+                                }
+                            }
+                        }
 
-            //            Console.WriteLine($"[Updated] Group SO 1: {partName} - {size} =>  Pairs: {numPiecesPerPair.Value.ToString()}, Die: {numCuttingDieQty.Value.ToString()}, Layer: {numMaterialLayer.Value.ToString()}");
-            //        }
+                        Console.WriteLine($"[Updated] Group SO 1: {partName} - {size} =>  Pairs: {numPiecesPerPair.Value.ToString()}, Die: {numCuttingDieQty.Value.ToString()}, Layer: {numMaterialLayer.Value.ToString()}");
+                    }
 
-            //        // Refresh the grid to reflect all changes
-            //        gridViewOverview.RefreshData();
+                    // Refresh the grid to reflect all changes
+                    gridViewOverview.RefreshData();
 
-            //        // Show success message
-            //        ShowMessage.ShowInfo($"Group SO {groupSOHeader} data updated successfully.");
-            //    }
-            //}
+                    // Show success message
+                    ShowMessage.ShowInfo($"Group SO {groupSOHeader} data updated successfully.");
+                }
+            }
         }
 
         private void btnDeleteData_Click(object sender, EventArgs e)

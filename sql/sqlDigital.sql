@@ -178,6 +178,8 @@ GO
 CREATE TABLE DefaultInfo (
     DefaultID INT PRIMARY KEY IDENTITY(1,1),
     ProductID INT,
+	PartID INT,
+	Model VARCHAR(100),
     PiecesPerPair INT,
 	TotalPiecesPerPair INT,
     CuttingDieQty INT,
@@ -192,7 +194,8 @@ ALTER TABLE DeviceOutput
 	CONSTRAINT FK_DeviceOutput_PartID FOREIGN KEY (PartID) REFERENCES Part(PartID);
 GO
 ALTER TABLE DefaultInfo
-    ADD CONSTRAINT FK_DefaultInfo_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID);
+	ADD CONSTRAINT FK_DefaultInfo_Part FOREIGN KEY (PartID) REFERENCES Part(PartID),
+    CONSTRAINT FK_DefaultInfo_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID);
 GO
 ALTER TABLE DistributionData
 	ADD CONSTRAINT FK_DistributionData_Users FOREIGN KEY (UserID) REFERENCES Users(UserID),

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -72,6 +73,14 @@ namespace DigitalProduction
             dataGridView_UserManagement.Columns["IsActive"].HeaderText = LocalizationManager.GetString("IsActive");
             dataGridView_UserManagement.Columns["DepartmentName"].HeaderText = LocalizationManager.GetString("DepartmentName");
             dataGridView_UserManagement.Columns["PositionName"].HeaderText = LocalizationManager.GetString("PositionName");
+
+
+            // custom header
+            dataGridView_UserManagement.EnableHeadersVisualStyles = false;
+            dataGridView_UserManagement.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+            dataGridView_UserManagement.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            dataGridView_UserManagement.ColumnHeadersHeight = 30;
+
 
             // ✅ Add Action Column if it does not exist
             if (!dataGridView_UserManagement.Columns.Contains("Action"))

@@ -77,6 +77,12 @@ namespace DigitalProduction
             dataGridView_OperatorManagement.Columns["DepartmentName"].HeaderText = LocalizationManager.GetString("DepartmentName");
             dataGridView_OperatorManagement.Columns["PositionName"].HeaderText = LocalizationManager.GetString("PositionName");
 
+            // custom header
+            dataGridView_OperatorManagement.EnableHeadersVisualStyles = false;
+            dataGridView_OperatorManagement.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+            dataGridView_OperatorManagement.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            dataGridView_OperatorManagement.ColumnHeadersHeight = 30;
+
             // ✅ Add Action Column if it does not exist
             if (!dataGridView_OperatorManagement.Columns.Contains("Action"))
             {

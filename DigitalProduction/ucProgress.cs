@@ -60,7 +60,7 @@ namespace DigitalProduction
 
             lblStartDate = new Label
             {
-                Text = "Start Date:",
+                Text = LocalizationManager.GetString("StartDate"),
                 AutoSize = true,
                 Margin = new Padding(5, 15, 5, 5)
             };
@@ -74,7 +74,7 @@ namespace DigitalProduction
 
             lblEndDate = new Label
             {
-                Text = "End Date:",
+                Text = LocalizationManager.GetString("EndDate"),
                 AutoSize = true,
                 Margin = new Padding(5, 15, 5, 5)
             };
@@ -246,7 +246,7 @@ namespace DigitalProduction
             // Clear existing columns
             gridViewProgressManagement.Columns.Clear();
 
-            gridViewProgressManagement.Appearance.HeaderPanel.Font = new System.Drawing.Font("Arial", 8, System.Drawing.FontStyle.Bold);
+            gridViewProgressManagement.Appearance.HeaderPanel.Font = new Font(gridViewProgressManagement.Appearance.Row.Font, FontStyle.Bold);
             gridViewProgressManagement.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
             gridViewProgressManagement.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
             gridViewProgressManagement.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;

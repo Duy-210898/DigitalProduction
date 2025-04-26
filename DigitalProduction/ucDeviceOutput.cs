@@ -160,7 +160,7 @@ namespace DigitalProduction
             if (row != null && row.IsGroupHeader)
             {
                 e.Appearance.BackColor = Color.LightGray;
-                e.Appearance.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Bold);
+                e.Appearance.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Regular);
             }
         }
 
@@ -202,7 +202,7 @@ namespace DigitalProduction
                 }
 
                 // Hide specific columns if necessary (example for "isLeather" and "Is Group Header")
-                var isLeatherColumn = gridView.Columns[4];
+                var isLeatherColumn = gridView.Columns[5];
                 if (isLeatherColumn != null)
                 {
                     // Set visibility to false to hide the column
@@ -215,10 +215,28 @@ namespace DigitalProduction
                     isGroupHeaderColumn.Visible = false;
                 }
 
+                gridView.OptionsView.ShowAutoFilterRow = false;   // Hide auto filter row
+                gridView.OptionsCustomization.AllowFilter = false; 
+                gridView.OptionsMenu.ShowAutoFilterRowItem = false;
+                gridView.OptionsCustomization.AllowSort = false;
+                gridView.ActiveFilter.Clear(); // Clear any applied filters
+                gridView_DeviceOutput.Appearance.HeaderPanel.ForeColor = Color.Black;
+                gridView_DeviceOutput.Appearance.HeaderPanel.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Bold);
+                gridView_DeviceOutput.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+
+                gridView_DeviceOutput.RowCellStyle += GridView_DeviceOutput_RowCellStyle;
+
                 // Trigger layout refresh to apply changes immediately
                 gridView.LayoutChanged();
             }
         }
-
+        private void GridView_DeviceOutput_RowCellStyle(object sender, RowCellStyleEventArgs e)
+        {
+            if (e.Column.FieldName == "ActualSizeQty")
+            {
+                e.Appearance.ForeColor = Color.ForestGreen;
+                e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+            }
+        }
     }
 }

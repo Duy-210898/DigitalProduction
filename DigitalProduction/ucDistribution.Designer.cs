@@ -261,6 +261,9 @@
             // 
             // tableLayoutPanel3
             // 
+            this.tableLayoutPanel3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel3.ColumnCount = 2;
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 51.12782F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 48.87218F));
@@ -269,7 +272,6 @@
             this.tableLayoutPanel3.Controls.Add(this.lblSelectMachine, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.panelMaterialType, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.panel5, 0, 2);
-            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(20, 100);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
@@ -426,6 +428,9 @@
             // 
             // tableLayoutPanel6
             // 
+            this.tableLayoutPanel6.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel6.BackColor = System.Drawing.Color.MistyRose;
             this.tableLayoutPanel6.ColumnCount = 2;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -438,7 +443,6 @@
             this.tableLayoutPanel6.Controls.Add(this.lblMaterialLayer, 0, 2);
             this.tableLayoutPanel6.Controls.Add(this.numMaterialLayer, 1, 2);
             this.tableLayoutPanel6.Controls.Add(this.numericTotalPeicesPerPair, 1, 3);
-            this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 39);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 4;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -140,9 +141,14 @@ namespace DigitalProduction
             gridControl.DataSource = productionSchedules;
             gridView.OptionsBehavior.Editable = true;
 
+            gridView.Appearance.FilterPanel.Font = new Font("Segoe UI", 10F); // for filter panel
+            gridView.Appearance.HeaderPanel.Font = new Font("Segoe UI", 10F, FontStyle.Bold); // optional: match header
+           // gridView.Appearance.Row.Font = new Font("Segoe UI", 12F);         // optional: match row font
+            gridView.RowHeight = 30; // increase height if needed
+
             // Customize headers
-            gridView.Appearance.HeaderPanel.Font = new System.Drawing.Font("Arial", 8, System.Drawing.FontStyle.Bold);
-            gridView.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
+         //   gridView.Appearance.HeaderPanel.Font = new Font(gridView.Appearance.Row.Font, FontStyle.Bold);
+            //gridView.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
             gridView.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
             gridView.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
 
