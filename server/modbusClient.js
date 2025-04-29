@@ -144,6 +144,11 @@ async function connectToDevice(ipAddress, retries = 0) {
       await updateDeviceConnectionStatus(ipAddress, false);
       return;
   }
+  else {
+    // avoid status connect device is turn off
+    console.log(`Update ${ipAddress} is reachable.`);
+    await updateDeviceConnectionStatus(ipAddress, true);
+  }
 
   if (modbusClient && modbusClient.isConnected) {
       return modbusClient; // Already connected, no need to reconnect
@@ -745,18 +750,15 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
       const distributionData = await getDistributionDataFromDb(ipAddress);
       const data = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data;
 
-      // if (data.length > 6) {
-      //   const itemCompleted = data.filter(
-      //     item => item.Status === 'Complete' && item.Status == 'Stop');
-      //   modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs].Data = data.filter(
-      //     item => item.Status !== 'Complete' && item.Status !== 'Stop'
-      //   );
-      // }
+      let isPendingSize = false;
+      if (distributionData != null) {
+        isPendingSize = distributionData.OrderIDWithSOs.length >  modbusClients[ipAddress].SOs.length;
+      }
       const allComplete = Array.isArray(data)
         ?  data.every(item => item.Status === 'Complete' || item.Status === 'Stop')
         : false;
 
-      if (allComplete || distributionData == null) {
+      if (allComplete || distributionData == null || isPendingSize) {
         const mask = 1 << deleteIndex;
         const valueToWrite = registerValue | mask;
     
@@ -1068,7 +1070,7 @@ async function readActualData(client, ipAddress) {
     const sizeInfo = modbusClients[ipAddress].sizeDataInfo;
     const sizeCompleteID = modbusClients[ipAddress].sizeCompleteID || [];
 
-     // Check choose size
+    // Check choose size
     const responseChooseSize = await client.readHoldingRegisters(chooseSizeAddress, 1);
     const registerChooseSizeValue = responseChooseSize.response._body.values[0];
 
@@ -1197,7 +1199,7 @@ async function readActualData(client, ipAddress) {
         modbusClients[ipAddress].storedActualCut = actualCut ?? 0;
         modbusClients[ipAddress].storedActualSizeQty = actualSizeQty ?? 0;
         modbusClients[ipAddress].storedActualPieces = actualPieces ?? 0;
-        
+
         let sizeRemain;
           if ((checkPendingSize.InventoryQty + actualSizeQty) >= checkPendingSize.SizeQty && checkPendingSize.InventoryQty !== 0) {
             modbusClients[ipAddress].actualSizeQty = checkPendingSize.InventoryQty + actualSizeQty;
@@ -1246,31 +1248,23 @@ async function readActualData(client, ipAddress) {
         }
         if (totalCompletedSize.totalSizeQty !== 0) {
           if (isLeather) {
-            actualSizeQty = checkPendingSize.ActualSizeQty;
+            actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
             actualPieces = checkPendingSize.TotalPiecesPerPair / actualCut;
           }
           else {
-            if(modbusClients[ipAddress].storedActualSizeQty >= sizeQty) {
-              let extraSizeRemaining =  modbusClients[ipAddress].storedActualSizeQty - sizeQty;
-              actualSizeQty = checkPendingSize.SizeQty + extraSizeRemaining;
-            } else {
-              modbusClients[ipAddress].storedActualSizeQty -= totalCompletedSize.totalSizeQty;
-              actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
-            }
+            actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
             modbusClients[ipAddress].storedActualCut -= totalCompletedSize.totalActualCut;
             actualCut = modbusClients[ipAddress].storedActualCut;
             actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair); 
           }
         } else {
           if (isLeather) {
-            actualSizeQty = checkPendingSize.ActualSizeQty;
+            actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
             actualPieces = checkPendingSize.TotalPiecesPerPair / actualCut;
           }
           else {
-            // modbusClients[ipAddress].storedActualCut = actualCut;
-            // modbusClients[ipAddress].storedActualSizeQty = actualSizeQty;
+            actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
             actualCut -= totalCompletedSize.totalActualCut;
-            actualSizeQty = checkPendingSize.ActualSizeQty;
             actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair);
           }
         }
@@ -1288,7 +1282,7 @@ async function readActualData(client, ipAddress) {
             actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
             actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair);
           }
-         // actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair);
+          // actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair);
           console.log(`ActualCut [Address] ${ipAddress} actualSizeQty ${actualSizeQty}`);
         }
       }
@@ -1306,6 +1300,17 @@ async function readActualData(client, ipAddress) {
   } catch (error) {
     console.error(`Error reading actual data: ${error.message}`);
     logToFile(errorLogPath, `Error reading actual data: ${error.message}`);
+  }
+
+async function readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize) {
+    if (modbusClients[ipAddress].storedActualSizeQty >= sizeQty) {
+      let extraSizeRemaining = modbusClients[ipAddress].storedActualSizeQty - sizeQty;
+      actualSizeQty = checkPendingSize.SizeQty + extraSizeRemaining;
+    } else {
+      modbusClients[ipAddress].storedActualSizeQty -= totalCompletedSize.totalSizeQty;
+      actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
+    }
+    return actualSizeQty;
   }
 }
 
@@ -1429,6 +1434,9 @@ async function writeToModbusRegister(client) {
   async function writeLoop() {
     try {
       counter++;
+      if(counter == 60000) {
+        counter = 0;
+      }
       await client.writeSingleRegister(8000, counter);
     } catch (err) {
       const errorMessage = `Error writing to Modbus register 8000: ${err.message}`;

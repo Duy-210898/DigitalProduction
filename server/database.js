@@ -416,107 +416,104 @@ async function saveDistributionDataToDB(dataList) {
 
     for (const data of dataList) {
       let status = {
+        PartID: data.PartID,
+        Model: data.Model,
         DeviceID: data.DeviceID,
         ProductID: data.ProductID,
         DistributionInserted: false,
         DistributionDuplicate: false,
         Error: null,
       };
-
+    
       try {
         const distributionConditions = {
           PartSizeOrderID: { type: sql.Int, value: data.PartSizeOrderID }
         };
-
-        const defaultInfoConditions = {
-          ProductID: { type: sql.Int, value: data.ProductID }
-        };
-
-        // Check if record exists before inserting
+    
+        // 🚫 Check for duplicate DistributionData
         const distributionExists = await recordExists("DistributionData", distributionConditions, pool);
-        const defaultInfoExists = await recordExists("DefaultInfo", defaultInfoConditions, pool);
-
-        if (!distributionExists) {
-          // Insert into DistributionData table
-          const distributionQuery = `
-            INSERT INTO DistributionData (
-              DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt , UpdatedAt, IsLeather, IsDelete, UserID
-            ) VALUES (
-              @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @UpdatedAt, @IsLeather, @IsDelete, @UserID
-            );
-          `;
-
-          let request = pool.request();
-          request.input('DeviceID', sql.Int, data.DeviceID);
-          request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
-          request.input('OperatorID', sql.Int, data.OperatorID);
-          request.input('InventoryQty', sql.Int, data.InventoryQty);
-          request.input('Status', sql.NVarChar, data.Status || 'Pending');
-          request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
-          request.input('UpdatedAt', sql.DateTime, data.UpdatedAt || new Date());
-          request.input('IsLeather', sql.Bit, data.IsLeather);
-          request.input('IsDelete', sql.Bit, data.IsDelete || 0);
-          request.input('UserID', sql.Int, data.UserID);
-
-          const result = await request.query(distributionQuery);
-          if (result.rowsAffected && result.rowsAffected[0] > 0) {
-            console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
-            status.DistributionInserted = true;
-          } else {
-            console.log(`❌ Insert failed: No rows affected for DeviceID ${data.DeviceID}`);
-          }
-        } else {
+    
+        if (distributionExists) {
           console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
           status.DistributionDuplicate = true;
+          results.push(status);
+          continue; // ⛔️ Skip entire item, including DefaultInfo
         }
-
+    
+        // ✅ Insert DistributionData
+        const distributionQuery = `
+          INSERT INTO DistributionData (
+            DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt , UpdatedAt, IsLeather, IsDelete, UserID
+          ) VALUES (
+            @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @UpdatedAt, @IsLeather, @IsDelete, @UserID
+          );
+        `;
+    
+        let request = pool.request();
+        request.input('DeviceID', sql.Int, data.DeviceID);
+        request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
+        request.input('OperatorID', sql.Int, data.OperatorID);
+        request.input('InventoryQty', sql.Int, data.InventoryQty);
+        request.input('Status', sql.NVarChar, data.Status || 'Pending');
+        request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
+        request.input('UpdatedAt', sql.DateTime, data.UpdatedAt || new Date());
+        request.input('IsLeather', sql.Bit, data.IsLeather);
+        request.input('IsDelete', sql.Bit, data.IsDelete || 0);
+        request.input('UserID', sql.Int, data.UserID);
+    
+        const result = await request.query(distributionQuery);
+        if (result.rowsAffected && result.rowsAffected[0] > 0) {
+          console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
+          status.DistributionInserted = true;
+        }
+    
+        // 🧩 Only do DefaultInfo if DistributionData was inserted
+        const defaultInfoConditions = {
+          PartID: { type: sql.Int, value: data.PartID },
+          Model: { type: sql.VarChar, value: data.Model },
+          ProductID: { type: sql.Int, value: data.ProductID }
+        };
+        const defaultInfoExists = await recordExists("DefaultInfo", defaultInfoConditions, pool);
+    
+        request = pool.request();
+        request.input('ProductID', sql.Int, data.ProductID);
+        request.input('PartID', sql.Int, data.PartID);
+        request.input('Model', sql.VarChar, data.Model);
+        request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
+        request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
+        request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
+        request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
+    
         if (!defaultInfoExists) {
-          // INSERT DefaultInfo nếu chưa tồn tại
           const defaultInfoQuery = `
             INSERT INTO DefaultInfo (
-              ProductID, PiecesPerPair, CuttingDieQty, MaterialLayer, TotalPiecesPerPair
+              ProductID, PartID, Model, PiecesPerPair, CuttingDieQty, MaterialLayer, TotalPiecesPerPair
             ) VALUES (
-              @ProductID, @PiecesPerPair, @CuttingDieQty, @MaterialLayer, @TotalPiecesPerPair
+              @ProductID, @PartID, @Model, @PiecesPerPair, @CuttingDieQty, @MaterialLayer, @TotalPiecesPerPair
             );
           `;
-
-          let request = pool.request();
-          request.input('ProductID', sql.Int, data.ProductID);
-          request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
-          request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
-          request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
-          request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
-
           await request.query(defaultInfoQuery);
           console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
         } else {
-          // UPDATE DefaultInfo nếu đã tồn tại
           const updateInfoQuery = `
             UPDATE DefaultInfo 
             SET PiecesPerPair = @PiecesPerPair, 
                 CuttingDieQty = @CuttingDieQty, 
                 MaterialLayer = @MaterialLayer, 
                 TotalPiecesPerPair = @TotalPiecesPerPair
-            WHERE ProductID = @ProductID;
+            WHERE ProductID = @ProductID AND PartID = @PartID AND Model = @Model;
           `;
-
-          let request = pool.request();
-          request.input('ProductID', sql.Int, data.ProductID);
-          request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
-          request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
-          request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
-          request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
-
           await request.query(updateInfoQuery);
           console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
         }
-      } catch (innerError) {
-        console.error(`❌ Error processing DeviceID ${data.DeviceID}: ${innerError.message}`);
-        status.Error = innerError.message;
+    
+      } catch (err) {
+        console.error(`❌ Error processing DeviceID ${data.DeviceID}: ${err.message}`);
+        status.Error = err.message;
       }
-
+    
       results.push(status);
-    }
+    }    
 
     console.log('✅ All unique data processed successfully.');
     return results; // Return status for all entries
@@ -579,7 +576,7 @@ async function getDistributionDataFromDb(ipAddress) {
           DeviceOutput AS do ON do.SizeID = se.SizeID
                       AND do.OrderID = pr.OrderID AND do.PartID = pa.PartID
       LEFT JOIN 
-          DefaultInfo AS di ON di.ProductID = p.ProductId
+          DefaultInfo AS di ON di.ProductID = p.ProductId  AND di.PartID = pa.PartId AND di.Model = p.Model
       WHERE 
           dd.IsDelete = 0  
           AND d.IpAddress = @IpAddress

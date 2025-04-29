@@ -236,7 +236,7 @@ namespace DigitalProduction.ViewModels
                 }
                 catch (System.Net.WebSockets.WebSocketException ex)
                 {
-                    ConnectionManager.Instance.IsConnected = false;
+                    ConnectionManager.Instance.IsReconnecting = true;
                     Console.WriteLine("WebSocket exception in RequestData: " + ex.Message);
                 }
                 catch (InvalidOperationException ex)
@@ -246,7 +246,7 @@ namespace DigitalProduction.ViewModels
             }
             else
             {
-                ConnectionManager.Instance.IsConnected = false;
+                ConnectionManager.Instance.IsReconnecting = true;
                 Console.WriteLine("WebSocket is not open or is null in RequestData.");
             }
         }

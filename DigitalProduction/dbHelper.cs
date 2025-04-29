@@ -993,6 +993,44 @@ namespace DigitalProduction
                 return false;
             }
         }
+        public static void UpdateInventoryQty(int distributionID, int newInventoryQty)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    // SQL command to update the inventory quantity
+                    string updateQuery = "UPDATE DistributionData SET InventoryQty = @InventoryQty WHERE DistributionID = @DistributionID";
+
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
+                    {
+                        // Adding parameters to prevent SQL injection
+                        cmd.Parameters.AddWithValue("@InventoryQty", newInventoryQty);
+                        cmd.Parameters.AddWithValue("@DistributionID", distributionID);
+
+                        // Execute the query
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        // Check if the update was successful
+                        if (rowsAffected > 0)
+                        {
+                            Console.WriteLine("Inventory quantity updated successfully.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("No rows updated, check if the DistributionID is valid.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log any errors
+                Console.WriteLine($"Error updating inventory quantity: {ex.Message}");
+            }
+        }
     }
 }
 

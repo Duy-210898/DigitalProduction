@@ -430,7 +430,7 @@
     <value>Số miếng trên đôi:</value>
   </data>
   <data name="TotalPeicesPerPair" xml:space="preserve">
-    <value>Tổng số đôi</value>
+    <value>Tổng số miếng trên đôi</value>
   </data>
   <data name="CuttingReport" xml:space="preserve">
     <value>Báo cáo đơn chặt</value>
@@ -501,9 +501,6 @@
   <data name="PiecesPerPair" xml:space="preserve">
     <value>Số miếng trên đôi</value>
   </data>
-  <data name="TotalPiecesPerPair" xml:space="preserve">
-    <value>Tổng số miếng</value>
-  </data>
   <data name="RequiredChooseSize" xml:space="preserve">
     <value>Vui lòng chọn bộ vị hợp lệ trước khi chọn kích thước.</value>
   </data>
@@ -554,5 +551,8 @@
   </data>
   <data name="RequiredDataCutting" xml:space="preserve">
     <value>Vui lòng nhập dữ liệu số đôi cắt, số miếng, số lớp !!!</value>
+  </data>
+  <data name="TotalPiecesPerPair" xml:space="preserve">
+    <value>Tổng số miếng trên đôi</value>
   </data>
 </root>

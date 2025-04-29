@@ -208,7 +208,7 @@ namespace DigitalProduction
                     // Set visibility to false to hide the column
                     isLeatherColumn.Visible = false;
                 }
-                // Hide specific columns if necessary (example for "isLeather" and "Is Group Header")
+                // Hide specific columns if necessary (example for "isCurrentUpdate")
                 var IsRecentlyUpdated = gridView.Columns[0];
                 if (IsRecentlyUpdated != null)
                 {
@@ -222,6 +222,22 @@ namespace DigitalProduction
                     isGroupHeaderColumn.Visible = false;
                 }
 
+                var displayIndexActualSizeQty = gridView.Columns["ActualSizeQty"];
+                if (displayIndexActualSizeQty != null)
+                {
+                    displayIndexActualSizeQty.VisibleIndex = 9;
+                }
+
+                var displayIndexTotalPiecesPerPair = gridView.Columns["TotalPiecesPerPair"];
+                if (displayIndexTotalPiecesPerPair != null)
+                {
+                    displayIndexTotalPiecesPerPair.VisibleIndex = 14;
+
+                    // Set font color
+                    displayIndexTotalPiecesPerPair.AppearanceCell.ForeColor = Color.OrangeRed;
+                    displayIndexTotalPiecesPerPair.AppearanceCell.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Bold);
+                }
+
                 gridView.OptionsView.ShowAutoFilterRow = false;   // Hide auto filter row
                 gridView.OptionsCustomization.AllowFilter = false; 
                 gridView.OptionsMenu.ShowAutoFilterRowItem = false;
@@ -233,8 +249,7 @@ namespace DigitalProduction
 
                 gridView_DeviceOutput.RowCellStyle += GridView_DeviceOutput_RowCellStyle;
 
-                // Trigger layout refresh to apply changes immediately
-                gridView.LayoutChanged();
+                gridView.LayoutChanged(); // Refresh layout
             }
         }
         private void GridView_DeviceOutput_RowCellStyle(object sender, RowCellStyleEventArgs e)

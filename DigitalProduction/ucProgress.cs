@@ -360,7 +360,7 @@ namespace DigitalProduction
                 if (string.IsNullOrEmpty(response))
                 {
                     MessageBox.Show("No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    ConnectionManager.Instance.IsConnected = false;
+                    ConnectionManager.Instance.IsReconnecting = true;
                     return;
                 }
 
@@ -551,6 +551,53 @@ namespace DigitalProduction
                         }
                     }
                 };
+
+                // Handle the ShowingEditor event to conditionally enable or disable editing for the Inventory column
+                gridViewProgressManagement.ShowingEditor += (s, e) =>
+                {
+                    if (gridViewProgressManagement.FocusedColumn.FieldName == "InventoryQty")
+                    {
+                        int rowHandle = gridViewProgressManagement.FocusedRowHandle;
+                        var distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+
+                        if (distribution != null)
+                        {
+                            // Enable editing for Inventory column only if the status is "Stop"
+                            if (distribution.Status != "Stop")
+                            {
+                                // Disable the editor if the status is not "Stop"
+                                e.Cancel = true;
+                                Console.WriteLine("Editing is disabled for Inventory column when status is not 'Stop'.");
+                            }
+                            else {
+                                e.Cancel = false;
+                            }
+                        }
+                    }
+                };
+
+                // Handle the editor's value change event for Inventory column if needed
+                gridViewProgressManagement.CellValueChanged += (s, e) =>
+                {
+                    if (e.Column.FieldName == "InventoryQty")
+                    {
+                        int rowHandle = e.RowHandle;
+                        var distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+
+                        if (distribution != null)
+                        {
+                            if (distribution.InventoryQty + distribution.ActualSizeQty <= distribution.SizeQty)
+                            {
+                                DbHelper.UpdateInventoryQty(distribution.DistributionID, Convert.ToInt32(e.Value));
+                                Console.WriteLine($"Updated InventoryQty for DistributionID: {distribution.DistributionID} to {e.Value}");
+                            }
+                            else {
+                                Console.WriteLine($"Can't update InventoryQty for DistributionID: {distribution.DistributionID} to {e.Value}");
+                            }
+                        }
+                    }
+                };
+
             }
         }
         private void GridViewProgressManagement_CustomDrawColumnHeader(object sender, ColumnHeaderCustomDrawEventArgs e)
@@ -620,11 +667,12 @@ namespace DigitalProduction
             public string PartName { get; set; }
             public string Size { get; set; }
             public string Unit { get; set; }
-            public double UnitUsage { get; set; }
+           // public double UnitUsage { get; set; }
             public int SizeQty { get; set; }
             public string MaterialName { get; set; }
             public string OperatorName { get; set; }
             public string EmployeeName { get; set; }
+            public int ActualSizeQty { get; set; }
             public int InventoryQty { get; set; }
             public string Status { get; set; }
             public DateTime CreatedAt { get; set; }

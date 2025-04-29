@@ -513,7 +513,7 @@ namespace DigitalProduction
                     else
                     {
                         MessageBox.Show("No response received from the server.");
-                        ConnectionManager.Instance.IsConnected = false;
+                        ConnectionManager.Instance.IsReconnecting = true;
                     }
                 }
             }

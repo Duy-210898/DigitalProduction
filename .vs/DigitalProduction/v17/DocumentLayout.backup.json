@@ -3,32 +3,64 @@
   "WorkspaceRootPath": "D:\\reps\\DigitalProduction\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|d:\\reps\\digitalproduction\\digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\websocketclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\websocketclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\deviceoutputlistviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\deviceoutputlistviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|d:\\reps\\digitalproduction\\digitalproduction\\ucdevicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdevicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdevicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdevicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\frmmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\connectionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\connectionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdeviceoutput.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdevicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdevicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucdevicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucdevicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\uccuttingreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -47,32 +79,8 @@
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucreportoder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucschedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\ucusermanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\websocketclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\websocketclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\connectionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|solutionrelative:digitalproduction\\connectionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AD3CCDFE-6AEE-4480-8BD8-04BCEF6E1EF1}|DigitalProduction\\DigitalProduction.csproj|D:\\reps\\DigitalProduction\\digitalproduction\\frmlogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -106,7 +114,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 11,
           "Children": [
             {
               "$type": "Bookmark",
@@ -130,20 +138,116 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ucDeviceManager.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceManager.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceManager.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceManager.cs",
-              "RelativeToolTip": "DigitalProduction\\ucDeviceManager.cs",
-              "ViewState": "AgIAAJcBAAAAAAAAAAAowK0BAAAbAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "WebSocketClient.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\WebSocketClient.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\WebSocketClient.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\WebSocketClient.cs",
+              "RelativeToolTip": "DigitalProduction\\WebSocketClient.cs",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAswGMAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-26T03:16:32.094Z",
+              "WhenOpened": "2025-04-28T09:11:06.122Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "frmMain.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\frmMain.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\frmMain.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\frmMain.cs",
+              "RelativeToolTip": "DigitalProduction\\frmMain.cs",
+              "ViewState": "AgIAAEYAAAAAAAAAAAA7wE8AAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-28T09:10:50.808Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ConnectionManager.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ConnectionManager.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ConnectionManager.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ConnectionManager.cs",
+              "RelativeToolTip": "DigitalProduction\\ConnectionManager.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAgwCEAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-28T09:05:28.847Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "ucDistribution.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDistribution.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucDistribution.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDistribution.cs",
+              "RelativeToolTip": "DigitalProduction\\ucDistribution.cs",
+              "ViewState": "AgIAAPoBAAAAAAAAAAAswAMCAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-28T06:05:16.602Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "DeviceOutputListViewModel.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\DeviceOutputListViewModel.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\DeviceOutputListViewModel.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\DeviceOutputListViewModel.cs",
+              "RelativeToolTip": "DigitalProduction\\DeviceOutputListViewModel.cs",
+              "ViewState": "AgIAAO8AAAAAAAAAAAAswPgAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-02T06:03:41.942Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ucUserManagement.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucUserManagement.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucUserManagement.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucUserManagement.cs",
+              "RelativeToolTip": "DigitalProduction\\ucUserManagement.cs",
+              "ViewState": "AgIAAFMBAAAAAAAAAAAcwGIBAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-17T02:11:46.21Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ucDeviceOutput.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceOutput.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs",
+              "RelativeToolTip": "DigitalProduction\\ucDeviceOutput.cs",
+              "ViewState": "AgIAANoAAAAAAAAAAAAmwPYAAABWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-24T09:54:56.91Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "ucCuttingReport.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucCuttingReport.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs",
+              "RelativeToolTip": "DigitalProduction\\ucCuttingReport.cs",
+              "ViewState": "AgIAALMAAAAAAAAAAAAuwCAAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-18T04:24:39.831Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ucProgress.cs [Design]",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucProgress.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs [Design]",
+              "RelativeToolTip": "DigitalProduction\\ucProgress.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-03T08:45:19.418Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
               "Title": "ucDeviceOutput.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceOutput.cs",
@@ -155,96 +259,75 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "DeviceOutputListViewModel.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\DeviceOutputListViewModel.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\DeviceOutputListViewModel.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\DeviceOutputListViewModel.cs",
-              "RelativeToolTip": "DigitalProduction\\DeviceOutputListViewModel.cs",
-              "ViewState": "AgIAADsCAAAAAAAAAAAAAE8CAAAmAAAAAAAAAA==",
+              "DocumentIndex": 9,
+              "Title": "ucDistribution.cs [Design]",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDistribution.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucDistribution.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDistribution.cs [Design]",
+              "RelativeToolTip": "DigitalProduction\\ucDistribution.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-02T06:03:41.942Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-28T06:05:13.748Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "ucProgress.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucProgress.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
-              "RelativeToolTip": "DigitalProduction\\ucProgress.cs",
-              "ViewState": "AgIAAFEBAAAAAAAAAAAMwGkBAAAlAAAAAAAAAA==",
+              "DocumentIndex": 11,
+              "Title": "ucSchedule.cs [Design]",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucSchedule.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs [Design]",
+              "RelativeToolTip": "DigitalProduction\\ucSchedule.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T08:45:20.676Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-08T05:55:54.066Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ucUserManagement.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucUserManagement.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucUserManagement.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucUserManagement.cs",
-              "RelativeToolTip": "DigitalProduction\\ucUserManagement.cs",
-              "ViewState": "AgIAAEkBAAAAAAAAAAAMwG0BAAAJAAAAAAAAAA==",
+              "DocumentIndex": 10,
+              "Title": "ucSchedule.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucSchedule.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
+              "RelativeToolTip": "DigitalProduction\\ucSchedule.cs",
+              "ViewState": "AgIAAFQBAAAAAAAAAAAkwG0BAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T02:11:46.21Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-22T07:39:11.375Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ucDeviceOutput.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceOutput.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceOutput.cs",
-              "RelativeToolTip": "DigitalProduction\\ucDeviceOutput.cs",
-              "ViewState": "AgIAALwAAAAAAAAAAAAswOAAAABXAAAAAAAAAA==",
+              "DocumentIndex": 13,
+              "Title": "ucDeviceManager.cs",
+              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceManager.cs",
+              "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceManager.cs",
+              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceManager.cs",
+              "RelativeToolTip": "DigitalProduction\\ucDeviceManager.cs",
+              "ViewState": "AgIAACsBAAAAAAAAAAAswEwBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-24T09:54:56.91Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-26T03:16:32.094Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "ucCuttingReport.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucCuttingReport.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs",
-              "RelativeToolTip": "DigitalProduction\\ucCuttingReport.cs",
-              "ViewState": "AgIAALMAAAAAAAAAAAAuwCAAAAAeAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-18T04:24:39.831Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 14,
               "Title": "ucDeviceManager.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceManager.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucDeviceManager.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucDeviceManager.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucDeviceManager.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-10T01:53:24.824Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2025-03-10T01:53:24.824Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 16,
               "Title": "ucCuttingReport.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucCuttingReport.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucCuttingReport.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucCuttingReport.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-10T06:43:40.988Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2025-03-10T06:43:40.988Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 17,
               "Title": "ucReportOder.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucReportOder.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucReportOder.cs",
@@ -252,49 +335,22 @@
               "RelativeToolTip": "DigitalProduction\\ucReportOder.cs",
               "ViewState": "AgIAAA4AAAAAAAAAAAAQwDEAAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-24T00:57:04.248Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-24T00:57:04.248Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 18,
               "Title": "ucReportOder.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucReportOder.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucReportOder.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucReportOder.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucReportOder.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-07T06:33:42.893Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2025-03-07T06:33:42.893Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "ucSchedule.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucSchedule.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
-              "RelativeToolTip": "DigitalProduction\\ucSchedule.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAowCUAAABKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-22T07:39:11.375Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "ucSchedule.cs [Design]",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucSchedule.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucSchedule.cs [Design]",
-              "RelativeToolTip": "DigitalProduction\\ucSchedule.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-08T05:55:54.066Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 19,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\Program.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\Program.cs",
@@ -302,61 +358,22 @@
               "RelativeToolTip": "DigitalProduction\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-23T09:20:49.952Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-23T09:20:49.952Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "ucProgress.cs [Design]",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ucProgress.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucProgress.cs [Design]",
-              "RelativeToolTip": "DigitalProduction\\ucProgress.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T08:45:19.418Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 7,
               "Title": "ucUserManagement.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucUserManagement.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucUserManagement.cs",
               "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucUserManagement.cs [Design]",
               "RelativeToolTip": "DigitalProduction\\ucUserManagement.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-07T04:21:43.482Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2025-03-07T04:21:43.482Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "WebSocketClient.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\WebSocketClient.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\WebSocketClient.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\WebSocketClient.cs",
-              "RelativeToolTip": "DigitalProduction\\WebSocketClient.cs",
-              "ViewState": "AgIAAEEAAAAAAAAAAAAowGQAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-08T02:38:45.953Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "ConnectionManager.cs",
-              "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ConnectionManager.cs",
-              "RelativeDocumentMoniker": "DigitalProduction\\ConnectionManager.cs",
-              "ToolTip": "D:\\reps\\DigitalProduction\\DigitalProduction\\ConnectionManager.cs",
-              "RelativeToolTip": "DigitalProduction\\ConnectionManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T01:10:45.262Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 21,
               "Title": "ucRegisterOperator.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucRegisterOperator.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucRegisterOperator.cs",
@@ -368,7 +385,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "frmLogin.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\frmLogin.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\frmLogin.cs",
@@ -376,12 +393,11 @@
               "RelativeToolTip": "DigitalProduction\\frmLogin.cs",
               "ViewState": "AgIAADwAAAAAAAAAAAAiwJIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-11T00:38:27.849Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-11T00:38:27.849Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 23,
               "Title": "Validator.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\Validation\\Validator.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\Validation\\Validator.cs",
@@ -393,7 +409,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 22,
               "Title": "ucRegisterUser.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ucRegisterUser.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ucRegisterUser.cs",
@@ -405,7 +421,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 24,
               "Title": "ChangePassword.cs [Design]",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\ChangePassword.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\ChangePassword.cs",
@@ -416,7 +432,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 25,
               "Title": "SecurityHelper.cs",
               "DocumentMoniker": "D:\\reps\\DigitalProduction\\DigitalProduction\\SecurityHelper.cs",
               "RelativeDocumentMoniker": "DigitalProduction\\SecurityHelper.cs",
