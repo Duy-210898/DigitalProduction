@@ -344,9 +344,9 @@ async function saveActualDataToDB(data) {
         { name: 'PiecesPerPair', type: sql.Int, value: size.PiecesPerPair },
         { name: 'MaterialLayer', type: sql.Int, value: size.MaterialLayer },
         { name: 'CuttingDieQty', type: sql.Int, value: size.CuttingDieQty },
-        { name: 'ActualCut', type: sql.Int, value: size.ActualCut },
-        { name: 'ActualPieces', type: sql.Int, value: size.ActualPieces },
-        { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty },
+        { name: 'ActualCut', type: sql.Int, value: size.ActualCut  || 0},
+        { name: 'ActualPieces', type: sql.Int, value: size.ActualPieces  || 0},
+        { name: 'ActualSizeQty', type: sql.Int, value: size.ActualSizeQty || 0 },
         { name: 'TotalPiecesPerPair', type: sql.Int, value: size.TotalPiecesPerPair }
       ];
 
@@ -928,7 +928,6 @@ async function getDistributions(startDate, endDate) {
               pa.PartName,
               se.Size,
               ps.Unit,
-              ps.UnitUsage,
               ps.SizeQty,
               m.MaterialName,
               dd.InventoryQty,
@@ -937,7 +936,8 @@ async function getDistributions(startDate, endDate) {
               dd.UpdatedAt,
               dd.IsLeather,
               dd.IsDelete,
-              dd.Note
+              dd.Note,
+              do.ActualSizeQty
           FROM 
               DistributionData dd
           JOIN 
@@ -956,6 +956,8 @@ async function getDistributions(startDate, endDate) {
               Users u ON dd.UserID = u.UserID
           JOIN 
               ProductOrder pr ON pr.OrderId = ps.OrderID
+          JOIN 
+              DeviceOutput do ON do.SizeID = ps.SizeId AND do.PartId = ps.PartId AND do.OrderID = ps.OrderId
           WHERE 
               dd.IsDelete = 0 AND 
               dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
@@ -1180,6 +1182,8 @@ async function getAllProductionSchedule() {
         JOIN Part pa ON pso.PartId = pa.PartId
         JOIN Material m ON pso.MaterialID = m.MaterialID
         JOIN Size s ON pso.SizeId = s.SizeID
+        LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
+        WHERE d.PartSizeOrderId IS NULL
       `);
 
     return result.recordset;

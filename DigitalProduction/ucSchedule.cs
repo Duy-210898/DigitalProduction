@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Media.Media3D;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -23,7 +22,7 @@ namespace DigitalProduction
         private GridControl gridControl;
         private GridView gridView;
         private Button btnSendData;
-        private readonly string[] columnsToHide = { "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId" };
+        private readonly string[] columnsToHide = { "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
         public ucSchedule()
         {

@@ -86,9 +86,9 @@ namespace DigitalProduction
         }
         private void BtnSyncData_Click(object sender, EventArgs e)
         {
-            _viewModel.SyncData();
+            TranslateHeaders();
+           // _viewModel.SyncData();
         }
-
 
         private void LoadFilters()
         {
@@ -184,74 +184,61 @@ namespace DigitalProduction
 
         private void TranslateHeaders()
         {
-            // Ensure the GridControl is not null and has a valid main view (typically a GridView)
             var gridView = gridControl_DeviceOutput.MainView as GridView;
+            if (gridView == null || gridView.Columns.Count == 0) return;
 
-            if (gridView != null && gridView.Columns.Count > 0)
+            foreach (GridColumn col in gridView.Columns)
             {
-                // Iterate through each column in the GridView
-                foreach (GridColumn col in gridView.Columns)
-                {
-                    // Get the translated text for each column header based on the FieldName
-                    string translatedText = LocalizationManager.GetString(col.FieldName);
-                    if (!string.IsNullOrEmpty(translatedText))
-                    {
-                        // Apply the translated text to the column's caption
-                        col.Caption = translatedText;
-                    }
-                }
+                var translatedText = LocalizationManager.GetString(col.FieldName);
+                col.Caption = !string.IsNullOrEmpty(translatedText) ? translatedText : col.FieldName;
 
-                // Hide specific columns if necessary (example for "isLeather" and "Is Group Header")
-                var isLeatherColumn = gridView.Columns[6];
-                if (isLeatherColumn != null)
-                {
-                    // Set visibility to false to hide the column
-                    isLeatherColumn.Visible = false;
-                }
-                // Hide specific columns if necessary (example for "isCurrentUpdate")
-                var IsRecentlyUpdated = gridView.Columns[0];
-                if (IsRecentlyUpdated != null)
-                {
-                    // Set visibility to false to hide the column
-                    IsRecentlyUpdated.Visible = false;
-                }
-
-                var isGroupHeaderColumn = gridView.Columns["IsGroupHeader"];
-                if (isGroupHeaderColumn != null)
-                {
-                    isGroupHeaderColumn.Visible = false;
-                }
-
-                var displayIndexActualSizeQty = gridView.Columns["ActualSizeQty"];
-                if (displayIndexActualSizeQty != null)
-                {
-                    displayIndexActualSizeQty.VisibleIndex = 9;
-                }
-
-                var displayIndexTotalPiecesPerPair = gridView.Columns["TotalPiecesPerPair"];
-                if (displayIndexTotalPiecesPerPair != null)
-                {
-                    displayIndexTotalPiecesPerPair.VisibleIndex = 14;
-
-                    // Set font color
-                    displayIndexTotalPiecesPerPair.AppearanceCell.ForeColor = Color.OrangeRed;
-                    displayIndexTotalPiecesPerPair.AppearanceCell.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Bold);
-                }
-
-                gridView.OptionsView.ShowAutoFilterRow = false;   // Hide auto filter row
-                gridView.OptionsCustomization.AllowFilter = false; 
-                gridView.OptionsMenu.ShowAutoFilterRowItem = false;
-                gridView.OptionsCustomization.AllowSort = false;
-                gridView.ActiveFilter.Clear(); // Clear any applied filters
-                gridView_DeviceOutput.Appearance.HeaderPanel.ForeColor = Color.Black;
-                gridView_DeviceOutput.Appearance.HeaderPanel.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Bold);
-                gridView_DeviceOutput.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-
-                gridView_DeviceOutput.RowCellStyle += GridView_DeviceOutput_RowCellStyle;
-
-                gridView.LayoutChanged(); // Refresh layout
             }
+
+            gridView.Columns["IsLeather"]?.SetVisible(false);
+            gridView.Columns["IsGroupHeader"]?.SetVisible(false);
+            gridView.Columns["IsRecentlyUpdated"]?.SetVisible(false);
+
+            StyleNumericColumn(gridView.Columns["ActualSizeQty"], 9);
+            StyleNumericColumn(gridView.Columns["TotalPiecesPerPair"], 14, Color.Blue, bold: true);
+
+
+            gridView.OptionsView.ShowAutoFilterRow = false;
+            gridView.OptionsCustomization.AllowFilter = false;
+            gridView.OptionsCustomization.AllowSort = false;
+            gridView.OptionsMenu.ShowAutoFilterRowItem = false;
+            gridView.ActiveFilter.Clear();
+
+            gridView.Appearance.HeaderPanel.ForeColor = Color.Black;
+            gridView.Appearance.HeaderPanel.Font = new Font(gridView.Appearance.Row.Font, FontStyle.Bold);
+            gridView.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+
+            gridView.RowCellStyle -= GridView_DeviceOutput_RowCellStyle;
+            gridView.RowCellStyle += GridView_DeviceOutput_RowCellStyle;
+
+            gridView.LayoutChanged();
         }
+
+        void StyleNumericColumn(GridColumn col, int visibleIndex, Color? fontColor = null, bool bold = false)
+        {
+            if (col == null) return;
+
+            col.VisibleIndex = visibleIndex;
+            //col.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Custom;
+            //col.DisplayFormat.FormatString = "{0:#}";
+            //col.OptionsColumn.AllowEdit = false;
+            //col.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            //col.AppearanceCell.Options.UseTextOptions = true;
+            //col.AppearanceCell.TextOptions.Trimming = DevExpress.Utils.Trimming.None;
+            //col.AppearanceCell.TextOptions.WordWrap = DevExpress.Utils.WordWrap.NoWrap;
+
+            if (fontColor.HasValue)
+                col.AppearanceCell.ForeColor = fontColor.Value;
+
+            if (bold)
+                col.AppearanceCell.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Bold);
+        }
+
+
         private void GridView_DeviceOutput_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
             if (e.Column.FieldName == "ActualSizeQty")
@@ -270,6 +257,17 @@ namespace DigitalProduction
             else
             {
                 e.Appearance.BackColor = Color.Transparent;           
+            }
+        }
+    }
+
+    public static class GridColumnExtensions
+    {
+        public static void SetVisible(this GridColumn column, bool isVisible)
+        {
+            if (column != null)
+            {
+                column.Visible = isVisible;
             }
         }
     }

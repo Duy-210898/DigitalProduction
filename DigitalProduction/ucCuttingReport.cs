@@ -179,7 +179,7 @@ namespace DigitalProduction
                   Date = x.CreatedAt,
                   x.MachineName,
                   x.SO,
-                  x.OrderID,
+               //   x.OrderID,
                   x.OperatorName
               })
               .Select(g => new CuttingReportModel
@@ -187,7 +187,7 @@ namespace DigitalProduction
                   CreatedAt = g.Key.Date,
                   MachineName = g.Key.MachineName,
                   SO = g.Key.SO,
-                  OrderID = g.Key.OrderID,
+                 // OrderID = g.Key.OrderID,
                   OperatorName = g.Key.OperatorName,
                   TotalActualCut = g.Sum(x => x.TotalActualCut),
                   TotalPieces = g.Sum(x => x.TotalPieces),
@@ -216,8 +216,8 @@ namespace DigitalProduction
                     if (gridView_CuttingReport.Columns["SO"] != null)
                         gridView_CuttingReport.Columns["SO"].Caption = LocalizationManager.GetString("SO");
 
-                    if (gridView_CuttingReport.Columns["OrderID"] != null)
-                        gridView_CuttingReport.Columns["OrderID"].Caption = LocalizationManager.GetString("OrderID");
+                    //if (gridView_CuttingReport.Columns["OrderID"] != null)
+                    //    gridView_CuttingReport.Columns["OrderID"].Caption = LocalizationManager.GetString("OrderID");
 
                     if (gridView_CuttingReport.Columns["OperatorName"] != null)
                         gridView_CuttingReport.Columns["OperatorName"].Caption = LocalizationManager.GetString("OperatorName");
@@ -310,7 +310,7 @@ namespace DigitalProduction
                                         worksheet.Cells[rowIndex, 1].Style.Numberformat.Format = "MM/dd/yyyy";
                                         worksheet.Cells[rowIndex, 2].Value = item.MachineName;
                                         worksheet.Cells[rowIndex, 3].Value = item.SO;
-                                        worksheet.Cells[rowIndex, 4].Value = item.OrderID;
+                                    //    worksheet.Cells[rowIndex, 4].Value = item.OrderID;
                                         worksheet.Cells[rowIndex, 5].Value = item.OperatorName;
                                         worksheet.Cells[rowIndex, 6].Value = item.TotalActualCut;
                                         worksheet.Cells[rowIndex, 7].Value = item.TotalPieces;

@@ -306,7 +306,8 @@ async function checkAndSaveDistribution(client, ipAddress) {
     try {
 
       // check complete size mutiple SO
-      const sizeData = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs].Data;
+      const sizeData = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress]?.indexMultipleSOs]?.Data;
+      
       const previousCompletedOrders = [];
 
       if (sizeData != null) {
@@ -1249,29 +1250,29 @@ async function readActualData(client, ipAddress) {
         if (totalCompletedSize.totalSizeQty !== 0) {
           if (isLeather) {
             actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
-            actualPieces = checkPendingSize.TotalPiecesPerPair / actualCut;
+            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty;
           }
           else {
             actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
             modbusClients[ipAddress].storedActualCut -= totalCompletedSize.totalActualCut;
             actualCut = modbusClients[ipAddress].storedActualCut;
-            actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair); 
+            actualPieces = (checkPendingSize.MaterialLayer * checkPendingSize.CuttingDieQty) * actualCut; 
           }
         } else {
           if (isLeather) {
             actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
-            actualPieces = checkPendingSize.TotalPiecesPerPair / actualCut;
+            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty;
           }
           else {
             actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
             actualCut -= totalCompletedSize.totalActualCut;
-            actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair);
+            actualPieces = (checkPendingSize.MaterialLayer * checkPendingSize.CuttingDieQty) * actualCut;
           }
         }
         console.log(`Total Complete => ActualCut [Address] ${ipAddress} ${actualCut} actualSizeQty ${actualSizeQty}`);
         } else {
           if (isLeather) {
-            actualPieces = checkPendingSize.TotalPiecesPerPair / actualCut;
+            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty;
             modbusClients[ipAddress].storedActualSizeQty -= totalCompletedSize.totalSizeQty;
             actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
           }
@@ -1280,7 +1281,7 @@ async function readActualData(client, ipAddress) {
             modbusClients[ipAddress].storedActualSizeQty -= totalCompletedSize.totalSizeQty;
             actualCut = modbusClients[ipAddress].storedActualCut;
             actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
-            actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair);
+            actualPieces = (checkPendingSize.MaterialLayer * checkPendingSize.CuttingDieQty) * actualCut;
           }
           // actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair);
           console.log(`ActualCut [Address] ${ipAddress} actualSizeQty ${actualSizeQty}`);

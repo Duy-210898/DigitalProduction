@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DevExpress.XtraGrid.Views.Grid;
+using System.Windows.Forms;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -15,7 +14,7 @@ namespace DigitalProduction.ViewModels
     {
         private WebSocketClient _webSocketClient;
         private BindingList<DeviceOutput> _bindingDeviceOutputs = new BindingList<DeviceOutput>();
-        private Timer _pollingTimer; // Dùng Timer chạy nền thay vì WinForms Timer
+        private System.Threading.Timer _pollingTimer; // Dùng Timer chạy nền thay vì WinForms Timer
         private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
         private string _lastJsonData;
 
@@ -180,7 +179,7 @@ namespace DigitalProduction.ViewModels
 
         private void StartPolling()
         {
-            _pollingTimer = new Timer(async _ =>
+            _pollingTimer = new System.Threading.Timer(async _ =>
             {
                 await CheckForSqlUpdates();
             }, null, 0, 2000);
@@ -309,9 +308,9 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-
         private void UpdateData(RealTimeData realTimeData)
         {
+
             if (realTimeData.OutputData == null || !realTimeData.OutputData.Any())
             {
                 Console.WriteLine("No OutputData received from WebSocket.");
@@ -319,120 +318,32 @@ namespace DigitalProduction.ViewModels
                 return;
             }
 
-            // Dictionary to track existing headers by their unique key (PartName, MachineName, SO, OperatorName)
             var headersDictionary = new Dictionary<string, DeviceOutput>();
 
             var groupedData = realTimeData.OutputData
-                .GroupBy(d => new {d.PartName, d.MachineName, d.SO, d.OperatorName})
-                .SelectMany(g =>
+                .GroupBy(d => new { UpdatedAt = d.UpdatedAt != null ? d.UpdatedAt.Value.ToString("yyyyMMdd") :  string.Empty, d.PartName, d.MachineName, d.SO, d.OperatorName })
+                .SelectMany(group =>
                 {
-                    // Create a unique key for this group based on PartName and other attributes
-                    string groupKey = $"{g.Key.PartName}-{g.Key.MachineName}-{g.Key.SO}-{g.Key.OperatorName}";
+                    string groupKey = $"{group.Key.UpdatedAt:yyyyMMdd}-{group.Key.PartName}-{group.Key.MachineName}-{group.Key.SO}-{group.Key.OperatorName}";
 
-                    // Check if header already exists, otherwise create a new one
                     if (!headersDictionary.TryGetValue(groupKey, out var header))
                     {
-                        header = new DeviceOutput
-                        {
-                            Timestamp = null,
-                            UpdatedAt = null,
-                            PartName = g.Key.PartName,
-                            MachineName = g.Key.MachineName,
-                            SO = g.Key.SO,
-                            OperatorName = g.Key.OperatorName,
-                            IsGroupHeader = true,
-                            IsLeather = g.Any(x => x.IsLeather),
-                            MaterialType = g.Any(x => x.IsLeather)
-                                ? LocalizationManager.GetString("leatherMaterial")
-                                : LocalizationManager.GetString("rawMaterial"),
-                            ActualCut = 0,
-                            ActualPieces = 0,
-                            ActualSizeQty = 0
-                        };
-
-                        headersDictionary[groupKey] = header; // Store for reuse
+                        header = CreateHeader(group, groupKey);
+                        Console.WriteLine($"[HEADER CREATED] Group: {groupKey} | IsLeather: {group.Any(x => x.IsLeather)}");
+                        headersDictionary[groupKey] = header;
                     }
 
-                    // Calculate total values for the group
-                    int totalActualCut = g.Sum(x => x.ActualCut ?? 0);
-                    int totalActualPieces = g.Sum(x => x.ActualPieces ?? 0);
-                    int totalActualSizeQty = g.Sum(x => x.ActualSizeQty ?? 0);
-                    DateTime createdAt = g.First().Timestamp.Value;
-                    DateTime updatedAt = g.First().UpdatedAt.Value;
+                    UpdateHeaderAggregates(header, group);
 
-                    // Update header totals only if they have changed
-                    if (header.ActualCut != totalActualCut)
+                    var items = group.Select(item =>
                     {
-                        header.ActualCut = totalActualCut;
-                        header.OnPropertyChanged(nameof(header.ActualCut));
-                    }
-                    if (header.ActualPieces != totalActualPieces)
-                    {
-                        header.ActualPieces = totalActualPieces;
-                        header.OnPropertyChanged(nameof(header.ActualPieces));
-                    }
-                    if (header.ActualSizeQty != totalActualSizeQty)
-                    {
-                        header.ActualSizeQty = totalActualSizeQty;
-                        header.OnPropertyChanged(nameof(header.ActualSizeQty));
-                    }
-                    if (header.Timestamp != createdAt)
-                    {
-                        header.Timestamp = createdAt;
-                        header.OnPropertyChanged(nameof(header.Timestamp));
-                    }
-                    if (header.UpdatedAt != updatedAt)
-                    {
-                        header.UpdatedAt = updatedAt;
-                        header.OnPropertyChanged(nameof(header.UpdatedAt));
-                    }
-
-                    // Process items in the group
-                    var items = g.Select(item =>
-                    {
-                        item.MaterialType = item.IsLeather
-                            ? LocalizationManager.GetString("leatherMaterial")
-                            : LocalizationManager.GetString("rawMaterial");
-
-                        // Clear redundant values to avoid repetition for grouped items
-                        if (g.Count() > 0)
-                        {
-                            item.Timestamp = null;
-                            item.UpdatedAt = null;
-                            item.MachineName = string.Empty;
-                            item.SO = string.Empty;
-                            item.OperatorName = string.Empty;
-                            item.PartName = string.Empty;
-                            item.MaterialType = string.Empty;
-                        }
-
-                        // Subscribe to property changes in child items to dynamically update totals
-                        item.PropertyChanged += (sender, e) =>
-                        {
-                            if (e.PropertyName == nameof(DeviceOutput.CuttingDieQty) ||
-                                e.PropertyName == nameof(DeviceOutput.PiecesPerPair) ||
-                                e.PropertyName == nameof(DeviceOutput.MaterialLayer) ||
-                                e.PropertyName == nameof(DeviceOutput.TotalPiecesPerPair) ||
-                                e.PropertyName == nameof(DeviceOutput.ActualCut) ||
-                                e.PropertyName == nameof(DeviceOutput.ActualPieces) ||
-                                e.PropertyName == nameof(DeviceOutput.ActualSizeQty))
-                            {
-                                // Recalculate totals when child values change
-                                header.ActualCut = g.Sum(x => x.ActualCut ?? 0);
-                                header.ActualPieces = g.Sum(x => x.ActualPieces ?? 0);
-                                header.ActualSizeQty = g.Sum(x => x.ActualSizeQty ?? 0);
-
-                                // Notify UI only if values changed
-                                header.OnPropertyChanged(nameof(header.ActualCut));
-                                header.OnPropertyChanged(nameof(header.ActualPieces));
-                                header.OnPropertyChanged(nameof(header.ActualSizeQty));
-                            }
-                        };
-
+                        PrepareChildItem(item, group.Count());
+                        SubscribeToItemChanges(item, header, group);
                         return item;
-                    }).ToList();
+                    })
+                    .OrderByDescending(x => x.UpdatedAt)
+                    .ToList();
 
-                    // Ensure only one header per unique key (PartName, MachineName, SO, OperatorName)
                     return new[] { header }.Concat(items);
                 })
                 .ToList();
@@ -449,8 +360,126 @@ namespace DigitalProduction.ViewModels
             }
         }
 
+        private DeviceOutput CreateHeader(IGrouping<dynamic, DeviceOutput> group, string groupKey)
+        {
+            return new DeviceOutput
+            {
+                PartName = group.Key.PartName,
+                MachineName = group.Key.MachineName,
+                SO = group.Key.SO,
+                OperatorName = group.Key.OperatorName,
+                IsGroupHeader = true,
+                IsLeather = group.Any(x => x.IsLeather),
+                MaterialType = group.Any(x => x.IsLeather)
+                    ? LocalizationManager.GetString("leatherMaterial")
+                    : LocalizationManager.GetString("rawMaterial"),
+                //Timestamp = null,
+                //UpdatedAt = null,
+                //ActualCut = 0,
+                //ActualPieces = 0,
+                //ActualSizeQty = 0
+            };
+        }
 
+        private void UpdateHeaderAggregates(DeviceOutput header, IGrouping<dynamic, DeviceOutput> group)
+        {
+        //    int totalCut = group.Sum(x => x.ActualCut ?? 0);
+        //    int totalPieces = group.Sum(x => x.ActualPieces ?? 0);
+        //    int totalSizeQty = group.Sum(x => x.ActualSizeQty ?? 0);
+            DateTime? createdAt = group.Min(x => x.Timestamp);
+            DateTime? updatedAt = group.Max(x => x.UpdatedAt);
 
+            //if (header.ActualCut != totalCut)
+            //{
+            //    header.ActualCut = totalCut;
+            //    header.OnPropertyChanged(nameof(header.ActualCut));
+            //}
+
+            //if (header.ActualPieces != totalPieces)
+            //{
+            //    header.ActualPieces = totalPieces;
+            //    header.OnPropertyChanged(nameof(header.ActualPieces));
+            //}
+
+            //if (header.ActualSizeQty != totalSizeQty)
+            //{
+            //    header.ActualSizeQty = totalSizeQty;
+            //    header.OnPropertyChanged(nameof(header.ActualSizeQty));
+            //}
+
+            if (header.Timestamp != createdAt)
+            {
+                header.Timestamp = createdAt;
+                header.OnPropertyChanged(nameof(header.Timestamp));
+            }
+
+            if (header.UpdatedAt != updatedAt)
+            {
+                header.UpdatedAt = updatedAt;
+                header.OnPropertyChanged(nameof(header.UpdatedAt));
+            }
+
+            Console.WriteLine($"[HEADER UPDATE] Group: {header.PartName}-{header.MachineName}-{header.SO}-{header.OperatorName}");
+        //    Console.WriteLine($"  -> Cut: {totalCut}, Pieces: {totalPieces}, SizeQty: {totalSizeQty}");
+            Console.WriteLine($"  -> Timestamp: {createdAt}, UpdatedAt: {updatedAt}");
+
+        }
+
+        private void PrepareChildItem(DeviceOutput item, int groupCount)
+        {
+            item.MaterialType = item.IsLeather
+                ? LocalizationManager.GetString("leatherMaterial")
+                : LocalizationManager.GetString("rawMaterial");
+
+            // Clear repeated fields for grouped display
+            item.Timestamp = null;
+            item.UpdatedAt = null;
+            item.MachineName = string.Empty;
+            item.SO = string.Empty;
+            item.OperatorName = string.Empty;
+            item.PartName = string.Empty;
+            item.MaterialType = string.Empty;
+        }
+
+        private void SubscribeToItemChanges(DeviceOutput item, DeviceOutput header, IEnumerable<DeviceOutput> group)
+        {
+            PropertyChangedEventHandler handler = null;
+
+            handler = (sender, e) =>
+            {
+                if (e.PropertyName == nameof(DeviceOutput.CuttingDieQty) ||
+                    e.PropertyName == nameof(DeviceOutput.PiecesPerPair) ||
+                    e.PropertyName == nameof(DeviceOutput.MaterialLayer) ||
+                    e.PropertyName == nameof(DeviceOutput.TotalPiecesPerPair) ||
+                    e.PropertyName == nameof(DeviceOutput.ActualCut) ||
+                    e.PropertyName == nameof(DeviceOutput.ActualPieces) ||
+                    e.PropertyName == nameof(DeviceOutput.ActualSizeQty))
+                {
+                    //int newCut = group.Sum(x => x.ActualCut ?? 0);
+                    //int newPieces = group.Sum(x => x.ActualPieces ?? 0);
+                    //int newSizeQty = group.Sum(x => x.ActualSizeQty ?? 0);
+
+                    //if (header.ActualCut != newCut)
+                    //{
+                    //    header.ActualCut = newCut;
+                    //    header.OnPropertyChanged(nameof(header.ActualCut));
+                    //}
+                    //if (header.ActualPieces != newPieces)
+                    //{
+                    //    header.ActualPieces = newPieces;
+                    //    header.OnPropertyChanged(nameof(header.ActualPieces));
+                    //}
+                    //if (header.ActualSizeQty != newSizeQty)
+                    //{
+                    //    header.ActualSizeQty = newSizeQty;
+                    //    header.OnPropertyChanged(nameof(header.ActualSizeQty));
+                    //}
+                }
+            };
+
+            item.PropertyChanged -= handler;
+            item.PropertyChanged += handler;
+        }
 
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {

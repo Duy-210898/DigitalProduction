@@ -820,9 +820,9 @@ namespace DigitalProduction
                                 SO = reader["SO"] != DBNull.Value
                                     ? reader["SO"].ToString()
                                     : string.Empty,
-                                OrderID = reader["OrderID"] != DBNull.Value
-                                    ? Convert.ToInt32(reader["OrderID"])
-                                    : 0,
+                                //OrderID = reader["OrderID"] != DBNull.Value
+                                //    ? Convert.ToInt32(reader["OrderID"])
+                                //    : 0,
                                 OperatorName = reader["OperatorName"] != DBNull.Value
                                     ? reader["OperatorName"].ToString()
                                     : string.Empty,
