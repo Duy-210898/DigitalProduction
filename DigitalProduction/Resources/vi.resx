@@ -550,9 +550,36 @@
     <value>Ngày bắt đầu:</value>
   </data>
   <data name="RequiredDataCutting" xml:space="preserve">
-    <value>Vui lòng nhập dữ liệu số đôi cắt, số miếng, số lớp !!!</value>
+    <value>Vui lòng nhập dữ liệu số đôi cắt, số miếng, số lớp hoặc tổng số miếng!!!</value>
   </data>
   <data name="TotalPiecesPerPair" xml:space="preserve">
     <value>Tổng số miếng trên đôi</value>
+  </data>
+  <data name="NoRecords" xml:space="preserve">
+    <value>Không có dữ liệu trong tháng này!!!!</value>
+  </data>
+  <data name="AddNewDevice" xml:space="preserve">
+    <value>Thêm thiết bị mới</value>
+  </data>
+  <data name="AddressID" xml:space="preserve">
+    <value>Địa chỉ IP:</value>
+  </data>
+  <data name="RegisterOperator" xml:space="preserve">
+    <value>Tạo người vận hành</value>
+  </data>
+  <data name="RegisterUser" xml:space="preserve">
+    <value>Tạo người dùng</value>
+  </data>
+  <data name="SelectDepartment" xml:space="preserve">
+    <value>Chọn bộ phận</value>
+  </data>
+  <data name="SelectPlant" xml:space="preserve">
+    <value>Chọn xưởng</value>
+  </data>
+  <data name="SelectPosition" xml:space="preserve">
+    <value>Chọn vị trí</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Xác nhận</value>
   </data>
 </root>

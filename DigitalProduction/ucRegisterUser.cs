@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using DevExpress.XtraEditors;
 using DigitalProduction.Models;
 using DigitalProduction.Validation;
 
@@ -15,6 +17,7 @@ namespace DigitalProduction
             InitializeComponent();
             LoadDepartments();
             LoadPositions();
+            ApplyLocalization();
         }
 
         private void btn_close_Click(object sender, System.EventArgs e)
@@ -72,7 +75,7 @@ namespace DigitalProduction
             cb_department.Properties.DisplayMember = "DepartmentName";
             cb_department.Properties.ValueMember = "DepartmentID";
 
-            cb_department.Properties.NullText = "Select a Department";
+            cb_department.Properties.NullText = LocalizationManager.GetString("SelectDepartment");
 
             //if (dt.Rows.Count > 0)
             //    cb_department.EditValue = dt.Rows[0]["DepartmentID"]; // Auto-select first item
@@ -85,7 +88,39 @@ namespace DigitalProduction
             cb_position.Properties.DisplayMember = "PositionName";
             cb_position.Properties.ValueMember = "PositionID";
 
-            cb_position.Properties.NullText = "Select a Position";
+            cb_position.Properties.NullText = LocalizationManager.GetString("SelectPosition");
+        }
+
+        private void ApplyLocalization()
+        {
+            var controls = new Dictionary<Control, string>
+            {
+                { groupControlRegisterUser, "RegisterUser" },
+                { lblUserName, "Username" },
+                { lblPassword, "Password" },
+                { lblEmployeeID, "EmployeeID" },
+                { lblEmployeeName, "EmployeeName" },
+                { lblDepartment, "Department" },
+                { lblPosition, "Position" },
+                { btn_submit, "Submit" },
+                { btn_close, "Cancle" }
+            };
+
+            foreach (var control in controls)
+            {
+                string localizedText = LocalizationManager.GetString(control.Value)?.TrimEnd();
+
+                if (control.Key is LabelControl)
+                {
+                    // Add colon only if it doesn't already end with ":"
+                    if (!localizedText.EndsWith(":"))
+                    {
+                        localizedText += ":";
+                    }
+                }
+
+                control.Key.Text = localizedText;
+            }
         }
     }
 }

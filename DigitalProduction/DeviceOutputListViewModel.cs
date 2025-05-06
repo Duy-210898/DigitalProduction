@@ -240,6 +240,7 @@ namespace DigitalProduction.ViewModels
                 }
                 catch (InvalidOperationException ex)
                 {
+                    ConnectionManager.Instance.IsReconnecting = true;
                     Console.WriteLine("Invalid operation in RequestData: " + ex.Message);
                 }
             }

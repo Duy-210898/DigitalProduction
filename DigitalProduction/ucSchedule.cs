@@ -234,10 +234,10 @@ namespace DigitalProduction
                 Dock = DockStyle.Top
             };
 
-            dateTimePicker.ValueChanged += (sender, e) =>
+            dateTimePicker.ValueChanged += async (sender, e) =>
             {
                 selectedMonth = new DateTime(dateTimePicker.Value.Year, dateTimePicker.Value.Month, 1);
-                ApplyMonthFilter();
+                await GetDataAndLoadToGridAsync(); // request filtered data directly from backend
             };
 
             Controls.Add(dateTimePicker);
@@ -261,10 +261,18 @@ namespace DigitalProduction
 
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new { app = Global.App, action = "getSchedule" };
+            var request = new
+            {
+                app = Global.App,
+                action = "getSchedule",
+                month = selectedMonth?.Month,
+                year = selectedMonth?.Year
+            };
+
             string jsonRequest = JsonConvert.SerializeObject(request);
             await _webSocketClient.SendAsync(jsonRequest);
         }
+
 
         private void WebSocket_OnMessage(string jsonData)
         {
@@ -286,7 +294,7 @@ namespace DigitalProduction
             }
             catch (Exception ex)
             {
-                ConnectionManager.Instance.IsConnected = false;
+                ConnectionManager.Instance.IsReconnecting = true;
                 MessageBox.Show($"Error processing WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -355,7 +363,7 @@ namespace DigitalProduction
 
             if (!filteredData.Any())
             {
-                MessageBox.Show("No records found for the selected month.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ShowMessage.ShowInfo(LocalizationManager.GetString("NoRecords"));
             }
 
             UpdateTotalLabel();

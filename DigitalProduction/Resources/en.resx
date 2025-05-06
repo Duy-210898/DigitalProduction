@@ -523,6 +523,33 @@
     <value>Start Date:</value>
   </data>
   <data name="RequiredDataCutting" xml:space="preserve">
-    <value>Please input the Cutting Die, Pieces Perpair, Material Layer !!!</value>
+    <value>Please input the Cutting Die, Pieces Perpair, Material Layer or TotalPiecesPerPair!!!</value>
+  </data>
+  <data name="NoRecords" xml:space="preserve">
+    <value>No records found for the selected month!!!!</value>
+  </data>
+  <data name="AddNewDevice" xml:space="preserve">
+    <value>Add new device</value>
+  </data>
+  <data name="AddressID" xml:space="preserve">
+    <value>Address ID:</value>
+  </data>
+  <data name="RegisterOperator" xml:space="preserve">
+    <value>Register Operator</value>
+  </data>
+  <data name="RegisterUser" xml:space="preserve">
+    <value>Register User</value>
+  </data>
+  <data name="SelectDepartment" xml:space="preserve">
+    <value>Select Department</value>
+  </data>
+  <data name="SelectPlant" xml:space="preserve">
+    <value>Select Plant</value>
+  </data>
+  <data name="SelectPosition" xml:space="preserve">
+    <value>Select Position</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Submit</value>
   </data>
 </root>

@@ -200,6 +200,13 @@ namespace DigitalProduction
 
             StyleNumericColumn(gridView.Columns["ActualSizeQty"], 9);
             StyleNumericColumn(gridView.Columns["TotalPiecesPerPair"], 14, Color.Blue, bold: true);
+            StyleNumericColumn(gridView.Columns["ActualCut"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns["ActualPieces"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns["InventoryQty"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns["CuttingDieQty"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns["MaterialLayer"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns["SizeQty"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns["PiecesPerPair"], 0, bold: true);
 
 
             gridView.OptionsView.ShowAutoFilterRow = false;
@@ -222,20 +229,47 @@ namespace DigitalProduction
         {
             if (col == null) return;
 
-            col.VisibleIndex = visibleIndex;
-            //col.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Custom;
-            //col.DisplayFormat.FormatString = "{0:#}";
-            //col.OptionsColumn.AllowEdit = false;
-            //col.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            //col.AppearanceCell.Options.UseTextOptions = true;
-            //col.AppearanceCell.TextOptions.Trimming = DevExpress.Utils.Trimming.None;
-            //col.AppearanceCell.TextOptions.WordWrap = DevExpress.Utils.WordWrap.NoWrap;
+            if (visibleIndex != 0)
+            {
+                col.VisibleIndex = visibleIndex;
+            }
+            col.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric; // Use Numeric for numbers
+            col.DisplayFormat.FormatString = "{0:#}";
+            col.OptionsColumn.AllowEdit = false;
+
+            // === Force Appearance for Cell ===
+            col.AppearanceCell.Options.UseTextOptions = true;
+            col.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
 
             if (fontColor.HasValue)
+            {
+                col.AppearanceCell.Options.UseForeColor = true;
                 col.AppearanceCell.ForeColor = fontColor.Value;
+            }
 
             if (bold)
-                col.AppearanceCell.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Bold);
+            {
+                col.AppearanceCell.Options.UseFont = true;
+                Font currentFont = gridView_DeviceOutput.Appearance.Row.Font ?? SystemFonts.DefaultFont;
+                col.AppearanceCell.Font = new Font(currentFont, FontStyle.Bold);
+            }
+
+            // === Header Appearance ===
+            col.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            col.AppearanceHeader.Options.UseTextOptions = true;
+
+            if (fontColor.HasValue)
+            {
+                col.AppearanceHeader.Options.UseForeColor = true;
+                col.AppearanceHeader.ForeColor = fontColor.Value;
+            }
+
+            if (bold)
+            {
+                col.AppearanceHeader.Options.UseFont = true;
+                Font currentHeaderFont = gridView_DeviceOutput.Appearance.HeaderPanel.Font ?? SystemFonts.DefaultFont;
+                col.AppearanceHeader.Font = new Font(currentHeaderFont, FontStyle.Bold);
+            }
         }
 
 

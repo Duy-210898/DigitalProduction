@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
 using DevExpress.Utils.Html.Internal;
+using DevExpress.XtraEditors;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using DigitalProduction.Validation;
@@ -15,6 +17,7 @@ namespace DigitalProduction
         public ucRegisterOperator()
         {
             InitializeComponent();
+            ApplyLocalization();
         }
         private void btn_submit_Click(object sender, EventArgs e)
         {
@@ -59,6 +62,21 @@ namespace DigitalProduction
         {
             ExitClicked?.Invoke(this, EventArgs.Empty);
         }
+        private void ApplyLocalization()
+        {
+            var controls = new Dictionary<Control, string>
+            {
+                { groupControlRegisterOperator, "RegisterOperator" },
+                { lblEmployeeID, "EmployeeID" },
+                { lblEmployeeName, "EmployeeName" },
+                { btn_submit, "Submit" },
+                { btn_close, "Cancle" }
+            };
 
+            foreach (var control in controls)
+            {
+                control.Key.Text = LocalizationManager.GetString(control.Value) + (control.Key is LabelControl ? ":" : "");
+            }
+        }
     }
 }

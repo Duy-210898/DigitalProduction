@@ -22,7 +22,6 @@ namespace DigitalProduction
         private int operatorID = 0;
         private int deviceID = 0;
         private int userID = 0;
-        private int totalPiecesPerPair = 0;
         private HashSet<int> sizeIDs = new HashSet<int>();
         private HashSet<int> partIDs = new HashSet<int>();
         private HashSet<int> partSizeOrderIDs = new HashSet<int>();
@@ -39,6 +38,7 @@ namespace DigitalProduction
             lbl_operatorName.Visible = false;
             loadDeviceDistribution();
             txtInventory.KeyPress += TxtInventory_KeyPress;
+            rdRawMaterial.CheckedChanged += MaterialFilterChanged;
         }
         private void TxtInventory_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -175,7 +175,6 @@ namespace DigitalProduction
                 numMaterialLayer.Text = defaultInfo.MaterialLayer.ToString();
                 numericTotalPeicesPerPair.Text = defaultInfo.TotalPiecesPerPair.ToString();
             }
-
         }
 
         private void WebSocket_OnMessage(object data)
@@ -347,12 +346,23 @@ namespace DigitalProduction
                         int cuttingDieQty = schedule.CuttingDieQty;
                         int piecesPerPair = schedule.PeicesPerPair;
                         int materialLayer = schedule.MaterialLayer;
-                        if (cuttingDieQty == 0 || piecesPerPair == 0 || materialLayer == 0) {
-                            ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
-                            return null;
+                        int TotalPiecesPerPair = schedule.TotalPiecesPerPair;
+                        if (rdRawMaterial.Checked)
+                        {
+                            if (cuttingDieQty == 0 || piecesPerPair == 0 || materialLayer == 0)
+                            {
+                                ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
+                                return null;
+                            }
+                        }
+                        if (rdLeather.Checked) {
+                            if (TotalPiecesPerPair == 0)
+                            {
+                                ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
+                                return null;
+                            }
                         }
                         int productId = dbHelper.getProductIdByArt(schedule.ART);
-                        int TotalPiecesPerPair = schedule.TotalPiecesPerPair;
 
                         int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
 
@@ -371,7 +381,7 @@ namespace DigitalProduction
                                 PiecesPerPair = piecesPerPair,
                                 MaterialLayer = materialLayer,
                                 InventoryQty = inventory,
-                                TotalPiecesPerPair = totalPiecesPerPair,
+                                TotalPiecesPerPair = TotalPiecesPerPair,
                                 IsLeather = isLeather,
                                 CreatedAt = DateTime.Now.AddSeconds(index),
                                 IsDelete = false,
@@ -523,10 +533,9 @@ namespace DigitalProduction
             }
         }
 
-
         private void btnSend_Click(object sender, EventArgs e)
         {
-            bool isAnyChecked = panelMaterialType.Controls.OfType<System.Windows.Forms.RadioButton>().Any(r => r.Checked);
+            bool isAnyChecked = panelMaterialType.Controls.OfType<RadioButton>().Any(r => r.Checked);
 
             if (!isAnyChecked)
             {
@@ -582,6 +591,7 @@ namespace DigitalProduction
             table.Columns.Add("PeicesPerPair", typeof(int));
             table.Columns.Add("CuttingDieQty", typeof(int));
             table.Columns.Add("MaterialLayer", typeof(int));
+            table.Columns.Add("TotalPiecesPerPair", typeof(int));
             table.Columns.Add("InventoryQty", typeof(int));
 
 
@@ -604,10 +614,16 @@ namespace DigitalProduction
                     string key = $"{partName}|{size}";
 
                     schedule.GroupSO = groupSO;
-                    schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
-                    schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
-                    schedule.MaterialLayer = (int)numMaterialLayer.Value;
-                    schedule.TotalPiecesPerPair = (int)numericTotalPeicesPerPair.Value;
+                    if (rdRawMaterial.Checked)
+                    {
+                        schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
+                        schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
+                        schedule.MaterialLayer = (int)numMaterialLayer.Value;
+                    }
+                    if (rdLeather.Checked)
+                    {
+                        schedule.TotalPiecesPerPair = (int)numericTotalPeicesPerPair.Value;
+                    }
                     if (size.Equals(""))
                     {
                         continue;
@@ -626,7 +642,7 @@ namespace DigitalProduction
                 {
                     string[] splitKey = entry.Key.Split('|');
                     string mergedSO = string.Join(", ", entry.Value.SOs);
-                    table.Rows.Add(groupSO, mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQty, numPiecesPerPair.Value, numCuttingDieQty.Value, numMaterialLayer.Value ,0);
+                    table.Rows.Add(groupSO, mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQty, 0, 0, 0, 0, 0);
                 }
             }
 
@@ -856,21 +872,29 @@ namespace DigitalProduction
                                     {
                                         // Update the schedule with new values
                                         //  schedule.InventoryQty = inventoryInput;
-                                        schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
-                                        schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
-                                        schedule.MaterialLayer = (int)numMaterialLayer.Value;
+                                        if (rdRawMaterial.Checked)
+                                        {
+                                            schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
+                                            schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
+                                            schedule.MaterialLayer = (int)numMaterialLayer.Value;
 
-                                        // Now, directly update the grid's cells for this row
-                                        //     gridViewOverview.SetRowCellValue(rowHandle, "InventoryQty", schedule.InventoryQty);
-                                        gridViewOverview.SetRowCellValue(rowHandle, "PeicesPerPair", schedule.PeicesPerPair);
-                                        gridViewOverview.SetRowCellValue(rowHandle, "CuttingDieQty", schedule.CuttingDieQty);
-                                        gridViewOverview.SetRowCellValue(rowHandle, "MaterialLayer", schedule.MaterialLayer);
+                                            // Now, directly update the grid's cells for this row
+                                            //     gridViewOverview.SetRowCellValue(rowHandle, "InventoryQty", schedule.InventoryQty);
+                                            gridViewOverview.SetRowCellValue(rowHandle, "PeicesPerPair", schedule.PeicesPerPair);
+                                            gridViewOverview.SetRowCellValue(rowHandle, "CuttingDieQty", schedule.CuttingDieQty);
+                                            gridViewOverview.SetRowCellValue(rowHandle, "MaterialLayer", schedule.MaterialLayer);
+                                        }
+                                        if (rdLeather.Checked) {
+                                            schedule.TotalPiecesPerPair = (int)numericTotalPeicesPerPair.Value;
+                                            // Now, directly update the grid's cells for this row
+                                            gridViewOverview.SetRowCellValue(rowHandle, "TotalPiecesPerPair", schedule.TotalPiecesPerPair);
+                                        }
                                     }
                                 }
                             }
                         }
 
-                        Console.WriteLine($"[Updated] Group SO 1: {partName} - {size} =>  Pairs: {numPiecesPerPair.Value.ToString()}, Die: {numCuttingDieQty.Value.ToString()}, Layer: {numMaterialLayer.Value.ToString()}");
+                        Console.WriteLine($"[Updated] Group SO 1: {partName} - {size} =>  Pairs: {numPiecesPerPair.Value.ToString()}, Die: {numCuttingDieQty.Value.ToString()}, Layer: {numMaterialLayer.Value.ToString()} TotalPiecesPerPair: {numericTotalPeicesPerPair.Value.ToString()}");
                     }
 
                     // Refresh the grid to reflect all changes
@@ -887,6 +911,83 @@ namespace DigitalProduction
             ResetSendDistribution();
         }
 
+
+        private void MaterialFilterChanged(object sender, EventArgs e)
+        {
+            ApplyMaterialFilterAndMonth(); // Combine with your existing month filter
+        }
+
+        private void ApplyMaterialFilterAndMonth()
+        {
+            gridViewOverview.RefreshData();
+
+            int inventory = int.TryParse(txtInventory.Text, out int result) ? result : 0;
+
+            for (int i = 0; i < gridViewOverview.RowCount; i++)
+            {
+                int rowHandle = gridViewOverview.GetVisibleRowHandle(i);
+                if (!gridViewOverview.IsDataRow(rowHandle)) continue;
+
+                string partName = gridViewOverview.GetRowCellValue(rowHandle, "PartName")?.ToString();
+                string size = gridViewOverview.GetRowCellValue(rowHandle, "Size")?.ToString()?.Trim();
+                string groupSO = gridViewOverview.GetRowCellValue(rowHandle, "GroupSO")?.ToString();
+
+                int sizeQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "SizeQty") ?? 0);
+                int piecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "PeicesPerPair") ?? 0);
+                int cuttingDieQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "CuttingDieQty") ?? 0);
+                int materialLayer = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "MaterialLayer") ?? 0);
+                int totalPiecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "TotalPiecesPerPair") ?? 0);
+
+                if (inventory >= sizeQty)
+                {
+                    ShowMessage.ShowInfo("Inventory must be less than SizeQty.");
+                    continue;
+                }
+
+                // Update InventoryQty in GridView
+                gridViewOverview.SetRowCellValue(rowHandle, "InventoryQty", inventory);
+
+                foreach (var group in productionSchedules)
+                {
+                    foreach (var schedule in group)
+                    {
+                        string scheduleSize = GetSizeName(schedule.SizeID);
+                        if (string.Equals(schedule.GroupSO, groupSO, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(scheduleSize, size, StringComparison.OrdinalIgnoreCase))
+                        {
+                            schedule.InventoryQty = inventory;
+
+                            if (rdRawMaterial.Checked)
+                            {
+                                schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
+                                schedule.CuttingDieQty = (int)numCuttingDieQty.Value;
+                                schedule.MaterialLayer = (int)numMaterialLayer.Value;
+
+                                gridViewOverview.SetRowCellValue(rowHandle, "PeicesPerPair", schedule.PeicesPerPair);
+                                gridViewOverview.SetRowCellValue(rowHandle, "CuttingDieQty", schedule.CuttingDieQty);
+                                gridViewOverview.SetRowCellValue(rowHandle, "MaterialLayer", schedule.MaterialLayer);
+
+                                gridViewOverview.SetRowCellValue(rowHandle, "TotalPiecesPerPair", 0);
+                            }
+
+                            if (rdLeather.Checked)
+                            {
+                                gridViewOverview.SetRowCellValue(rowHandle, "PeicesPerPair", 0);
+                                gridViewOverview.SetRowCellValue(rowHandle, "CuttingDieQty", 0);
+                                gridViewOverview.SetRowCellValue(rowHandle, "MaterialLayer", 0);
+
+                                schedule.TotalPiecesPerPair = (int)numericTotalPeicesPerPair.Value;
+                                gridViewOverview.SetRowCellValue(rowHandle, "TotalPiecesPerPair", schedule.TotalPiecesPerPair);
+                            }
+                        }
+                    }
+                }
+            }
+
+            gridViewOverview.RefreshData();
+            ShowMessage.ShowInfo("All rows updated successfully.");
+        }
         private void ResetSendDistribution()
         {
             loadDeviceDistribution();

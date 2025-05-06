@@ -513,7 +513,7 @@ namespace DigitalProduction
             groupPanelButtonContainer = new Panel { Dock = DockStyle.Top, Height = 50 };
             Controls.Add(groupPanelButtonContainer);
 
-            button = new Button { Text = "Add new device", Size = new Size(100, 40), Location = new Point(10, 5) };
+            button = new Button { Text = LocalizationManager.GetString("AddNewDevice"), Size = new Size(100, 40), Location = new Point(10, 5) };
             groupPanelButtonContainer.Controls.Add(button);
             button.Click += Button_Click;
         }

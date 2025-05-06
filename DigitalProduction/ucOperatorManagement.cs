@@ -536,7 +536,7 @@ namespace DigitalProduction
             Controls.Add(groupPanelButtonContainer);
             button = new SimpleButton()
             {
-                Text = "Create user",
+                Text = LocalizationManager.GetString("RegisterOperator"),
                 Size = new Size(100, 40)
             };
 

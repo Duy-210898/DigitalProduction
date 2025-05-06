@@ -28,23 +28,23 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.groupControlRegisterUser = new DevExpress.XtraEditors.GroupControl();
             this.cb_position = new DevExpress.XtraEditors.LookUpEdit();
             this.cb_department = new DevExpress.XtraEditors.LookUpEdit();
-            this.labelControl6 = new DevExpress.XtraEditors.LabelControl();
+            this.lblPosition = new DevExpress.XtraEditors.LabelControl();
             this.btn_close = new DevExpress.XtraEditors.SimpleButton();
             this.btn_submit = new DevExpress.XtraEditors.SimpleButton();
-            this.labelControl5 = new DevExpress.XtraEditors.LabelControl();
+            this.lblDepartment = new DevExpress.XtraEditors.LabelControl();
             this.txt_employeeID = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
+            this.lblEmployeeID = new DevExpress.XtraEditors.LabelControl();
             this.txt_employeeName = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
+            this.lblEmployeeName = new DevExpress.XtraEditors.LabelControl();
             this.txt_pwd = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
+            this.lblPassword = new DevExpress.XtraEditors.LabelControl();
             this.txt_username = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
-            ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
-            this.groupControl1.SuspendLayout();
+            this.lblUserName = new DevExpress.XtraEditors.LabelControl();
+            ((System.ComponentModel.ISupportInitialize)(this.groupControlRegisterUser)).BeginInit();
+            this.groupControlRegisterUser.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cb_position.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cb_department.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_employeeID.Properties)).BeginInit();
@@ -53,29 +53,29 @@
             ((System.ComponentModel.ISupportInitialize)(this.txt_username.Properties)).BeginInit();
             this.SuspendLayout();
             // 
-            // groupControl1
+            // groupControlRegisterUser
             // 
-            this.groupControl1.CaptionLocation = DevExpress.Utils.Locations.Top;
-            this.groupControl1.Controls.Add(this.cb_position);
-            this.groupControl1.Controls.Add(this.cb_department);
-            this.groupControl1.Controls.Add(this.labelControl6);
-            this.groupControl1.Controls.Add(this.btn_close);
-            this.groupControl1.Controls.Add(this.btn_submit);
-            this.groupControl1.Controls.Add(this.labelControl5);
-            this.groupControl1.Controls.Add(this.txt_employeeID);
-            this.groupControl1.Controls.Add(this.labelControl4);
-            this.groupControl1.Controls.Add(this.txt_employeeName);
-            this.groupControl1.Controls.Add(this.labelControl3);
-            this.groupControl1.Controls.Add(this.txt_pwd);
-            this.groupControl1.Controls.Add(this.labelControl2);
-            this.groupControl1.Controls.Add(this.txt_username);
-            this.groupControl1.Controls.Add(this.labelControl1);
-            this.groupControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupControl1.Location = new System.Drawing.Point(0, 0);
-            this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(536, 354);
-            this.groupControl1.TabIndex = 0;
-            this.groupControl1.Text = "Register User";
+            this.groupControlRegisterUser.CaptionLocation = DevExpress.Utils.Locations.Top;
+            this.groupControlRegisterUser.Controls.Add(this.cb_position);
+            this.groupControlRegisterUser.Controls.Add(this.cb_department);
+            this.groupControlRegisterUser.Controls.Add(this.lblPosition);
+            this.groupControlRegisterUser.Controls.Add(this.btn_close);
+            this.groupControlRegisterUser.Controls.Add(this.btn_submit);
+            this.groupControlRegisterUser.Controls.Add(this.lblDepartment);
+            this.groupControlRegisterUser.Controls.Add(this.txt_employeeID);
+            this.groupControlRegisterUser.Controls.Add(this.lblEmployeeID);
+            this.groupControlRegisterUser.Controls.Add(this.txt_employeeName);
+            this.groupControlRegisterUser.Controls.Add(this.lblEmployeeName);
+            this.groupControlRegisterUser.Controls.Add(this.txt_pwd);
+            this.groupControlRegisterUser.Controls.Add(this.lblPassword);
+            this.groupControlRegisterUser.Controls.Add(this.txt_username);
+            this.groupControlRegisterUser.Controls.Add(this.lblUserName);
+            this.groupControlRegisterUser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupControlRegisterUser.Location = new System.Drawing.Point(0, 0);
+            this.groupControlRegisterUser.Name = "groupControlRegisterUser";
+            this.groupControlRegisterUser.Size = new System.Drawing.Size(536, 354);
+            this.groupControlRegisterUser.TabIndex = 0;
+            this.groupControlRegisterUser.Text = "Register User";
             // 
             // cb_position
             // 
@@ -101,15 +101,15 @@
             this.cb_department.Size = new System.Drawing.Size(171, 24);
             this.cb_department.TabIndex = 5;
             // 
-            // labelControl6
+            // lblPosition
             // 
-            this.labelControl6.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl6.Appearance.Options.UseFont = true;
-            this.labelControl6.Location = new System.Drawing.Point(19, 262);
-            this.labelControl6.Name = "labelControl6";
-            this.labelControl6.Size = new System.Drawing.Size(62, 19);
-            this.labelControl6.TabIndex = 12;
-            this.labelControl6.Text = "Position:";
+            this.lblPosition.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.lblPosition.Appearance.Options.UseFont = true;
+            this.lblPosition.Location = new System.Drawing.Point(19, 262);
+            this.lblPosition.Name = "lblPosition";
+            this.lblPosition.Size = new System.Drawing.Size(62, 19);
+            this.lblPosition.TabIndex = 12;
+            this.lblPosition.Text = "Position:";
             // 
             // btn_close
             // 
@@ -129,15 +129,15 @@
             this.btn_submit.Text = "Submit";
             this.btn_submit.Click += new System.EventHandler(this.btn_submit_Click);
             // 
-            // labelControl5
+            // lblDepartment
             // 
-            this.labelControl5.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl5.Appearance.Options.UseFont = true;
-            this.labelControl5.Location = new System.Drawing.Point(19, 219);
-            this.labelControl5.Name = "labelControl5";
-            this.labelControl5.Size = new System.Drawing.Size(89, 19);
-            this.labelControl5.TabIndex = 8;
-            this.labelControl5.Text = "Department:";
+            this.lblDepartment.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.lblDepartment.Appearance.Options.UseFont = true;
+            this.lblDepartment.Location = new System.Drawing.Point(19, 219);
+            this.lblDepartment.Name = "lblDepartment";
+            this.lblDepartment.Size = new System.Drawing.Size(89, 19);
+            this.lblDepartment.TabIndex = 8;
+            this.lblDepartment.Text = "Department:";
             // 
             // txt_employeeID
             // 
@@ -148,15 +148,15 @@
             this.txt_employeeID.Size = new System.Drawing.Size(171, 26);
             this.txt_employeeID.TabIndex = 3;
             // 
-            // labelControl4
+            // lblEmployeeID
             // 
-            this.labelControl4.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl4.Appearance.Options.UseFont = true;
-            this.labelControl4.Location = new System.Drawing.Point(19, 129);
-            this.labelControl4.Name = "labelControl4";
-            this.labelControl4.Size = new System.Drawing.Size(97, 19);
-            this.labelControl4.TabIndex = 6;
-            this.labelControl4.Text = "Employee ID:";
+            this.lblEmployeeID.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.lblEmployeeID.Appearance.Options.UseFont = true;
+            this.lblEmployeeID.Location = new System.Drawing.Point(19, 129);
+            this.lblEmployeeID.Name = "lblEmployeeID";
+            this.lblEmployeeID.Size = new System.Drawing.Size(97, 19);
+            this.lblEmployeeID.TabIndex = 6;
+            this.lblEmployeeID.Text = "Employee ID:";
             // 
             // txt_employeeName
             // 
@@ -167,15 +167,15 @@
             this.txt_employeeName.Size = new System.Drawing.Size(171, 26);
             this.txt_employeeName.TabIndex = 4;
             // 
-            // labelControl3
+            // lblEmployeeName
             // 
-            this.labelControl3.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl3.Appearance.Options.UseFont = true;
-            this.labelControl3.Location = new System.Drawing.Point(19, 181);
-            this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(121, 19);
-            this.labelControl3.TabIndex = 4;
-            this.labelControl3.Text = "Employee Name:";
+            this.lblEmployeeName.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.lblEmployeeName.Appearance.Options.UseFont = true;
+            this.lblEmployeeName.Location = new System.Drawing.Point(19, 181);
+            this.lblEmployeeName.Name = "lblEmployeeName";
+            this.lblEmployeeName.Size = new System.Drawing.Size(121, 19);
+            this.lblEmployeeName.TabIndex = 4;
+            this.lblEmployeeName.Text = "Employee Name:";
             // 
             // txt_pwd
             // 
@@ -187,15 +187,15 @@
             this.txt_pwd.Size = new System.Drawing.Size(171, 26);
             this.txt_pwd.TabIndex = 2;
             // 
-            // labelControl2
+            // lblPassword
             // 
-            this.labelControl2.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl2.Appearance.Options.UseFont = true;
-            this.labelControl2.Location = new System.Drawing.Point(19, 88);
-            this.labelControl2.Name = "labelControl2";
-            this.labelControl2.Size = new System.Drawing.Size(73, 19);
-            this.labelControl2.TabIndex = 2;
-            this.labelControl2.Text = "Password:";
+            this.lblPassword.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.lblPassword.Appearance.Options.UseFont = true;
+            this.lblPassword.Location = new System.Drawing.Point(19, 88);
+            this.lblPassword.Name = "lblPassword";
+            this.lblPassword.Size = new System.Drawing.Size(73, 19);
+            this.lblPassword.TabIndex = 2;
+            this.lblPassword.Text = "Password:";
             // 
             // txt_username
             // 
@@ -206,27 +206,27 @@
             this.txt_username.Size = new System.Drawing.Size(171, 26);
             this.txt_username.TabIndex = 1;
             // 
-            // labelControl1
+            // lblUserName
             // 
-            this.labelControl1.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl1.Appearance.Options.UseFont = true;
-            this.labelControl1.Location = new System.Drawing.Point(19, 45);
-            this.labelControl1.Name = "labelControl1";
-            this.labelControl1.Size = new System.Drawing.Size(87, 19);
-            this.labelControl1.TabIndex = 0;
-            this.labelControl1.Text = "User name: ";
+            this.lblUserName.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.lblUserName.Appearance.Options.UseFont = true;
+            this.lblUserName.Location = new System.Drawing.Point(19, 45);
+            this.lblUserName.Name = "lblUserName";
+            this.lblUserName.Size = new System.Drawing.Size(87, 19);
+            this.lblUserName.TabIndex = 0;
+            this.lblUserName.Text = "User name: ";
             // 
             // ucRegisterUser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.groupControl1);
+            this.Controls.Add(this.groupControlRegisterUser);
             this.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.Name = "ucRegisterUser";
             this.Size = new System.Drawing.Size(536, 354);
-            ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
-            this.groupControl1.ResumeLayout(false);
-            this.groupControl1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.groupControlRegisterUser)).EndInit();
+            this.groupControlRegisterUser.ResumeLayout(false);
+            this.groupControlRegisterUser.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cb_position.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cb_department.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txt_employeeID.Properties)).EndInit();
@@ -239,19 +239,19 @@
 
         #endregion
 
-        private DevExpress.XtraEditors.GroupControl groupControl1;
+        private DevExpress.XtraEditors.GroupControl groupControlRegisterUser;
         private DevExpress.XtraEditors.TextEdit txt_username;
-        private DevExpress.XtraEditors.LabelControl labelControl1;
-        private DevExpress.XtraEditors.LabelControl labelControl5;
+        private DevExpress.XtraEditors.LabelControl lblUserName;
+        private DevExpress.XtraEditors.LabelControl lblDepartment;
         private DevExpress.XtraEditors.TextEdit txt_employeeID;
-        private DevExpress.XtraEditors.LabelControl labelControl4;
+        private DevExpress.XtraEditors.LabelControl lblEmployeeID;
         private DevExpress.XtraEditors.TextEdit txt_employeeName;
-        private DevExpress.XtraEditors.LabelControl labelControl3;
+        private DevExpress.XtraEditors.LabelControl lblEmployeeName;
         private DevExpress.XtraEditors.TextEdit txt_pwd;
-        private DevExpress.XtraEditors.LabelControl labelControl2;
+        private DevExpress.XtraEditors.LabelControl lblPassword;
         private DevExpress.XtraEditors.SimpleButton btn_close;
         private DevExpress.XtraEditors.SimpleButton btn_submit;
-        private DevExpress.XtraEditors.LabelControl labelControl6;
+        private DevExpress.XtraEditors.LabelControl lblPosition;
         private DevExpress.XtraEditors.LookUpEdit cb_position;
         private DevExpress.XtraEditors.LookUpEdit cb_department;
     }

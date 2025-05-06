@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraEditors;
 using DigitalProduction.Models;
 using DigitalProduction.Validation;
 using Newtonsoft.Json;
@@ -20,6 +21,7 @@ namespace DigitalProduction
             InitializeComponent();
             loadDepartments();
             loadPlants();
+            ApplyLocalization();
         }
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -77,7 +79,7 @@ namespace DigitalProduction
             cb_department.Properties.DataSource = dt;
             cb_department.Properties.DisplayMember = "DepartmentName";
             cb_department.Properties.ValueMember = "DepartmentID";
-            cb_department.Properties.NullText = "Select a Department";
+            cb_department.Properties.NullText = LocalizationManager.GetString("SelectDepartment");
         }
 
         private void loadPlants()
@@ -86,7 +88,7 @@ namespace DigitalProduction
             cb_plant.Properties.DataSource = dt;
             cb_plant.Properties.DisplayMember = "PlantName";
             cb_plant.Properties.ValueMember = "PlantID";
-            cb_plant.Properties.NullText = "Select a Plant";
+            cb_plant.Properties.NullText = LocalizationManager.GetString("SelectPlant");
         }
 
         private void btn_close_Click(object sender, System.EventArgs e)
@@ -97,7 +99,7 @@ namespace DigitalProduction
         private async void btn_submit_Click(object sender, EventArgs e)
         {
             if (!txt_addressIP.ValidateInput(ValidationType.NotEmptyString) ||
-                !txt_deviceName.ValidateInput(ValidationType.NotEmptyString) ||
+                !txt_machineName.ValidateInput(ValidationType.NotEmptyString) ||
                  !cb_department.ValidateInput(ValidationType.NotNull) ||
                   !cb_plant.ValidateInput(ValidationType.NotNull))
             {
@@ -128,6 +130,25 @@ namespace DigitalProduction
             else
             {
                 ShowMessage.ShowError($"Failed to add new device: {ipAddress}!");
+            }
+        }
+
+        private void ApplyLocalization()
+        {
+            var controls = new Dictionary<Control, string>
+            {
+                { groupControl_RegisterDevice, "AddNewDevice" },
+                { lblAddressID, "AddressID" },
+                { lblMachineName, "MachineName" },
+                { lblDeparment, "Department" },
+                { lblPlant, "Plant" },
+                { btn_submit, "Submit" },
+                { btn_close, "Cancle" }
+            };
+
+            foreach (var control in controls)
+            {
+                control.Key.Text = LocalizationManager.GetString(control.Value) + (control.Key is LabelControl ? ":" : "");
             }
         }
     }
