@@ -1,4 +1,4 @@
--- Check if the database exists
+﻿-- Check if the database exists
 USE CuttingProjectData;
 GO
 -- Table: Department
@@ -186,8 +186,23 @@ CREATE TABLE DefaultInfo (
     MaterialLayer INT
 );
 GO
+-- Table: TargetInDay
+CREATE TABLE TargetInDay (
+    TargetID  INT PRIMARY KEY IDENTITY(1,1),
+    TargetDate DATE NOT NULL,               -- Ngày mục tiêu
+    DepartmentId INT NOT NULL,              -- Phòng ban
+    ProductId INT NOT NULL,                 -- Sản phẩm
+    TargetQuantity INT NOT NULL,            -- Số lượng mục tiêu trong ngày
+    EmployeeId INT NOT NULL,                -- Người phụ trách mục tiêu
+    CreatedAt DATETIME DEFAULT GETDATE(),   -- Ngày tạo bản ghi
+    UpdatedAt DATETIME NULL                 -- Ngày cập nhật
+);
+GO
 
 -- Foreign Key Constraints
+ALTER TABLE TargetInDay 
+	ADD CONSTRAINT FK_TargetInDay_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
+	CONSTRAINT FK_TargetInDay_Operator FOREIGN KEY (EmployeeID) REFERENCES Operator(EmployeeID);
 ALTER TABLE DeviceOutput
 	ADD CONSTRAINT FK_DeviceOutput_Size FOREIGN KEY (SizeID) REFERENCES Size(SizeID),
 	CONSTRAINT FK_DeviceOutput_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID),

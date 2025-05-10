@@ -260,8 +260,6 @@ async function setDistributionIsComplete(DistributionID, Status) {
   }
 }
 
-
-
 async function saveActualDataToDB(data) {
   const { OrderID, SizeData, IsLeather } = data;
 
@@ -1146,9 +1144,15 @@ async function getProductionSchedule(so) {
     return [];
   }
 }
-async function getAllProductionSchedule() {
+async function getAllProductionSchedule(month = null, year = null) {
   try {
     if (!pool) await initDatabase(); 
+
+    const targetDate = new Date();
+    targetDate.setMonth(targetDate.getMonth());
+    const targetMonth = month ?? targetDate.getMonth() + 1; // JS month is 0-based
+    const targetYear = year ?? targetDate.getFullYear();
+
     const result = await pool.request()
       .query(`
         SELECT 
@@ -1184,6 +1188,8 @@ async function getAllProductionSchedule() {
         JOIN Size s ON pso.SizeId = s.SizeID
         LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
         WHERE d.PartSizeOrderId IS NULL
+          AND MONTH(po.CreatedAt) = ${targetMonth}
+          AND YEAR(po.CreatedAt) = ${targetYear}
       `);
 
     return result.recordset;

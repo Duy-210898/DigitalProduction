@@ -1,13 +1,9 @@
-﻿using DigitalProduction;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
-using System.Threading.Tasks;
-using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
-using System.Collections.Concurrent;
 using System.Threading;
-using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 namespace DigitalProduction
 {
     public class WebSocketClient : IDisposable
@@ -72,7 +68,7 @@ namespace DigitalProduction
                 {
                     _url = url;
                     _webSocket = new ClientWebSocket();
-                    await _webSocket.ConnectAsync(new Uri(url), System.Threading.CancellationToken.None);
+                    await _webSocket.ConnectAsync(new Uri(url), CancellationToken.None);
 
                     ConnectionManager.Instance.IsConnected = true;
                     Console.WriteLine("WebSocket connected.");
@@ -220,7 +216,7 @@ namespace DigitalProduction
 
             try
             {
-                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", System.Threading.CancellationToken.None);
+                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                 NotifyDisconnection();
             }
             catch (Exception ex)
@@ -254,23 +250,28 @@ namespace DigitalProduction
             if (_isReconnecting || _reconnectAttempts >= MaxReconnectAttempts)
                 return;
 
+            _isReconnecting = true;
             ConnectionManager.Instance.IsReconnecting = true;
-            _reconnectAttempts++;
 
-            Console.WriteLine("Attempting to reconnect...");
+            Console.WriteLine($"🔁 Reconnect attempt {_reconnectAttempts + 1}/{MaxReconnectAttempts}");
+
+            _reconnectAttempts++;
 
             await Task.Delay(ReconnectDelaySeconds * 1000);
 
             try
             {
                 await Connect(_url);
+                _isReconnecting = false;
+                _reconnectAttempts = 0; // Reset on success
                 ConnectionManager.Instance.IsReconnecting = false;
-                Console.WriteLine("Reconnected successfully!");
+                Console.WriteLine("✅ Reconnected successfully!");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error while reconnecting: " + ex.Message);
-                StartReconnect();
+                Console.WriteLine("❌ Error while reconnecting: " + ex.Message);
+                _isReconnecting = false;
+                StartReconnect(); // Recursive call with safety above
             }
         }
 

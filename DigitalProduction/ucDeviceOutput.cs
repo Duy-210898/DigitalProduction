@@ -233,7 +233,7 @@ namespace DigitalProduction
             {
                 col.VisibleIndex = visibleIndex;
             }
-            col.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric; // Use Numeric for numbers
+            col.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
             col.DisplayFormat.FormatString = "{0:#}";
             col.OptionsColumn.AllowEdit = false;
 
@@ -271,7 +271,6 @@ namespace DigitalProduction
                 col.AppearanceHeader.Font = new Font(currentHeaderFont, FontStyle.Bold);
             }
         }
-
 
         private void GridView_DeviceOutput_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {

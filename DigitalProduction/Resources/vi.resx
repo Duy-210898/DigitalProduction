@@ -427,7 +427,7 @@
     <value>Số lớp vật liệu</value>
   </data>
   <data name="PeicesPerPair" xml:space="preserve">
-    <value>Số miếng trên đôi:</value>
+    <value>Số miếng trên đôi</value>
   </data>
   <data name="TotalPeicesPerPair" xml:space="preserve">
     <value>Tổng số miếng trên đôi</value>
@@ -581,5 +581,8 @@
   </data>
   <data name="Submit" xml:space="preserve">
     <value>Xác nhận</value>
+  </data>
+  <data name="TargetInDay" xml:space="preserve">
+    <value>Mục tiêu trong ngày</value>
   </data>
 </root>

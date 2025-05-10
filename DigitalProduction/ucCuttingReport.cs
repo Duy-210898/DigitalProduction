@@ -281,13 +281,12 @@ namespace DigitalProduction
                             worksheet.Cells[1, 1].Value = "Timestamp";
                             worksheet.Cells[1, 2].Value = "Machine Name";
                             worksheet.Cells[1, 3].Value = "SO";
-                            worksheet.Cells[1, 4].Value = "Order ID";
-                            worksheet.Cells[1, 5].Value = "Operator Name";
-                            worksheet.Cells[1, 6].Value = "Total Actual Cut";
-                            worksheet.Cells[1, 7].Value = "Total Pieces";
-                            worksheet.Cells[1, 8].Value = "Total Size Qty";
+                            worksheet.Cells[1, 4].Value = "Operator Name";
+                            worksheet.Cells[1, 5].Value = "Total Actual Cut";
+                            worksheet.Cells[1, 6].Value = "Total Pieces";
+                            worksheet.Cells[1, 7].Value = "Total Size Qty";
 
-                            using (ExcelRange range = worksheet.Cells[1, 1, 1, 8])
+                            using (ExcelRange range = worksheet.Cells[1, 1, 1, 7])
                             {
                                 range.Style.Font.Bold = true;
                                 range.Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -311,10 +310,10 @@ namespace DigitalProduction
                                         worksheet.Cells[rowIndex, 2].Value = item.MachineName;
                                         worksheet.Cells[rowIndex, 3].Value = item.SO;
                                     //    worksheet.Cells[rowIndex, 4].Value = item.OrderID;
-                                        worksheet.Cells[rowIndex, 5].Value = item.OperatorName;
-                                        worksheet.Cells[rowIndex, 6].Value = item.TotalActualCut;
-                                        worksheet.Cells[rowIndex, 7].Value = item.TotalPieces;
-                                        worksheet.Cells[rowIndex, 8].Value = item.TotalSizeQty;
+                                        worksheet.Cells[rowIndex, 4].Value = item.OperatorName;
+                                        worksheet.Cells[rowIndex, 5].Value = item.TotalActualCut;
+                                        worksheet.Cells[rowIndex, 6].Value = item.TotalPieces;
+                                        worksheet.Cells[rowIndex, 7].Value = item.TotalSizeQty;
 
                                         rowIndex++; // move to the next row
                                     }

@@ -38,7 +38,9 @@ namespace DigitalProduction
             lbl_operatorName.Visible = false;
             loadDeviceDistribution();
             txtInventory.KeyPress += TxtInventory_KeyPress;
+            txt_targetInDay.KeyPress += TxtInventory_KeyPress;
             rdRawMaterial.CheckedChanged += MaterialFilterChanged;
+            setControlVisibility(false, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
         }
         private void TxtInventory_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -158,13 +160,13 @@ namespace DigitalProduction
                     break;
             }
 
-            lblFactory.Text = $"Factory: {factoryName}";
-            lblLastNo.Text = $"Last No: {schedules.FirstOrDefault()?.LastNo ?? string.Empty}";
-            lblMasterWorkOrder.Text = $"Master Work Order: {string.Join(", ", schedules.Select(s => s.MasterWorkOrder).Distinct())}";
-            lblSO.Text = $"SO: {schedules.FirstOrDefault()?.SO ?? string.Empty}";
-            lblPO.Text = $"PO: {schedules.FirstOrDefault()?.PO ?? string.Empty}";
-            lblModel.Text = $"Model: {schedules.FirstOrDefault()?.Model ?? string.Empty}";
-            lblArt.Text = $"ART: {schedules.FirstOrDefault()?.ART ?? string.Empty}";
+            lblFactory.Text = $"{LocalizationManager.GetString("Factory")}: {factoryName}";
+            lblLastNo.Text = $"{LocalizationManager.GetString("LastNo")}: {schedules.FirstOrDefault()?.LastNo ?? string.Empty}";
+            lblMasterWorkOrder.Text = $"{LocalizationManager.GetString("MasterWorkOrder")}: {string.Join(", ", schedules.Select(s => s.MasterWorkOrder).Distinct())}";
+            lblSO.Text = $"{LocalizationManager.GetString("SO")}: {schedules.FirstOrDefault()?.SO ?? string.Empty}";
+            lblPO.Text = $"{LocalizationManager.GetString("PO")}: {schedules.FirstOrDefault()?.PO ?? string.Empty}";
+            lblModel.Text = $"{LocalizationManager.GetString("Model")}: {schedules.FirstOrDefault()?.Model ?? string.Empty}";
+            lblArt.Text = $"{LocalizationManager.GetString("ART")}: {schedules.FirstOrDefault()?.ART ?? string.Empty}";
 
             // set defaultInfo
             DefaultInfo defaultInfo = dbHelper.getDefaultValueFromART(lblArt.Text.Split(':')[1]);
@@ -176,7 +178,6 @@ namespace DigitalProduction
                 numericTotalPeicesPerPair.Text = defaultInfo.TotalPiecesPerPair.ToString();
             }
         }
-
         private void WebSocket_OnMessage(object data)
         {
             try
@@ -395,7 +396,6 @@ namespace DigitalProduction
                 }
             }
 
-
                 //foreach (int orderID in orderIDs)
                 //{
                 //    if (partIDs.Count >= 20)
@@ -470,6 +470,7 @@ namespace DigitalProduction
                 { btnDeleteData, "Refresh" },
                 { lblInventoryQty, "InventoryQty" },
                 {lblPeicesPerPair, "PeicesPerPair" },
+                {lblTargetInDay, "TargetInDay" },
                 {lblCuttingDie, "CuttingDieQty" },
                 {lblMaterialLayer, "MaterialLayer" },
                 {lblTotalPeicesPerPair, "TotalPeicesPerPair" },
@@ -792,7 +793,7 @@ namespace DigitalProduction
                 object sizeQtyObj = gridViewOverview.GetRowCellValue(selectedRowHandle, "SizeQty");
                 int sizeQty = sizeQtyObj != DBNull.Value ? Convert.ToInt32(sizeQtyObj) : 0;
 
-                if (sizeQty != 0 && inventory >= sizeQty)
+                if (sizeQty != 0 && inventory > sizeQty)
                 {
                     ShowMessage.ShowInfo("Number of Inventory must be less than SizeQty");
                     return;

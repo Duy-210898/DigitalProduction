@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -59,7 +58,6 @@ namespace DigitalProduction.ViewModels
                 }
             }
         }
-
 
         public DateTime? FilterStartDate
         {
@@ -251,7 +249,6 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-
         private void WebSocket_OnMessage(string jsonData)
         {
             _lastJsonData = jsonData; // cache last received data
@@ -339,7 +336,6 @@ namespace DigitalProduction.ViewModels
                     var items = group.Select(item =>
                     {
                         PrepareChildItem(item, group.Count());
-                        SubscribeToItemChanges(item, header, group);
                         return item;
                     })
                     .OrderByDescending(x => x.UpdatedAt)
@@ -374,39 +370,13 @@ namespace DigitalProduction.ViewModels
                 MaterialType = group.Any(x => x.IsLeather)
                     ? LocalizationManager.GetString("leatherMaterial")
                     : LocalizationManager.GetString("rawMaterial"),
-                //Timestamp = null,
-                //UpdatedAt = null,
-                //ActualCut = 0,
-                //ActualPieces = 0,
-                //ActualSizeQty = 0
             };
         }
 
         private void UpdateHeaderAggregates(DeviceOutput header, IGrouping<dynamic, DeviceOutput> group)
         {
-        //    int totalCut = group.Sum(x => x.ActualCut ?? 0);
-        //    int totalPieces = group.Sum(x => x.ActualPieces ?? 0);
-        //    int totalSizeQty = group.Sum(x => x.ActualSizeQty ?? 0);
             DateTime? createdAt = group.Min(x => x.Timestamp);
             DateTime? updatedAt = group.Max(x => x.UpdatedAt);
-
-            //if (header.ActualCut != totalCut)
-            //{
-            //    header.ActualCut = totalCut;
-            //    header.OnPropertyChanged(nameof(header.ActualCut));
-            //}
-
-            //if (header.ActualPieces != totalPieces)
-            //{
-            //    header.ActualPieces = totalPieces;
-            //    header.OnPropertyChanged(nameof(header.ActualPieces));
-            //}
-
-            //if (header.ActualSizeQty != totalSizeQty)
-            //{
-            //    header.ActualSizeQty = totalSizeQty;
-            //    header.OnPropertyChanged(nameof(header.ActualSizeQty));
-            //}
 
             if (header.Timestamp != createdAt)
             {
@@ -421,7 +391,6 @@ namespace DigitalProduction.ViewModels
             }
 
             Console.WriteLine($"[HEADER UPDATE] Group: {header.PartName}-{header.MachineName}-{header.SO}-{header.OperatorName}");
-        //    Console.WriteLine($"  -> Cut: {totalCut}, Pieces: {totalPieces}, SizeQty: {totalSizeQty}");
             Console.WriteLine($"  -> Timestamp: {createdAt}, UpdatedAt: {updatedAt}");
 
         }
@@ -440,46 +409,6 @@ namespace DigitalProduction.ViewModels
             item.OperatorName = string.Empty;
             item.PartName = string.Empty;
             item.MaterialType = string.Empty;
-        }
-
-        private void SubscribeToItemChanges(DeviceOutput item, DeviceOutput header, IEnumerable<DeviceOutput> group)
-        {
-            PropertyChangedEventHandler handler = null;
-
-            handler = (sender, e) =>
-            {
-                if (e.PropertyName == nameof(DeviceOutput.CuttingDieQty) ||
-                    e.PropertyName == nameof(DeviceOutput.PiecesPerPair) ||
-                    e.PropertyName == nameof(DeviceOutput.MaterialLayer) ||
-                    e.PropertyName == nameof(DeviceOutput.TotalPiecesPerPair) ||
-                    e.PropertyName == nameof(DeviceOutput.ActualCut) ||
-                    e.PropertyName == nameof(DeviceOutput.ActualPieces) ||
-                    e.PropertyName == nameof(DeviceOutput.ActualSizeQty))
-                {
-                    //int newCut = group.Sum(x => x.ActualCut ?? 0);
-                    //int newPieces = group.Sum(x => x.ActualPieces ?? 0);
-                    //int newSizeQty = group.Sum(x => x.ActualSizeQty ?? 0);
-
-                    //if (header.ActualCut != newCut)
-                    //{
-                    //    header.ActualCut = newCut;
-                    //    header.OnPropertyChanged(nameof(header.ActualCut));
-                    //}
-                    //if (header.ActualPieces != newPieces)
-                    //{
-                    //    header.ActualPieces = newPieces;
-                    //    header.OnPropertyChanged(nameof(header.ActualPieces));
-                    //}
-                    //if (header.ActualSizeQty != newSizeQty)
-                    //{
-                    //    header.ActualSizeQty = newSizeQty;
-                    //    header.OnPropertyChanged(nameof(header.ActualSizeQty));
-                    //}
-                }
-            };
-
-            item.PropertyChanged -= handler;
-            item.PropertyChanged += handler;
         }
 
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
@@ -506,7 +435,7 @@ namespace DigitalProduction.ViewModels
 
                 var existingGroups = BindingDeviceOutputs
                .Where(d => d.IsGroupHeader)
-               .GroupBy(d => new { d.MachineName, d.SO, d.OperatorName, d.PartName })
+               .GroupBy(d => new { UpdatedAt = d.UpdatedAt != null ? d.UpdatedAt.Value.ToString("yyyyMMdd") : string.Empty, d.MachineName, d.SO, d.OperatorName, d.PartName })
                .ToDictionary(g => g.Key, g => g.First());
 
                 int index = 0;
@@ -516,7 +445,7 @@ namespace DigitalProduction.ViewModels
                     if (newItem.IsGroupHeader)
                     {
                         // If group header exists, update values
-                        var key = new { newItem.MachineName, newItem.SO, newItem.OperatorName, newItem.PartName };
+                        var key = new { UpdatedAt = newItem.UpdatedAt?.ToString("yyyyMMdd") ?? string.Empty, newItem.MachineName, newItem.SO, newItem.OperatorName, newItem.PartName };
                         if (existingGroups.TryGetValue(key, out var existingHeader))
                         {
                             // Update group header values
@@ -624,8 +553,6 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-    
-
         public void Dispose()
         {
             _pollingTimer?.Dispose();
@@ -635,7 +562,6 @@ namespace DigitalProduction.ViewModels
             }
             Console.WriteLine("ViewModel disposed.");
         }
-
 
         public class RealTimeData
         {

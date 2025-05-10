@@ -552,4 +552,7 @@
   <data name="Submit" xml:space="preserve">
     <value>Submit</value>
   </data>
+  <data name="TargetInDay" xml:space="preserve">
+    <value>Target In Day</value>
+  </data>
 </root>

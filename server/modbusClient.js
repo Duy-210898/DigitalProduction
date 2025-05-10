@@ -7,8 +7,6 @@ const { notifyClientsToDeleteOrder } = require('./notifications');
 
 let countRemainSizeData = {};
 let storeDistributionData = {};
-let sizeAddress;
-let chooseSizeAddress;
 // let previousData = {};  // Store previous data for comparison
 
 let modbusClients = {};
@@ -212,6 +210,11 @@ async function connectToDevice(ipAddress, retries = 0) {
           if (modbusClients[ipAddress]) {
               modbusClients[ipAddress].isDisconnected = true;
               modbusClients[ipAddress].isConnected = false;
+
+              // reset index 
+              modbusClients[ipAddress].indexMultipleSOs = 0;
+              modbusClients[ipAddress].indexMultiplePartNames = 0;
+              
               delete modbusClients[ipAddress].client;
               delete modbusClients[ipAddress].socket;
           }
@@ -223,18 +226,31 @@ async function connectToDevice(ipAddress, retries = 0) {
 }
 
 async function startReadingRegisters(client, ipAddress) {
-  setInterval(() => {
-    if (modbusClients[ipAddress]?.isConnected) { 
-    //readAndCheckBits(client, ipAddress);
-    readOperatorID(client, ipAddress);
-    checkAndSaveDistribution(client, ipAddress);
+  if (modbusClients[ipAddress].readerLoopStarted) return;
+  modbusClients[ipAddress].readerLoopStarted = true;
 
-    if (modbusClients[ipAddress]?.sizeDataInfo && 
-      typeof modbusClients[ipAddress].sizeDataInfo === 'object' &&
-      Object.keys(modbusClients[ipAddress].sizeDataInfo || {}).length > 0) 
-      {
-          readActualData(client, ipAddress);
-      } 
+  setInterval(async () => {
+    try {
+      const modbusClient = modbusClients[ipAddress];
+      if (!modbusClient || !modbusClient.isConnected || !modbusClient.client) return;
+
+      const socket = modbusClient.socket;
+      if (!socket || socket.destroyed) {
+        console.warn(`[${ipAddress}] Socket is closed or destroyed. Skipping read.`);
+        return;
+      }
+
+      // Read only if everything is healthy
+      await readOperatorID(client, ipAddress);
+      await checkAndSaveDistribution(client, ipAddress);
+
+      const sizeDataInfo = modbusClient.sizeDataInfo;
+      if (sizeDataInfo && typeof sizeDataInfo === 'object' && Object.keys(sizeDataInfo).length > 0) {
+        await readActualData(client, ipAddress);
+      }
+
+    } catch (err) {
+      console.error(`[${ipAddress}] Error in reading loop: ${err.message}`);
     }
   }, 1000);
 }
@@ -481,7 +497,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
         //     console.log("No valid size data found.");
         // }
       } catch (error) {
-          console.error(`Error reading register ${sizeAddress}:`, error.message);
+          console.error(`Error reading register ${modbusClients[ipAddress].sizeAddress}:`, error.message);
       }        
     }
 
@@ -694,13 +710,13 @@ async function fetchStoreDistributionData(ipAddress, orderID, isLeather) {
   while (true) {
       if (Object.keys(storeDistributionData[ipAddress]).length === 0) {
           if (isLeather === 1) {
-              chooseSizeAddress = 3101;
-              sizeAddress = 3102;
+              modbusClients[ipAddress].chooseSizeAddress = 3101;
+              modbusClients[ipAddress].sizeAddress = 3102;
               storeDistributionData[ipAddress] = await getSizeAndDistributionDataFromDb(ipAddress, orderID, isLeather == 1 ? 0 : 1);
           } else {
-              chooseSizeAddress = 3103;
-              sizeAddress = 3104;
-              storeDistributionData[ipAddress] = await getSizeAndDistributionDataFromDb(ipAddress, orderID, isLeather == 1 ? 0 : 1);
+            modbusClients[ipAddress].chooseSizeAddress = 3103;
+            modbusClients[ipAddress].sizeAddress = 3104;
+            storeDistributionData[ipAddress] = await getSizeAndDistributionDataFromDb(ipAddress, orderID, isLeather == 1 ? 0 : 1);
           }
           return storeDistributionData[ipAddress]; // Exit loop after fetching data
       } else {
@@ -859,6 +875,15 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
       storeDistributionData[ipAddress] = {};
       modbusClients[ipAddress].previousSizeData = [];
       modbusClients[ipAddress].previousData = {};
+    }
+
+    // check max size SOS index, subtract - 1 element index
+    if(modbusClients[ipAddress].SOs !== undefined) {
+      if (modbusClients[ipAddress].SOs.length === 0) {
+        modbusClients[ipAddress].indexMultipleSOs = 0;
+      } else if (modbusClients[ipAddress].indexMultipleSOs >= modbusClients[ipAddress].SOs.length) {
+        modbusClients[ipAddress].indexMultipleSOs = modbusClients[ipAddress].SOs.length - 1;
+      }
     }
     
   } catch (error) {
@@ -1072,11 +1097,11 @@ async function readActualData(client, ipAddress) {
     const sizeCompleteID = modbusClients[ipAddress].sizeCompleteID || [];
 
     // Check choose size
-    const responseChooseSize = await client.readHoldingRegisters(chooseSizeAddress, 1);
+    const responseChooseSize = await client.readHoldingRegisters(modbusClients[ipAddress].chooseSizeAddress, 1);
     const registerChooseSizeValue = responseChooseSize.response._body.values[0];
 
     let binaryChooseSizeValue = registerChooseSizeValue.toString(2).padStart(16, '0');
-    console.log(`Output of size at register address ${chooseSizeAddress} = ${registerChooseSizeValue}`);
+    console.log(`Output of size at register address ${modbusClients[ipAddress].chooseSizeAddress} = ${registerChooseSizeValue}`);
     console.log(`Binary representation: ${binaryChooseSizeValue}`);
 
     const index = findSetBitIndex(binaryChooseSizeValue);
@@ -1249,22 +1274,22 @@ async function readActualData(client, ipAddress) {
         }
         if (totalCompletedSize.totalSizeQty !== 0) {
           if (isLeather) {
-            actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
-            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty;
+            actualSizeQty = await  readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
+            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty + actualCut;
           }
           else {
-            actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
+            actualSizeQty = await  readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
             modbusClients[ipAddress].storedActualCut -= totalCompletedSize.totalActualCut;
             actualCut = modbusClients[ipAddress].storedActualCut;
             actualPieces = (checkPendingSize.MaterialLayer * checkPendingSize.CuttingDieQty) * actualCut; 
           }
         } else {
           if (isLeather) {
-            actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
-            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty;
+            actualSizeQty = await  readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
+            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty + actualCut;
           }
           else {
-            actualSizeQty = readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
+            actualSizeQty = await readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize);
             actualCut -= totalCompletedSize.totalActualCut;
             actualPieces = (checkPendingSize.MaterialLayer * checkPendingSize.CuttingDieQty) * actualCut;
           }
@@ -1272,7 +1297,7 @@ async function readActualData(client, ipAddress) {
         console.log(`Total Complete => ActualCut [Address] ${ipAddress} ${actualCut} actualSizeQty ${actualSizeQty}`);
         } else {
           if (isLeather) {
-            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty;
+            actualPieces = checkPendingSize.TotalPiecesPerPair * actualSizeQty + actualCut;
             modbusClients[ipAddress].storedActualSizeQty -= totalCompletedSize.totalSizeQty;
             actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
           }
@@ -1311,7 +1336,7 @@ async function readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, total
       modbusClients[ipAddress].storedActualSizeQty -= totalCompletedSize.totalSizeQty;
       actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
     }
-    return actualSizeQty;
+    return parseInt(actualSizeQty);
   }
 }
 
@@ -1349,7 +1374,12 @@ async function processActualDataChange(
   modbusClients[ipAddress].previousData ||= {};
   const prevData = modbusClients[ipAddress].previousData[sizeID] || {};
   const isNewData = !modbusClients[ipAddress].previousData[sizeID];
-  const hasChanges = isNewData || JSON.stringify(newData) !== JSON.stringify(prevData);
+  let hasChanges = false;
+  if (isLeather) { 
+    hasChanges = isNewData;
+  } else {
+    hasChanges = isNewData || JSON.stringify(newData) !== JSON.stringify(prevData);
+  }
 
   if (hasChanges) {
     console.log(`Data changed or first-time load for sizeID ${sizeID}, updating DB...`, newData);
@@ -1690,10 +1720,9 @@ async function saveDistributionDataToModbus(ipAddress, data) {
     // }
     
     // Write defaultValue
+    const defaultValue =  modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
     if (data.Leather == 1) {
       const BASE_REGISTER = 886; 
-
-      const defaultValue =  modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
       try {
         await client.writeSingleRegister(BASE_REGISTER, defaultValue.Data[0].PiecesPerPair ?? 0);
         await client.writeSingleRegister(BASE_REGISTER + 4, defaultValue.Data[0].MaterialLayer ?? 0);
