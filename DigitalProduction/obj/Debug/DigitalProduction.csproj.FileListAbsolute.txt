@@ -189,3 +189,11 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.applicat
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalP.A2EA8899.Up2Date
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.pdb
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v24.2.Core.Desktop.dll
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v24.2.Core.dll
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v24.2.dll
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.Images.v24.2.dll
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v24.2.xml
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v24.2.Core.xml
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v24.2.Core.Desktop.xml
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses

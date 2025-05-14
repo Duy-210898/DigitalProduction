@@ -585,4 +585,13 @@
   <data name="TargetInDay" xml:space="preserve">
     <value>Mục tiêu trong ngày</value>
   </data>
+  <data name="EfficiencyPercent" xml:space="preserve">
+    <value>Hiệu suất</value>
+  </data>
+  <data name="TargetActualQuantity" xml:space="preserve">
+    <value>Mục tiêu thực tế</value>
+  </data>
+  <data name="TargetQuantity" xml:space="preserve">
+    <value>Mục tiêu</value>
+  </data>
 </root>

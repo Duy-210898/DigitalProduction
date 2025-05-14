@@ -193,16 +193,21 @@ CREATE TABLE TargetInDay (
     DepartmentId INT NOT NULL,              -- Phòng ban
     ProductId INT NOT NULL,                 -- Sản phẩm
     TargetQuantity INT NOT NULL,            -- Số lượng mục tiêu trong ngày
+	TargetActualQuantity INT NOT NULL,            -- Số lượng thuc te trong ngày
     EmployeeId INT NOT NULL,                -- Người phụ trách mục tiêu
     CreatedAt DATETIME DEFAULT GETDATE(),   -- Ngày tạo bản ghi
     UpdatedAt DATETIME NULL                 -- Ngày cập nhật
 );
 GO
 
+
+ALTER TABLE Operator ADD CONSTRAINT UQ_Operator_EmployeeID UNIQUE (EmployeeID);
+
 -- Foreign Key Constraints
 ALTER TABLE TargetInDay 
 	ADD CONSTRAINT FK_TargetInDay_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
-	CONSTRAINT FK_TargetInDay_Operator FOREIGN KEY (EmployeeID) REFERENCES Operator(EmployeeID);
+	CONSTRAINT FK_TargetInDay_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+	CONSTRAINT FK_TargetInDay_Operator FOREIGN KEY (EmployeeId) REFERENCES Operator(EmployeeId);
 ALTER TABLE DeviceOutput
 	ADD CONSTRAINT FK_DeviceOutput_Size FOREIGN KEY (SizeID) REFERENCES Size(SizeID),
 	CONSTRAINT FK_DeviceOutput_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID),

@@ -555,4 +555,13 @@
   <data name="TargetInDay" xml:space="preserve">
     <value>Target In Day</value>
   </data>
+  <data name="EfficiencyPercent" xml:space="preserve">
+    <value>Efficiency Percent</value>
+  </data>
+  <data name="TargetActualQuantity" xml:space="preserve">
+    <value>Target Actual Quantity</value>
+  </data>
+  <data name="TargetQuantity" xml:space="preserve">
+    <value>Target Quantity</value>
+  </data>
 </root>

@@ -48,7 +48,6 @@
             this.lbl_operatorID = new System.Windows.Forms.Label();
             this.lbl_operatorName = new System.Windows.Forms.Label();
             this.lbl_Name = new System.Windows.Forms.Label();
-            this.cbxDevice = new System.Windows.Forms.ComboBox();
             this.lblSelectMachine = new System.Windows.Forms.Label();
             this.panelMaterialType = new System.Windows.Forms.Panel();
             this.rdLeather = new System.Windows.Forms.RadioButton();
@@ -56,6 +55,8 @@
             this.panel5 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+            this.txt_targetInDay = new System.Windows.Forms.TextBox();
+            this.lblTargetInDay = new System.Windows.Forms.Label();
             this.numCuttingDieQty = new System.Windows.Forms.NumericUpDown();
             this.numPiecesPerPair = new System.Windows.Forms.NumericUpDown();
             this.lblTotalPeicesPerPair = new System.Windows.Forms.Label();
@@ -68,10 +69,9 @@
             this.btnSaveInventory = new DevExpress.XtraEditors.SimpleButton();
             this.txtInventory = new System.Windows.Forms.TextBox();
             this.lblInventoryQty = new System.Windows.Forms.Label();
+            this.cbxDevice = new System.Windows.Forms.ComboBox();
             this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
             this.gridViewOverview = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.lblTargetInDay = new System.Windows.Forms.Label();
-            this.txt_targetInDay = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -93,7 +93,7 @@
             // 
             this.lblFactory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblFactory.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFactory.Location = new System.Drawing.Point(747, 42);
+            this.lblFactory.Location = new System.Drawing.Point(747, 29);
             this.lblFactory.Name = "lblFactory";
             this.lblFactory.Size = new System.Drawing.Size(181, 20);
             this.lblFactory.TabIndex = 2;
@@ -103,7 +103,7 @@
             // 
             this.lblLastNo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblLastNo.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLastNo.Location = new System.Drawing.Point(375, 42);
+            this.lblLastNo.Location = new System.Drawing.Point(375, 29);
             this.lblLastNo.Name = "lblLastNo";
             this.lblLastNo.Size = new System.Drawing.Size(366, 20);
             this.lblLastNo.TabIndex = 2;
@@ -113,7 +113,7 @@
             // 
             this.lblArt.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblArt.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblArt.Location = new System.Drawing.Point(189, 42);
+            this.lblArt.Location = new System.Drawing.Point(189, 29);
             this.lblArt.Name = "lblArt";
             this.lblArt.Size = new System.Drawing.Size(180, 20);
             this.lblArt.TabIndex = 2;
@@ -123,7 +123,7 @@
             // 
             this.lblModel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblModel.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblModel.Location = new System.Drawing.Point(3, 42);
+            this.lblModel.Location = new System.Drawing.Point(3, 29);
             this.lblModel.Name = "lblModel";
             this.lblModel.Size = new System.Drawing.Size(180, 20);
             this.lblModel.TabIndex = 2;
@@ -133,7 +133,7 @@
             // 
             this.lblPO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPO.Location = new System.Drawing.Point(3, 62);
+            this.lblPO.Location = new System.Drawing.Point(3, 49);
             this.lblPO.Name = "lblPO";
             this.lblPO.Size = new System.Drawing.Size(180, 20);
             this.lblPO.TabIndex = 2;
@@ -157,7 +157,7 @@
             // 
             this.lblSO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSO.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSO.Location = new System.Drawing.Point(189, 62);
+            this.lblSO.Location = new System.Drawing.Point(189, 49);
             this.lblSO.Name = "lblSO";
             this.lblSO.Size = new System.Drawing.Size(180, 20);
             this.lblSO.TabIndex = 2;
@@ -167,7 +167,7 @@
             // 
             this.lblMasterWorkOrder.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMasterWorkOrder.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMasterWorkOrder.Location = new System.Drawing.Point(375, 62);
+            this.lblMasterWorkOrder.Location = new System.Drawing.Point(375, 49);
             this.lblMasterWorkOrder.Name = "lblMasterWorkOrder";
             this.lblMasterWorkOrder.Size = new System.Drawing.Size(366, 20);
             this.lblMasterWorkOrder.TabIndex = 2;
@@ -201,14 +201,14 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(931, 82);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(931, 69);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // lblProductionDate
             // 
             this.lblProductionDate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblProductionDate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblProductionDate.Location = new System.Drawing.Point(189, 22);
+            this.lblProductionDate.Location = new System.Drawing.Point(189, 9);
             this.lblProductionDate.Name = "lblProductionDate";
             this.lblProductionDate.Size = new System.Drawing.Size(180, 20);
             this.lblProductionDate.TabIndex = 2;
@@ -218,7 +218,7 @@
             // 
             this.lblCreatedDate.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblCreatedDate.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCreatedDate.Location = new System.Drawing.Point(375, 22);
+            this.lblCreatedDate.Location = new System.Drawing.Point(375, 9);
             this.lblCreatedDate.Name = "lblCreatedDate";
             this.lblCreatedDate.Size = new System.Drawing.Size(366, 20);
             this.lblCreatedDate.TabIndex = 2;
@@ -229,14 +229,14 @@
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel4.Location = new System.Drawing.Point(189, 3);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(180, 16);
+            this.panel4.Size = new System.Drawing.Size(180, 3);
             this.panel4.TabIndex = 4;
             // 
             // lblWorkCenter
             // 
             this.lblWorkCenter.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblWorkCenter.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblWorkCenter.Location = new System.Drawing.Point(3, 22);
+            this.lblWorkCenter.Location = new System.Drawing.Point(3, 9);
             this.lblWorkCenter.Name = "lblWorkCenter";
             this.lblWorkCenter.Size = new System.Drawing.Size(180, 20);
             this.lblWorkCenter.TabIndex = 2;
@@ -255,9 +255,9 @@
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.08664F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 54.58003F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10.19022F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 34.78261F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 54.8913F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(971, 736);
             this.tableLayoutPanel1.TabIndex = 1;
@@ -273,15 +273,14 @@
             this.tableLayoutPanel3.Controls.Add(this.panel5, 0, 2);
             this.tableLayoutPanel3.Controls.Add(this.cbxDevice, 1, 1);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(20, 91);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(20, 78);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 3;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 188F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(931, 239);
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 47.45763F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 52.54237F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(931, 250);
             this.tableLayoutPanel3.TabIndex = 2;
             // 
             // panel2
@@ -292,10 +291,10 @@
             this.panel2.Controls.Add(this.lbl_Name);
             this.panel2.Controls.Add(this.btnSend);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(479, 53);
+            this.panel2.Location = new System.Drawing.Point(479, 61);
             this.panel2.Margin = new System.Windows.Forms.Padding(3, 3, 20, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(432, 183);
+            this.panel2.Size = new System.Drawing.Size(432, 186);
             this.panel2.TabIndex = 6;
             // 
             // btnDeleteData
@@ -315,7 +314,7 @@
             // lbl_operatorID
             // 
             this.lbl_operatorID.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lbl_operatorID.Location = new System.Drawing.Point(0, 56);
+            this.lbl_operatorID.Location = new System.Drawing.Point(0, 61);
             this.lbl_operatorID.Name = "lbl_operatorID";
             this.lbl_operatorID.Size = new System.Drawing.Size(432, 22);
             this.lbl_operatorID.TabIndex = 7;
@@ -326,7 +325,7 @@
             // lbl_operatorName
             // 
             this.lbl_operatorName.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lbl_operatorName.Location = new System.Drawing.Point(0, 28);
+            this.lbl_operatorName.Location = new System.Drawing.Point(0, 33);
             this.lbl_operatorName.Name = "lbl_operatorName";
             this.lbl_operatorName.Size = new System.Drawing.Size(432, 28);
             this.lbl_operatorName.TabIndex = 6;
@@ -338,29 +337,17 @@
             this.lbl_Name.Dock = System.Windows.Forms.DockStyle.Top;
             this.lbl_Name.Location = new System.Drawing.Point(0, 0);
             this.lbl_Name.Name = "lbl_Name";
-            this.lbl_Name.Size = new System.Drawing.Size(432, 28);
+            this.lbl_Name.Size = new System.Drawing.Size(432, 33);
             this.lbl_Name.TabIndex = 5;
             this.lbl_Name.Text = "Operator Name";
             this.lbl_Name.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // cbxDevice
-            // 
-            this.cbxDevice.Dock = System.Windows.Forms.DockStyle.Top;
-            this.cbxDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxDevice.FormattingEnabled = true;
-            this.cbxDevice.Location = new System.Drawing.Point(476, 28);
-            this.cbxDevice.Margin = new System.Windows.Forms.Padding(0, 3, 20, 3);
-            this.cbxDevice.Name = "cbxDevice";
-            this.cbxDevice.Size = new System.Drawing.Size(435, 26);
-            this.cbxDevice.TabIndex = 5;
-            this.cbxDevice.SelectedValueChanged += new System.EventHandler(this.cbxDevice_SelectedValueChanged);
-            // 
             // lblSelectMachine
             // 
-            this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSelectMachine.Location = new System.Drawing.Point(479, 0);
             this.lblSelectMachine.Name = "lblSelectMachine";
-            this.lblSelectMachine.Size = new System.Drawing.Size(449, 25);
+            this.lblSelectMachine.Size = new System.Drawing.Size(449, 28);
             this.lblSelectMachine.TabIndex = 0;
             this.lblSelectMachine.Text = "Select Machine";
             this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -372,7 +359,7 @@
             this.panelMaterialType.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMaterialType.Location = new System.Drawing.Point(3, 3);
             this.panelMaterialType.Name = "panelMaterialType";
-            this.panelMaterialType.Size = new System.Drawing.Size(470, 19);
+            this.panelMaterialType.Size = new System.Drawing.Size(470, 22);
             this.panelMaterialType.TabIndex = 6;
             // 
             // rdLeather
@@ -381,7 +368,7 @@
             this.rdLeather.Dock = System.Windows.Forms.DockStyle.Left;
             this.rdLeather.Location = new System.Drawing.Point(97, 0);
             this.rdLeather.Name = "rdLeather";
-            this.rdLeather.Size = new System.Drawing.Size(97, 19);
+            this.rdLeather.Size = new System.Drawing.Size(97, 22);
             this.rdLeather.TabIndex = 5;
             this.rdLeather.TabStop = true;
             this.rdLeather.Text = "radioButton3";
@@ -394,7 +381,7 @@
             this.rdRawMaterial.Dock = System.Windows.Forms.DockStyle.Left;
             this.rdRawMaterial.Location = new System.Drawing.Point(0, 0);
             this.rdRawMaterial.Name = "rdRawMaterial";
-            this.rdRawMaterial.Size = new System.Drawing.Size(97, 19);
+            this.rdRawMaterial.Size = new System.Drawing.Size(97, 22);
             this.rdRawMaterial.TabIndex = 3;
             this.rdRawMaterial.TabStop = true;
             this.rdRawMaterial.Text = "radioButton1";
@@ -405,9 +392,9 @@
             // 
             this.panel5.Controls.Add(this.tableLayoutPanel4);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel5.Location = new System.Drawing.Point(3, 53);
+            this.panel5.Location = new System.Drawing.Point(3, 61);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(470, 183);
+            this.panel5.Size = new System.Drawing.Size(470, 186);
             this.panel5.TabIndex = 7;
             // 
             // tableLayoutPanel4
@@ -424,7 +411,7 @@
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(470, 183);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(470, 186);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // tableLayoutPanel6
@@ -454,6 +441,25 @@
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.Size = new System.Drawing.Size(464, 141);
             this.tableLayoutPanel6.TabIndex = 8;
+            // 
+            // txt_targetInDay
+            // 
+            this.txt_targetInDay.Dock = System.Windows.Forms.DockStyle.Left;
+            this.txt_targetInDay.Location = new System.Drawing.Point(235, 119);
+            this.txt_targetInDay.Name = "txt_targetInDay";
+            this.txt_targetInDay.Size = new System.Drawing.Size(118, 23);
+            this.txt_targetInDay.TabIndex = 9;
+            // 
+            // lblTargetInDay
+            // 
+            this.lblTargetInDay.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTargetInDay.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblTargetInDay.Location = new System.Drawing.Point(3, 116);
+            this.lblTargetInDay.Name = "lblTargetInDay";
+            this.lblTargetInDay.Size = new System.Drawing.Size(176, 24);
+            this.lblTargetInDay.TabIndex = 8;
+            this.lblTargetInDay.Text = "Target In Day:";
+            this.lblTargetInDay.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // numCuttingDieQty
             // 
@@ -585,13 +591,25 @@
             this.lblInventoryQty.Text = "Inventory Quanity:";
             this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // cbxDevice
+            // 
+            this.cbxDevice.Dock = System.Windows.Forms.DockStyle.Top;
+            this.cbxDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxDevice.FormattingEnabled = true;
+            this.cbxDevice.Location = new System.Drawing.Point(476, 31);
+            this.cbxDevice.Margin = new System.Windows.Forms.Padding(0, 3, 20, 3);
+            this.cbxDevice.Name = "cbxDevice";
+            this.cbxDevice.Size = new System.Drawing.Size(435, 26);
+            this.cbxDevice.TabIndex = 5;
+            this.cbxDevice.SelectedValueChanged += new System.EventHandler(this.cbxDevice_SelectedValueChanged);
+            // 
             // gridControlOverview
             // 
             this.gridControlOverview.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridControlOverview.Location = new System.Drawing.Point(3, 336);
+            this.gridControlOverview.Location = new System.Drawing.Point(3, 334);
             this.gridControlOverview.MainView = this.gridViewOverview;
             this.gridControlOverview.Name = "gridControlOverview";
-            this.gridControlOverview.Size = new System.Drawing.Size(965, 397);
+            this.gridControlOverview.Size = new System.Drawing.Size(965, 399);
             this.gridControlOverview.TabIndex = 3;
             this.gridControlOverview.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewOverview});
@@ -600,25 +618,6 @@
             // 
             this.gridViewOverview.GridControl = this.gridControlOverview;
             this.gridViewOverview.Name = "gridViewOverview";
-            // 
-            // lblTargetInDay
-            // 
-            this.lblTargetInDay.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTargetInDay.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblTargetInDay.Location = new System.Drawing.Point(3, 116);
-            this.lblTargetInDay.Name = "lblTargetInDay";
-            this.lblTargetInDay.Size = new System.Drawing.Size(176, 24);
-            this.lblTargetInDay.TabIndex = 8;
-            this.lblTargetInDay.Text = "Target In Day:";
-            this.lblTargetInDay.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // txt_targetInDay
-            // 
-            this.txt_targetInDay.Dock = System.Windows.Forms.DockStyle.Left;
-            this.txt_targetInDay.Location = new System.Drawing.Point(235, 119);
-            this.txt_targetInDay.Name = "txt_targetInDay";
-            this.txt_targetInDay.Size = new System.Drawing.Size(118, 23);
-            this.txt_targetInDay.TabIndex = 9;
             // 
             // ucDistribution
             // 
@@ -667,7 +666,6 @@
         private System.Windows.Forms.Panel panelMaterialType;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.ComboBox cbxDevice;
         private System.Windows.Forms.Label lblSelectMachine;
         private System.Windows.Forms.Label lbl_Name;
         private System.Windows.Forms.Label lbl_operatorName;
@@ -694,5 +692,6 @@
         private System.Windows.Forms.NumericUpDown numericTotalPeicesPerPair;
         private System.Windows.Forms.TextBox txt_targetInDay;
         private System.Windows.Forms.Label lblTargetInDay;
+        private System.Windows.Forms.ComboBox cbxDevice;
     }
 }

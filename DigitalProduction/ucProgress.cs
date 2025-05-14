@@ -384,16 +384,16 @@ namespace DigitalProduction
             try
             {
                 var response = ResponseMessage<List<Distribution>>.FromJson(jsonData);
-                if (response?.DistributionData != null && response.DistributionData.Count > 0)
+                Console.WriteLine(jsonData);
+
+                if (response?.DistributionData?.Any() == true)
                 {
-                    distributionDataList.Clear();  // Ensure the list is cleared only when necessary
+                    distributionDataList.Clear();
 
                     foreach (var distribution in response.DistributionData)
                     {
                         if (distribution != null)
-                        {
                             distributionDataList.Add(distribution);
-                        }
                     }
 
                     UpdateGridControl(new BindingList<Distribution>(distributionDataList));
@@ -401,13 +401,18 @@ namespace DigitalProduction
                 }
                 else
                 {
-                    Console.WriteLine("No Data Found");
+                    Console.WriteLine("No Data Found or DistributionData is null");
                 }
+            }
+            catch (JsonException jsonEx)
+            {
+                MessageBox.Show($"Invalid JSON format: {jsonEx.Message}", "JSON Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error receiving WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error receiving WebSocket data:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
         }
 
         // Implement the RowStyle event handler
@@ -586,9 +591,14 @@ namespace DigitalProduction
 
                         if (distribution != null)
                         {
-                            if (distribution.InventoryQty + distribution.ActualSizeQty <= distribution.SizeQty)
+                            if (distribution.InventoryQty + distribution.ActualSizeQty < distribution.SizeQty)
                             {
-                                DbHelper.UpdateInventoryQty(distribution.DistributionID, Convert.ToInt32(e.Value));
+                                DbHelper.UpdateInventoryQty(distribution.DistributionID, Convert.ToInt32(e.Value), "Stop");
+                                Console.WriteLine($"Updated InventoryQty for DistributionID: {distribution.DistributionID} to {e.Value}");
+                            }
+                            else if (distribution.InventoryQty + distribution.ActualSizeQty == distribution.SizeQty)
+                            {
+                                DbHelper.UpdateInventoryQty(distribution.DistributionID, Convert.ToInt32(e.Value), "Complete");
                                 Console.WriteLine($"Updated InventoryQty for DistributionID: {distribution.DistributionID} to {e.Value}");
                             }
                             else {
@@ -672,7 +682,7 @@ namespace DigitalProduction
             public string MaterialName { get; set; }
             public string OperatorName { get; set; }
             public string EmployeeName { get; set; }
-            public int ActualSizeQty { get; set; }
+            public int? ActualSizeQty { get; set; }
             public int InventoryQty { get; set; }
             public string Status { get; set; }
             public DateTime CreatedAt { get; set; }

@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DigitalProduction.Models;
+using static DigitalProduction.ucReportOrder;
 
 namespace DigitalProduction
 {
@@ -993,7 +994,7 @@ namespace DigitalProduction
                 return false;
             }
         }
-        public static void UpdateInventoryQty(int distributionID, int newInventoryQty)
+        public static void UpdateInventoryQty(int distributionID, int newInventoryQty, string status)
         {
             try
             {
@@ -1002,13 +1003,14 @@ namespace DigitalProduction
                     conn.Open();
 
                     // SQL command to update the inventory quantity
-                    string updateQuery = "UPDATE DistributionData SET InventoryQty = @InventoryQty WHERE DistributionID = @DistributionID";
+                    string updateQuery = "UPDATE DistributionData SET InventoryQty = @InventoryQty, Status = @Status WHERE DistributionID = @DistributionID";
 
                     using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
                     {
                         // Adding parameters to prevent SQL injection
                         cmd.Parameters.AddWithValue("@InventoryQty", newInventoryQty);
                         cmd.Parameters.AddWithValue("@DistributionID", distributionID);
+                        cmd.Parameters.AddWithValue("@Status", status);
 
                         // Execute the query
                         int rowsAffected = cmd.ExecuteNonQuery();
@@ -1030,6 +1032,104 @@ namespace DigitalProduction
                 // Log any errors
                 Console.WriteLine($"Error updating inventory quantity: {ex.Message}");
             }
+        }
+
+        public static void UpsertTargetInDay(
+         DateTime targetDate,
+         int departmentId,
+         int productId,
+         int targetQuantity,
+         int employeeId)
+        {
+            string sql = @"
+            IF EXISTS (
+                SELECT 1 FROM TargetInDay 
+                WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId
+            )
+            BEGIN
+                UPDATE TargetInDay
+                SET 
+                    TargetQuantity = @TargetQuantity,
+                    EmployeeId = @EmployeeId,
+                    UpdatedAt = GETDATE()
+                WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId;
+            END
+            ELSE
+            BEGIN
+                INSERT INTO TargetInDay (TargetDate, DepartmentId, ProductId, TargetQuantity, EmployeeId)
+                VALUES (@TargetDate, @DepartmentId, @ProductId, @TargetQuantity, @EmployeeId);
+            END";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Parameters.Add("@TargetDate", SqlDbType.Date).Value = targetDate;
+                    cmd.Parameters.Add("@DepartmentId", SqlDbType.Int).Value = departmentId;
+                    cmd.Parameters.Add("@ProductId", SqlDbType.Int).Value = productId;
+                    cmd.Parameters.Add("@TargetQuantity", SqlDbType.Int).Value = targetQuantity;
+                    cmd.Parameters.Add("@EmployeeId", SqlDbType.Int).Value = employeeId;
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public static async Task<List<TargetRealtimeInfo>> GetRealtimeTargetDataAsync(int month, int year)
+        {
+            var list = new List<TargetRealtimeInfo>();
+
+            string sql = @"
+                  SELECT 
+                o.OperatorName,
+                tid.TargetDate AS Timestamp,  -- Use actual datetime for compatibility with DateTime in C#
+                tid.TargetQuantity,
+                COALESCE(SUM(ac.ActualCut), 0) AS TargetActualQuantity  -- Match C# property name
+            FROM DeviceOutput ac
+            LEFT JOIN PartSizeOrder pso 
+                ON ac.OrderID = pso.OrderId 
+                AND ac.SizeID = pso.SizeId 
+                AND ac.PartID = pso.PartId
+            LEFT JOIN ProductOrder po 
+                ON po.OrderId = ac.OrderId
+            JOIN TargetInDay tid 
+                ON CAST(ac.UpdatedAt AS DATE) = CAST(tid.TargetDate AS DATE)
+            JOIN Operator o 
+                ON tid.EmployeeId = o.EmployeeId
+            WHERE 
+                YEAR(tid.TargetDate) = @Year
+                AND MONTH(tid.TargetDate) = @Month
+            GROUP BY 
+                tid.TargetDate,
+                tid.TargetQuantity,
+                o.OperatorName
+            ORDER BY 
+                tid.TargetDate;
+            ";
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@Month", month);
+                cmd.Parameters.AddWithValue("@Year", year);
+
+                await conn.OpenAsync();
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        list.Add(new TargetRealtimeInfo
+                        {
+                            OperatorName = reader["OperatorName"].ToString(),
+                            Timestamp = Convert.ToDateTime(reader["Timestamp"]),
+                            TargetQuantity = Convert.ToInt32(reader["TargetQuantity"]),
+                            TargetActualQuantity = Convert.ToInt32(reader["TargetActualQuantity"]),
+                        });
+                    }
+                }
+            }
+
+            return list;
         }
     }
 }

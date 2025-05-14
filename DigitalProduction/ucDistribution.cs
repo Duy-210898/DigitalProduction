@@ -22,6 +22,8 @@ namespace DigitalProduction
         private int operatorID = 0;
         private int deviceID = 0;
         private int userID = 0;
+        private int departmentID = 0;
+        private int productId = 0;
         private HashSet<int> sizeIDs = new HashSet<int>();
         private HashSet<int> partIDs = new HashSet<int>();
         private HashSet<int> partSizeOrderIDs = new HashSet<int>();
@@ -287,7 +289,6 @@ namespace DigitalProduction
             else {
                 lbl_operatorName.Visible = false;
             }
-
         }
 
         private async void SendGetOpertaionAndScheduleRequestAsync(string so, string IpAddress, string key)
@@ -312,6 +313,7 @@ namespace DigitalProduction
             partSizeOrderIDs.Clear();
             List<DistributionData> results = new List<DistributionData>();
             userID = Global.CurrentUser != null ? Global.CurrentUser.UserID : 0;
+            departmentID = Global.CurrentUser != null ? Global.CurrentUser.DepartmentID : 0;
             deviceID = int.Parse(cbxDevice.SelectedValue.ToString());
             operatorID = int.Parse(lbl_operatorID.Text);
             //cuttingDieQty = int.Parse(numCuttingDieQty.Text);
@@ -319,7 +321,7 @@ namespace DigitalProduction
             //materialLayer = int.Parse(numMaterialLayer.Text);
             //totalPiecesPerPair = int.Parse(numericTotalPeicesPerPair.Text);
 
-          //  int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
+            //int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
             bool isLeather = false;
 
             // Use a HashSet to avoid duplicate PartSizeOrderIDs
@@ -348,6 +350,7 @@ namespace DigitalProduction
                         int piecesPerPair = schedule.PeicesPerPair;
                         int materialLayer = schedule.MaterialLayer;
                         int TotalPiecesPerPair = schedule.TotalPiecesPerPair;
+
                         if (rdRawMaterial.Checked)
                         {
                             if (cuttingDieQty == 0 || piecesPerPair == 0 || materialLayer == 0)
@@ -363,7 +366,7 @@ namespace DigitalProduction
                                 return null;
                             }
                         }
-                        int productId = dbHelper.getProductIdByArt(schedule.ART);
+                        productId = dbHelper.getProductIdByArt(schedule.ART);
 
                         int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
 
@@ -513,6 +516,7 @@ namespace DigitalProduction
 
                         if (response != null && response.Status == "success")
                         {
+                            DbHelper.UpsertTargetInDay(DateTime.Now, departmentID, productId, int.Parse(txt_targetInDay.Text), operatorID);
                             ResetSendDistribution();
                             ShowMessage.ShowInfo(response.Message, "Sucess");
                         }
@@ -524,12 +528,12 @@ namespace DigitalProduction
                     else
                     {
                         MessageBox.Show("No response received from the server.");
-                        ConnectionManager.Instance.IsReconnecting = true;
                     }
                 }
             }
             catch (Exception ex)
             {
+                ConnectionManager.Instance.IsReconnecting = true;
                 MessageBox.Show("An error occurred while sending data: " + ex.Message);
             }
         }
