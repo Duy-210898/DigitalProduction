@@ -168,42 +168,49 @@ namespace DigitalProduction
         {
             if (pnlControl.InvokeRequired)
             {
-                await Task.Run(() => pnlControl.Invoke(new Action(async () => await ShowUserControlAsync<T>())));
+                var tcs = new TaskCompletionSource<bool>();
+                pnlControl.Invoke(new Action(() => {
+                    ShowUserControlAsync<T>().ContinueWith(t => {
+                        if (t.IsFaulted) tcs.SetException(t.Exception);
+                        else tcs.SetResult(true);
+                    });
+                }));
+                await tcs.Task;
                 return;
             }
 
-            // Check if the requested UserControl already exists in the dictionary
+            // Bật double buffering nếu chưa bật (gọi 1 lần duy nhất)
+            typeof(Panel).InvokeMember("DoubleBuffered",
+                System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+                null, pnlControl, new object[] { true });
+
             if (!_userControls.TryGetValue(typeof(T), out UserControl userControl))
             {
-                // Create a new instance of the control
                 userControl = new T { Dock = DockStyle.Fill };
+
                 _userControls[typeof(T)] = userControl;
 
-                // Ensure WebSocket setup happens on the UI thread
-                pnlControl.Invoke(new Action(() => InvokeSetWebSocketClient(userControl)));
-
                 pnlControl.Controls.Add(userControl);
+
+                InvokeSetWebSocketClient(userControl);
             }
             else
             {
-                // If control already exists, ensure WebSocketClient is properly initialized
-                pnlControl.Invoke(new Action(() =>
-                {
-                    _webSocketClient?.ClearEventHandlers();
-                    InvokeSetWebSocketClient(userControl);
-                }));
+                _webSocketClient?.ClearEventHandlers();
+                InvokeSetWebSocketClient(userControl);
             }
 
-            // Only change visibility without reloading the UI
+            pnlControl.SuspendLayout();
+
             foreach (Control ctrl in pnlControl.Controls)
             {
-                ctrl.Visible = ctrl == userControl; // Show only the requested control
+                ctrl.Visible = ctrl == userControl;
             }
 
             userControl.BringToFront();
+
+            pnlControl.ResumeLayout();
         }
-
-
 
 
         private void InvokeSetWebSocketClient(UserControl userControl)

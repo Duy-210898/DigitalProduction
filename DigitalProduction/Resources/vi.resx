@@ -594,4 +594,16 @@
   <data name="TargetQuantity" xml:space="preserve">
     <value>Mục tiêu</value>
   </data>
+  <data name="Group By This Column" xml:space="preserve">
+    <value>Nhóm theo cột này</value>
+  </data>
+  <data name="Hide Group By Box" xml:space="preserve">
+    <value>Ẩn nhóm</value>
+  </data>
+  <data name="Show Group By Box" xml:space="preserve">
+    <value>Hiện nhóm</value>
+  </data>
+  <data name="UnGroup" xml:space="preserve">
+    <value>Tách nhóm</value>
+  </data>
 </root>

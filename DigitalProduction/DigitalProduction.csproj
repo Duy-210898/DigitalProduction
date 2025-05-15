@@ -199,6 +199,7 @@
       <DependentUpon>ChangePassword.cs</DependentUpon>
     </Compile>
     <Compile Include="ConnectionManager.cs" />
+    <Compile Include="Extensions\GridViewHelper.cs" />
     <Compile Include="Extensions\LookUpEditValidatorExtensions.cs" />
     <Compile Include="Extensions\TextBoxValidatorExtensions.cs" />
     <Compile Include="Models\CuttingReportModel.cs" />
@@ -444,6 +445,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon_digital.ico" />
+    <None Include="Resources\save_icon.png" />
+    <None Include="Resources\reset_icon.png" />
+    <None Include="Resources\foreColor_icon.png" />
+    <None Include="Resources\font_icon.png" />
+    <None Include="Resources\backGround_icon.png" />
     <None Include="Resources\Untitled design %281%29.png" />
     <None Include="Resources\Untitled design.png" />
   </ItemGroup>

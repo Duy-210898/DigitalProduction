@@ -193,13 +193,11 @@ CREATE TABLE TargetInDay (
     DepartmentId INT NOT NULL,              -- Phòng ban
     ProductId INT NOT NULL,                 -- Sản phẩm
     TargetQuantity INT NOT NULL,            -- Số lượng mục tiêu trong ngày
-	TargetActualQuantity INT NOT NULL,            -- Số lượng thuc te trong ngày
     EmployeeId INT NOT NULL,                -- Người phụ trách mục tiêu
     CreatedAt DATETIME DEFAULT GETDATE(),   -- Ngày tạo bản ghi
     UpdatedAt DATETIME NULL                 -- Ngày cập nhật
 );
 GO
-
 
 ALTER TABLE Operator ADD CONSTRAINT UQ_Operator_EmployeeID UNIQUE (EmployeeID);
 

@@ -51,6 +51,7 @@
             this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
             this.statusItem = new DevExpress.XtraBars.BarStaticItem();
             this.pnlControl = new System.Windows.Forms.Panel();
+            this.SkinOption = new DevExpress.XtraBars.SkinBarSubItem();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemTextEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl1)).BeginInit();
@@ -209,7 +210,8 @@
             this.fluentDesignFormControl1.FluentDesignForm = this;
             this.fluentDesignFormControl1.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
             this.barSubItem1,
-            this.statusItem});
+            this.statusItem,
+            this.SkinOption});
             this.fluentDesignFormControl1.Location = new System.Drawing.Point(0, 0);
             this.fluentDesignFormControl1.Name = "fluentDesignFormControl1";
             this.fluentDesignFormControl1.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
@@ -220,6 +222,7 @@
             this.fluentDesignFormControl1.TabStop = false;
             this.fluentDesignFormControl1.TitleItemLinks.Add(this.barSubItem1);
             this.fluentDesignFormControl1.TitleItemLinks.Add(this.statusItem);
+            this.fluentDesignFormControl1.TitleItemLinks.Add(this.SkinOption);
             // 
             // barSubItem1
             // 
@@ -241,6 +244,12 @@
             this.pnlControl.Name = "pnlControl";
             this.pnlControl.Size = new System.Drawing.Size(971, 736);
             this.pnlControl.TabIndex = 3;
+            // 
+            // SkinOption
+            // 
+            this.SkinOption.Caption = "Skin UI";
+            this.SkinOption.Id = 0;
+            this.SkinOption.Name = "SkinOption";
             // 
             // frmMain
             // 
@@ -287,6 +296,7 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnProgressDistribution;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnReportOder;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnCuttingReportQty;
+        private DevExpress.XtraBars.SkinBarSubItem SkinOption;
     }
 }
 

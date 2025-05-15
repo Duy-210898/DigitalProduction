@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraEditors;
 
 namespace DigitalProduction
 {
@@ -12,6 +13,7 @@ namespace DigitalProduction
         [STAThread]
         static void Main()
         {
+            WindowsFormsSettings.DefaultFont = new System.Drawing.Font("Arial", 8);
             // Enable visual styles for the application
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -20,6 +22,7 @@ namespace DigitalProduction
             Task.Run(() => ConnectWithRetry());
 
             // Run the main application form
+            WindowsFormsSettings.ScrollUIMode = ScrollUIMode.Fluent;
             Application.Run(new frmLogin());
         }
 

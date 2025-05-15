@@ -30,11 +30,11 @@
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnSync = new DevExpress.XtraEditors.SimpleButton();
             this.dateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.btnExport = new DevExpress.XtraEditors.SimpleButton();
             this.gridControlPerformance = new DevExpress.XtraGrid.GridControl();
             this.gridViewPeformance = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.btnSync = new DevExpress.XtraEditors.SimpleButton();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlPerformance)).BeginInit();
@@ -62,9 +62,9 @@
             // 
             this.tableLayoutPanel2.AutoSize = true;
             this.tableLayoutPanel2.ColumnCount = 3;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableLayoutPanel2.Controls.Add(this.btnSync, 2, 0);
             this.tableLayoutPanel2.Controls.Add(this.dateTimePicker, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnExport, 1, 0);
@@ -75,6 +75,20 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.Size = new System.Drawing.Size(853, 42);
             this.tableLayoutPanel2.TabIndex = 0;
+            // 
+            // btnSync
+            // 
+            this.btnSync.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSync.Appearance.ForeColor = System.Drawing.Color.DeepSkyBlue;
+            this.btnSync.Appearance.Options.UseFont = true;
+            this.btnSync.Appearance.Options.UseForeColor = true;
+            this.btnSync.ImageOptions.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.False;
+            this.btnSync.ImageOptions.Image = global::DigitalProduction.Properties.Resources.sync_icon;
+            this.btnSync.Location = new System.Drawing.Point(303, 3);
+            this.btnSync.Name = "btnSync";
+            this.btnSync.Size = new System.Drawing.Size(109, 39);
+            this.btnSync.TabIndex = 2;
+            this.btnSync.Text = "Sync";
             // 
             // dateTimePicker
             // 
@@ -92,7 +106,7 @@
             this.btnExport.Appearance.ForeColor = System.Drawing.Color.LimeGreen;
             this.btnExport.Appearance.Options.UseFont = true;
             this.btnExport.Appearance.Options.UseForeColor = true;
-            this.btnExport.Location = new System.Drawing.Point(130, 3);
+            this.btnExport.Location = new System.Drawing.Point(153, 3);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(121, 26);
             this.btnExport.TabIndex = 1;
@@ -113,20 +127,6 @@
             // 
             this.gridViewPeformance.GridControl = this.gridControlPerformance;
             this.gridViewPeformance.Name = "gridViewPeformance";
-            // 
-            // btnSync
-            // 
-            this.btnSync.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSync.Appearance.ForeColor = System.Drawing.Color.DeepSkyBlue;
-            this.btnSync.Appearance.Options.UseFont = true;
-            this.btnSync.Appearance.Options.UseForeColor = true;
-            this.btnSync.ImageOptions.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.False;
-            this.btnSync.ImageOptions.Image = global::DigitalProduction.Properties.Resources.sync_icon;
-            this.btnSync.Location = new System.Drawing.Point(257, 3);
-            this.btnSync.Name = "btnSync";
-            this.btnSync.Size = new System.Drawing.Size(109, 39);
-            this.btnSync.TabIndex = 2;
-            this.btnSync.Text = "Sync";
             // 
             // ucReportOrder
             // 

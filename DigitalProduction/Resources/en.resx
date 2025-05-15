@@ -564,4 +564,16 @@
   <data name="TargetQuantity" xml:space="preserve">
     <value>Target Quantity</value>
   </data>
+  <data name="Group By This Column" xml:space="preserve">
+    <value>Group By This Column</value>
+  </data>
+  <data name="Hide Group By Box" xml:space="preserve">
+    <value>Hide Group By Box</value>
+  </data>
+  <data name="Show Group By Box" xml:space="preserve">
+    <value>Show Group By Box</value>
+  </data>
+  <data name="UnGroup" xml:space="preserve">
+    <value>UnGroup</value>
+  </data>
 </root>

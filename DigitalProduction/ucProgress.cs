@@ -5,11 +5,18 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.Utils.Menu;
 using DevExpress.XtraEditors;
+using DevExpress.XtraExport.Helpers;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Menu;
+using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraGrid.Views.Grid.ViewInfo;
+using DevExpress.XtraVerticalGrid;
 using DigitalProduction.Models;
+using GridviewHelp;
 using Newtonsoft.Json;
 
 namespace DigitalProduction
@@ -247,13 +254,52 @@ namespace DigitalProduction
             gridViewProgressManagement.Columns.Clear();
 
             gridViewProgressManagement.Appearance.HeaderPanel.Font = new Font(gridViewProgressManagement.Appearance.Row.Font, FontStyle.Bold);
-            gridViewProgressManagement.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
-            gridViewProgressManagement.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
+            gridViewProgressManagement.Appearance.HeaderPanel.BackColor = Color.AntiqueWhite;
+            gridViewProgressManagement.Appearance.HeaderPanel.ForeColor = Color.Black;
             gridViewProgressManagement.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
 
             // Set data source
             gridProgressManagement.DataSource = distributionDataList;
+
+            // Đánh số thứ tự
+            gridViewProgressManagement.CustomDrawRowIndicator += (s, e) => { GridViewHelper.GridView_CustomDrawRowIndicator(s, e, gridProgressManagement, gridViewProgressManagement); };
+            // thêm menu vào gridview
+            gridViewProgressManagement.PopupMenuShowing += (s, e) => { GridViewHelper.AddFontAndColortoPopupMenuShowing(s, e, gridProgressManagement, this.Name); };
+            this.Load += (s, e) =>
+            {
+                GridViewHelper.SaveAndRestoreLayout(gridProgressManagement, this.Name);
+            };
+
+            GridViewHelper.CustomizeGroupText(gridViewProgressManagement);
+            //gridViewProgressManagement.CustomDrawGroupRow += gridViewProgressManagement_CustomDrawGroupRow;
         }
+        //private void gridViewProgressManagement_CustomDrawGroupRow(object sender, RowObjectCustomDrawEventArgs e)
+        //{
+        //    var view = sender as GridView;
+        //    if (view == null) return;
+
+        //    var info = e.Info as GridGroupRowInfo;
+        //    if (info == null) return;
+
+        //    int groupRowHandle = e.RowHandle;
+
+        //    // ✅ Get the first child row in this group
+        //    int childHandle = view.GetChildRowHandle(groupRowHandle, 0);
+        //    if (childHandle < 0) return;
+
+        //    // ✅ Get your data object
+        //    var data = view.GetRow(childHandle) as DeviceOutput;
+        //    if (data == null) return;
+
+        //    // ✅ Build group display text
+        //    string partName = data.PartName;
+        //    string status = view.GetRowCellDisplayText(childHandle, view.Columns["Status"]);            // Or map status from code to text
+
+        //    info.GroupText = $"PartName: {partName} - Status: {status}";
+
+        //    e.Painter.DrawObject(e.Info);
+        //    e.Handled = true;
+        //}
 
         private void DateTimePicker_ValueChanged(object sender, EventArgs e)
         {
@@ -466,6 +512,19 @@ namespace DigitalProduction
             gridViewProgressManagement.Columns["IsLeather"].Visible = false;
             gridViewProgressManagement.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
 
+
+            gridViewProgressManagement.PopupMenuShowing += (s, e) =>
+            {
+                if (e.MenuType == GridMenuType.Column)
+                {
+                    GridViewColumnMenu menu = e.Menu as GridViewColumnMenu;
+                    foreach (DXMenuItem item in menu.Items)
+                    {
+                        item.Caption = LocalizationManager.GetString(item.Caption);
+                    }
+                }
+            };
+
             var existedNoted = gridViewProgressManagement.Columns.ColumnByFieldName(LocalizationManager.GetString("Reason"));
             if (existedNoted == null)
             {
@@ -607,7 +666,6 @@ namespace DigitalProduction
                         }
                     }
                 };
-
             }
         }
         private void GridViewProgressManagement_CustomDrawColumnHeader(object sender, ColumnHeaderCustomDrawEventArgs e)

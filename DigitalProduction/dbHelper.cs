@@ -1081,31 +1081,40 @@ namespace DigitalProduction
             var list = new List<TargetRealtimeInfo>();
 
             string sql = @"
-                  SELECT 
-                o.OperatorName,
-                tid.TargetDate AS Timestamp,  -- Use actual datetime for compatibility with DateTime in C#
-                tid.TargetQuantity,
-                COALESCE(SUM(ac.ActualCut), 0) AS TargetActualQuantity  -- Match C# property name
-            FROM DeviceOutput ac
-            LEFT JOIN PartSizeOrder pso 
-                ON ac.OrderID = pso.OrderId 
-                AND ac.SizeID = pso.SizeId 
-                AND ac.PartID = pso.PartId
-            LEFT JOIN ProductOrder po 
-                ON po.OrderId = ac.OrderId
-            JOIN TargetInDay tid 
-                ON CAST(ac.UpdatedAt AS DATE) = CAST(tid.TargetDate AS DATE)
-            JOIN Operator o 
-                ON tid.EmployeeId = o.EmployeeId
-            WHERE 
-                YEAR(tid.TargetDate) = @Year
-                AND MONTH(tid.TargetDate) = @Month
-            GROUP BY 
-                tid.TargetDate,
-                tid.TargetQuantity,
-                o.OperatorName
-            ORDER BY 
-                tid.TargetDate;
+                    SELECT 
+                        ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
+                        CAST(ac.UpdatedAt AS DATE) AS Timestamp,
+                        ISNULL(t.TargetQuantity, 0) AS TargetQuantity,
+                        SUM(ac.ActualCut) AS TargetActualQuantity
+                    FROM DeviceOutput ac
+                    LEFT JOIN PartSizeOrder pso 
+                        ON ac.OrderID = pso.OrderId 
+                        AND ac.SizeID = pso.SizeId 
+                        AND ac.PartID = pso.PartId
+                    LEFT JOIN ProductOrder po 
+                        ON po.OrderId = ac.OrderId
+
+                    -- Get latest TargetInDay ON OR BEFORE the actual cut date
+                    OUTER APPLY (
+                        SELECT TOP 1 tid.*
+                        FROM TargetInDay tid
+                        WHERE tid.TargetDate <= CAST(ac.UpdatedAt AS DATE)
+                        ORDER BY tid.TargetDate DESC
+                    ) t
+
+                    LEFT JOIN Operator o ON o.EmployeeId = t.EmployeeId
+
+                    WHERE 
+                        YEAR(ac.UpdatedAt) = @Year
+                        AND MONTH(ac.UpdatedAt) = @Month
+	                     AND o.EmployeeId IS NOT NULL
+                    GROUP BY 
+                        ISNULL(o.OperatorName, 'Unknown'),
+                        ISNULL(t.TargetQuantity, 0),
+                        CAST(ac.UpdatedAt AS DATE)
+
+                    ORDER BY 
+                        CAST(ac.UpdatedAt AS DATE);
             ";
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(sql, conn))
