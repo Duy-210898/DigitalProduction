@@ -1034,87 +1034,94 @@ namespace DigitalProduction
             }
         }
 
-        public static void UpsertTargetInDay(
-         DateTime targetDate,
-         int departmentId,
-         int productId,
-         int targetQuantity,
-         int employeeId)
-        {
-            string sql = @"
-            IF EXISTS (
-                SELECT 1 FROM TargetInDay 
-                WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId
-            )
-            BEGIN
-                UPDATE TargetInDay
-                SET 
-                    TargetQuantity = @TargetQuantity,
-                    EmployeeId = @EmployeeId,
-                    UpdatedAt = GETDATE()
-                WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId;
-            END
-            ELSE
-            BEGIN
-                INSERT INTO TargetInDay (TargetDate, DepartmentId, ProductId, TargetQuantity, EmployeeId)
-                VALUES (@TargetDate, @DepartmentId, @ProductId, @TargetQuantity, @EmployeeId);
-            END";
+        //public static void UpsertTargetInDay(
+        // DateTime targetDate,
+        // int departmentId,
+        // int productId,
+        // int targetQuantity,
+        // int employeeId)
+        //{
+        //    string sql = @"
+        //    IF EXISTS (
+        //        SELECT 1 FROM TargetInDay 
+        //        WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId
+        //    )
+        //    BEGIN
+        //        UPDATE TargetInDay
+        //        SET 
+        //            TargetQuantity = @TargetQuantity,
+        //            EmployeeId = @EmployeeId,
+        //            UpdatedAt = GETDATE()
+        //        WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId;
+        //    END
+        //    ELSE
+        //    BEGIN
+        //        INSERT INTO TargetInDay (TargetDate, DepartmentId, ProductId, TargetQuantity, EmployeeId)
+        //        VALUES (@TargetDate, @DepartmentId, @ProductId, @TargetQuantity, @EmployeeId);
+        //    END";
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
+        //    using (SqlConnection connection = new SqlConnection(connectionString))
+        //    {
+        //        connection.Open();
 
-                using (SqlCommand cmd = new SqlCommand(sql, connection))
-                {
-                    cmd.Parameters.Add("@TargetDate", SqlDbType.Date).Value = targetDate;
-                    cmd.Parameters.Add("@DepartmentId", SqlDbType.Int).Value = departmentId;
-                    cmd.Parameters.Add("@ProductId", SqlDbType.Int).Value = productId;
-                    cmd.Parameters.Add("@TargetQuantity", SqlDbType.Int).Value = targetQuantity;
-                    cmd.Parameters.Add("@EmployeeId", SqlDbType.Int).Value = employeeId;
+        //        using (SqlCommand cmd = new SqlCommand(sql, connection))
+        //        {
+        //            cmd.Parameters.Add("@TargetDate", SqlDbType.Date).Value = targetDate;
+        //            cmd.Parameters.Add("@DepartmentId", SqlDbType.Int).Value = departmentId;
+        //            cmd.Parameters.Add("@ProductId", SqlDbType.Int).Value = productId;
+        //            cmd.Parameters.Add("@TargetQuantity", SqlDbType.Int).Value = targetQuantity;
+        //            cmd.Parameters.Add("@EmployeeId", SqlDbType.Int).Value = employeeId;
 
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
+        //            cmd.ExecuteNonQuery();
+        //        }
+        //    }
+        //}
         public static async Task<List<TargetRealtimeInfo>> GetRealtimeTargetDataAsync(int month, int year)
         {
             var list = new List<TargetRealtimeInfo>();
 
             string sql = @"
-                    SELECT 
-                        ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
-                        CAST(ac.UpdatedAt AS DATE) AS Timestamp,
-                        ISNULL(t.TargetQuantity, 0) AS TargetQuantity,
-                        SUM(ac.ActualCut) AS TargetActualQuantity
-                    FROM DeviceOutput ac
-                    LEFT JOIN PartSizeOrder pso 
-                        ON ac.OrderID = pso.OrderId 
-                        AND ac.SizeID = pso.SizeId 
-                        AND ac.PartID = pso.PartId
-                    LEFT JOIN ProductOrder po 
-                        ON po.OrderId = ac.OrderId
+                SELECT 
+                    ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
+                    CAST(ac.UpdatedAt AS DATE) AS Timestamp,
+                    t.EmployeeId,
+                    CASE 
+                        WHEN CAST(t.TargetDate AS DATE) = CAST(ac.UpdatedAt AS DATE) THEN ISNULL(t.TargetQuantity, 0)
+                        ELSE 0
+                    END AS TargetQuantity,
+                    SUM(ac.ActualCut) AS TargetActualQuantity
+                FROM DeviceOutput ac
+                LEFT JOIN PartSizeOrder pso 
+                    ON ac.OrderID = pso.OrderId 
+                    AND ac.SizeID = pso.SizeId 
+                    AND ac.PartID = pso.PartId
+                LEFT JOIN ProductOrder po 
+                    ON po.OrderId = ac.OrderId
 
-                    -- Get latest TargetInDay ON OR BEFORE the actual cut date
-                    OUTER APPLY (
-                        SELECT TOP 1 tid.*
-                        FROM TargetInDay tid
-                        WHERE tid.TargetDate <= CAST(ac.UpdatedAt AS DATE)
-                        ORDER BY tid.TargetDate DESC
-                    ) t
+                -- OUTER APPLY: get latest TargetInDay on or before UpdatedAt date
+                OUTER APPLY (
+                    SELECT TOP 1 *
+                    FROM TargetInDay tid
+                    WHERE tid.TargetDate <= CAST(ac.UpdatedAt AS DATE)
+                    ORDER BY tid.TargetDate DESC
+                ) t
 
-                    LEFT JOIN Operator o ON o.EmployeeId = t.EmployeeId
+                LEFT JOIN Operator o ON o.EmployeeId = t.EmployeeId
 
-                    WHERE 
-                        YEAR(ac.UpdatedAt) = @Year
-                        AND MONTH(ac.UpdatedAt) = @Month
-	                     AND o.EmployeeId IS NOT NULL
-                    GROUP BY 
-                        ISNULL(o.OperatorName, 'Unknown'),
-                        ISNULL(t.TargetQuantity, 0),
-                        CAST(ac.UpdatedAt AS DATE)
+                WHERE 
+                    YEAR(ac.UpdatedAt) = @YEAR
+                    AND MONTH(ac.UpdatedAt) = @MONTH
+                    AND o.EmployeeId IS NOT NULL
 
-                    ORDER BY 
-                        CAST(ac.UpdatedAt AS DATE);
+                GROUP BY 
+                    ISNULL(o.OperatorName, 'Unknown'),
+                    CAST(ac.UpdatedAt AS DATE),
+                    t.TargetDate,
+                    t.TargetQuantity,
+                    t.EmployeeId 
+
+                ORDER BY 
+                    CAST(ac.UpdatedAt AS DATE);
             ";
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -1129,6 +1136,7 @@ namespace DigitalProduction
                     {
                         list.Add(new TargetRealtimeInfo
                         {
+                            EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
                             OperatorName = reader["OperatorName"].ToString(),
                             Timestamp = Convert.ToDateTime(reader["Timestamp"]),
                             TargetQuantity = Convert.ToInt32(reader["TargetQuantity"]),
@@ -1140,6 +1148,39 @@ namespace DigitalProduction
 
             return list;
         }
+
+        public static async Task SaveTargetQuantityAsync(TargetRealtimeInfo item)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+
+                var command = new SqlCommand(@"
+            MERGE TargetInDay AS target
+            USING (SELECT 
+                        @TargetDate AS TargetDate,
+                        @DepartmentId AS DepartmentId,
+                        @EmployeeId AS EmployeeId) AS source
+            ON (target.TargetDate = source.TargetDate 
+                AND target.DepartmentId = source.DepartmentId 
+                AND target.EmployeeId = source.EmployeeId)
+            WHEN MATCHED THEN
+                UPDATE SET TargetQuantity = @TargetQuantity,
+                           UpdatedAt = GETDATE()
+            WHEN NOT MATCHED THEN
+                INSERT (TargetDate, DepartmentId, EmployeeId, TargetQuantity, CreatedAt)
+                VALUES (@TargetDate, @DepartmentId, @EmployeeId, @TargetQuantity, GETDATE());", connection);
+
+                command.Parameters.AddWithValue("@TargetDate", item.Timestamp.Date);
+                command.Parameters.AddWithValue("@DepartmentId", item.DepartmentId);
+                command.Parameters.AddWithValue("@EmployeeId", item.EmployeeId);
+                command.Parameters.AddWithValue("@TargetQuantity", item.TargetQuantity);
+
+                await command.ExecuteNonQueryAsync();
+            }
+        }
+
+
     }
 }
 

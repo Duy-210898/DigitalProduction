@@ -33,7 +33,6 @@
             this.lblArt = new System.Windows.Forms.Label();
             this.lblModel = new System.Windows.Forms.Label();
             this.lblPO = new System.Windows.Forms.Label();
-            this.btnSend = new DevExpress.XtraEditors.SimpleButton();
             this.lblSO = new System.Windows.Forms.Label();
             this.lblMasterWorkOrder = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
@@ -48,6 +47,7 @@
             this.lbl_operatorID = new System.Windows.Forms.Label();
             this.lbl_operatorName = new System.Windows.Forms.Label();
             this.lbl_Name = new System.Windows.Forms.Label();
+            this.btnSend = new DevExpress.XtraEditors.SimpleButton();
             this.lblSelectMachine = new System.Windows.Forms.Label();
             this.panelMaterialType = new System.Windows.Forms.Panel();
             this.rdLeather = new System.Windows.Forms.RadioButton();
@@ -55,8 +55,6 @@
             this.panel5 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
-            this.txt_targetInDay = new System.Windows.Forms.TextBox();
-            this.lblTargetInDay = new System.Windows.Forms.Label();
             this.numCuttingDieQty = new System.Windows.Forms.NumericUpDown();
             this.numPiecesPerPair = new System.Windows.Forms.NumericUpDown();
             this.lblTotalPeicesPerPair = new System.Windows.Forms.Label();
@@ -138,20 +136,6 @@
             this.lblPO.Size = new System.Drawing.Size(180, 20);
             this.lblPO.TabIndex = 2;
             this.lblPO.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // btnSend
-            // 
-            this.btnSend.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSend.Appearance.Options.UseFont = true;
-            this.btnSend.Location = new System.Drawing.Point(262, 81);
-            this.btnSend.LookAndFeel.SkinName = "Dark Side";
-            this.btnSend.LookAndFeel.UseDefaultLookAndFeel = false;
-            this.btnSend.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
-            this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(170, 29);
-            this.btnSend.TabIndex = 4;
-            this.btnSend.Text = "Send Distribution";
-            this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             // 
             // lblSO
             // 
@@ -277,9 +261,9 @@
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 3;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 47.45763F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 52.54237F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.66535F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.24216F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 73.09248F));
             this.tableLayoutPanel3.Size = new System.Drawing.Size(931, 250);
             this.tableLayoutPanel3.TabIndex = 2;
             // 
@@ -291,10 +275,10 @@
             this.panel2.Controls.Add(this.lbl_Name);
             this.panel2.Controls.Add(this.btnSend);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(479, 61);
+            this.panel2.Location = new System.Drawing.Point(479, 69);
             this.panel2.Margin = new System.Windows.Forms.Padding(3, 3, 20, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(432, 186);
+            this.panel2.Size = new System.Drawing.Size(432, 178);
             this.panel2.TabIndex = 6;
             // 
             // btnDeleteData
@@ -342,12 +326,26 @@
             this.lbl_Name.Text = "Operator Name";
             this.lbl_Name.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // btnSend
+            // 
+            this.btnSend.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSend.Appearance.Options.UseFont = true;
+            this.btnSend.Location = new System.Drawing.Point(262, 81);
+            this.btnSend.LookAndFeel.SkinName = "Dark Side";
+            this.btnSend.LookAndFeel.UseDefaultLookAndFeel = false;
+            this.btnSend.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
+            this.btnSend.Name = "btnSend";
+            this.btnSend.Size = new System.Drawing.Size(170, 29);
+            this.btnSend.TabIndex = 4;
+            this.btnSend.Text = "Send Distribution";
+            this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
+            // 
             // lblSelectMachine
             // 
             this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSelectMachine.Location = new System.Drawing.Point(479, 0);
             this.lblSelectMachine.Name = "lblSelectMachine";
-            this.lblSelectMachine.Size = new System.Drawing.Size(449, 28);
+            this.lblSelectMachine.Size = new System.Drawing.Size(449, 31);
             this.lblSelectMachine.TabIndex = 0;
             this.lblSelectMachine.Text = "Select Machine";
             this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -359,7 +357,7 @@
             this.panelMaterialType.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMaterialType.Location = new System.Drawing.Point(3, 3);
             this.panelMaterialType.Name = "panelMaterialType";
-            this.panelMaterialType.Size = new System.Drawing.Size(470, 22);
+            this.panelMaterialType.Size = new System.Drawing.Size(470, 25);
             this.panelMaterialType.TabIndex = 6;
             // 
             // rdLeather
@@ -368,7 +366,7 @@
             this.rdLeather.Dock = System.Windows.Forms.DockStyle.Left;
             this.rdLeather.Location = new System.Drawing.Point(97, 0);
             this.rdLeather.Name = "rdLeather";
-            this.rdLeather.Size = new System.Drawing.Size(97, 22);
+            this.rdLeather.Size = new System.Drawing.Size(97, 25);
             this.rdLeather.TabIndex = 5;
             this.rdLeather.TabStop = true;
             this.rdLeather.Text = "radioButton3";
@@ -381,7 +379,7 @@
             this.rdRawMaterial.Dock = System.Windows.Forms.DockStyle.Left;
             this.rdRawMaterial.Location = new System.Drawing.Point(0, 0);
             this.rdRawMaterial.Name = "rdRawMaterial";
-            this.rdRawMaterial.Size = new System.Drawing.Size(97, 22);
+            this.rdRawMaterial.Size = new System.Drawing.Size(97, 25);
             this.rdRawMaterial.TabIndex = 3;
             this.rdRawMaterial.TabStop = true;
             this.rdRawMaterial.Text = "radioButton1";
@@ -392,9 +390,9 @@
             // 
             this.panel5.Controls.Add(this.tableLayoutPanel4);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel5.Location = new System.Drawing.Point(3, 61);
+            this.panel5.Location = new System.Drawing.Point(3, 69);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(470, 186);
+            this.panel5.Size = new System.Drawing.Size(470, 178);
             this.panel5.TabIndex = 7;
             // 
             // tableLayoutPanel4
@@ -410,8 +408,8 @@
             this.tableLayoutPanel4.RowCount = 3;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(470, 186);
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(470, 178);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // tableLayoutPanel6
@@ -420,8 +418,6 @@
             this.tableLayoutPanel6.ColumnCount = 2;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.Controls.Add(this.txt_targetInDay, 1, 4);
-            this.tableLayoutPanel6.Controls.Add(this.lblTargetInDay, 0, 4);
             this.tableLayoutPanel6.Controls.Add(this.numCuttingDieQty, 1, 1);
             this.tableLayoutPanel6.Controls.Add(this.numPiecesPerPair, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.lblTotalPeicesPerPair, 0, 3);
@@ -433,33 +429,13 @@
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 39);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-            this.tableLayoutPanel6.RowCount = 5;
+            this.tableLayoutPanel6.RowCount = 4;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel6.Size = new System.Drawing.Size(464, 141);
             this.tableLayoutPanel6.TabIndex = 8;
-            // 
-            // txt_targetInDay
-            // 
-            this.txt_targetInDay.Dock = System.Windows.Forms.DockStyle.Left;
-            this.txt_targetInDay.Location = new System.Drawing.Point(235, 119);
-            this.txt_targetInDay.Name = "txt_targetInDay";
-            this.txt_targetInDay.Size = new System.Drawing.Size(118, 23);
-            this.txt_targetInDay.TabIndex = 9;
-            // 
-            // lblTargetInDay
-            // 
-            this.lblTargetInDay.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTargetInDay.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblTargetInDay.Location = new System.Drawing.Point(3, 116);
-            this.lblTargetInDay.Name = "lblTargetInDay";
-            this.lblTargetInDay.Size = new System.Drawing.Size(176, 24);
-            this.lblTargetInDay.TabIndex = 8;
-            this.lblTargetInDay.Text = "Target In Day:";
-            this.lblTargetInDay.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // numCuttingDieQty
             // 
@@ -596,7 +572,7 @@
             this.cbxDevice.Dock = System.Windows.Forms.DockStyle.Top;
             this.cbxDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbxDevice.FormattingEnabled = true;
-            this.cbxDevice.Location = new System.Drawing.Point(476, 31);
+            this.cbxDevice.Location = new System.Drawing.Point(476, 34);
             this.cbxDevice.Margin = new System.Windows.Forms.Padding(0, 3, 20, 3);
             this.cbxDevice.Name = "cbxDevice";
             this.cbxDevice.Size = new System.Drawing.Size(435, 26);
@@ -635,7 +611,6 @@
             this.panel5.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel6.ResumeLayout(false);
-            this.tableLayoutPanel6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numCuttingDieQty)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numPiecesPerPair)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).EndInit();
@@ -654,7 +629,6 @@
         private System.Windows.Forms.Label lblArt;
         private System.Windows.Forms.Label lblModel;
         private System.Windows.Forms.Label lblPO;
-        private DevExpress.XtraEditors.SimpleButton btnSend;
         private System.Windows.Forms.Label lblSO;
         private System.Windows.Forms.Label lblMasterWorkOrder;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
@@ -664,34 +638,33 @@
         private System.Windows.Forms.RadioButton rdLeather;
         private System.Windows.Forms.RadioButton rdRawMaterial;
         private System.Windows.Forms.Panel panelMaterialType;
-        private System.Windows.Forms.Panel panel5;
-        private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label lblSelectMachine;
-        private System.Windows.Forms.Label lbl_Name;
-        private System.Windows.Forms.Label lbl_operatorName;
-        private System.Windows.Forms.Label lbl_operatorID;
         private System.Windows.Forms.Label lblProductionDate;
         private System.Windows.Forms.Label lblCreatedDate;
         private System.Windows.Forms.Panel panel4;
-        private DevExpress.XtraEditors.SimpleButton btnDeleteData;
         private DevExpress.XtraGrid.GridControl gridControlOverview;
         private DevExpress.XtraGrid.Views.Grid.GridView gridViewOverview;
+        private System.Windows.Forms.ComboBox cbxDevice;
+        private System.Windows.Forms.Panel panel2;
+        private DevExpress.XtraEditors.SimpleButton btnDeleteData;
+        private System.Windows.Forms.Label lbl_operatorID;
+        private System.Windows.Forms.Label lbl_operatorName;
+        private System.Windows.Forms.Label lbl_Name;
+        private DevExpress.XtraEditors.SimpleButton btnSend;
+        private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.NumericUpDown numCuttingDieQty;
         private System.Windows.Forms.NumericUpDown numPiecesPerPair;
+        private System.Windows.Forms.Label lblTotalPeicesPerPair;
         private System.Windows.Forms.Label lblPeicesPerPair;
         private System.Windows.Forms.Label lblCuttingDie;
         private System.Windows.Forms.Label lblMaterialLayer;
         private System.Windows.Forms.NumericUpDown numMaterialLayer;
+        private System.Windows.Forms.NumericUpDown numericTotalPeicesPerPair;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private DevExpress.XtraEditors.SimpleButton btnSaveInventory;
         private System.Windows.Forms.TextBox txtInventory;
         private System.Windows.Forms.Label lblInventoryQty;
-        private System.Windows.Forms.Label lblTotalPeicesPerPair;
-        private System.Windows.Forms.NumericUpDown numericTotalPeicesPerPair;
-        private System.Windows.Forms.TextBox txt_targetInDay;
-        private System.Windows.Forms.Label lblTargetInDay;
-        private System.Windows.Forms.ComboBox cbxDevice;
     }
 }

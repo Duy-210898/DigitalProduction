@@ -40,7 +40,6 @@ namespace DigitalProduction
             lbl_operatorName.Visible = false;
             loadDeviceDistribution();
             txtInventory.KeyPress += TxtInventory_KeyPress;
-            txt_targetInDay.KeyPress += TxtInventory_KeyPress;
             rdRawMaterial.CheckedChanged += MaterialFilterChanged;
             setControlVisibility(false, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
         }
@@ -473,7 +472,7 @@ namespace DigitalProduction
                 { btnDeleteData, "Refresh" },
                 { lblInventoryQty, "InventoryQty" },
                 {lblPeicesPerPair, "PeicesPerPair" },
-                {lblTargetInDay, "TargetInDay" },
+                //{lblTargetInDay, "TargetInDay" },
                 {lblCuttingDie, "CuttingDieQty" },
                 {lblMaterialLayer, "MaterialLayer" },
                 {lblTotalPeicesPerPair, "TotalPeicesPerPair" },
@@ -516,7 +515,7 @@ namespace DigitalProduction
 
                         if (response != null && response.Status == "success")
                         {
-                            DbHelper.UpsertTargetInDay(DateTime.Now, departmentID, productId, int.Parse(txt_targetInDay.Text), operatorID);
+                            //DbHelper.UpsertTargetInDay(DateTime.Now, departmentID, productId, int.Parse(txt_targetInDay.Text), operatorID);
                             ResetSendDistribution();
                             ShowMessage.ShowInfo(response.Message, "Sucess");
                         }

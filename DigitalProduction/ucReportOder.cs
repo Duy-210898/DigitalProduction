@@ -57,6 +57,24 @@ namespace DigitalProduction
             int selectedYear = dateTimePicker.Value.Year;
             int selectedMonth = dateTimePicker.Value.Month;
             var data = await DbHelper.GetRealtimeTargetDataAsync(selectedMonth, selectedYear);
+
+
+            // Attach event to each item
+            foreach (var item in data)
+            {
+                item.TargetQuantityChanged += async (changedItem) =>
+                {
+                    try
+                    {
+                        await SaveTargetQuantityAsync(changedItem);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Optionally handle errors here
+                        MessageBox.Show($"Error saving target: {ex.Message}");
+                    }
+                };
+            }
             targetBindingSource.DataSource = data;
             targetBindingSource.ResetBindings(false);
             TranslateHeaders();
@@ -73,6 +91,11 @@ namespace DigitalProduction
                 var translatedText = LocalizationManager.GetString(col.FieldName);
                 col.Caption = !string.IsNullOrEmpty(translatedText) ? translatedText : col.FieldName;
 
+                // Hide specific fields
+                if (col.FieldName == "EmployeeId" || col.FieldName == "DepartmentId")
+                {
+                    col.Visible = false;
+                }
             }
         }
 
@@ -153,10 +176,17 @@ namespace DigitalProduction
 
         public class TargetRealtimeInfo : INotifyPropertyChanged
         {
+
+            public int DepartmentId { get; set; }
+            public int EmployeeId { get; set; }
+
             private string _operatorName;
             private DateTime _timestamp;
             private int _targetQuantity;
             private int _targetActualQuantity;
+
+
+            public event Func<TargetRealtimeInfo, Task> TargetQuantityChanged;
 
             public string OperatorName
             {
@@ -193,6 +223,7 @@ namespace DigitalProduction
                     {
                         _targetQuantity = value;
                         NotifyPropertyChanged(nameof(TargetQuantity));
+                        _ = InvokeTargetQuantityChangedAsync();
                     }
                 }
             }
@@ -224,6 +255,26 @@ namespace DigitalProduction
             }
 
 
+            private async Task InvokeTargetQuantityChangedAsync()
+            {
+                if (TargetQuantityChanged != null)
+                {
+                    var invocationList = TargetQuantityChanged.GetInvocationList();
+                    foreach (Func<TargetRealtimeInfo, Task> handler in invocationList)
+                    {
+                        try
+                        {
+                            await handler(this);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Handle or log exception here safely
+                            Console.Error.WriteLine($"Error in TargetQuantityChanged event: {ex}");
+                        }
+                    }
+                }
+            }
+
             public event PropertyChangedEventHandler PropertyChanged;
 
             private void NotifyPropertyChanged(string propertyName)
@@ -231,5 +282,26 @@ namespace DigitalProduction
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+        private static async Task SaveTargetQuantityAsync(TargetRealtimeInfo changedItem)
+        {
+            if (changedItem == null)
+                throw new ArgumentNullException(nameof(changedItem));
+
+            try
+            {
+                // Example: Update the target quantity in your database
+                changedItem.DepartmentId = Global.CurrentUser != null ? Global.CurrentUser.DepartmentID : 0;
+                await DbHelper.SaveTargetQuantityAsync(changedItem);
+
+                // Optionally: Refresh data or UI if needed here
+
+            }
+            catch (Exception ex)
+            {
+                // Log or rethrow depending on your error handling strategy
+                throw new Exception("Failed to save target quantity.", ex);
+            }
+        }
+
     }
 }

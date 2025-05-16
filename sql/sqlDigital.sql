@@ -204,7 +204,6 @@ ALTER TABLE Operator ADD CONSTRAINT UQ_Operator_EmployeeID UNIQUE (EmployeeID);
 -- Foreign Key Constraints
 ALTER TABLE TargetInDay 
 	ADD CONSTRAINT FK_TargetInDay_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
-	CONSTRAINT FK_TargetInDay_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
 	CONSTRAINT FK_TargetInDay_Operator FOREIGN KEY (EmployeeId) REFERENCES Operator(EmployeeId);
 ALTER TABLE DeviceOutput
 	ADD CONSTRAINT FK_DeviceOutput_Size FOREIGN KEY (SizeID) REFERENCES Size(SizeID),

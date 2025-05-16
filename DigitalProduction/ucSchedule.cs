@@ -5,9 +5,11 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -311,6 +313,34 @@ namespace DigitalProduction
 
             // Hide columns after data is bound
             HideGridColumns();
+            gridView.OptionsFilter.AllowMultiSelectInCheckedFilterPopup = true;
+            gridView.Columns["Size"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+            gridView.Columns["SO"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+            gridView.Columns["PartName"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+            gridView.ShowFilterPopupCheckedListBox += (s, e) =>
+            {
+                // Sort numeric values
+                var sortedItems = e.CheckedComboBox.Items
+                    .Cast<CheckedListBoxItem>()
+                    .OrderBy(item =>
+                    {
+                        if (item.Value != null && double.TryParse(item.Value.ToString(), out double number))
+                            return number;
+                        else
+                            return double.MaxValue;
+                    })
+                    .ToList();
+
+                e.CheckedComboBox.Items.Clear();
+                foreach (var item in sortedItems)
+                {
+                    e.CheckedComboBox.Items.Add(item);
+                }
+
+                // UI customization
+                e.CheckedComboBox.BorderStyle = BorderStyles.Office2003;
+            };
+
         }
 
         private void HideGridColumns()

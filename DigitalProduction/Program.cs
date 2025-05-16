@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
 
 namespace DigitalProduction
@@ -13,7 +14,9 @@ namespace DigitalProduction
         [STAThread]
         static void Main()
         {
-            WindowsFormsSettings.DefaultFont = new System.Drawing.Font("Arial", 8);
+
+           UserLookAndFeel.Default.SetSkinStyle("DevExpress Style"); 
+           WindowsFormsSettings.DefaultFont = new System.Drawing.Font("Arial", 9);
             // Enable visual styles for the application
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

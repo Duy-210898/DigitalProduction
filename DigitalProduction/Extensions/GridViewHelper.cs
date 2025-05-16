@@ -209,36 +209,58 @@ namespace GridviewHelp
                 string field = info.Column?.FieldName;
                 string value = info.GroupValueText;
 
-                if (field == "PartName")
+                if (field == "SO" || field == "PartName" || field == "Size")
                 {
-                    bool hasPending = false;
-                    int childCount = view.GetChildRowCount(groupRowHandle);
+                    bool hasPending = HasPendingStatus(view, groupRowHandle);
+                    string displayStatus = hasPending ? "Pending" : "Completed";
 
-                    for (int i = 0; i < childCount; i++)
+                    // Label for each field
+                    string label;
+                    switch (field)
                     {
-                        int childHandle = view.GetChildRowHandle(groupRowHandle, i);
-                        string status = view.GetRowCellDisplayText(childHandle, view.Columns["Status"]);
-                        if (status == "Pending")
-                        {
-                            hasPending = true;
+                        case "SO":
+                            label = "SO";
                             break;
-                        }
+                        case "Size":
+                            label = "Size";
+                            break;
+                        default:
+                            label = "Part";
+                            break;
                     }
 
-                    string displayStatus = hasPending
-                        ? "Pending"
-                        : view.GetRowCellDisplayText(view.GetChildRowHandle(groupRowHandle, 0), view.Columns["Status"]);
-
-                    info.GroupText = $"Part: {value} | Status: {displayStatus}";
-
-                    // Change background color based on status
+                    // Only set text for the current group field
+                    info.GroupText = $"{label}: {value} | Status: {displayStatus}";
                     e.Appearance.ForeColor = hasPending ? Color.Gray : Color.Green;
                     e.Painter.DrawObject(info);
                     e.Handled = true;
+
                 }
             };
         }
 
+        private static bool HasPendingStatus(GridView view, int groupRowHandle)
+        {
+            int childCount = view.GetChildRowCount(groupRowHandle);
+            for (int i = 0; i < childCount; i++)
+            {
+                int childHandle = view.GetChildRowHandle(groupRowHandle, i);
+
+                if (view.IsGroupRow(childHandle))
+                {
+                    // Recursive call for subgroup
+                    if (HasPendingStatus(view, childHandle))
+                        return true;
+                }
+                else
+                {
+                    string status = view.GetRowCellDisplayText(childHandle, view.Columns["Status"]);
+                    if (status == "Pending")
+                        return true;
+                }
+            }
+            return false;
+        }
 
         //Create a menu item 
         public static DXMenuCheckItem CreateCheckItem(string caption, GridColumn column, FixedStyle style, Color color)
@@ -300,8 +322,6 @@ namespace GridviewHelp
                     info.Column.AppearanceCell.ForeColor = ((Bitmap)item.Image).GetPixel(5, 5);
                 }
             }
-
-
         }
         class MenuInfo
         {

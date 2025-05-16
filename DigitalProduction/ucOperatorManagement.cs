@@ -537,7 +537,7 @@ namespace DigitalProduction
             button = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("RegisterOperator"),
-                Size = new Size(100, 40)
+                Size = new Size(105, 40)
             };
 
             groupPanelButtonContainer.Controls.Add(button);

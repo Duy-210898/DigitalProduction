@@ -556,7 +556,7 @@
     <value>Target In Day</value>
   </data>
   <data name="EfficiencyPercent" xml:space="preserve">
-    <value>Efficiency Percent</value>
+    <value>Complete Percent</value>
   </data>
   <data name="TargetActualQuantity" xml:space="preserve">
     <value>Target Actual Quantity</value>
