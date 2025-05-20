@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
-using DigitalProduction.Models;
 using DigitalProduction.Validation;
 
 namespace DigitalProduction
@@ -95,7 +94,7 @@ namespace DigitalProduction
         {
             var controls = new Dictionary<Control, string>
             {
-                { groupControlRegisterUser, "RegisterUser" },
+                { groupControlRegisterUser, "PleaseInput" },
                 { lblUserName, "Username" },
                 { lblPassword, "Password" },
                 { lblEmployeeID, "EmployeeID" },

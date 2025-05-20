@@ -4,9 +4,10 @@ namespace DigitalProduction.Models
 {
     public class ProductionSchedule
     {
-        private ProductionSchedule() { }
+        public ProductionSchedule() { }
 
         public int OrderID { get; set; }
+        public int DepartmentID { get; set; }
         public string GroupSO { get; set; }
         public string Factory { get; set; }
         public string SO { get; set; }

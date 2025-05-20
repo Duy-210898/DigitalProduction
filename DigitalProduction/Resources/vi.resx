@@ -562,7 +562,7 @@
     <value>Thêm thiết bị mới</value>
   </data>
   <data name="AddressID" xml:space="preserve">
-    <value>Địa chỉ IP:</value>
+    <value>Địa chỉ IP</value>
   </data>
   <data name="RegisterOperator" xml:space="preserve">
     <value>Tạo người vận hành</value>
@@ -586,13 +586,13 @@
     <value>Mục tiêu trong ngày</value>
   </data>
   <data name="EfficiencyPercent" xml:space="preserve">
-    <value>Hiệu suất</value>
+    <value>Phần trăm hoàn thành</value>
   </data>
   <data name="TargetActualQuantity" xml:space="preserve">
-    <value>Mục tiêu thực tế</value>
+    <value>Số lần chặt thực tế trong ngày</value>
   </data>
   <data name="TargetQuantity" xml:space="preserve">
-    <value>Mục tiêu</value>
+    <value>Số lần chặt</value>
   </data>
   <data name="Group By This Column" xml:space="preserve">
     <value>Nhóm theo cột này</value>
@@ -605,5 +605,20 @@
   </data>
   <data name="UnGroup" xml:space="preserve">
     <value>Tách nhóm</value>
+  </data>
+  <data name="FilterDate" xml:space="preserve">
+    <value>Lọc theo ngày:</value>
+  </data>
+  <data name="PleaseInput" xml:space="preserve">
+    <value>Vui lòng điền thông tin bên dưới</value>
+  </data>
+  <data name="SaveListOfSO" xml:space="preserve">
+    <value>Lưu danh sách SO</value>
+  </data>
+  <data name="SelectSO" xml:space="preserve">
+    <value>Vui lòng chọn SO:</value>
+  </data>
+  <data name="WatchSOList" xml:space="preserve">
+    <value>Xem danh sách SO</value>
   </data>
 </root>

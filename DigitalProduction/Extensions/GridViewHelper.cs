@@ -234,7 +234,6 @@ namespace GridviewHelp
                     e.Appearance.ForeColor = hasPending ? Color.Gray : Color.Green;
                     e.Painter.DrawObject(info);
                     e.Handled = true;
-
                 }
             };
         }

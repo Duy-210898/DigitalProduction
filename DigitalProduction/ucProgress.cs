@@ -687,7 +687,6 @@ namespace DigitalProduction
             {
                 _reasonHeaderChecked = !_reasonHeaderChecked;
                 gridViewProgressManagement.InvalidateColumnHeader(gridViewProgressManagement.Columns[LocalizationManager.GetString("Reason")]);
-
                 for (int i = 0; i < gridViewProgressManagement.RowCount; i++)
                 {
                     var row = gridViewProgressManagement.GetRow(i) as Distribution;

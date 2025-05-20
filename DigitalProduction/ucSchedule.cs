@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -9,7 +10,6 @@ using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
-using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -24,6 +24,7 @@ namespace DigitalProduction
         private GridControl gridControl;
         private GridView gridView;
         private Button btnSendData;
+        private Button btnSaveData;
         private readonly string[] columnsToHide = { "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
         public ucSchedule()
@@ -101,6 +102,12 @@ namespace DigitalProduction
         }
 
 
+        private void BtnSaveData_Click(object sender, EventArgs e)
+        {
+            // avoid dupliacte
+            List<ProductionSchedule> filteredSchedules = GetFilteredData().Distinct(new ProductionScheduleComparer()).ToList();
+            DbHelper.SaveFilteredSchedulesToDatabase(filteredSchedules);
+        }
         private List<ProductionSchedule> GetFilteredData()
         {
             var filteredData = new List<ProductionSchedule>();
@@ -218,9 +225,20 @@ namespace DigitalProduction
             };
             btnSendData.Click += BtnSendData_Click;
 
+            btnSaveData = new Button
+            {
+                Text = LocalizationManager.GetString("SaveListOfSO"),
+                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
+                BackColor = System.Drawing.Color.LightBlue,
+                AutoSize = true,
+                Margin = new Padding(10, 0, 0, 0) // Adds space between label and button
+            };
+
+            btnSaveData.Click += BtnSaveData_Click;
             // Add components to FlowLayoutPanel
             bottomPanel.Controls.Add(lblTotalRecords);
             bottomPanel.Controls.Add(btnSendData);
+            bottomPanel.Controls.Add(btnSaveData);
 
             // Add to UserControl
             Controls.Add(bottomPanel);
@@ -319,27 +337,44 @@ namespace DigitalProduction
             gridView.Columns["PartName"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
             gridView.ShowFilterPopupCheckedListBox += (s, e) =>
             {
-                // Sort numeric values
-                var sortedItems = e.CheckedComboBox.Items
-                    .Cast<CheckedListBoxItem>()
-                    .OrderBy(item =>
-                    {
-                        if (item.Value != null && double.TryParse(item.Value.ToString(), out double number))
-                            return number;
-                        else
-                            return double.MaxValue;
-                    })
-                    .ToList();
-
-                e.CheckedComboBox.Items.Clear();
-                foreach (var item in sortedItems)
+                if (e.Column.FieldName == "Size")
                 {
-                    e.CheckedComboBox.Items.Add(item);
-                }
+                    List<string> originalItems = e.CheckedComboBox.Items
+                        .Cast<CheckedListBoxItem>()
+                        .Select(item => item.Value?.ToString())
+                        .Where(val => !string.IsNullOrWhiteSpace(val))
+                        .ToList();
 
-                // UI customization
-                e.CheckedComboBox.BorderStyle = BorderStyles.Office2003;
+                    // Sort numerically
+                    originalItems.Sort((a, b) =>
+                    {
+                        double numA = 0, numB = 0;
+
+                        CultureInfo culture = CultureInfo.InvariantCulture;
+                        double.TryParse(a, NumberStyles.Any, culture, out numA);
+                        double.TryParse(b, NumberStyles.Any, culture, out numB);
+
+                        // Compare numerically
+                        return numA.CompareTo(numB);
+                    });
+
+                    originalItems.ForEach(val =>
+                    {
+                        e.CheckedComboBox.Items.Add(val);
+                    });
+
+
+                    e.CheckedComboBox.Items.Clear();
+                    foreach (var value in originalItems)
+                    {
+                        e.CheckedComboBox.Items.Add(value, CheckState.Unchecked, true);
+                    }
+
+                    // UI styling (optional)
+                    e.CheckedComboBox.BorderStyle = BorderStyles.Office2003;
+                }
             };
+
 
         }
 

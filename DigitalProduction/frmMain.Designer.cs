@@ -50,8 +50,9 @@
             this.fluentDesignFormControl1 = new DevExpress.XtraBars.FluentDesignSystem.FluentDesignFormControl();
             this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
             this.statusItem = new DevExpress.XtraBars.BarStaticItem();
-            this.pnlControl = new System.Windows.Forms.Panel();
             this.SkinOption = new DevExpress.XtraBars.SkinBarSubItem();
+            this.pnlControl = new System.Windows.Forms.Panel();
+            this.btnViewInfoDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemTextEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl1)).BeginInit();
@@ -93,13 +94,19 @@
             // accordionControlElement1
             // 
             this.accordionControlElement1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.btnMonthlyPlan});
+            this.btnMonthlyPlan,
+            this.btnViewInfoDistribution});
             this.accordionControlElement1.Expanded = true;
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Text = "Production Schedule";
             // 
             // btnMonthlyPlan
             // 
+            this.btnMonthlyPlan.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.btnMonthlyPlan.Name = "btnMonthlyPlan";
             this.btnMonthlyPlan.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnMonthlyPlan.Text = "Monthly Plan";
@@ -227,15 +234,22 @@
             // barSubItem1
             // 
             this.barSubItem1.Alignment = DevExpress.XtraBars.BarItemLinkAlignment.Right;
-            this.barSubItem1.Caption = "barSubItem1";
+            this.barSubItem1.Caption = "Translate";
             this.barSubItem1.Id = 2;
             this.barSubItem1.Name = "barSubItem1";
             // 
             // statusItem
             // 
-            this.statusItem.Caption = "barStaticItem1";
+            this.statusItem.Caption = "State Connect";
             this.statusItem.Id = 1;
             this.statusItem.Name = "statusItem";
+            // 
+            // SkinOption
+            // 
+            this.SkinOption.AllowSerializeChildren = DevExpress.Utils.DefaultBoolean.False;
+            this.SkinOption.Caption = "Skin UI";
+            this.SkinOption.Id = 0;
+            this.SkinOption.Name = "SkinOption";
             // 
             // pnlControl
             // 
@@ -245,11 +259,12 @@
             this.pnlControl.Size = new System.Drawing.Size(971, 736);
             this.pnlControl.TabIndex = 3;
             // 
-            // SkinOption
+            // btnViewInfoDistribution
             // 
-            this.SkinOption.Caption = "Skin UI";
-            this.SkinOption.Id = 0;
-            this.SkinOption.Name = "SkinOption";
+            this.btnViewInfoDistribution.Name = "btnViewInfoDistribution";
+            this.btnViewInfoDistribution.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnViewInfoDistribution.Text = "View Distribution";
+            this.btnViewInfoDistribution.Click += new System.EventHandler(this.btnViewDistributionClick);
             // 
             // frmMain
             // 
@@ -297,6 +312,7 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnReportOder;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnCuttingReportQty;
         private DevExpress.XtraBars.SkinBarSubItem SkinOption;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnViewInfoDistribution;
     }
 }
 

@@ -33,7 +33,7 @@
             // ucSchedule
             // 
             this.Name = "ucSchedule";
-            this.Size = new System.Drawing.Size(704, 567);
+            this.Size = new System.Drawing.Size(975, 567);
             this.ResumeLayout(false);
 
         }

@@ -299,6 +299,11 @@ namespace DigitalProduction
             await ShowUserControlAsync<ucCuttingReport>();
         }
 
+        private async void btnViewDistributionClick(object sender, EventArgs e)
+        {
+            await ShowUserControlAsync<ucViewDistribution>();
+        }
+
 
         private void frmMain_Load(object sender, EventArgs e)
         {
@@ -337,6 +342,7 @@ namespace DigitalProduction
             barSubItem1.Caption = LocalizationManager.GetString("Guest");
             accordionControlElement6.Text = LocalizationManager.GetString("Report");
 
+            btnViewInfoDistribution.Text = LocalizationManager.GetString("WatchSOList");
             btnDeviceManager.Text = LocalizationManager.GetString("DeviceManager");
             btnMonthlyPlan.Text = LocalizationManager.GetString("MonthlyPlan");
             btnDistribution.Text = LocalizationManager.GetString("Distribution");

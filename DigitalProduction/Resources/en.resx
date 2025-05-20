@@ -532,7 +532,7 @@
     <value>Add new device</value>
   </data>
   <data name="AddressID" xml:space="preserve">
-    <value>Address ID:</value>
+    <value>Address ID</value>
   </data>
   <data name="RegisterOperator" xml:space="preserve">
     <value>Register Operator</value>
@@ -575,5 +575,20 @@
   </data>
   <data name="UnGroup" xml:space="preserve">
     <value>UnGroup</value>
+  </data>
+  <data name="FilterDate" xml:space="preserve">
+    <value>Filter Date:</value>
+  </data>
+  <data name="PleaseInput" xml:space="preserve">
+    <value>Please input the infomation below</value>
+  </data>
+  <data name="SaveListOfSO" xml:space="preserve">
+    <value>Save SO List</value>
+  </data>
+  <data name="SelectSO" xml:space="preserve">
+    <value>Please select to SO:</value>
+  </data>
+  <data name="WatchSOList" xml:space="preserve">
+    <value>Watched SO List</value>
   </data>
 </root>

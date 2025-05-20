@@ -66,7 +66,7 @@ namespace DigitalProduction
         {
             var controls = new Dictionary<Control, string>
             {
-                { groupControlRegisterOperator, "RegisterOperator" },
+                { groupControlRegisterOperator, "PleaseInput" },
                 { lblEmployeeID, "EmployeeID" },
                 { lblEmployeeName, "EmployeeName" },
                 { btn_submit, "Submit" },

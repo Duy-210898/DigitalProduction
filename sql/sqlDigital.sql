@@ -142,6 +142,7 @@ GO
 -- Table: ProductionSchedule
 CREATE TABLE ProductionSchedule (
     ScheduleID INT PRIMARY KEY IDENTITY(1,1),
+	DepartmentID INT,
     Factory VARCHAR(50),
     ART VARCHAR(50),
     Model VARCHAR(100),
@@ -158,7 +159,8 @@ CREATE TABLE ProductionSchedule (
     ProductionProcess VARCHAR(50),
     Page VARCHAR(10),
     LastNo VARCHAR(50),
-    UnitUsage FLOAT
+    UnitUsage FLOAT, 
+	CreatedAt DATETIME DEFAULT GETDATE()
 );
 GO
 
@@ -202,6 +204,8 @@ GO
 ALTER TABLE Operator ADD CONSTRAINT UQ_Operator_EmployeeID UNIQUE (EmployeeID);
 
 -- Foreign Key Constraints
+ALTER TABLE ProductionSchedule 
+	ADD CONSTRAINT FK_ProductionSchedule_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID);
 ALTER TABLE TargetInDay 
 	ADD CONSTRAINT FK_TargetInDay_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
 	CONSTRAINT FK_TargetInDay_Operator FOREIGN KEY (EmployeeId) REFERENCES Operator(EmployeeId);

@@ -618,10 +618,12 @@ async function processDistributionData(client, ipAddress, distributionData, retr
       }
 
       try {
+
         // write register partname position
         await client.writeSingleRegister(1022, modbusClients[ipAddress].indexMultiplePartNames + 1);
         await client.writeSingleRegister(1023, uniquePartSOsMap.length);
 
+        console.log(`Next value PartName:`, modbusClients[ipAddress].indexMultiplePartNames + 1);
 
          // display partName name
          const partDisplayStartRegister = distributionData.Leather === 2 ? 115 : 270;
@@ -821,61 +823,96 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
         next = modbusClients[ipAddress].indexMultipleSOs + 1;
       }
     
+      console.log(`Next value ${next} to register 3000 address ${ipAddress}`);
+    
       modbusClients[ipAddress].indexMultipleSOs = next;
-      console.log(`Next value ${next} to register 3000 address ${ipAddress}`);
-    
       await client.writeSingleRegister(register3000Address, valueToWrite);
       storeDistributionData[ipAddress] = {};
       modbusClients[ipAddress].previousSizeData = [];
       modbusClients[ipAddress].previousData = {};
     }
-    if (isBitOn(binaryValue3000, previousPartNameIndex)) {
-      const mask = 1 << deleteIndex;
-      const valueToWrite = registerValue | mask;
-    
-      let previous = modbusClients[ipAddress].indexMultiplePartNames;
-      if (previous <= 0) {
-        previous = 0;
-      } else {
-        previous = modbusClients[ipAddress].indexMultiplePartNames - 1;
-      }
-    
-      modbusClients[ipAddress].indexMultiplePartNames = previous;
-      await client.writeSingleRegister(register3000Address, valueToWrite);
-      console.log(`Previous value ${previous} to register 3000 address ${ipAddress}`);
-      storeDistributionData[ipAddress] = {};
-      modbusClients[ipAddress].previousSizeData = [];
-      modbusClients[ipAddress].previousData = {};
+    if (modbusClients[ipAddress].lockPartNameAdvance) {
+      console.warn(`Action ignored: still processing for ${ipAddress}`);
+      return;
     }
     
-    if (isBitOn(binaryValue3000, nextPartNameIndex)) {
-      const mask = 1 << deleteIndex;
-      const valueToWrite = registerValue | mask;
-      const currentSO = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
-      let uniquePartNameSOs = [];
-      if (currentSO && Array.isArray(currentSO.Data)) {
-        uniquePartNameSOs = [...new Set(currentSO.Data.map(p => p.PartName))];
-        console.log(`Unique PartName Store:`, uniquePartNameSOs);
-      } else {
-        console.warn(`currentSO or currentSO.Data is undefined for IP: ${ipAddress}`);
-      }
-      // Determine max based on actual number of part names
-      const maxPartNames = uniquePartNameSOs.length;
-      let next = modbusClients[ipAddress].indexMultiplePartNames;
+    if (modbusClients[ipAddress].lockPartNameAdvance) {
+      console.warn(`Action ignored: still processing for ${ipAddress}`);
+      return;
+    }
+    
+    modbusClients[ipAddress].lockPartNameAdvance = true;
+    
+    try {
 
-      if (next >= maxPartNames) {
-        next = maxPartNames - 1;
-      } else {
-        next = modbusClients[ipAddress].indexMultiplePartNames + 1;
+      if (modbusClients[ipAddress].SOs === undefined) {
+        const mask = 1 << deleteIndex;
+        const valueToWrite = registerValue | mask;
+        await client.writeSingleRegister(register3000Address, valueToWrite);
+        modbusClients[ipAddress].indexMultipleSOs = 0;
+        modbusClients[ipAddress].indexMultiplePartNames = 0;
+
+        await client.writeSingleRegister(1020, 1);
+        await client.writeSingleRegister(1021, 1);
+        return;
+      };
+      // === Previous Logic ===
+      if (isBitOn(binaryValue3000, previousPartNameIndex)) {
+        const mask = 1 << deleteIndex;
+        const valueToWrite = registerValue | mask;
+    
+        let previous = modbusClients[ipAddress].indexMultiplePartNames;
+        previous = previous > 0 ? previous - 1 : 0;
+    
+        modbusClients[ipAddress].indexMultiplePartNames = previous;
+        await client.writeSingleRegister(register3000Address, valueToWrite);
+    
+        console.log(`Previous value ${previous} to register 3000 address ${ipAddress}`);
+    
+        storeDistributionData[ipAddress] = {};
+        modbusClients[ipAddress].previousSizeData = [];
+        modbusClients[ipAddress].previousData = {};
       }
     
-      modbusClients[ipAddress].indexMultiplePartNames = next;
-      await client.writeSingleRegister(register3000Address, valueToWrite);
-      console.log(`Next value ${next} to register 3000 address ${ipAddress}`);
-      storeDistributionData[ipAddress] = {};
-      modbusClients[ipAddress].previousSizeData = [];
-      modbusClients[ipAddress].previousData = {};
+      // === Next Logic ===
+      if (isBitOn(binaryValue3000, nextPartNameIndex)) {
+        const mask = 1 << deleteIndex;
+        const valueToWrite = registerValue | mask;
+    
+        const currentSO = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
+        let uniquePartNameSOs = [];
+    
+        if (currentSO && Array.isArray(currentSO.Data)) {
+          uniquePartNameSOs = [...new Set(currentSO.Data.map(p => p.PartName))];
+          console.log(`Unique PartName Store:`, uniquePartNameSOs);
+        } else {
+          console.warn(`currentSO or currentSO.Data is undefined for IP: ${ipAddress}`);
+        }
+    
+        const maxPartNames = uniquePartNameSOs.length;
+        let next = modbusClients[ipAddress].indexMultiplePartNames;
+    
+        if (next + 1 >= maxPartNames) {
+          next = maxPartNames - 1;
+        } else {
+          next = next + 1;
+        }
+    
+        modbusClients[ipAddress].indexMultiplePartNames = next;
+        await client.writeSingleRegister(register3000Address, valueToWrite);
+        console.log(`Next value ${next} maxPartNames:${maxPartNames} to register 3000 address ${ipAddress}`);
+    
+        storeDistributionData[ipAddress] = {};
+        modbusClients[ipAddress].previousSizeData = [];
+        modbusClients[ipAddress].previousData = {};
+      }
+    } catch (error) {
+      console.error(`Error processing part name change for ${ipAddress}:`, error);
+    } finally {
+      modbusClients[ipAddress].lockPartNameAdvance = false;
     }
+    
+    
 
     // check max size SOS index, subtract - 1 element index
     if(modbusClients[ipAddress].SOs !== undefined) {
@@ -885,7 +922,6 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
         modbusClients[ipAddress].indexMultipleSOs = modbusClients[ipAddress].SOs.length - 1;
       }
     }
-    
   } catch (error) {
     console.error(`Error reading register ${register3000Address}:`, error.message);
   }

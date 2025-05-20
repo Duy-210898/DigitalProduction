@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DigitalProduction.Models;
@@ -1180,6 +1181,151 @@ namespace DigitalProduction
             }
         }
 
+        public static void SaveFilteredSchedulesToDatabase(List<ProductionSchedule> schedules)
+        {
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                using (var transaction = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        string query = @"
+                        IF NOT EXISTS (
+                            SELECT 1 FROM ProductionSchedule
+                            WHERE SO = @SO AND PartCode = @PartCode AND Size = @Size 
+                        )
+                        BEGIN
+                            INSERT INTO ProductionSchedule 
+                            (Factory, DepartmentID, ART, Model, PO, SO, MasterWorkOrder, Size, PartCode, PartName, MaterialCode, MaterialName, 
+                                SizeQty, UNIT, ProductionProcess, LastNo, UnitUsage, CreatedAt)
+                            VALUES 
+                            (@Factory, @DepartmentID, @ART, @Model, @PO, @SO, @MasterWorkOrder, @Size, @PartCode, @PartName, @MaterialCode, 
+                                @MaterialName, @SizeQty, @UNIT, @ProductionProcess, @LastNo, @UnitUsage, @CreatedAt)
+                        END";
+
+                        foreach (var schedule in schedules)
+                        {
+                            using (SqlCommand cmd = new SqlCommand(query, conn, transaction))
+                            {
+                                cmd.Parameters.Add("@Factory", SqlDbType.NVarChar).Value = (object)schedule.Factory ?? DBNull.Value;
+                                cmd.Parameters.Add("@DepartmentID", SqlDbType.Int).Value = Global.CurrentUser?.DepartmentID ?? 0;
+                                cmd.Parameters.Add("@ART", SqlDbType.NVarChar).Value = (object)schedule.ART ?? DBNull.Value;
+                                cmd.Parameters.Add("@Model", SqlDbType.NVarChar).Value = (object)schedule.Model ?? DBNull.Value;
+                                cmd.Parameters.Add("@PO", SqlDbType.NVarChar).Value = (object)schedule.PO ?? DBNull.Value;
+                                cmd.Parameters.Add("@SO", SqlDbType.NVarChar).Value = (object)schedule.SO ?? DBNull.Value;
+                                cmd.Parameters.Add("@MasterWorkOrder", SqlDbType.NVarChar).Value = (object)schedule.MasterWorkOrder ?? DBNull.Value;
+                                cmd.Parameters.Add("@Size", SqlDbType.NVarChar).Value = (object)schedule.Size ?? DBNull.Value;
+                                cmd.Parameters.Add("@PartCode", SqlDbType.NVarChar).Value = (object)schedule.PartCode ?? DBNull.Value;
+                                cmd.Parameters.Add("@PartName", SqlDbType.NVarChar).Value = (object)schedule.PartName ?? DBNull.Value;
+                                cmd.Parameters.Add("@MaterialCode", SqlDbType.NVarChar).Value = (object)schedule.MaterialCode ?? DBNull.Value;
+                                cmd.Parameters.Add("@MaterialName", SqlDbType.NVarChar).Value = (object)schedule.MaterialName ?? DBNull.Value;
+                                cmd.Parameters.Add("@SizeQty", SqlDbType.Int).Value = schedule.SizeQty;
+                                cmd.Parameters.Add("@UNIT", SqlDbType.NVarChar).Value = (object)schedule.PartSizeUnit ?? DBNull.Value;
+                                cmd.Parameters.Add("@ProductionProcess", SqlDbType.NVarChar).Value = (object)schedule.Process ?? DBNull.Value;
+                                cmd.Parameters.Add("@LastNo", SqlDbType.NVarChar).Value = (object)schedule.LastNo ?? DBNull.Value;
+                                cmd.Parameters.Add("@UnitUsage", SqlDbType.Decimal).Value = schedule.UnitUsage;
+                                cmd.Parameters.Add("@CreatedAt", SqlDbType.DateTime).Value = schedule.CreatedAt;
+
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        transaction.Commit();
+                        MessageBox.Show("Data saved to ProductionSchedule table successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        MessageBox.Show("Error saving data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+        public static List<string> GetDistinctSOListByMonthAndDepartment(int month, int year, int departmentId)
+        {
+            var soList = new List<string>();
+            string query = @"
+                SELECT DISTINCT SO 
+                FROM ProductionSchedule 
+                WHERE SO IS NOT NULL AND SO <> ''
+                AND MONTH(CreatedAt) = @Month 
+                AND YEAR(CreatedAt) = @Year
+                AND DepartmentID = @DepartmentID";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Month", month);
+                    cmd.Parameters.AddWithValue("@Year", year);
+                    cmd.Parameters.AddWithValue("@DepartmentID", departmentId);
+
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            soList.Add(reader["SO"].ToString());
+                        }
+                    }
+                }
+            }
+
+            return soList;
+        }
+        public static List<ProductionSchedule> GetSchedulesBySOList(List<string> soList)
+        {
+            var result = new List<ProductionSchedule>();
+
+            if (soList == null || soList.Count == 0)
+                return result;
+
+            string query = $@"
+                SELECT * FROM ProductionSchedule
+                WHERE SO IN ({string.Join(",", soList.Select((s, i) => $"@SO{i}"))})";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                for (int i = 0; i < soList.Count; i++)
+                {
+                    cmd.Parameters.AddWithValue($"@SO{i}", soList[i]);
+                }
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        result.Add(new ProductionSchedule
+                        {
+                            DepartmentID = Convert.ToInt32(reader["DepartmentID"]),
+                            Factory = reader["Factory"].ToString(),
+                            ART = reader["ART"].ToString(),
+                            Model = reader["Model"].ToString(),
+                            PO = reader["PO"].ToString(),
+                            SO = reader["SO"].ToString(),
+                            MasterWorkOrder = reader["MasterWorkOrder"].ToString(),
+                            Size = reader["Size"].ToString(),
+                            PartCode = reader["PartCode"].ToString(),
+                            PartName = reader["PartName"].ToString(),
+                            MaterialCode = reader["MaterialCode"].ToString(),
+                            MaterialName = reader["MaterialName"].ToString(),
+                            SizeQty = reader["SizeQty"] != DBNull.Value ? Convert.ToInt32(reader["SizeQty"]) : 0,
+                            PartSizeUnit = reader["UNIT"].ToString(),
+                            Process = reader["ProductionProcess"].ToString(),
+                            LastNo = reader["LastNo"].ToString(),
+                            CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]) : DateTime.MinValue
+                        });
+                    }
+                }
+            }
+
+            return result;
+        }
 
     }
 }

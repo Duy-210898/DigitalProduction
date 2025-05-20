@@ -137,7 +137,7 @@ namespace DigitalProduction
         {
             var controls = new Dictionary<Control, string>
             {
-                { groupControl_RegisterDevice, "AddNewDevice" },
+                { groupControl_RegisterDevice, "PleaseInput" },
                 { lblAddressID, "AddressID" },
                 { lblMachineName, "MachineName" },
                 { lblDeparment, "Department" },
