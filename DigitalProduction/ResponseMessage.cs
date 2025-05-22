@@ -16,6 +16,9 @@ namespace DigitalProduction
         [JsonProperty("schedule", NullValueHandling = NullValueHandling.Ignore)]
         public T Schedule { get; set; }
 
+        [JsonProperty("data")]
+        public T Data { get; set; }
+
         [JsonProperty("distributionData", NullValueHandling = NullValueHandling.Ignore)]
         public T DistributionData { get; set; }
         [JsonProperty("deviceOutput", NullValueHandling = NullValueHandling.Ignore)]

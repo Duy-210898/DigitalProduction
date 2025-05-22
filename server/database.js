@@ -1144,6 +1144,88 @@ async function getProductionSchedule(so) {
     return [];
   }
 }
+
+async function getListOfSOsByMonthYear(month, year) {
+  try {
+    if (!pool) await initDatabase();
+
+    const result = await pool.request()
+      .input('Month', sql.Int, month)
+      .input('Year', sql.Int, year)
+      .query(`
+        SELECT DISTINCT po.SO
+        FROM Product p
+        JOIN ProductOrder po ON p.ProductId = po.ProductId
+        JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+        JOIN Part pa ON pso.PartId = pa.PartId
+        JOIN Material m ON pso.MaterialID = m.MaterialID
+        JOIN Size s ON pso.SizeId = s.SizeID
+        WHERE MONTH(po.CreatedAt) = @Month AND YEAR(po.CreatedAt) = @Year
+      `);
+
+    return result.recordset.map(row => row.SO);
+  } catch (err) {
+    console.error('Error getting SO list by month/year:', err.message);
+    return [];
+  }
+}
+
+async function getProductionSchedule(soList) {
+  try {
+    if (!pool) await initDatabase(); 
+
+    // Create dynamic parameters for each SO
+    const soParams = soList.map((_, index) => `@SO${index}`).join(', ');
+    const request = pool.request();
+
+    // Add each SO to the request
+    soList.forEach((so, index) => {
+      request.input(`SO${index}`, sql.NVarChar, so);
+    });
+
+    const query = `
+      SELECT 
+          po.OrderID,
+          po.Factory,
+          po.SO,
+          po.PO,
+          po.MasterWorkOrder,
+          po.LastNo,
+          po.Process,
+          s.Size,
+          s.SizeID,
+          p.ART,
+          p.Model,
+          pso.SizeQty,
+          pso.Unit AS PartSizeUnit,
+          pso.UnitUsage,
+          m.MaterialID,
+          m.MaterialCode,
+          m.MaterialName,
+          m.Unit AS MaterialUnit,
+          pa.PartId,
+          pa.PartName,
+          pa.VietnameseName,
+          pa.PartCode,
+          po.CreatedAt,
+          po.UpdatedAt
+      FROM Product p
+      JOIN ProductOrder po ON p.ProductId = po.ProductId
+      JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+      JOIN Part pa ON pso.PartId = pa.PartId
+      JOIN Material m ON pso.MaterialID = m.MaterialID
+      JOIN Size s ON pso.SizeId = s.SizeID
+      WHERE po.SO IN (${soParams})
+    `;
+
+    const result = await request.query(query);
+    return result.recordset;
+  } catch (err) {
+    console.error('Lỗi khi truy cập cơ sở dữ liệu:', err.message);
+    return [];
+  }
+}
+
 async function getAllProductionSchedule(month = null, year = null) {
   try {
     if (!pool) await initDatabase(); 
@@ -1304,5 +1386,6 @@ module.exports = {
   getOperatorDistribution,
   getSizeAndDistributionDataFromDb,
   getDistributionIDFromSizeID,
-  getDistributionCompleteFromDb
+  getDistributionCompleteFromDb, 
+  getListOfSOsByMonthYear
 };

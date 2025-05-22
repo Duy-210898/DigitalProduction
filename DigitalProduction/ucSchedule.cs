@@ -7,11 +7,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors.Controls;
-using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DigitalProduction
 {
@@ -19,13 +19,11 @@ namespace DigitalProduction
     {
         private BindingList<ProductionSchedule> productionSchedules = new BindingList<ProductionSchedule>();
         private WebSocketClient _webSocketClient;
-        private DateTime? selectedMonth;
+        private DateTime? selectedMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
         private Label lblTotalRecords;
-        private GridControl gridControl;
-        private GridView gridView;
         private Button btnSendData;
         private Button btnSaveData;
-        private readonly string[] columnsToHide = { "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
+        private readonly string[] columnsToHide = { "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
         public ucSchedule()
         {
@@ -33,7 +31,30 @@ namespace DigitalProduction
             SetupGridControl();
             InitializeTotalLabel();
             InitializeMonthFilter();
+
+            lblFilterDate.Text = LocalizationManager.GetString("FilterDate");
+            lblSelectSO.Text = LocalizationManager.GetString("SelectSO");
+
+            cboSO.EditValueChanged += cboSO_EditValueChanged;
+            InitializeSyncButton();
         }
+
+        private void cboSO_EditValueChanged(object sender, EventArgs e)
+        {
+            var selectedSOs = cboSO.Properties.Items
+                                .GetCheckedValues()
+                                .Cast<string>()
+                                .ToList();
+
+            // Do something with selectedSOs
+            Console.WriteLine("Selected SOs: " + string.Join(", ", selectedSOs));
+
+            if (selectedSOs != null && selectedSOs.Count > 0)
+            {
+                _ = GetDataAndLoadToGridAsync();
+            }
+        }
+
 
         public class ProductionScheduleComparer : IEqualityComparer<ProductionSchedule>
         {
@@ -112,19 +133,19 @@ namespace DigitalProduction
         {
             var filteredData = new List<ProductionSchedule>();
 
-            if (gridView == null || gridView.DataSource == null)
+            if (gridViewSchedule == null || gridViewSchedule.DataSource == null)
                 return filteredData;
 
             // Ensure the grid view is refreshed to reflect the latest filter changes
-            gridView.RefreshData();
+            gridViewSchedule.RefreshData();
 
             // Iterate through filtered (visible) rows
-            for (int i = 0; i < gridView.RowCount; i++)
+            for (int i = 0; i < gridViewSchedule.RowCount; i++)
             {
-                int rowHandle = gridView.GetVisibleRowHandle(i);
-                if (gridView.IsDataRow(rowHandle))
+                int rowHandle = gridViewSchedule.GetVisibleRowHandle(i);
+                if (gridViewSchedule.IsDataRow(rowHandle))
                 {
-                    var row = gridView.GetRow(rowHandle) as ProductionSchedule;
+                    var row = gridViewSchedule.GetRow(rowHandle) as ProductionSchedule;
                     if (row != null)
                     {
                         filteredData.Add(row);
@@ -138,45 +159,47 @@ namespace DigitalProduction
 
         private void SetupGridControl()
         {
-            gridControl = new GridControl { Dock = DockStyle.Fill };
-            gridView = new GridView(gridControl)
-            {
-                OptionsView = { ShowGroupPanel = true, ColumnAutoWidth = true },
-                OptionsBehavior = { AutoExpandAllGroups = true } // Automatically expands all groups
-            };
+            gridControlSchedule.DataSource = productionSchedules;
 
-            gridControl.MainView = gridView;
-            gridControl.DataSource = productionSchedules;
-            gridView.OptionsBehavior.Editable = true;
+            gridViewSchedule.OptionsBehavior.Editable = true;
 
-            gridView.Appearance.FilterPanel.Font = new Font("Segoe UI", 10F); // for filter panel
-            gridView.Appearance.HeaderPanel.Font = new Font("Segoe UI", 10F, FontStyle.Bold); // optional: match header
-           // gridView.Appearance.Row.Font = new Font("Segoe UI", 12F);         // optional: match row font
-            gridView.RowHeight = 30; // increase height if needed
+            // Appearance settings
+            gridViewSchedule.Appearance.FilterPanel.Font = new Font("Segoe UI", 10F);
+            gridViewSchedule.Appearance.HeaderPanel.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            gridViewSchedule.Appearance.HeaderPanel.ForeColor = Color.Black;
+            gridViewSchedule.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
 
-            // Customize headers
-         //   gridView.Appearance.HeaderPanel.Font = new Font(gridView.Appearance.Row.Font, FontStyle.Bold);
-            //gridView.Appearance.HeaderPanel.BackColor = System.Drawing.Color.AntiqueWhite;
-            gridView.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
-            gridView.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            // Optional row font and height
+            // gridViewSchedule.Appearance.Row.Font = new Font("Segoe UI", 12F);
+            gridViewSchedule.RowHeight = 30;
 
-            // Ensure groups are always expanded
-            gridView.OptionsView.ShowGroupPanel = true;
-            gridView.OptionsView.GroupDrawMode = DevExpress.XtraGrid.Views.Grid.GroupDrawMode.Office;
-            gridView.OptionsView.ShowGroupedColumns = true;
+            // View options
+            gridViewSchedule.OptionsView.ShowGroupPanel = true;
+            gridViewSchedule.OptionsView.GroupDrawMode = DevExpress.XtraGrid.Views.Grid.GroupDrawMode.Office;
+            gridViewSchedule.OptionsView.ShowGroupedColumns = true;
 
-            Controls.Add(gridControl);
+            // Important: avoid auto-expanding all groups for large datasets
+            gridViewSchedule.OptionsBehavior.AutoExpandAllGroups = false;
+
+            // Optional: expand top-level groups manually (if performance is acceptable)
+            gridViewSchedule.ExpandAllGroups(); // Caution: use only with small to medium datasets
+
+
+            // Setup columns and grouping
             GroupGridViewColumns();
-            gridView.ColumnFilterChanged += (sender, e) => UpdateTotalLabel();
+
+            // Update total when filters change
+            gridViewSchedule.ColumnFilterChanged += (sender, e) => UpdateTotalLabel();
         }
+
 
         private void GroupGridViewColumns()
         {
-            gridView.ClearGrouping();
+            gridViewSchedule.ClearGrouping();
 
-            GridColumn partNameColumn = gridView.Columns["PartName"];
-            GridColumn sizeColumn = gridView.Columns["Size"];
-            GridColumn soColumn = gridView.Columns["SO"];
+            GridColumn partNameColumn = gridViewSchedule.Columns["PartName"];
+            GridColumn sizeColumn = gridViewSchedule.Columns["Size"];
+            GridColumn soColumn = gridViewSchedule.Columns["SO"];
             if (soColumn != null)
             {
                 soColumn.GroupIndex = 0;
@@ -191,20 +214,11 @@ namespace DigitalProduction
                 sizeColumn.GroupIndex = 2;
             }
 
-            gridView.ExpandAllGroups(); // Expand all groups after setting
+            gridViewSchedule.ExpandAllGroups(); // Expand all groups after setting
         }
 
         private void InitializeTotalLabel()
         {
-            FlowLayoutPanel bottomPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Bottom,
-                FlowDirection = FlowDirection.LeftToRight,
-                AutoSize = true,
-                Padding = new Padding(5),
-                BackColor = System.Drawing.Color.Transparent
-            };
-
             lblTotalRecords = new Label
             {
                 Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
@@ -247,21 +261,14 @@ namespace DigitalProduction
 
         private void InitializeMonthFilter()
         {
-            DateTimePicker dateTimePicker = new DateTimePicker
+            dateTimePickerSchedule.ValueChanged += async (sender, e) =>
             {
-                Format = DateTimePickerFormat.Custom,
-                CustomFormat = "MM/yyyy",
-                Dock = DockStyle.Top
-            };
+                selectedMonth = new DateTime(dateTimePickerSchedule.Value.Year, dateTimePickerSchedule.Value.Month, 1);
 
-            dateTimePicker.ValueChanged += async (sender, e) =>
-            {
-                selectedMonth = new DateTime(dateTimePicker.Value.Year, dateTimePicker.Value.Month, 1);
-                await GetDataAndLoadToGridAsync(); // request filtered data directly from backend
+                await GetListOfSOsByMonthYearAsync();
             };
-
-            Controls.Add(dateTimePicker);
         }
+
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
@@ -275,7 +282,8 @@ namespace DigitalProduction
 
             if (productionSchedules.Count == 0)
             {
-                _ = GetDataAndLoadToGridAsync();
+                _ = GetListOfSOsByMonthYearAsync();
+               // _ = GetDataAndLoadToGridAsync();
             }
         }
 
@@ -285,6 +293,19 @@ namespace DigitalProduction
             {
                 app = Global.App,
                 action = "getSchedule",
+                so = cboSO.Properties.Items.GetCheckedValues().Cast<string>().ToList()
+        };
+
+            string jsonRequest = JsonConvert.SerializeObject(request);
+            await _webSocketClient.SendAsync(jsonRequest);
+        }
+
+        public async Task GetListOfSOsByMonthYearAsync()
+        {
+            var request = new
+            {
+                app = Global.App,
+                action = "getListOfSOsByMonthYear",
                 month = selectedMonth?.Month,
                 year = selectedMonth?.Year
             };
@@ -293,23 +314,41 @@ namespace DigitalProduction
             await _webSocketClient.SendAsync(jsonRequest);
         }
 
-
         private void WebSocket_OnMessage(string jsonData)
         {
             try
             {
-                var response = JsonConvert.DeserializeObject<ResponseMessage<List<ProductionSchedule>>>(jsonData);
-                if (response != null && response.Status == "success" && response.Schedule != null)
+                string action = JObject.Parse(jsonData)["action"]?.ToString();
+                if (!string.IsNullOrEmpty(action))
                 {
-                    // Ensure UI update happens on the main thread
-                    if (InvokeRequired)
+                    switch (action)
                     {
-                        Invoke(new Action(() => UpdateGrid(response.Schedule)));
+                        case "getSchedule":
+                            var scheduleResponse = JsonConvert.DeserializeObject<ResponseMessage<List<ProductionSchedule>>>(jsonData);
+                            if (scheduleResponse?.Schedule != null)
+                            {
+                                SafeUpdateGrid(scheduleResponse.Schedule);
+                            }
+                            break;
+
+                        case "getListOfSOsByMonthYear":
+                            var soListResponse = JsonConvert.DeserializeObject<ResponseMessage<List<string>>>(jsonData);
+                            if (soListResponse?.Data != null)
+                            {
+                                SafeUpdateSOList(soListResponse.Data);
+                            }
+                            else {
+                                cboSO.Properties.Items.Clear();
+                            }
+                            break;
+
+                        default:
+                            break;
                     }
-                    else
-                    {
-                        UpdateGrid(response.Schedule);
-                    }
+                }
+                else
+                {
+                    ShowMessage.ShowInfo("Cant not processing get WebSocket data");
                 }
             }
             catch (Exception ex)
@@ -317,6 +356,38 @@ namespace DigitalProduction
                 ConnectionManager.Instance.IsReconnecting = true;
                 MessageBox.Show($"Error processing WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void SafeUpdateSOList(List<string> soList)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => SafeUpdateSOList(soList)));
+                return;
+            }
+
+            cboSO.Properties.Items.BeginUpdate();
+            try
+            {
+                cboSO.Properties.Items.Clear();
+                foreach (var so in soList)
+                {
+                    cboSO.Properties.Items.Add(so, CheckState.Unchecked, true);
+                }
+            }
+            finally
+            {
+                cboSO.Properties.Items.EndUpdate();
+            }
+        }
+
+        // Helper method to safely update schedule grid on UI thread
+        private void SafeUpdateGrid(List<ProductionSchedule> schedules)
+        {
+            if (InvokeRequired)
+                Invoke(new Action(() => UpdateGrid(schedules)));
+            else
+                UpdateGrid(schedules);
         }
 
         private void UpdateGrid(List<ProductionSchedule> newSchedules)
@@ -331,58 +402,47 @@ namespace DigitalProduction
 
             // Hide columns after data is bound
             HideGridColumns();
-            gridView.OptionsFilter.AllowMultiSelectInCheckedFilterPopup = true;
-            gridView.Columns["Size"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
-            gridView.Columns["SO"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
-            gridView.Columns["PartName"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
-            gridView.ShowFilterPopupCheckedListBox += (s, e) =>
+            gridViewSchedule.OptionsFilter.AllowMultiSelectInCheckedFilterPopup = true;
+            gridViewSchedule.Columns["Size"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+            gridViewSchedule.Columns["SO"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+            gridViewSchedule.Columns["PartName"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+            gridViewSchedule.ShowFilterPopupCheckedListBox += (s, e) =>
             {
                 if (e.Column.FieldName == "Size")
                 {
-                    List<string> originalItems = e.CheckedComboBox.Items
+                    var originalItems = e.CheckedComboBox.Items
                         .Cast<CheckedListBoxItem>()
-                        .Select(item => item.Value?.ToString())
-                        .Where(val => !string.IsNullOrWhiteSpace(val))
                         .ToList();
 
-                    // Sort numerically
-                    originalItems.Sort((a, b) =>
-                    {
-                        double numA = 0, numB = 0;
+                    var sortedItems = originalItems
+                        .Where(item => double.TryParse(item.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                        .OrderBy(item =>
+                        {
+                            double.TryParse(item.Value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out double number);
+                            return number;
+                        })
+                        .ToList();
 
-                        CultureInfo culture = CultureInfo.InvariantCulture;
-                        double.TryParse(a, NumberStyles.Any, culture, out numA);
-                        double.TryParse(b, NumberStyles.Any, culture, out numB);
-
-                        // Compare numerically
-                        return numA.CompareTo(numB);
-                    });
-
-                    originalItems.ForEach(val =>
-                    {
-                        e.CheckedComboBox.Items.Add(val);
-                    });
-
-
+                    // Clear the current items
                     e.CheckedComboBox.Items.Clear();
-                    foreach (var value in originalItems)
+
+                    // Add sorted items with correct check state
+                    foreach (var item in sortedItems)
                     {
-                        e.CheckedComboBox.Items.Add(value, CheckState.Unchecked, true);
+                        e.CheckedComboBox.Items.Add(new CheckedListBoxItem(item.Value, item.Description, item.CheckState == CheckState.Checked ? CheckState.Checked : CheckState.Unchecked, item.Enabled));
                     }
 
-                    // UI styling (optional)
+                    // Optional UI styling
                     e.CheckedComboBox.BorderStyle = BorderStyles.Office2003;
                 }
             };
-
-
         }
 
         private void HideGridColumns()
         {
             foreach (var columnName in columnsToHide)
             {
-                var column = gridView.Columns[columnName];
+                var column = gridViewSchedule.Columns[columnName];
                 if (column != null)
                 {
                     column.Visible = false;
@@ -395,7 +455,7 @@ namespace DigitalProduction
 
         private void TranslateHeaders()
         {
-            if (gridControl.MainView is GridView gridView && gridView.Columns.Count > 0)
+            if (gridControlSchedule.MainView is GridView gridView && gridView.Columns.Count > 0)
             {
                 foreach (GridColumn col in gridView.Columns)
                 {
@@ -418,13 +478,13 @@ namespace DigitalProduction
                 .ToList();
 
             // Update the grid control's data point
-            gridControl.DataSource = filteredData;
+            gridControlSchedule.DataSource = filteredData;
 
             // Reset and apply grouping
-            gridView.ClearGrouping();
+            gridViewSchedule.ClearGrouping();
             GroupGridViewColumns();
-            gridView.ExpandAllGroups();
-            gridView.RefreshData();
+            gridViewSchedule.ExpandAllGroups();
+            gridViewSchedule.RefreshData();
 
             if (!filteredData.Any())
             {
@@ -436,13 +496,24 @@ namespace DigitalProduction
 
         private void UpdateTotalLabel()
         {
-            if (gridView == null)
+            if (gridViewSchedule == null)
                 return;
 
-            int totalCount = gridView.DataRowCount; // Get only filtered rows
+            int totalCount = gridViewSchedule.DataRowCount; // Get only filtered rows
             lblTotalRecords.Text = $"{LocalizationManager.GetString("TotalRecords")} {totalCount}";
             lblTotalRecords.BackColor = System.Drawing.Color.AntiqueWhite;
             lblTotalRecords.ForeColor = System.Drawing.Color.Green;
+        }
+
+        private void InitializeSyncButton()
+        {
+            btnSync.Text = LocalizationManager.GetString("Sync");
+            btnSync.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnSync.Click += BtnSync_Click;
+        }
+        private void BtnSync_Click(object sender, EventArgs e)
+        {
+            _ = GetListOfSOsByMonthYearAsync();
         }
     }
 }

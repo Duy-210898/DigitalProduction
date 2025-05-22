@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 const { connectToDevice, isHostReachable, modbusClients } = require('./modbusClient');
-const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList, getOperatorList, getAllProductionSchedule, getDistributions, getOperatorDistribution } = require('./database');
+const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList, getOperatorList, getAllProductionSchedule, getDistributions, getOperatorDistribution, getListOfSOsByMonthYear} = require('./database');
 const { setClients } = require('./notifications'); 
 const { Time } = require('mssql');
 
@@ -98,6 +98,9 @@ async function handleClientMessage(ws, message) {
           break;
         case 'getOperatorDistribution':
           await handleGetOperatorDistribution(ws, request);
+          break;
+        case 'getListOfSOsByMonthYear':
+          await handleGetListOfSOsByMonthYear(ws, request);
           break;
         default:
           console.log('Unknown action for CuttingProject:', action);
@@ -414,24 +417,87 @@ async function handleAddDevice(ws, request) {
 }
 
 // Xử lý yêu cầu lấy lịch trình sản xuất
+// async function handleGetSchedule(ws, request) {
+//   try {
+//     let schedule;
+    
+//     if (request.so) {
+//       // Get schedule for a specific SO
+//       schedule = await getProductionSchedule(request.so);
+//     } else {
+//       // Get all schedules if no SO is provided
+//       const month = request.month ?? null;
+//       const year = request.year ?? null;
+
+//       // Pass month/year into the query function
+//       schedule = await getAllProductionSchedule(month, year);
+//     }
+
+//     ws.send(JSON.stringify({ action: 'getSchedule', status: 'success', schedule }));
+//   } catch (error) {
+//     console.error('Error fetching production schedule:', error);
+//     ws.send(JSON.stringify({ action: 'getSchedule', status: 'error', message: 'Failed to retrieve production schedule' }));
+//   }
+// }
+
+async function handleGetListOfSOsByMonthYear(ws, request) {
+  try {
+    const month = request.month ?? null;
+    const year = request.year ?? null;
+
+    if (!month || !year) {
+      ws.send(JSON.stringify({
+        action: 'getListOfSOsByMonthYear',
+        status: 'error',
+        message: 'Month and year are required'
+      }));
+      return;
+    }
+
+    const soList = await getListOfSOsByMonthYear(month, year);
+    ws.send(JSON.stringify({
+      action: 'getListOfSOsByMonthYear',
+      status: 'success',
+      data: soList
+    }));
+  } catch (error) {
+    console.error('Error in handleGetListOfSOsByMonthYear:', error.message);
+    ws.send(JSON.stringify({
+      action: 'getListOfSOsByMonthYear',
+      status: 'error',
+      message: 'Failed to retrieve SO list'
+    }));
+  }
+}
+
 async function handleGetSchedule(ws, request) {
   try {
     let schedule;
-    
+
     if (request.so) {
-      // Get schedule for a specific SO
-      schedule = await getProductionSchedule(request.so);
+      const soList = Array.isArray(request.so) ? request.so : [request.so];
+      schedule = await getProductionSchedule(soList);
     } else {
-      // Get all schedules if no SO is provided
-      schedule = await getAllProductionSchedule();
+      const month = request.month ?? null;
+      const year = request.year ?? null;
+      schedule = await getAllProductionSchedule(month, year);
     }
 
-    ws.send(JSON.stringify({ action: 'getSchedule', status: 'success', schedule }));
+    ws.send(JSON.stringify({
+      action: 'getSchedule',
+      status: 'success',
+      schedule
+    }));
   } catch (error) {
     console.error('Error fetching production schedule:', error);
-    ws.send(JSON.stringify({ action: 'getSchedule', status: 'error', message: 'Failed to retrieve production schedule' }));
+    ws.send(JSON.stringify({
+      action: 'getSchedule',
+      status: 'error',
+      message: 'Failed to retrieve production schedule'
+    }));
   }
 }
+
 
 
 // Xử lý yêu cầu lấy các trang duy nhất

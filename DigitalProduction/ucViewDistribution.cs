@@ -102,7 +102,6 @@ namespace DigitalProduction
                 cboSO.Focus();
                 cboSO.ShowPopup();
             }
-
         }
 
         private void LoadProductionSchedulesBySelectedSOs(DevExpress.XtraEditors.CheckedComboBoxEdit cboSO, GridControl gridControl, GridView gridView)

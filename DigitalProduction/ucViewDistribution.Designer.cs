@@ -35,17 +35,17 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.lblSelectSO = new DevExpress.XtraEditors.LabelControl();
             this.cboSO = new DevExpress.XtraEditors.CheckedComboBoxEdit();
+            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnSync = new DevExpress.XtraEditors.SimpleButton();
             this.gridViewSO = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridControlViewSO = new DevExpress.XtraGrid.GridControl();
-            this.btnSync = new DevExpress.XtraEditors.SimpleButton();
-            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cboSO.Properties)).BeginInit();
+            this.tableLayoutPanel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewSO)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlViewSO)).BeginInit();
-            this.tableLayoutPanel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -139,6 +139,31 @@
             this.cboSO.Size = new System.Drawing.Size(183, 20);
             this.cboSO.TabIndex = 5;
             // 
+            // tableLayoutPanel4
+            // 
+            this.tableLayoutPanel4.ColumnCount = 2;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel4.Controls.Add(this.btnSync, 0, 1);
+            this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(198, 59);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 2;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 27.45098F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 72.54902F));
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(580, 51);
+            this.tableLayoutPanel4.TabIndex = 6;
+            // 
+            // btnSync
+            // 
+            this.btnSync.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnSync.ImageOptions.Image = global::DigitalProduction.Properties.Resources.sync_icon;
+            this.btnSync.Location = new System.Drawing.Point(3, 17);
+            this.btnSync.Name = "btnSync";
+            this.btnSync.Size = new System.Drawing.Size(109, 31);
+            this.btnSync.TabIndex = 5;
+            this.btnSync.Text = "simpleButton1";
+            // 
             // gridViewSO
             // 
             this.gridViewSO.GridControl = this.gridControlViewSO;
@@ -155,31 +180,6 @@
             this.gridControlViewSO.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewSO});
             // 
-            // btnSync
-            // 
-            this.btnSync.Dock = System.Windows.Forms.DockStyle.Left;
-            this.btnSync.ImageOptions.Image = global::DigitalProduction.Properties.Resources.sync_icon;
-            this.btnSync.Location = new System.Drawing.Point(3, 17);
-            this.btnSync.Name = "btnSync";
-            this.btnSync.Size = new System.Drawing.Size(109, 31);
-            this.btnSync.TabIndex = 5;
-            this.btnSync.Text = "simpleButton1";
-            // 
-            // tableLayoutPanel4
-            // 
-            this.tableLayoutPanel4.ColumnCount = 2;
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel4.Controls.Add(this.btnSync, 0, 1);
-            this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(198, 59);
-            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 2;
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 27.45098F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 72.54902F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(580, 51);
-            this.tableLayoutPanel4.TabIndex = 6;
-            // 
             // ucViewDistribution
             // 
             this.Controls.Add(this.gridControlViewSO);
@@ -192,9 +192,9 @@
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cboSO.Properties)).EndInit();
+            this.tableLayoutPanel4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridViewSO)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlViewSO)).EndInit();
-            this.tableLayoutPanel4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
