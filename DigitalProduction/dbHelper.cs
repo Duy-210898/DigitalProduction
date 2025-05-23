@@ -1183,7 +1183,6 @@ namespace DigitalProduction
 
         public static void SaveFilteredSchedulesToDatabase(List<ProductionSchedule> schedules)
         {
-
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
@@ -1195,15 +1194,17 @@ namespace DigitalProduction
                         string query = @"
                         IF NOT EXISTS (
                             SELECT 1 FROM ProductionSchedule
-                            WHERE SO = @SO AND PartCode = @PartCode AND Size = @Size 
+                            WHERE SO = @SO AND PartID = @PartID AND SizeID = @SizeID AND OrderID = @OrderID
                         )
                         BEGIN
                             INSERT INTO ProductionSchedule 
-                            (Factory, DepartmentID, ART, Model, PO, SO, MasterWorkOrder, Size, PartCode, PartName, MaterialCode, MaterialName, 
-                                SizeQty, UNIT, ProductionProcess, LastNo, UnitUsage, CreatedAt)
+                            (Factory, DepartmentID, ART, Model, PO, SO, MasterWorkOrder, SizeID, PartID, OrderID, 
+                             MaterialCode, MaterialName, 
+                             UNIT, ProductionProcess, LastNo, UnitUsage, CreatedAt)
                             VALUES 
-                            (@Factory, @DepartmentID, @ART, @Model, @PO, @SO, @MasterWorkOrder, @Size, @PartCode, @PartName, @MaterialCode, 
-                                @MaterialName, @SizeQty, @UNIT, @ProductionProcess, @LastNo, @UnitUsage, @CreatedAt)
+                            (@Factory, @DepartmentID, @ART, @Model, @PO, @SO, @MasterWorkOrder, @SizeID, @PartID, @OrderID, 
+                             @MaterialCode, @MaterialName, 
+                             @UNIT, @ProductionProcess, @LastNo, @UnitUsage, @CreatedAt)
                         END";
 
                         foreach (var schedule in schedules)
@@ -1217,12 +1218,11 @@ namespace DigitalProduction
                                 cmd.Parameters.Add("@PO", SqlDbType.NVarChar).Value = (object)schedule.PO ?? DBNull.Value;
                                 cmd.Parameters.Add("@SO", SqlDbType.NVarChar).Value = (object)schedule.SO ?? DBNull.Value;
                                 cmd.Parameters.Add("@MasterWorkOrder", SqlDbType.NVarChar).Value = (object)schedule.MasterWorkOrder ?? DBNull.Value;
-                                cmd.Parameters.Add("@Size", SqlDbType.NVarChar).Value = (object)schedule.Size ?? DBNull.Value;
-                                cmd.Parameters.Add("@PartCode", SqlDbType.NVarChar).Value = (object)schedule.PartCode ?? DBNull.Value;
-                                cmd.Parameters.Add("@PartName", SqlDbType.NVarChar).Value = (object)schedule.PartName ?? DBNull.Value;
+                                cmd.Parameters.Add("@SizeID", SqlDbType.Int).Value = schedule.SizeID;
+                                cmd.Parameters.Add("@PartID", SqlDbType.Int).Value = schedule.PartId;
+                                cmd.Parameters.Add("@OrderID", SqlDbType.Int).Value = schedule.OrderID;
                                 cmd.Parameters.Add("@MaterialCode", SqlDbType.NVarChar).Value = (object)schedule.MaterialCode ?? DBNull.Value;
                                 cmd.Parameters.Add("@MaterialName", SqlDbType.NVarChar).Value = (object)schedule.MaterialName ?? DBNull.Value;
-                                cmd.Parameters.Add("@SizeQty", SqlDbType.Int).Value = schedule.SizeQty;
                                 cmd.Parameters.Add("@UNIT", SqlDbType.NVarChar).Value = (object)schedule.PartSizeUnit ?? DBNull.Value;
                                 cmd.Parameters.Add("@ProductionProcess", SqlDbType.NVarChar).Value = (object)schedule.Process ?? DBNull.Value;
                                 cmd.Parameters.Add("@LastNo", SqlDbType.NVarChar).Value = (object)schedule.LastNo ?? DBNull.Value;
@@ -1244,6 +1244,7 @@ namespace DigitalProduction
                 }
             }
         }
+
         public static List<string> GetDistinctSOListByMonthAndDepartment(int month, int year, int departmentId)
         {
             var soList = new List<string>();
@@ -1283,9 +1284,48 @@ namespace DigitalProduction
             if (soList == null || soList.Count == 0)
                 return result;
 
+            string inClause = string.Join(",", soList.Select((s, i) => $"@SO{i}"));
             string query = $@"
-                SELECT * FROM ProductionSchedule
-                WHERE SO IN ({string.Join(",", soList.Select((s, i) => $"@SO{i}"))})";
+            SELECT 
+                po.OrderID,
+                po.Factory,
+                po.SO,
+                po.PO,
+                po.MasterWorkOrder,
+                po.LastNo,
+                po.Process,
+                s.Size,
+                s.SizeID,
+                p.ART,
+                p.Model,
+                pso.SizeQty,
+                pso.Unit AS PartSizeUnit,
+                pso.UnitUsage,
+                m.MaterialID,
+                m.MaterialCode,
+                m.MaterialName,
+                m.Unit AS MaterialUnit,
+                pa.PartId,
+                pa.PartName,
+                pa.VietnameseName,
+                pa.PartCode,
+                ps.CreatedAt,
+                d.Status,
+                d.InventoryQty,
+                do.CuttingDieQty, 
+                do.PiecesPerPair, 
+                do.MaterialLayer, 
+                do.TotalPiecesPerPair
+            FROM Product p
+            JOIN ProductOrder po ON p.ProductId = po.ProductId
+            JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+            JOIN Part pa ON pso.PartId = pa.PartId
+            JOIN Material m ON pso.MaterialID = m.MaterialID
+            JOIN Size s ON pso.SizeId = s.SizeID
+            JOIN ProductionSchedule ps ON ps.OrderID = po.OrderID AND ps.PartID = pa.PartId AND ps.SizeID = s.SizeID
+            LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
+            LEFT JOIN DeviceOutput do ON do.SizeID = s.SizeId AND do.PartId = pa.PartId AND do.OrderID = po.OrderId
+            WHERE po.SO IN ({inClause})";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -1302,23 +1342,34 @@ namespace DigitalProduction
                     {
                         result.Add(new ProductionSchedule
                         {
-                            DepartmentID = Convert.ToInt32(reader["DepartmentID"]),
+                            OrderID = Convert.ToInt32(reader["OrderID"]),
                             Factory = reader["Factory"].ToString(),
+                            SO = reader["SO"].ToString(),
+                            PO = reader["PO"].ToString(),
+                            MasterWorkOrder = reader["MasterWorkOrder"].ToString(),
+                            LastNo = reader["LastNo"].ToString(),
+                            Process = reader["Process"].ToString(),
+                            Size = reader["Size"].ToString(),
+                            SizeID = Convert.ToInt32(reader["SizeID"]),
                             ART = reader["ART"].ToString(),
                             Model = reader["Model"].ToString(),
-                            PO = reader["PO"].ToString(),
-                            SO = reader["SO"].ToString(),
-                            MasterWorkOrder = reader["MasterWorkOrder"].ToString(),
-                            Size = reader["Size"].ToString(),
-                            PartCode = reader["PartCode"].ToString(),
-                            PartName = reader["PartName"].ToString(),
+                            SizeQty = reader["SizeQty"] is int qty ? qty : 0,
+                            PartSizeUnit = reader["PartSizeUnit"].ToString(),
+                            MaterialID = Convert.ToInt32(reader["MaterialID"]),
                             MaterialCode = reader["MaterialCode"].ToString(),
                             MaterialName = reader["MaterialName"].ToString(),
-                            SizeQty = reader["SizeQty"] != DBNull.Value ? Convert.ToInt32(reader["SizeQty"]) : 0,
-                            PartSizeUnit = reader["UNIT"].ToString(),
-                            Process = reader["ProductionProcess"].ToString(),
-                            LastNo = reader["LastNo"].ToString(),
-                            CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]) : DateTime.MinValue
+                            MaterialUnit = reader["MaterialUnit"].ToString(),
+                            PartId = Convert.ToInt32(reader["PartId"]),
+                            PartName = reader["PartName"].ToString(),
+                            VietnameseName = reader["VietnameseName"].ToString(),
+                            PartCode = reader["PartCode"].ToString(),
+                            CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]) : DateTime.MinValue,
+                            Status = reader["Status"]?.ToString(),
+                            InventoryQty = reader["InventoryQty"] is int inv ? inv : 0,
+                            CuttingDieQty = reader["CuttingDieQty"] is int die ? die : 0,
+                            PeicesPerPair = reader["PiecesPerPair"] is int ppp ? ppp : 0,
+                            MaterialLayer = reader["MaterialLayer"] is int ml ? ml : 0,
+                            TotalPiecesPerPair = reader["TotalPiecesPerPair"] is int tpp ? tpp : 0
                         });
                     }
                 }
@@ -1326,7 +1377,6 @@ namespace DigitalProduction
 
             return result;
         }
-
     }
 }
 

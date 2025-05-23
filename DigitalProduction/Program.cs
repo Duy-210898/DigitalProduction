@@ -39,7 +39,7 @@ namespace DigitalProduction
             {
                 try
                 {
-                    await WebSocketClient.Instance.Connect("ws://10.30.0.116:8000");
+                    await WebSocketClient.Instance.Connect("ws://10.30.4.106:8000");
                     Console.WriteLine("Connected to WebSocket server successfully.");
                     return; // Exit loop when successful
                 }

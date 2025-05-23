@@ -621,4 +621,7 @@
   <data name="WatchSOList" xml:space="preserve">
     <value>Xem danh sách SO</value>
   </data>
+  <data name="WatchList" xml:space="preserve">
+    <value>Danh sách theo dõi</value>
+  </data>
 </root>

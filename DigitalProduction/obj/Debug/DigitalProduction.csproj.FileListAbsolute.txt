@@ -197,3 +197,5 @@ D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v24.2.Core.xml
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v24.2.Core.Desktop.xml
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucViewDistribution.resources
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucSchedule_View.resources

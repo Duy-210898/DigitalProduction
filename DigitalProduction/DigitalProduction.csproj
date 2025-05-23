@@ -25,7 +25,7 @@
     <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>71</ApplicationRevision>
+    <ApplicationRevision>73</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -307,6 +307,12 @@
     <Compile Include="ucReportOder.Designer.cs">
       <DependentUpon>ucReportOder.cs</DependentUpon>
     </Compile>
+    <Compile Include="ucSchedule_View.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucSchedule_View.Designer.cs">
+      <DependentUpon>ucSchedule_View.cs</DependentUpon>
+    </Compile>
     <Compile Include="ucViewDistribution.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -331,6 +337,7 @@
     <EmbeddedResource Include="ChangePassword.resx">
       <DependentUpon>ChangePassword.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
     <EmbeddedResource Include="ucCuttingReport.resx">
       <DependentUpon>ucCuttingReport.cs</DependentUpon>
     </EmbeddedResource>
@@ -382,6 +389,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ucReportOder.resx">
       <DependentUpon>ucReportOder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucSchedule_View.resx">
+      <DependentUpon>ucSchedule_View.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ucViewDistribution.resx">
       <DependentUpon>ucViewDistribution.cs</DependentUpon>

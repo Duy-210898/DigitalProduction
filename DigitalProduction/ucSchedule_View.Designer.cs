@@ -1,6 +1,6 @@
 ﻿namespace DigitalProduction
 {
-    partial class ucSchedule
+    partial class ucSchedule_View
     {
         /// <summary> 
         /// Required designer variable.
@@ -232,12 +232,12 @@
             this.tableLayoutPanel5.Size = new System.Drawing.Size(975, 413);
             this.tableLayoutPanel5.TabIndex = 4;
             // 
-            // ucSchedule
+            // ucSchedule_View
             // 
             this.Controls.Add(this.tableLayoutPanel5);
             this.Controls.Add(this.bottomPanel);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Name = "ucSchedule";
+            this.Name = "ucSchedule_View";
             this.Size = new System.Drawing.Size(975, 567);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);

@@ -1273,7 +1273,13 @@ async function readActualData(client, ipAddress) {
 
           console.log(`sizeRemain [Address] ${ipAddress} ${sizeRemain} ActualCut ${actualCut} actualSizeQty ${actualSizeQty}`);
     
-        if ((modbusClients[ipAddress].storedActualSizeQty - sizeRemain) >= checkPendingSize.SizeQty) {
+          const availableQty = modbusClients[ipAddress].storedActualSizeQty - sizeRemain;
+
+          if (availableQty < 0) {
+              return;
+          }
+          
+          if (availableQty >= checkPendingSize.SizeQty) {
             if(isLeather) {
               // case leather
               const so = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs];

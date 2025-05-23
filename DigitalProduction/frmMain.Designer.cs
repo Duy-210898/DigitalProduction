@@ -36,6 +36,9 @@
             this.accordionControl1 = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnMonthlyPlan = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElementWL = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnViewInfoDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnWatchedList = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnProgressDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -52,7 +55,9 @@
             this.statusItem = new DevExpress.XtraBars.BarStaticItem();
             this.SkinOption = new DevExpress.XtraBars.SkinBarSubItem();
             this.pnlControl = new System.Windows.Forms.Panel();
-            this.btnViewInfoDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement5 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement7 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemTextEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl1)).BeginInit();
@@ -95,7 +100,7 @@
             // 
             this.accordionControlElement1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnMonthlyPlan,
-            this.btnViewInfoDistribution});
+            this.accordionControlElementWL});
             this.accordionControlElement1.Expanded = true;
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Text = "Production Schedule";
@@ -111,6 +116,30 @@
             this.btnMonthlyPlan.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnMonthlyPlan.Text = "Monthly Plan";
             this.btnMonthlyPlan.Click += new System.EventHandler(this.btnSchedule_Click);
+            // 
+            // accordionControlElementWL
+            // 
+            this.accordionControlElementWL.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElementWL.Appearance.Default.Options.UseFont = true;
+            this.accordionControlElementWL.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.btnViewInfoDistribution,
+            this.btnWatchedList});
+            this.accordionControlElementWL.Name = "accordionControlElementWL";
+            this.accordionControlElementWL.Text = "Watch List";
+            // 
+            // btnViewInfoDistribution
+            // 
+            this.btnViewInfoDistribution.Name = "btnViewInfoDistribution";
+            this.btnViewInfoDistribution.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnViewInfoDistribution.Text = "Monthly Plan";
+            this.btnViewInfoDistribution.Click += new System.EventHandler(this.btnScheduleView_Click);
+            // 
+            // btnWatchedList
+            // 
+            this.btnWatchedList.Name = "btnWatchedList";
+            this.btnWatchedList.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnWatchedList.Text = "Watched SO List";
+            this.btnWatchedList.Click += new System.EventHandler(this.btnViewDistributionClick);
             // 
             // accordionControlElement3
             // 
@@ -259,12 +288,31 @@
             this.pnlControl.Size = new System.Drawing.Size(971, 736);
             this.pnlControl.TabIndex = 3;
             // 
-            // btnViewInfoDistribution
+            // accordionControlElement2
             // 
-            this.btnViewInfoDistribution.Name = "btnViewInfoDistribution";
-            this.btnViewInfoDistribution.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.btnViewInfoDistribution.Text = "View Distribution";
-            this.btnViewInfoDistribution.Click += new System.EventHandler(this.btnViewDistributionClick);
+            this.accordionControlElement2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.accordionControlElement5,
+            this.accordionControlElement7});
+            this.accordionControlElement2.Expanded = true;
+            this.accordionControlElement2.Name = "accordionControlElement2";
+            this.accordionControlElement2.Text = "Production Schedule";
+            // 
+            // accordionControlElement5
+            // 
+            this.accordionControlElement5.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
+            this.accordionControlElement5.Name = "accordionControlElement5";
+            this.accordionControlElement5.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.accordionControlElement5.Text = "Monthly Plan";
+            // 
+            // accordionControlElement7
+            // 
+            this.accordionControlElement7.Name = "accordionControlElement7";
+            this.accordionControlElement7.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.accordionControlElement7.Text = "View Distribution";
             // 
             // frmMain
             // 
@@ -312,7 +360,12 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnReportOder;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnCuttingReportQty;
         private DevExpress.XtraBars.SkinBarSubItem SkinOption;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnWatchedList;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement2;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement5;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement7;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnViewInfoDistribution;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElementWL;
     }
 }
 

@@ -12,22 +12,23 @@ using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static DigitalProduction.ucProgress;
 
 namespace DigitalProduction
 {
-    public partial class ucSchedule : UserControl
+    public partial class ucSchedule_View : UserControl
     {
         private BindingList<ProductionSchedule> productionSchedules = new BindingList<ProductionSchedule>();
         private WebSocketClient _webSocketClient;
         private DateTime? selectedMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
         private Label lblTotalRecords;
-        private System.Windows.Forms.Button btnSendData;
+        private Button btnSaveData;
         // Keep track of selected items
         List<SalesOrder> selectedSalesOrders = new List<SalesOrder>();
         private List<string> selectedSOs = new List<string>();
-        private readonly string[] columnsToHide = { "InventoryQty ,DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
+        private readonly string[] columnsToHide = { "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
-        public ucSchedule()
+        public ucSchedule_View()
         {
             InitializeComponent();
             SetupGridControl();
@@ -127,57 +128,11 @@ namespace DigitalProduction
             }
         }
 
-        private async void BtnSendData_Click(object sender, EventArgs e)
+        private void BtnSaveData_Click(object sender, EventArgs e)
         {
-
             // avoid dupliacte
             List<ProductionSchedule> filteredSchedules = GetFilteredData().Distinct(new ProductionScheduleComparer()).ToList();
-
-            if (filteredSchedules.Count == 0)
-            {
-                MessageBox.Show("No data available to send.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            bool allSame = filteredSchedules
-                .GroupBy(s => new {s.Model })
-                .Count() == 1;
-
-            if (!allSame) {
-                MessageBox.Show("Please sure Model is the same", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            HashSet<int> sizeIDs = new HashSet<int>(filteredSchedules.Select(s => s.SizeID));
-            if (sizeIDs.Count > 6) {
-                MessageBox.Show("Only allow minimun or equal to 6 sizes", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            //if (filteredSchedules.Count >= 20) {
-            //    MessageBox.Show("Only allow 20 SO", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            //    return;
-            //}
-
-            // Get reference to frmMain
-            Form parentForm = this.FindForm();
-            if (parentForm is frmMain mainForm)
-            {
-                // Switch to ucDistribution
-                await mainForm.ShowUserControlAsync<ucDistribution>();
-
-                // Send filtered data to ucDistribution
-                if (mainForm._userControls.TryGetValue(typeof(ucDistribution), out UserControl userControl))
-                {
-                    if (userControl is ucDistribution distributionControl)
-                    {
-                        distributionControl.ReceiveFilteredData(filteredSchedules);
-                    }
-                }
-
-                // 🔥 Highlight "Distribution" in Accordion Menu
-                mainForm.HighlightSelectedItem(mainForm.btnDistribution);
-
-                MessageBox.Show($"Sent {filteredSchedules.Count} records to Distribution!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            DbHelper.SaveFilteredSchedulesToDatabase(filteredSchedules);
         }
         private List<ProductionSchedule> GetFilteredData()
         {
@@ -212,26 +167,7 @@ namespace DigitalProduction
             gridControlSchedule.DataSource = productionSchedules;
 
             gridViewSchedule.OptionsBehavior.Editable = true;
-            string[] columnsToHide = {
-                "PeicesPerPair",
-                "CuttingDieQty",
-                "MaterialLayer",
-                "TotalPiecesPerPair",
-                "Status"
-            };
 
-            foreach (string colName in columnsToHide)
-            {
-                GridColumn col = gridViewSchedule.Columns.ColumnByFieldName(colName);
-                if (col != null)
-                {
-                    col.Visible = false;
-                }
-                else
-                {
-                    Console.WriteLine($"Column not found: {colName}");
-                }
-            }
             // Appearance settings
             gridViewSchedule.Appearance.FilterPanel.Font = new Font("Segoe UI", 10F);
             gridViewSchedule.Appearance.HeaderPanel.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -259,8 +195,37 @@ namespace DigitalProduction
 
             // Update total when filters change
             gridViewSchedule.ColumnFilterChanged += (sender, e) => UpdateTotalLabel();
+            // Subscribe to the RowStyle event
+            gridViewSchedule.RowCellStyle += gridViewSchedule_RowCellStyle;
         }
 
+        private void gridViewSchedule_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
+        {
+            var view = sender as GridView;
+            if (view != null)
+            {
+                // Get the current row data
+                var rowData = view.GetRow(e.RowHandle) as ProductionSchedule;
+
+                // Ensure rowData is valid and the column is "Status"
+                if (rowData != null && e.Column.FieldName == "Status")
+                {
+                    // Customize only the "Status" column background color
+                    if (rowData.Status == "Complete")
+                    {
+                        e.Appearance.BackColor = Color.LightGreen; // Green for complete
+                    }
+                    else if (rowData.Status == "Pending")
+                    {
+                        e.Appearance.BackColor = Color.LightYellow; // Yellow for pending
+                    }
+                    else
+                    {
+                        e.Appearance.BackColor = Color.LightSteelBlue; // Red for other statuses
+                    }
+                }
+            }
+        }
 
         private void GroupGridViewColumns()
         {
@@ -298,19 +263,20 @@ namespace DigitalProduction
                 Padding = new Padding(5)
             };
 
-            btnSendData = new System.Windows.Forms.Button
+
+            btnSaveData = new Button
             {
-                Text = LocalizationManager.GetString("SelectData"),
+                Text = LocalizationManager.GetString("SaveListOfSO"),
                 Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
                 BackColor = System.Drawing.Color.LightBlue,
                 AutoSize = true,
                 Margin = new Padding(10, 0, 0, 0) // Adds space between label and button
             };
-            btnSendData.Click += BtnSendData_Click;
 
+            btnSaveData.Click += BtnSaveData_Click;
             // Add components to FlowLayoutPanel
             bottomPanel.Controls.Add(lblTotalRecords);
-            bottomPanel.Controls.Add(btnSendData);
+            bottomPanel.Controls.Add(btnSaveData);
 
             // Add to UserControl
             Controls.Add(bottomPanel);
@@ -352,7 +318,7 @@ namespace DigitalProduction
                 app = Global.App,
                 action = "getSchedule",
                 so = selectedSalesOrders.Select(x => x.SO).ToList(),
-                includeDistributed = true
+                includeDistributed = false
             };
 
             string jsonRequest = JsonConvert.SerializeObject(request);
@@ -542,6 +508,7 @@ namespace DigitalProduction
 
             // Update the grid control's data point
             gridControlSchedule.DataSource = filteredData;
+            gridViewSchedule.PopulateColumns();
 
             // Reset and apply grouping
             gridViewSchedule.ClearGrouping();

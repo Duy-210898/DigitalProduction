@@ -142,19 +142,18 @@ GO
 -- Table: ProductionSchedule
 CREATE TABLE ProductionSchedule (
     ScheduleID INT PRIMARY KEY IDENTITY(1,1),
-	DepartmentID INT,
+	DepartmentID INT NOT NULL,
     Factory VARCHAR(50),
     ART VARCHAR(50),
     Model VARCHAR(100),
     PO VARCHAR(50),
     SO VARCHAR(50),
     MasterWorkOrder VARCHAR(50),
-    Size VARCHAR(10),
-    PartCode VARCHAR(50),
-    PartName VARCHAR(100),
+    SizeID INT NOT NULL,
+    PartID INT NOT NULL,
+    OrderID INT NOT NULL,
     MaterialCode VARCHAR(50),
     MaterialName VARCHAR(1000),
-    SizeQty INT,
     UNIT VARCHAR(10),
     ProductionProcess VARCHAR(50),
     Page VARCHAR(10),
@@ -205,7 +204,10 @@ ALTER TABLE Operator ADD CONSTRAINT UQ_Operator_EmployeeID UNIQUE (EmployeeID);
 
 -- Foreign Key Constraints
 ALTER TABLE ProductionSchedule 
-	ADD CONSTRAINT FK_ProductionSchedule_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID);
+	ADD CONSTRAINT FK_ProductionSchedule_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
+	CONSTRAINT FK_ProductionSchedule_Part FOREIGN KEY (PartId) REFERENCES Part(PartId),
+	CONSTRAINT FK_ProductionSchedule_Size FOREIGN KEY (SizeId) REFERENCES Size(SizeId),
+	CONSTRAINT FK_ProductionSchedule_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID);
 ALTER TABLE TargetInDay 
 	ADD CONSTRAINT FK_TargetInDay_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
 	CONSTRAINT FK_TargetInDay_Operator FOREIGN KEY (EmployeeId) REFERENCES Operator(EmployeeId);

@@ -475,12 +475,14 @@ async function handleGetSchedule(ws, request) {
     let schedule;
 
     if (request.so) {
+      const includeDistributed = request.includeDistributed;
       const soList = Array.isArray(request.so) ? request.so : [request.so];
-      schedule = await getProductionSchedule(soList);
+      schedule = await getProductionSchedule(soList, includeDistributed);
     } else {
       const month = request.month ?? null;
       const year = request.year ?? null;
-      schedule = await getAllProductionSchedule(month, year);
+      const includeDistributed = request.includeDistributed;
+      schedule = await getAllProductionSchedule(month, year, includeDistributed);
     }
 
     ws.send(JSON.stringify({

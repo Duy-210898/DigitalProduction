@@ -1153,7 +1153,7 @@ async function getListOfSOsByMonthYear(month, year) {
       .input('Month', sql.Int, month)
       .input('Year', sql.Int, year)
       .query(`
-        SELECT DISTINCT po.SO
+        SELECT DISTINCT po.SO, po.CreatedAt
         FROM Product p
         JOIN ProductOrder po ON p.ProductId = po.ProductId
         JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
@@ -1163,14 +1163,14 @@ async function getListOfSOsByMonthYear(month, year) {
         WHERE MONTH(po.CreatedAt) = @Month AND YEAR(po.CreatedAt) = @Year
       `);
 
-    return result.recordset.map(row => row.SO);
+    return result.recordset.map(row => ({ SO: row.SO, CreatedAt: row.CreatedAt }));
   } catch (err) {
     console.error('Error getting SO list by month/year:', err.message);
     return [];
   }
 }
 
-async function getProductionSchedule(soList) {
+async function getProductionSchedule(soList, includeDistributed) {
   try {
     if (!pool) await initDatabase(); 
 
@@ -1183,7 +1183,80 @@ async function getProductionSchedule(soList) {
       request.input(`SO${index}`, sql.NVarChar, so);
     });
 
+    // clause
+    let conditionClause = '', joinDeviceOutput = '', selectDeviceOutput = '';
+    if (includeDistributed) {
+      conditionClause = ` AND d.PartSizeOrderId IS NULL`;
+    } else {
+      selectDeviceOutput =  ` ,do.ActualCut, do.CuttingDieQty, do.PiecesPerPair AS PeicesPerPair, do.MaterialLayer, do.TotalPiecesPerPair`;
+      joinDeviceOutput = `  LEFT JOIN DeviceOutput do ON do.SizeID = s.SizeId AND do.PartId = pa.PartId AND do.OrderID = po.OrderId`;
+    }
     const query = `
+      SELECT 
+          po.OrderID,
+          po.Factory,
+          po.SO,
+          po.PO,
+          po.MasterWorkOrder,
+          po.LastNo,
+          po.Process,
+          s.Size,
+          s.SizeID,
+          p.ART,
+          p.Model,
+          pso.SizeQty,
+          pso.Unit AS PartSizeUnit,
+          pso.UnitUsage,
+          m.MaterialID,
+          m.MaterialCode,
+          m.MaterialName,
+          m.Unit AS MaterialUnit,
+          pa.PartId,
+          pa.PartName,
+          pa.VietnameseName,
+          pa.PartCode,
+          po.CreatedAt,
+          po.UpdatedAt,
+          d.Status,
+          d.InventoryQty ${selectDeviceOutput}
+      FROM Product p
+      JOIN ProductOrder po ON p.ProductId = po.ProductId
+      JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+      JOIN Part pa ON pso.PartId = pa.PartId
+      JOIN Material m ON pso.MaterialID = m.MaterialID
+      JOIN Size s ON pso.SizeId = s.SizeID
+      LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
+      ${joinDeviceOutput}
+      WHERE po.SO IN (${soParams})  ${conditionClause}
+    `;
+
+    const result = await request.query(query);
+    return result.recordset;
+  } catch (err) {
+    console.error('Lỗi khi truy cập cơ sở dữ liệu:', err.message);
+    return [];
+  }
+}
+
+async function getAllProductionSchedule(month = null, year = null, includeDistributed) {
+  try {
+    if (!pool) await initDatabase(); 
+
+    const targetDate = new Date();
+    targetDate.setMonth(targetDate.getMonth());
+    const targetMonth = month ?? targetDate.getMonth() + 1; // JS month is 0-based
+    const targetYear = year ?? targetDate.getFullYear();
+
+    let whereClause = `
+      MONTH(po.CreatedAt) = ${targetMonth}
+      AND YEAR(po.CreatedAt) = ${targetYear}
+    `;
+
+    if (includeDistributed) {
+      whereClause += ` AND d.PartSizeOrderId IS NULL`;
+    }
+    const result = await pool.request()
+    .query(`
       SELECT 
           po.OrderID,
           po.Factory,
@@ -1215,64 +1288,9 @@ async function getProductionSchedule(soList) {
       JOIN Part pa ON pso.PartId = pa.PartId
       JOIN Material m ON pso.MaterialID = m.MaterialID
       JOIN Size s ON pso.SizeId = s.SizeID
-      WHERE po.SO IN (${soParams})
-    `;
-
-    const result = await request.query(query);
-    return result.recordset;
-  } catch (err) {
-    console.error('Lỗi khi truy cập cơ sở dữ liệu:', err.message);
-    return [];
-  }
-}
-
-async function getAllProductionSchedule(month = null, year = null) {
-  try {
-    if (!pool) await initDatabase(); 
-
-    const targetDate = new Date();
-    targetDate.setMonth(targetDate.getMonth());
-    const targetMonth = month ?? targetDate.getMonth() + 1; // JS month is 0-based
-    const targetYear = year ?? targetDate.getFullYear();
-
-    const result = await pool.request()
-      .query(`
-        SELECT 
-            po.OrderID,
-            po.Factory,
-            po.SO,
-            po.PO,
-            po.MasterWorkOrder,
-            po.LastNo,
-            po.Process,
-            s.Size,
-            s.SizeID,
-            p.ART,
-            p.Model,
-            pso.SizeQty,
-            pso.Unit AS PartSizeUnit,
-            pso.UnitUsage,
-            m.MaterialID,
-            m.MaterialCode,
-            m.MaterialName,
-            m.Unit AS MaterialUnit,
-            pa.PartId,
-            pa.PartName,
-            pa.VietnameseName,
-            pa.PartCode,
-            po.CreatedAt,
-            po.UpdatedAt
-        FROM Product p
-        JOIN ProductOrder po ON p.ProductId = po.ProductId
-        JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
-        JOIN Part pa ON pso.PartId = pa.PartId
-        JOIN Material m ON pso.MaterialID = m.MaterialID
-        JOIN Size s ON pso.SizeId = s.SizeID
-        LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
-        WHERE d.PartSizeOrderId IS NULL
-          AND MONTH(po.CreatedAt) = ${targetMonth}
-          AND YEAR(po.CreatedAt) = ${targetYear}
-      `);
+      LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
+      WHERE ${whereClause}
+    `);
 
     return result.recordset;
   } catch (err) {

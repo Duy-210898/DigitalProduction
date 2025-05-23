@@ -31,11 +31,12 @@ namespace DigitalProduction.Models
         public string PartCode { get; set; }
         public string VietnameseName { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int InventoryQty { get; set; } = 0;
-        public int PeicesPerPair { get; set; } = 0;
-        public int CuttingDieQty { get; set; } = 0;
-        public int MaterialLayer { get; set; } = 0;
-        public int TotalPiecesPerPair { get; set; } = 0;
+        public int? InventoryQty { get; set; } = 0;
+        public int? PeicesPerPair { get; set; } = 0;
+        public int? CuttingDieQty { get; set; } = 0;
+        public int? MaterialLayer { get; set; } = 0;
+        public int? TotalPiecesPerPair { get; set; } = 0;
+        public string Status { get; set; }
     }
 
 }

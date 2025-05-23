@@ -344,11 +344,11 @@ namespace DigitalProduction
                         int sizeID = schedule.SizeID;
                         int orderID = schedule.OrderID;
                         string model = schedule.Model;
-                        int inventory = schedule.InventoryQty;
-                        int cuttingDieQty = schedule.CuttingDieQty;
-                        int piecesPerPair = schedule.PeicesPerPair;
-                        int materialLayer = schedule.MaterialLayer;
-                        int TotalPiecesPerPair = schedule.TotalPiecesPerPair;
+                        int inventory = (int)schedule.InventoryQty;
+                        int cuttingDieQty = (int)schedule.CuttingDieQty;
+                        int piecesPerPair = (int)schedule.PeicesPerPair;
+                        int materialLayer = (int)schedule.MaterialLayer;
+                        int TotalPiecesPerPair = (int)schedule.TotalPiecesPerPair;
 
                         if (rdRawMaterial.Checked)
                         {

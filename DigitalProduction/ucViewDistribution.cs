@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using DigitalProduction.Models;
 namespace DigitalProduction
 {
     public partial class ucViewDistribution : UserControl
@@ -149,6 +150,36 @@ namespace DigitalProduction
             }
 
             TranslateHeaders();
+            // Subscribe to the RowStyle event
+            gridViewSO.RowCellStyle += gridViewSO_RowCellStyle;
+        }
+
+        private void gridViewSO_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
+        {
+            var view = sender as GridView;
+            if (view != null)
+            {
+                // Get the current row data
+                var rowData = view.GetRow(e.RowHandle) as ProductionSchedule;
+
+                // Ensure rowData is valid and the column is "Status"
+                if (rowData != null && e.Column.FieldName == "Status")
+                {
+                    // Customize only the "Status" column background color
+                    if (rowData.Status == "Complete")
+                    {
+                        e.Appearance.BackColor = Color.LightGreen; // Green for complete
+                    }
+                    else if (rowData.Status == "Pending")
+                    {
+                        e.Appearance.BackColor = Color.LightYellow; // Yellow for pending
+                    }
+                    else
+                    {
+                        e.Appearance.BackColor = Color.LightSteelBlue; // Red for other statuses
+                    }
+                }
+            }
         }
         private void TranslateHeaders()
         {

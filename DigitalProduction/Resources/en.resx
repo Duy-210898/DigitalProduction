@@ -591,4 +591,7 @@
   <data name="WatchSOList" xml:space="preserve">
     <value>Watched SO List</value>
   </data>
+  <data name="WatchList" xml:space="preserve">
+    <value>Watch List</value>
+  </data>
 </root>

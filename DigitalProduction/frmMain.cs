@@ -304,6 +304,11 @@ namespace DigitalProduction
             await ShowUserControlAsync<ucViewDistribution>();
         }
 
+        private async void btnScheduleView_Click(object sender, EventArgs e)
+        {
+            await ShowUserControlAsync<ucSchedule_View>();
+        }
+
 
         private void frmMain_Load(object sender, EventArgs e)
         {
@@ -342,7 +347,9 @@ namespace DigitalProduction
             barSubItem1.Caption = LocalizationManager.GetString("Guest");
             accordionControlElement6.Text = LocalizationManager.GetString("Report");
 
-            btnViewInfoDistribution.Text = LocalizationManager.GetString("WatchSOList");
+            btnViewInfoDistribution.Text = LocalizationManager.GetString("MonthlyPlan");
+            accordionControlElementWL.Text = LocalizationManager.GetString("WatchList");
+            btnWatchedList.Text = LocalizationManager.GetString("WatchSOList");
             btnDeviceManager.Text = LocalizationManager.GetString("DeviceManager");
             btnMonthlyPlan.Text = LocalizationManager.GetString("MonthlyPlan");
             btnDistribution.Text = LocalizationManager.GetString("Distribution");
