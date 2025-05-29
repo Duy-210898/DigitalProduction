@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraSplashScreen;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -386,7 +387,20 @@ namespace DigitalProduction
                             var scheduleResponse = JsonConvert.DeserializeObject<ResponseMessage<List<ProductionSchedule>>>(jsonData);
                             if (scheduleResponse?.Schedule != null)
                             {
-                                SafeUpdateGrid(scheduleResponse.Schedule);
+                                IOverlaySplashScreenHandle handle = null;
+
+                                try
+                                {
+                                    handle = SplashScreenManager.ShowOverlayForm(gridControlSchedule);
+
+                                    // Thực hiện cập nhật dữ liệu
+                                    SafeUpdateGrid(scheduleResponse.Schedule);
+                                }
+                                finally
+                                {
+                                    if (handle != null)
+                                        SplashScreenManager.CloseOverlayForm(handle);
+                                }
                             }
                             break;
 

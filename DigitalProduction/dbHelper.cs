@@ -1082,10 +1082,10 @@ namespace DigitalProduction
             var list = new List<TargetRealtimeInfo>();
 
             string sql = @"
-                SELECT 
+                  SELECT 
                     ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
                     CAST(ac.UpdatedAt AS DATE) AS Timestamp,
-                    t.EmployeeId,
+                    o.OperatorID,
                     CASE 
                         WHEN CAST(t.TargetDate AS DATE) = CAST(ac.UpdatedAt AS DATE) THEN ISNULL(t.TargetQuantity, 0)
                         ELSE 0
@@ -1096,33 +1096,36 @@ namespace DigitalProduction
                     ON ac.OrderID = pso.OrderId 
                     AND ac.SizeID = pso.SizeId 
                     AND ac.PartID = pso.PartId
+                LEFT JOIN DistributionData dd 
+                    ON pso.PartSizeOrderId = dd.PartSizeOrderId 
                 LEFT JOIN ProductOrder po 
                     ON po.OrderId = ac.OrderId
+                LEFT JOIN Operator o 
+                    ON o.OperatorID = dd.OperatorID
 
-                -- OUTER APPLY: get latest TargetInDay on or before UpdatedAt date
+                -- OUTER APPLY: fetch latest target by Operator (EmployeeId)
                 OUTER APPLY (
                     SELECT TOP 1 *
                     FROM TargetInDay tid
-                    WHERE tid.TargetDate <= CAST(ac.UpdatedAt AS DATE)
+                    WHERE 
+                        tid.EmployeeId = o.EmployeeID
+                        AND tid.TargetDate <= CAST(ac.UpdatedAt AS DATE)
                     ORDER BY tid.TargetDate DESC
                 ) t
-
-                LEFT JOIN Operator o ON o.EmployeeId = t.EmployeeId
-
                 WHERE 
-                    YEAR(ac.UpdatedAt) = @YEAR
-                    AND MONTH(ac.UpdatedAt) = @MONTH
-                    AND o.EmployeeId IS NOT NULL
+                    YEAR(ac.UpdatedAt) = @Year
+                    AND MONTH(ac.UpdatedAt) = @Month
+                    AND o.OperatorID IS NOT NULL
 
                 GROUP BY 
                     ISNULL(o.OperatorName, 'Unknown'),
                     CAST(ac.UpdatedAt AS DATE),
                     t.TargetDate,
-                    t.TargetQuantity,
-                    t.EmployeeId 
+                    o.OperatorID,
+                    t.TargetQuantity
 
                 ORDER BY 
-                    CAST(ac.UpdatedAt AS DATE);
+                    CAST(ac.UpdatedAt AS DATE)
             ";
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -1137,7 +1140,7 @@ namespace DigitalProduction
                     {
                         list.Add(new TargetRealtimeInfo
                         {
-                            EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
+                            OperatorID = Convert.ToInt32(reader["OperatorID"]),
                             OperatorName = reader["OperatorName"].ToString(),
                             Timestamp = Convert.ToDateTime(reader["Timestamp"]),
                             TargetQuantity = Convert.ToInt32(reader["TargetQuantity"]),
@@ -1156,28 +1159,50 @@ namespace DigitalProduction
             {
                 await connection.OpenAsync();
 
-                var command = new SqlCommand(@"
-            MERGE TargetInDay AS target
-            USING (SELECT 
-                        @TargetDate AS TargetDate,
-                        @DepartmentId AS DepartmentId,
-                        @EmployeeId AS EmployeeId) AS source
-            ON (target.TargetDate = source.TargetDate 
-                AND target.DepartmentId = source.DepartmentId 
-                AND target.EmployeeId = source.EmployeeId)
-            WHEN MATCHED THEN
-                UPDATE SET TargetQuantity = @TargetQuantity,
-                           UpdatedAt = GETDATE()
-            WHEN NOT MATCHED THEN
-                INSERT (TargetDate, DepartmentId, EmployeeId, TargetQuantity, CreatedAt)
-                VALUES (@TargetDate, @DepartmentId, @EmployeeId, @TargetQuantity, GETDATE());", connection);
+                // Get EmployeeID using OperatorID
+                var getEmpIdCommand = new SqlCommand("SELECT EmployeeID FROM dbo.Operator WHERE OperatorID = @OperatorID", connection);
+                getEmpIdCommand.Parameters.Add("@OperatorID", SqlDbType.Int).Value = item.OperatorID;
 
-                command.Parameters.AddWithValue("@TargetDate", item.Timestamp.Date);
-                command.Parameters.AddWithValue("@DepartmentId", item.DepartmentId);
-                command.Parameters.AddWithValue("@EmployeeId", item.EmployeeId);
-                command.Parameters.AddWithValue("@TargetQuantity", item.TargetQuantity);
+                var employeeIdObj = await getEmpIdCommand.ExecuteScalarAsync();
+                if (employeeIdObj == null)
+                {
+                    throw new InvalidOperationException($"OperatorID {item.OperatorID} does not exist in the Operator table.");
+                }
 
-                await command.ExecuteNonQueryAsync();
+                int employeeId = Convert.ToInt32(employeeIdObj);
+
+                // Proceed with MERGE
+                using (var command = new SqlCommand(@"
+                    MERGE TargetInDay AS target
+                    USING (
+                        SELECT 
+                            @TargetDate AS TargetDate,
+                            @DepartmentId AS DepartmentId,
+                            @EmployeeId AS EmployeeId
+                    ) AS source
+                    ON (
+                        target.TargetDate = source.TargetDate
+                        AND target.DepartmentId = source.DepartmentId 
+                        AND target.EmployeeId = source.EmployeeId
+                    )
+                    WHEN MATCHED THEN
+                        UPDATE SET 
+                            TargetQuantity = @TargetQuantity,
+                            UpdatedAt = GETDATE()
+                    WHEN NOT MATCHED BY TARGET
+                    THEN
+                        INSERT (TargetDate, DepartmentId, EmployeeId, TargetQuantity, CreatedAt)
+                        VALUES (@TargetDate, @DepartmentId, @EmployeeId, @TargetQuantity, GETDATE())
+                    OUTPUT $action, inserted.*, deleted.*;", connection))
+                {
+                    command.Parameters.Add("@TargetDate", SqlDbType.Date).Value = item.Timestamp.Date;
+                    command.Parameters.Add("@DepartmentId", SqlDbType.Int).Value = item.DepartmentId;
+                    command.Parameters.Add("@EmployeeId", SqlDbType.Int).Value = employeeId;
+                    command.Parameters.Add("@TargetQuantity", SqlDbType.Int).Value = item.TargetQuantity;
+
+                    await command.ExecuteNonQueryAsync();
+                }
+
             }
         }
 
@@ -1325,7 +1350,8 @@ namespace DigitalProduction
             JOIN ProductionSchedule ps ON ps.OrderID = po.OrderID AND ps.PartID = pa.PartId AND ps.SizeID = s.SizeID
             LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
             LEFT JOIN DeviceOutput do ON do.SizeID = s.SizeId AND do.PartId = pa.PartId AND do.OrderID = po.OrderId
-            WHERE po.SO IN ({inClause})";
+            WHERE po.SO IN ({inClause})
+            ORDER BY TRY_CAST(s.Size AS DECIMAL(4,1));";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(query, conn))

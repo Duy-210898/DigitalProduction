@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DevExpress.Data;
+using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using DigitalProduction.ViewModels;
@@ -52,7 +55,7 @@ namespace DigitalProduction
             };
 
             gridControl_DeviceOutput.MainView = gridView_DeviceOutput;
-         
+
             gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
             gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
@@ -81,9 +84,101 @@ namespace DigitalProduction
             };
             syncButton.Click += BtnSyncData_Click;
             syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
-            filterPanel.Controls.Add(syncButton); 
+            filterPanel.Controls.Add(syncButton);
+
+            // === Apply selection options ===
+            gridView_DeviceOutput.OptionsSelection.MultiSelect = true;
+            gridView_DeviceOutput.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CellSelect;
+            gridView_DeviceOutput.OptionsBehavior.EditorShowMode = EditorShowMode.MouseDown;
+            gridView_DeviceOutput.OptionsSelection.EnableAppearanceFocusedCell = true;
+            gridView_DeviceOutput.OptionsSelection.EnableAppearanceHideSelection = false;
+            gridView_DeviceOutput.OptionsView.ShowFooter = true;
+            gridView_DeviceOutput.OptionsSelection.EnableAppearanceFocusedRow = true;
+
+            gridView_DeviceOutput.SelectionChanged +=  gridView_DeviceOutput_SelectionChanged;
+            gridView_DeviceOutput.CustomSummaryCalculate += gridView_DeviceOutput_CustomSummaryCalculate;
+
+            var sizeColumn = gridView_DeviceOutput.Columns.ColumnByFieldName("ActualSizeQty");
+            if (sizeColumn != null)
+            {
+                sizeColumn.Width = 120;
+                sizeColumn.OptionsColumn.FixedWidth = true; 
+                sizeColumn.SummaryItem.SummaryType = SummaryItemType.Custom;
+                sizeColumn.SummaryItem.DisplayFormat = string.Format("{0}: {{0:N2}}", LocalizationManager.GetString("Total"));
+            }
+            else
+            {
+                MessageBox.Show("Cột 'ActualCut' không tồn tại. Kiểm tra FieldName trong nguồn dữ liệu.");
+            }
+
+            this.gridView_DeviceOutput.RowStyle += gridView_DeviceOutput_RowStyle;
+            gridView_DeviceOutput.CustomDrawFooterCell += GridView_DeviceOutput_CustomDrawFooterCell;
 
         }
+
+        private void GridView_DeviceOutput_CustomDrawFooterCell(object sender, FooterCellCustomDrawEventArgs e)
+        {
+            if (e.Column != null && e.Column.FieldName == "ActualSizeQty")
+            {
+                e.Appearance.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+                e.Appearance.BackColor = Color.LightYellow;
+                e.Appearance.ForeColor = Color.DarkBlue;         
+                e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
+            }
+        }
+
+        private void gridView_DeviceOutput_RowStyle(object sender, RowStyleEventArgs e)
+        {
+            GridView view = sender as GridView;
+
+            if (e.RowHandle >= 0)
+            {
+                // Focused row
+                if (view.FocusedRowHandle == e.RowHandle)
+                {
+                    e.Appearance.BackColor = Color.LightSkyBlue;
+                    e.Appearance.ForeColor = Color.Black;
+                }
+
+                if (view.IsRowSelected(e.RowHandle))
+                {
+                    e.Appearance.BackColor = Color.LightGreen;
+                    e.Appearance.ForeColor = Color.Black;
+                }
+            }
+        }
+
+        private int totalSummary = 0;
+        private void gridView_DeviceOutput_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            GridView view = sender as GridView;
+            totalSummary = 0;
+
+            var selectedCells = view.GetSelectedCells();
+            foreach (GridCell cell in selectedCells)
+            {
+                if (cell.Column.FieldName == "ActualSizeQty")
+                {
+                    object val = view.GetRowCellValue(cell.RowHandle, cell.Column);
+                    if (val != DBNull.Value && val != null)
+                        totalSummary += (int) val;
+                }
+            }
+
+            gridView_DeviceOutput.UpdateSummary();   // Gọi lại để footer cập nhật giá trị mới
+        }
+
+        private void gridView_DeviceOutput_CustomSummaryCalculate(object sender, CustomSummaryEventArgs e)
+        {
+            if (e.SummaryProcess == CustomSummaryProcess.Finalize && e.IsTotalSummary)
+            {
+                if (e.Item is GridSummaryItem item && item.FieldName == "ActualSizeQty")
+                {
+                    e.TotalValue = totalSummary;
+                }
+            }
+        }
+
         private void BtnSyncData_Click(object sender, EventArgs e)
         {
             TranslateHeaders();
@@ -164,7 +259,7 @@ namespace DigitalProduction
             }
         }
 
-        private void GridView_DeviceOutput_CustomColumnDisplayText(object sender, DevExpress.XtraGrid.Views.Base.CustomColumnDisplayTextEventArgs e)
+        private void GridView_DeviceOutput_CustomColumnDisplayText(object sender, CustomColumnDisplayTextEventArgs e)
         {
             if (e.Column.FieldName == "IpAddress" && e.ListSourceRowIndex >= 0)
             {
@@ -217,7 +312,7 @@ namespace DigitalProduction
 
             gridView.Appearance.HeaderPanel.ForeColor = Color.Black;
             gridView.Appearance.HeaderPanel.Font = new Font(gridView.Appearance.Row.Font, FontStyle.Bold);
-            gridView.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            gridView.Appearance.HeaderPanel.TextOptions.HAlignment = HorzAlignment.Center;
 
             gridView.RowCellStyle -= GridView_DeviceOutput_RowCellStyle;
             gridView.RowCellStyle += GridView_DeviceOutput_RowCellStyle;
@@ -233,13 +328,13 @@ namespace DigitalProduction
             {
                 col.VisibleIndex = visibleIndex;
             }
-            col.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+            col.DisplayFormat.FormatType = FormatType.Numeric;
             col.DisplayFormat.FormatString = "{0:#}";
             col.OptionsColumn.AllowEdit = false;
 
             // === Force Appearance for Cell ===
             col.AppearanceCell.Options.UseTextOptions = true;
-            col.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            col.AppearanceCell.TextOptions.HAlignment = HorzAlignment.Center;
 
             if (fontColor.HasValue)
             {
@@ -255,7 +350,7 @@ namespace DigitalProduction
             }
 
             // === Header Appearance ===
-            col.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            col.AppearanceHeader.TextOptions.HAlignment = HorzAlignment.Center;
             col.AppearanceHeader.Options.UseTextOptions = true;
 
             if (fontColor.HasValue)

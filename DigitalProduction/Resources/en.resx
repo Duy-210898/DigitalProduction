@@ -594,4 +594,7 @@
   <data name="WatchList" xml:space="preserve">
     <value>Watch List</value>
   </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
 </root>

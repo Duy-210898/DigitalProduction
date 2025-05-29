@@ -949,7 +949,7 @@ async function getDistributions(startDate, endDate) {
           JOIN 
               Material m ON m.MaterialID = ps.MaterialID
           JOIN 
-              Operator o ON dd.OperatorID = o.OperatorID  
+              Operator o ON dd.OperatorID = o.OperatorID
           JOIN 
               Users u ON dd.UserID = u.UserID
           JOIN 

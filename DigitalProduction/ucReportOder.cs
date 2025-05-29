@@ -92,7 +92,7 @@ namespace DigitalProduction
                 col.Caption = !string.IsNullOrEmpty(translatedText) ? translatedText : col.FieldName;
 
                 // Hide specific fields
-                if (col.FieldName == "EmployeeId" || col.FieldName == "DepartmentId")
+                if (col.FieldName == "OperatorID" || col.FieldName == "DepartmentId")
                 {
                     col.Visible = false;
                 }
@@ -178,7 +178,7 @@ namespace DigitalProduction
         {
 
             public int DepartmentId { get; set; }
-            public int EmployeeId { get; set; }
+            public int OperatorID { get; set; }
 
             private string _operatorName;
             private DateTime _timestamp;

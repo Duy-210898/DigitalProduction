@@ -164,6 +164,11 @@ async function connectToDevice(ipAddress, retries = 0) {
           modbusClients[ipAddress] = { client, socket, isConnected: true, isDisconnected: false };
 
           try {
+              // get index SOs and Part if available
+              adjustModbusIndex(await safeRead(1020, client), ipAddress, true);
+              adjustModbusIndex(await safeRead(1022, client), ipAddress, false);
+              
+              console.warn(`[indexMultiplePartNamesAndSOs] ${ipAddress} ${modbusClients[ipAddress].indexMultipleSOs} and ${modbusClients[ipAddress].indexMultiplePartNames}`);
               await updateDeviceConnectionStatus(ipAddress, true);
           } catch (err) {
               console.error(`⚠️ Error updating device status: ${err.message}`);
@@ -507,17 +512,11 @@ async function checkAndSaveDistribution(client, ipAddress) {
     logToFile(errorLogPath, errorMsg);
   }
 }
-
 async function processDistributionData(client, ipAddress, distributionData, retryData) {
   if (!distributionData) {
     console.warn(`No distribution data found for IP ${ipAddress}. Skipping save.`);
     return;
   }
-
-  // let index = await safeRead(1020, client);
-
-  // modbusClients[ipAddress].indexMultipleSOs = index >= 1 ? index - 1 : 0;
-
   const writeRegister = async (address, value) => {
     await client.writeSingleRegister(address, value);
    // await delay(1000);
@@ -532,9 +531,9 @@ async function processDistributionData(client, ipAddress, distributionData, retr
   // Check for multiple Sales Orders
   const hasMultipleSOs = distributionData.OrderIDWithSOs && distributionData.OrderIDWithSOs.length >= 1;
   if (hasMultipleSOs) {
-    if (!modbusClients[ipAddress]?.indexMultipleSOs || modbusClients[ipAddress].indexMultipleSOs === 0 || modbusClients[ipAddress].indexMultipleSOs == undefined) {
+    if (modbusClients[ipAddress].indexMultipleSOs == null) {
       modbusClients[ipAddress].indexMultipleSOs = 0;
-    }
+    }    
     modbusClients[ipAddress].hasMultipleSOs = true;
 
     // Reset SizeDataDB Status if it's an array
@@ -550,9 +549,13 @@ async function processDistributionData(client, ipAddress, distributionData, retr
 
     const totalSOs = distributionData.OrderIDWithSOs.length;
 
+    if (modbusClients[ipAddress].indexMultipleSOs + 1 > totalSOs) {
+      await writeRegister(1020, totalSOs);
+    } else {
+      await writeRegister(1020, modbusClients[ipAddress].indexMultipleSOs + 1);
+    }
     await writeRegister(1021, totalSOs);
     console.log(`Successfully wrote TotalSOs ${totalSOs} to register 112`);
-    await writeRegister(1020, modbusClients[ipAddress].indexMultipleSOs + 1);
     console.log(`Successfully wrote DefaultOrderIndex ${modbusClients[ipAddress].indexMultipleSOs} to register 111`);
 
     if (distributionData?.SizeData && modbusClients[ipAddress]?.SOs
@@ -613,14 +616,18 @@ async function processDistributionData(client, ipAddress, distributionData, retr
 
     // assign PartName position to switch out
     if (uniquePartSOsMap.length > 0) {
-      if (!modbusClients[ipAddress]?.indexMultiplePartNames || modbusClients[ipAddress].indexMultiplePartNames === 0) {
+      if (modbusClients[ipAddress].indexMultiplePartNames == null) {
         modbusClients[ipAddress].indexMultiplePartNames = 0;
       }
 
       try {
-
         // write register partname position
-        await client.writeSingleRegister(1022, modbusClients[ipAddress].indexMultiplePartNames + 1);
+        if ( modbusClients[ipAddress].indexMultiplePartNames + 1 > uniquePartSOsMap.length) {
+          await client.writeSingleRegister(1022, uniquePartSOsMap.length);
+        } else {
+          await client.writeSingleRegister(1022, modbusClients[ipAddress].indexMultiplePartNames + 1);
+        }
+        await delay(10); 
         await client.writeSingleRegister(1023, uniquePartSOsMap.length);
 
         console.log(`Next value PartName:`, modbusClients[ipAddress].indexMultiplePartNames + 1);
@@ -699,6 +706,30 @@ async function processDistributionData(client, ipAddress, distributionData, retr
     console.warn(`No multiple Sales Orders detected for IP ${ipAddress}. Data will not be processed.`);
   }
 }
+
+/**
+ * get index SOs and Partname
+ * @param {address to read get index SOs and Partname} value 
+ * @returns 
+ */
+function adjustModbusIndex(value, ipAddress, isMultipleSOs) {
+  if (typeof value !== 'number' || isNaN(value)) return 0;
+
+  const clients = modbusClients[ipAddress];
+  if (!clients) return 0;
+
+  const adjusted = value !== 0 ? value - 1 : 0;
+
+  if (isMultipleSOs) {
+    clients.indexMultipleSOs = adjusted;
+  } else {
+    clients.indexMultiplePartNames = adjusted;
+  }
+
+  return adjusted;
+}
+
+
 function indexCompleteOnes(binaryString) {
   let count = binaryString.split('').filter(bit => bit === '1').length;
 
@@ -778,10 +809,8 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
         : false;
 
       if (allComplete || distributionData == null || isPendingSize) {
-        const mask = 1 << deleteIndex;
-        const valueToWrite = registerValue | mask;
-    
-        await client.writeSingleRegister(register3000Address, valueToWrite);
+        await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
+
         storeDistributionData[ipAddress] = {};
         modbusClients[ipAddress].previousSizeData = [];
         modbusClients[ipAddress].previousData = {};
@@ -792,41 +821,28 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
     }
     
     if (isBitOn(binaryValue3000, previousSOIndex)) {
-      const mask = 1 << deleteIndex;
-      const valueToWrite = registerValue | mask;
-      let previous = modbusClients[ipAddress].indexMultipleSOs;
-      if (previous <= 0) {
-        previous = 0;
-      } else {
-        previous = modbusClients[ipAddress].indexMultipleSOs - 1;
-      }
+      await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
+      let previous = Math.max(0, modbusClients[ipAddress].indexMultipleSOs - 1);
     
       modbusClients[ipAddress].indexMultipleSOs = previous;
       console.log(`Previous value ${previous} to register 3000 ${ipAddress}`);
     
-      await client.writeSingleRegister(register3000Address, valueToWrite);
+      //await client.writeSingleRegister(1020, previous);
       storeDistributionData[ipAddress] = {};
       modbusClients[ipAddress].previousSizeData = [];
       modbusClients[ipAddress].previousData = {};
     }
     
     if (isBitOn(binaryValue3000, nextSOIndex)) {
-      const mask = 1 << deleteIndex;
-      const valueToWrite = registerValue | mask;
+      await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
     
       const maxSOs = modbusClients[ipAddress].SOs.length;
-      let next = modbusClients[ipAddress].indexMultipleSOs;
-      console.log(`Before Next value ${next} to register 3000 address ${ipAddress}`);
-      if (next >= maxSOs) {
-        next = maxSOs - 1;
-      } else {
-        next = modbusClients[ipAddress].indexMultipleSOs + 1;
-      }
+      let next = Math.min(modbusClients[ipAddress].indexMultipleSOs + 1, maxSOs - 1);
     
       console.log(`Next value ${next} to register 3000 address ${ipAddress}`);
     
       modbusClients[ipAddress].indexMultipleSOs = next;
-      await client.writeSingleRegister(register3000Address, valueToWrite);
+      //await client.writeSingleRegister(1020, next);
       storeDistributionData[ipAddress] = {};
       modbusClients[ipAddress].previousSizeData = [];
       modbusClients[ipAddress].previousData = {};
@@ -846,9 +862,7 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
     try {
 
       if (modbusClients[ipAddress].SOs === undefined) {
-        const mask = 1 << deleteIndex;
-        const valueToWrite = registerValue | mask;
-        await client.writeSingleRegister(register3000Address, valueToWrite);
+        await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
         modbusClients[ipAddress].indexMultipleSOs = 0;
         modbusClients[ipAddress].indexMultiplePartNames = 0;
 
@@ -858,14 +872,12 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
       };
       // === Previous Logic ===
       if (isBitOn(binaryValue3000, previousPartNameIndex)) {
-        const mask = 1 << deleteIndex;
-        const valueToWrite = registerValue | mask;
+        await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
     
-        let previous = modbusClients[ipAddress].indexMultiplePartNames;
-        previous = previous > 0 ? previous - 1 : 0;
+        let previous = Math.max(0, modbusClients[ipAddress].indexMultiplePartNames - 1);
     
         modbusClients[ipAddress].indexMultiplePartNames = previous;
-        await client.writeSingleRegister(register3000Address, valueToWrite);
+      //  await client.writeSingleRegister(1022, previous);
     
         console.log(`Previous value ${previous} to register 3000 address ${ipAddress}`);
     
@@ -876,8 +888,7 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
     
       // === Next Logic ===
       if (isBitOn(binaryValue3000, nextPartNameIndex)) {
-        const mask = 1 << deleteIndex;
-        const valueToWrite = registerValue | mask;
+        await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
     
         const currentSO = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
         let uniquePartNameSOs = [];
@@ -890,16 +901,10 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
         }
     
         const maxPartNames = uniquePartNameSOs.length;
-        let next = modbusClients[ipAddress].indexMultiplePartNames;
-    
-        if (next + 1 >= maxPartNames) {
-          next = maxPartNames - 1;
-        } else {
-          next = next + 1;
-        }
+        let next = Math.min(modbusClients[ipAddress].indexMultiplePartNames + 1, maxPartNames - 1);
     
         modbusClients[ipAddress].indexMultiplePartNames = next;
-        await client.writeSingleRegister(register3000Address, valueToWrite);
+       // await client.writeSingleRegister(1022, next);
         console.log(`Next value ${next} maxPartNames:${maxPartNames} to register 3000 address ${ipAddress}`);
     
         storeDistributionData[ipAddress] = {};
@@ -912,8 +917,6 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
       modbusClients[ipAddress].lockPartNameAdvance = false;
     }
     
-    
-
     // check max size SOS index, subtract - 1 element index
     if(modbusClients[ipAddress].SOs !== undefined) {
       if (modbusClients[ipAddress].SOs.length === 0) {
@@ -925,6 +928,13 @@ async function checkBitOnOffRegister3000(client, ipAddress) {
   } catch (error) {
     console.error(`Error reading register ${register3000Address}:`, error.message);
   }
+}
+
+// delete data
+async function clearDeleteBit(client, registerValue, address, deleteIndex) {
+  const mask = 1 << deleteIndex;
+  const valueToWrite = registerValue | mask;
+  await client.writeSingleRegister(address, valueToWrite);
 }
 
 async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {

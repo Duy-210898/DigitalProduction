@@ -624,4 +624,7 @@
   <data name="WatchList" xml:space="preserve">
     <value>Danh sách theo dõi</value>
   </data>
+  <data name="Total" xml:space="preserve">
+    <value>Tổng</value>
+  </data>
 </root>
