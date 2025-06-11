@@ -82,12 +82,13 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.Controls.Add(this.lblFilterDate, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.dateTimePickerSchedule, 0, 1);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(189, 50);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(237, 55);
             this.tableLayoutPanel2.TabIndex = 3;
             // 
             // lblFilterDate
@@ -106,9 +107,9 @@
             this.dateTimePickerSchedule.CustomFormat = "MM/yyyy";
             this.dateTimePickerSchedule.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dateTimePickerSchedule.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePickerSchedule.Location = new System.Drawing.Point(3, 28);
+            this.dateTimePickerSchedule.Location = new System.Drawing.Point(3, 30);
             this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
-            this.dateTimePickerSchedule.Size = new System.Drawing.Size(183, 20);
+            this.dateTimePickerSchedule.Size = new System.Drawing.Size(231, 20);
             this.dateTimePickerSchedule.TabIndex = 2;
             // 
             // tableLayoutPanel3

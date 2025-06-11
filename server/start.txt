@@ -1,0 +1,3 @@
+schtasks /create /tn "CuttingStart" ^
+ /tr "D:\reps\DigitalProduction\server\start-server.bat" ^
+ /sc daily /st 07:30 /rl HIGHEST

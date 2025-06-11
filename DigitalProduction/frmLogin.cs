@@ -121,11 +121,35 @@ namespace DigitalProduction
             lblExit.ForeColor = System.Drawing.Color.Black;
         }
 
+        //}
+        private void UpdateUI()
+        {
+            this.SuspendLayout();  // Suspend layout to batch UI updates
+
+            try
+            {
+                bool isChecked = toggleLanguage.IsOn;
+                string selectedLanguage = isChecked ? "en" : "vi";
+                LocalizationManager.SetLanguage(selectedLanguage);
+
+                this.Text = LocalizationManager.GetString("frmLogin_Title");
+                btn_Login.Text = LocalizationManager.GetString("Login");
+                lblExit.Text = LocalizationManager.GetString("Exit");
+                lblShowPassword.Text = LocalizationManager.GetString("ChangePassword");
+                chkRememberMe.Text = LocalizationManager.GetString("RememberMe");
+            }
+            finally
+            {
+                this.ResumeLayout(true); // Resume layout and perform layout immediately
+            }
+        }
+
         private void toggleLanguage_Toggled(object sender, EventArgs e)
         {
             try
             {
                 Cursor.Current = Cursors.WaitCursor;
+                this.SuspendLayout(); // Suspend layout before UI update
 
                 bool isChecked = toggleLanguage.IsOn;
                 string selectedLanguage = isChecked ? "en" : "vi";
@@ -141,21 +165,11 @@ namespace DigitalProduction
             }
             finally
             {
+                this.ResumeLayout(true); // Resume layout
                 Cursor.Current = Cursors.Default;
             }
         }
 
-        private void UpdateUI()
-        {
-            bool isChecked = toggleLanguage.IsOn;
-            string selectedLanguage = isChecked ? "en" : "vi";
-            LocalizationManager.SetLanguage(selectedLanguage);
-            this.Text = LocalizationManager.GetString("frmLogin_Title");
-            btn_Login.Text = LocalizationManager.GetString("Login");
-            lblExit.Text = LocalizationManager.GetString("Exit");
-            lblShowPassword.Text = LocalizationManager.GetString("ChangePassword");
-            chkRememberMe.Text = LocalizationManager.GetString("RememberMe");
-        }
         private void lblChangePassword_Click(object sender, EventArgs e)
         {
             ChangePassword changePasswordForm = new ChangePassword();

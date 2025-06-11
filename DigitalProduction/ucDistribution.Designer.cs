@@ -393,8 +393,8 @@
             this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 3;
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 68.29269F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.58537F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 76.09756F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.829268F));
             this.tableLayoutPanel4.Size = new System.Drawing.Size(470, 205);
             this.tableLayoutPanel4.TabIndex = 0;
@@ -415,20 +415,21 @@
             this.tableLayoutPanel6.Controls.Add(this.numMaterialLayer, 1, 2);
             this.tableLayoutPanel6.Controls.Add(this.numericTotalPeicesPerPair, 1, 3);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 54);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 37);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 4;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(464, 133);
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(464, 150);
             this.tableLayoutPanel6.TabIndex = 8;
             // 
             // numCuttingDieQty
             // 
             this.numCuttingDieQty.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numCuttingDieQty.Location = new System.Drawing.Point(235, 36);
+            this.numCuttingDieQty.Location = new System.Drawing.Point(235, 41);
             this.numCuttingDieQty.Name = "numCuttingDieQty";
             this.numCuttingDieQty.Size = new System.Drawing.Size(226, 23);
             this.numCuttingDieQty.TabIndex = 0;
@@ -446,7 +447,7 @@
             this.lblTotalPeicesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblTotalPeicesPerPair.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTotalPeicesPerPair.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblTotalPeicesPerPair.Location = new System.Drawing.Point(3, 99);
+            this.lblTotalPeicesPerPair.Location = new System.Drawing.Point(3, 109);
             this.lblTotalPeicesPerPair.Name = "lblTotalPeicesPerPair";
             this.lblTotalPeicesPerPair.Size = new System.Drawing.Size(226, 29);
             this.lblTotalPeicesPerPair.TabIndex = 7;
@@ -470,7 +471,7 @@
             this.lblCuttingDie.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblCuttingDie.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCuttingDie.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblCuttingDie.Location = new System.Drawing.Point(3, 33);
+            this.lblCuttingDie.Location = new System.Drawing.Point(3, 38);
             this.lblCuttingDie.Name = "lblCuttingDie";
             this.lblCuttingDie.Size = new System.Drawing.Size(226, 33);
             this.lblCuttingDie.TabIndex = 3;
@@ -482,7 +483,7 @@
             this.lblMaterialLayer.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblMaterialLayer.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMaterialLayer.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblMaterialLayer.Location = new System.Drawing.Point(3, 66);
+            this.lblMaterialLayer.Location = new System.Drawing.Point(3, 76);
             this.lblMaterialLayer.Name = "lblMaterialLayer";
             this.lblMaterialLayer.Size = new System.Drawing.Size(226, 33);
             this.lblMaterialLayer.TabIndex = 5;
@@ -492,7 +493,7 @@
             // numMaterialLayer
             // 
             this.numMaterialLayer.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numMaterialLayer.Location = new System.Drawing.Point(235, 69);
+            this.numMaterialLayer.Location = new System.Drawing.Point(235, 79);
             this.numMaterialLayer.Name = "numMaterialLayer";
             this.numMaterialLayer.Size = new System.Drawing.Size(226, 23);
             this.numMaterialLayer.TabIndex = 0;
@@ -500,7 +501,7 @@
             // numericTotalPeicesPerPair
             // 
             this.numericTotalPeicesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(235, 102);
+            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(235, 112);
             this.numericTotalPeicesPerPair.Name = "numericTotalPeicesPerPair";
             this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(226, 23);
             this.numericTotalPeicesPerPair.TabIndex = 6;
@@ -520,7 +521,7 @@
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(464, 30);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(464, 28);
             this.tableLayoutPanel5.TabIndex = 8;
             // 
             // btnSaveInventory
@@ -533,7 +534,7 @@
             this.btnSaveInventory.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnSaveInventory.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
             this.btnSaveInventory.Name = "btnSaveInventory";
-            this.btnSaveInventory.Size = new System.Drawing.Size(55, 24);
+            this.btnSaveInventory.Size = new System.Drawing.Size(55, 22);
             this.btnSaveInventory.TabIndex = 5;
             this.btnSaveInventory.Text = "Save";
             this.btnSaveInventory.Click += new System.EventHandler(this.btnSaveInventory_Click);
@@ -555,7 +556,7 @@
             this.lblInventoryQty.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblInventoryQty.Location = new System.Drawing.Point(3, 0);
             this.lblInventoryQty.Name = "lblInventoryQty";
-            this.lblInventoryQty.Size = new System.Drawing.Size(124, 30);
+            this.lblInventoryQty.Size = new System.Drawing.Size(124, 28);
             this.lblInventoryQty.TabIndex = 2;
             this.lblInventoryQty.Text = "Inventory Quanity:";
             this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;

@@ -2,10 +2,12 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraSplashScreen;
 using OfficeOpenXml;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
@@ -18,11 +20,13 @@ namespace DigitalProduction
         public ucReportOrder()
         {
             InitializeComponent();
-            SetupUI();
             btnSync.Text = LocalizationManager.GetString("Sync");
             btnSync.Click += SyncButton_Click;
         }
-
+        private async void ucReportOrder_Load(object sender, EventArgs e)
+        {
+            await SetupUIAsync();
+        }
 
         private async void SyncButton_Click(object sender, EventArgs e)
         {
@@ -35,21 +39,52 @@ namespace DigitalProduction
                 MessageBox.Show($"Error during data sync: {ex.Message}", "Sync Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void SetupUI()
+        private async Task SetupUIAsync()
         {
-            // Initialize the BindingSource
-            targetBindingSource = new BindingSource();
-            gridViewPeformance.OptionsView.ShowGroupPanel = false;
-            gridControlPerformance.DataSource = targetBindingSource;
+            var parentForm = this.FindForm();
+            if (parentForm != null)
+            {
+                SplashScreenManager.ShowForm(parentForm, typeof(frmLoading), true, true, false);
+            }
 
-            // Handle date change
-            dateTimePicker.ValueChanged += async (s, e) => await ReloadDataAsync();
-            // ⬇ Call once on load (initial fetch)
-            _ = ReloadDataAsync();
-            btnExport.Click += BtnExportAllRows_Click;
-            gridViewPeformance.Appearance.HeaderPanel.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            gridViewPeformance.Appearance.HeaderPanel.Options.UseFont = true;
-            gridViewPeformance.RowCellStyle += GridViewPeformance_RowCellStyle;
+            try
+            {
+                // Simulate loading progress (optional)
+                for (int i = 1; i <= 100; i += 20)
+                {
+                    if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                    {
+                        SplashScreenManager.Default.SetWaitFormDescription($"Setting up UI... {i}%");
+                    }
+                    await Task.Delay(10); // async delay, don't block UI thread
+                }
+
+                // Initialize the BindingSource
+                targetBindingSource = new BindingSource();
+                gridViewPeformance.OptionsView.ShowGroupPanel = false;
+                gridControlPerformance.DataSource = targetBindingSource;
+
+                // Handle date change - async event handler
+                dateTimePicker.ValueChanged += async (s, e) => await ReloadDataAsync();
+
+                // Initial data fetch
+                await ReloadDataAsync();
+
+                btnExport.Click += BtnExportAllRows_Click;
+                gridViewPeformance.Appearance.HeaderPanel.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+                gridViewPeformance.Appearance.HeaderPanel.Options.UseFont = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error during UI setup: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                {
+                    SplashScreenManager.CloseForm(false);
+                }
+            }
         }
 
         private async Task ReloadDataAsync()
@@ -78,6 +113,7 @@ namespace DigitalProduction
             targetBindingSource.DataSource = data;
             targetBindingSource.ResetBindings(false);
             TranslateHeaders();
+            gridViewPeformance.RowCellStyle += GridViewPeformance_RowCellStyle;
         }
 
 
@@ -103,12 +139,30 @@ namespace DigitalProduction
         {
             if (e.Column.FieldName == "EfficiencyPercent")
             {
-            //    e.Appearance.BackColor = System.Drawing.Color.LightGreen;
-                e.Appearance.ForeColor = System.Drawing.Color.Green; // Optional: for contrast
-                e.Appearance.Font = new System.Drawing.Font(e.Appearance.Font, System.Drawing.FontStyle.Bold); // Optional
+                GridView view = sender as GridView;
+                if (view == null) return;
+
+                object cellValue = view.GetRowCellValue(e.RowHandle, e.Column);
+
+                if (cellValue != null)
+                {
+                    string percentText = cellValue.ToString().Trim().Replace("%", "");
+                    if (decimal.TryParse(percentText, out decimal efficiency))
+                    {
+                        if (efficiency < 80)
+                        {
+                            e.Appearance.ForeColor = Color.Red;
+                        }
+                        else
+                        {
+                            e.Appearance.ForeColor = Color.Green;
+                        }
+
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
             }
         }
-
 
         private void BtnExportAllRows_Click(object sender, EventArgs e)
         {
@@ -165,7 +219,6 @@ namespace DigitalProduction
                         {
                             sheet.Row(i).Height = 45;
                         }
-
                         // Save the file
                         File.WriteAllBytes(sfd.FileName, package.GetAsByteArray());
                         MessageBox.Show("Export complete!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -184,7 +237,6 @@ namespace DigitalProduction
             private DateTime _timestamp;
             private int _targetQuantity;
             private int _targetActualQuantity;
-
 
             public event Func<TargetRealtimeInfo, Task> TargetQuantityChanged;
 

@@ -4,9 +4,11 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraSplashScreen;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -398,39 +400,85 @@ namespace DigitalProduction
 
         private void WebSocket_OnMessage(string jsonData)
         {
+            if (IsDisposed || !IsHandleCreated) return;
+
             try
             {
-                ResponseMessage<List<Employee>> response = ResponseMessage<List<Employee>>.FromJson(jsonData);
+                var response = ResponseMessage<List<Employee>>.FromJson(jsonData);
 
                 if (response?.Users != null && response.Users.Count > 0)
                 {
-                    employees.Clear(); // Clear existing employees
-                    UpdateEmployees(response.Users); // Update with new employee data
-
-                    // Ensure UI update happens on the main thread
-                    Invoke(new Action(() =>
+                    // Show SplashScreen from parent Form
+                    var parentForm = this.FindForm();
+                    if (parentForm != null)
                     {
-                        CreatelabelTotalControls(); // Create/update pagination controls based on the latest employee count
+                        SplashScreenManager.ShowForm(parentForm, typeof(frmLoading), true, true, false);
+                    }
+
+                    // Simulate loading progress (optional)
+                    for (int i = 1; i <= 100; i += 20)
+                    {
+                        if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                        {
+                            SplashScreenManager.Default.SetWaitFormDescription($"Loading... {i}%");
+                        }
+                        Thread.Sleep(10); // Simulate brief loading
+                    }
+
+                    // Safely update UI
+                    SafeInvoke(() =>
+                    {
+                        employees.Clear();
+                        UpdateEmployees(response.Users);
+
+                        CreatelabelTotalControls();
                         LoadDataGridView();
                         ApplyLocalization();
 
-                        // Optionally refresh to enforce drawing updates
                         paginationPanel?.Invalidate();
                         paginationPanel?.Refresh();
-                    }));
+                    });
                 }
                 else
                 {
-                    ShowMessage.ShowInfo("No Data Found");
+                    SafeInvoke(() =>
+                        ShowMessage.ShowInfo("No Data Found"));
                 }
             }
             catch (JsonSerializationException jsonEx)
             {
-                ShowMessage.ShowError($"JSON Deserialization Error: {jsonEx.Message}");
+                SafeInvoke(() =>
+                    ShowMessage.ShowError($"JSON Deserialization Error: {jsonEx.Message}"));
             }
             catch (Exception ex)
             {
-                ShowMessage.ShowError($"An error occurred: {ex.Message}");
+                SafeInvoke(() =>
+                    ShowMessage.ShowError($"An error occurred: {ex.Message}"));
+            }
+            finally
+            {
+                if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                {
+                    SplashScreenManager.CloseForm(false);
+                }
+            }
+        }
+
+        private void SafeInvoke(Action action)
+        {
+            if (IsDisposed || !IsHandleCreated) return;
+
+            if (InvokeRequired)
+            {
+                try
+                {
+                    Invoke(action);
+                }
+                catch (ObjectDisposedException) { } // Handle case where form is already disposed
+            }
+            else
+            {
+                action();
             }
         }
 

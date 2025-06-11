@@ -2092,3 +2092,360 @@
 [2025-03-01T08:35:25.737Z] Connected to device at 10.30.4.91
 [2025-03-01T09:30:45.235Z] Connection closed to device at 10.30.4.91
 [2025-03-01T09:30:45.231Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:10:03.362Z] Connected to device at 10.30.2.149
+[2025-06-10T04:10:03.536Z] Connected to device at 10.30.4.91
+[2025-06-10T04:12:02.188Z] Connection closed at 10.30.4.91
+[2025-06-10T04:12:02.192Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:12:03.334Z] Connected to device at 10.30.4.91
+[2025-06-10T04:12:03.386Z] Connected to device at 10.30.4.91
+[2025-06-10T04:12:32.880Z] Connection closed at 10.30.4.91
+[2025-06-10T04:12:32.882Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:12:33.079Z] Connected to device at 10.30.4.91
+[2025-06-10T04:12:33.114Z] Connected to device at 10.30.4.91
+[2025-06-10T04:13:02.879Z] Connection closed at 10.30.4.91
+[2025-06-10T04:13:02.880Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:13:02.884Z] Connection closed at 10.30.4.91
+[2025-06-10T04:13:03.070Z] Connected to device at 10.30.4.91
+[2025-06-10T04:13:03.148Z] Connected to device at 10.30.4.91
+[2025-06-10T04:13:32.878Z] Connection closed at 10.30.4.91
+[2025-06-10T04:13:32.879Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:13:32.881Z] Connection closed at 10.30.4.91
+[2025-06-10T04:13:33.276Z] Connected to device at 10.30.4.91
+[2025-06-10T04:13:33.407Z] Connected to device at 10.30.4.91
+[2025-06-10T04:14:02.879Z] Connection closed at 10.30.4.91
+[2025-06-10T04:14:02.879Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:14:02.881Z] Connection closed at 10.30.4.91
+[2025-06-10T04:14:03.063Z] Connected to device at 10.30.4.91
+[2025-06-10T04:14:03.080Z] Connected to device at 10.30.4.91
+[2025-06-10T04:14:03.132Z] Connected to device at 10.30.4.91
+[2025-06-10T04:14:32.879Z] Connection closed at 10.30.4.91
+[2025-06-10T04:14:32.880Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:14:32.882Z] Connection closed at 10.30.4.91
+[2025-06-10T04:14:32.885Z] Connection closed at 10.30.4.91
+[2025-06-10T04:14:33.098Z] Connected to device at 10.30.4.91
+[2025-06-10T04:14:53.087Z] Connection closed at 10.30.4.91
+[2025-06-10T04:14:53.107Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:14:53.490Z] Connected to device at 10.30.4.91
+[2025-06-10T04:14:53.631Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:24.634Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:24.634Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:15:24.913Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:24.913Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:24.914Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:24.914Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:24.921Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:24.984Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:54.636Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:54.636Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:15:54.638Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:54.641Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:54.642Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:54.643Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:54.644Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:55.335Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.353Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.353Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.437Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.437Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.438Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.438Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.438Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.471Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.471Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.471Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.492Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.493Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.494Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.494Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.520Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:55.522Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:15:55.528Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.546Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:55.546Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:15:55.549Z] Connected to device at 10.30.4.91
+[2025-06-10T04:15:55.555Z] Connection closed at 10.30.4.91
+[2025-06-10T04:15:55.556Z] Disconnected from device at 10.30.4.91
+[2025-06-10T04:29:19.716Z] Connected to device at 10.30.2.149
+[2025-06-10T04:29:19.890Z] Connected to device at 10.30.4.91
+[2025-06-10T06:58:43.502Z] Connected to device at 10.30.2.149
+[2025-06-10T06:58:43.685Z] Connected to device at 10.30.4.91
+[2025-06-10T06:59:33.206Z] Connected to device at 10.30.2.149
+[2025-06-10T06:59:33.407Z] Connected to device at 10.30.4.91
+[2025-06-10T07:00:09.934Z] Connection closed at 10.30.4.91
+[2025-06-10T07:00:09.939Z] Disconnected from device at 10.30.4.91
+[2025-06-10T07:00:10.849Z] Connected to device at 10.30.4.91
+[2025-06-10T07:01:07.014Z] Connection closed at 10.30.4.91
+[2025-06-10T07:01:07.022Z] Disconnected from device at 10.30.4.91
+[2025-06-10T07:01:07.328Z] Connected to device at 10.30.4.91
+[2025-06-10T07:01:43.392Z] Connection closed at 10.30.4.91
+[2025-06-10T07:01:43.399Z] Disconnected from device at 10.30.4.91
+[2025-06-10T07:01:43.703Z] Connected to device at 10.30.4.91
+[2025-06-10T07:04:10.864Z] Connected to device at 10.30.2.149
+[2025-06-10T07:04:10.934Z] Connected to device at 10.30.4.91
+[2025-06-10T07:05:06.407Z] Connected to device at 10.30.2.149
+[2025-06-10T07:05:06.587Z] Connected to device at 10.30.4.91
+[2025-06-10T07:05:29.980Z] Connected to device at 10.30.2.149
+[2025-06-10T07:05:30.172Z] Connected to device at 10.30.4.91
+[2025-06-10T07:05:53.823Z] Connected to device at 10.30.2.149
+[2025-06-10T07:05:53.997Z] Connected to device at 10.30.4.91
+[2025-06-10T07:10:25.258Z] Connected to device at 10.30.2.149
+[2025-06-10T07:10:25.432Z] Connected to device at 10.30.4.91
+[2025-06-10T07:12:46.826Z] Connected to device at 10.30.2.149
+[2025-06-10T07:12:46.992Z] Connected to device at 10.30.4.91
+[2025-06-10T07:24:22.795Z] Connected to device at 10.30.2.149
+[2025-06-10T07:24:22.863Z] Connected to device at 10.30.4.91
+[2025-06-10T07:24:47.078Z] Connected to device at 10.30.2.149
+[2025-06-10T07:24:47.235Z] Connected to device at 10.30.4.91
+[2025-06-10T07:26:41.580Z] Connected to device at 10.30.2.149
+[2025-06-10T07:26:41.772Z] Connected to device at 10.30.4.91
+[2025-06-10T07:28:37.492Z] Connected to device at 10.30.2.149
+[2025-06-10T07:28:37.675Z] Connected to device at 10.30.4.91
+[2025-06-10T07:28:45.461Z] Connected to device at 10.30.2.149
+[2025-06-10T07:28:45.658Z] Connected to device at 10.30.4.91
+[2025-06-10T07:29:07.942Z] Connected to device at 10.30.2.149
+[2025-06-10T07:29:08.131Z] Connected to device at 10.30.4.91
+[2025-06-10T07:43:45.384Z] Connected to device at 10.30.2.149
+[2025-06-10T07:43:45.549Z] Connected to device at 10.30.4.91
+[2025-06-10T07:44:15.270Z] Connected to device at 10.30.2.149
+[2025-06-10T07:44:15.454Z] Connected to device at 10.30.4.91
+[2025-06-10T07:44:50.501Z] Connection closed at 10.30.4.91
+[2025-06-10T07:44:50.504Z] Disconnected from device at 10.30.4.91
+[2025-06-10T07:44:50.823Z] Connected to device at 10.30.4.91
+[2025-06-10T07:48:38.643Z] Connected to device at 10.30.2.149
+[2025-06-10T07:48:38.829Z] Connected to device at 10.30.4.91
+[2025-06-10T07:53:14.986Z] Connected to device at 10.30.2.149
+[2025-06-10T07:53:15.150Z] Connected to device at 10.30.4.91
+[2025-06-10T07:54:56.555Z] Connection closed at 10.30.4.91
+[2025-06-10T07:54:56.558Z] Disconnected from device at 10.30.4.91
+[2025-06-10T07:54:56.848Z] Connected to device at 10.30.4.91
+[2025-06-10T07:57:38.451Z] Connected to device at 10.30.2.149
+[2025-06-10T07:57:38.617Z] Connected to device at 10.30.4.91
+[2025-06-10T08:23:17.252Z] Connected to device at 10.30.2.149
+[2025-06-10T08:23:17.425Z] Connected to device at 10.30.4.91
+[2025-06-10T08:24:28.031Z] Connected to device at 10.30.2.149
+[2025-06-10T08:24:28.201Z] Connected to device at 10.30.4.91
+[2025-06-10T08:48:23.193Z] Connected to device at 10.30.2.149
+[2025-06-10T08:48:23.353Z] Connected to device at 10.30.4.91
+[2025-06-10T08:54:22.979Z] Connected to device at 10.30.2.149
+[2025-06-10T08:54:23.161Z] Connected to device at 10.30.4.91
+[2025-06-10T08:59:11.841Z] Connected to device at 10.30.2.149
+[2025-06-10T08:59:12.045Z] Connected to device at 10.30.4.91
+[2025-06-10T09:04:56.740Z] Connection closed at 10.30.4.91
+[2025-06-10T09:04:56.743Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:04:57.095Z] Connected to device at 10.30.4.91
+[2025-06-10T09:07:32.650Z] Connection closed at 10.30.4.91
+[2025-06-10T09:07:32.656Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:07:32.989Z] Connected to device at 10.30.4.91
+[2025-06-10T09:08:16.100Z] Connection closed at 10.30.4.91
+[2025-06-10T09:08:16.112Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:08:16.437Z] Connected to device at 10.30.4.91
+[2025-06-10T09:08:16.471Z] Connected to device at 10.30.4.91
+[2025-06-10T09:08:46.380Z] Connection closed at 10.30.4.91
+[2025-06-10T09:08:46.381Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:08:46.613Z] Connected to device at 10.30.4.91
+[2025-06-10T09:08:46.644Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:16.380Z] Connection closed at 10.30.4.91
+[2025-06-10T09:09:16.381Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:09:16.698Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:16.700Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:16.705Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:16.733Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:16.792Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:16.903Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:17.380Z] Connection closed at 10.30.4.91
+[2025-06-10T09:09:17.380Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:09:17.599Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:46.384Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:09:46.382Z] Connection closed at 10.30.4.91
+[2025-06-10T09:09:46.387Z] Connection closed at 10.30.4.91
+[2025-06-10T09:09:46.388Z] Connection closed at 10.30.4.91
+[2025-06-10T09:09:46.388Z] Connection closed at 10.30.4.91
+[2025-06-10T09:09:46.389Z] Connection closed at 10.30.4.91
+[2025-06-10T09:09:47.120Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:47.195Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:47.196Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:47.197Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:47.197Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:47.196Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:47.198Z] Connected to device at 10.30.4.91
+[2025-06-10T09:09:47.382Z] Connection closed at 10.30.4.91
+[2025-06-10T09:09:47.384Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:09:47.388Z] Connection closed at 10.30.4.91
+[2025-06-10T09:12:46.095Z] Connected to device at 10.30.2.149
+[2025-06-10T09:12:46.261Z] Connected to device at 10.30.4.91
+[2025-06-10T09:14:38.669Z] Connection closed at 10.30.4.91
+[2025-06-10T09:14:38.674Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:14:38.982Z] Connected to device at 10.30.4.91
+[2025-06-10T09:19:37.499Z] Connected to device at 10.30.2.149
+[2025-06-10T09:19:37.747Z] Connected to device at 10.30.4.91
+[2025-06-10T09:22:19.294Z] Connected to device at 10.30.2.149
+[2025-06-10T09:22:19.364Z] Connected to device at 10.30.4.91
+[2025-06-10T09:22:33.014Z] Connected to device at 10.30.2.149
+[2025-06-10T09:22:33.193Z] Connected to device at 10.30.4.91
+[2025-06-10T09:23:17.263Z] Connection closed at 10.30.4.91
+[2025-06-10T09:23:17.266Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:23:17.567Z] Connected to device at 10.30.4.91
+[2025-06-10T09:25:17.212Z] Connected to device at 10.30.2.149
+[2025-06-10T09:25:17.369Z] Connected to device at 10.30.4.91
+[2025-06-10T09:26:05.435Z] Connected to device at 10.30.2.149
+[2025-06-10T09:26:05.599Z] Connected to device at 10.30.4.91
+[2025-06-10T09:26:45.713Z] Connection closed at 10.30.4.91
+[2025-06-10T09:26:45.718Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:26:45.916Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:08.808Z] Connection closed at 10.30.4.91
+[2025-06-10T09:29:08.814Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:29:09.902Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:09.961Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:10.021Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:10.038Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:40.736Z] Connection closed at 10.30.4.91
+[2025-06-10T09:29:40.736Z] Connection closed at 10.30.4.91
+[2025-06-10T09:29:40.736Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:29:40.738Z] Connection closed at 10.30.4.91
+[2025-06-10T09:29:40.996Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:46.712Z] Connection closed at 10.30.4.91
+[2025-06-10T09:29:46.720Z] Disconnected from device at 10.30.4.91
+[2025-06-10T09:29:47.119Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:47.168Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:47.193Z] Connected to device at 10.30.4.91
+[2025-06-10T09:29:47.283Z] Connected to device at 10.30.4.91
+[2025-06-11T00:34:43.768Z] Connected to device at 10.30.2.149
+[2025-06-11T00:44:12.155Z] Connected to device at 10.30.2.149
+[2025-06-11T01:37:58.594Z] Connected to device at 10.30.2.149
+[2025-06-11T01:37:58.909Z] Connected to device at 10.30.4.91
+[2025-06-11T01:52:46.565Z] Connected to device at 10.30.2.149
+[2025-06-11T01:52:46.764Z] Connected to device at 10.30.4.91
+[2025-06-11T01:59:28.210Z] Connected to device at 10.30.2.149
+[2025-06-11T01:59:28.393Z] Connected to device at 10.30.4.91
+[2025-06-11T02:33:17.184Z] Connected to device at 10.30.2.149
+[2025-06-11T02:33:17.358Z] Connected to device at 10.30.4.91
+[2025-06-11T04:18:56.801Z] Connected to device at 10.30.2.149
+[2025-06-11T04:18:56.962Z] Connected to device at 10.30.4.91
+[2025-06-11T04:19:26.273Z] Connected to device at 10.30.2.149
+[2025-06-11T04:19:26.459Z] Connected to device at 10.30.4.91
+[2025-06-11T04:19:57.813Z] Connected to device at 10.30.2.149
+[2025-06-11T04:19:57.971Z] Connected to device at 10.30.4.91
+[2025-06-11T04:23:27.090Z] Connected to device at 10.30.2.149
+[2025-06-11T04:23:27.254Z] Connected to device at 10.30.4.91
+[2025-06-11T04:23:43.464Z] Connected to device at 10.30.2.149
+[2025-06-11T04:23:43.629Z] Connected to device at 10.30.4.91
+[2025-06-11T04:26:29.845Z] Connected to device at 10.30.2.149
+[2025-06-11T04:26:30.011Z] Connected to device at 10.30.4.91
+[2025-06-11T04:29:11.532Z] Connected to device at 10.30.2.149
+[2025-06-11T04:29:11.747Z] Connected to device at 10.30.4.91
+[2025-06-11T04:30:03.087Z] Connected to device at 10.30.2.149
+[2025-06-11T04:30:03.173Z] Connected to device at 10.30.4.91
+[2025-06-11T05:33:49.551Z] Connected to device at 10.30.2.149
+[2025-06-11T05:33:49.742Z] Connected to device at 10.30.4.91
+[2025-06-11T05:37:25.006Z] Connected to device at 10.30.2.149
+[2025-06-11T05:37:25.220Z] Connected to device at 10.30.4.91
+[2025-06-11T05:38:57.780Z] Connected to device at 10.30.2.149
+[2025-06-11T05:38:57.944Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:23.607Z] Closed connection to device at 10.30.2.149
+[2025-06-11T05:39:23.608Z] Connection closed at 10.30.2.149
+[2025-06-11T05:39:23.609Z] Disconnected from device at 10.30.2.149
+[2025-06-11T05:39:23.632Z] Closed connection to device at 10.30.4.91
+[2025-06-11T05:39:23.636Z] Connection closed at 10.30.4.91
+[2025-06-11T05:39:23.637Z] Disconnected from device at 10.30.4.91
+[2025-06-11T05:39:24.035Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:24.062Z] Connected to device at 10.30.2.149
+[2025-06-11T05:39:24.096Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:24.121Z] Connected to device at 10.30.2.149
+[2025-06-11T05:39:24.357Z] Closed connection to device at 10.30.4.91
+[2025-06-11T05:39:24.357Z] Connection closed at 10.30.4.91
+[2025-06-11T05:39:24.358Z] Disconnected from device at 10.30.4.91
+[2025-06-11T05:39:24.360Z] Closed connection to device at 10.30.2.149
+[2025-06-11T05:39:24.360Z] Connection closed at 10.30.2.149
+[2025-06-11T05:39:24.361Z] Disconnected from device at 10.30.2.149
+[2025-06-11T05:39:25.391Z] Connected to device at 10.30.2.149
+[2025-06-11T05:39:25.392Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:25.394Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:25.399Z] Connected to device at 10.30.2.149
+[2025-06-11T05:39:25.399Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:25.411Z] Connected to device at 10.30.2.149
+[2025-06-11T05:39:25.411Z] Connected to device at 10.30.2.149
+[2025-06-11T05:39:25.411Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:25.443Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:25.444Z] Connected to device at 10.30.4.91
+[2025-06-11T05:39:25.511Z] Connected to device at 10.30.2.149
+[2025-06-11T05:39:25.548Z] Connected to device at 10.30.2.149
+[2025-06-11T05:39:53.598Z] Connection closed at 10.30.2.149
+[2025-06-11T05:39:53.598Z] Disconnected from device at 10.30.2.149
+[2025-06-11T05:41:55.455Z] Connected to device at 10.30.2.149
+[2025-06-11T05:41:55.635Z] Connected to device at 10.30.4.91
+[2025-06-11T06:00:32.204Z] Connected to device at 10.30.2.149
+[2025-06-11T06:00:32.378Z] Connected to device at 10.30.4.91
+[2025-06-11T06:03:31.809Z] Connected to device at 10.30.2.149
+[2025-06-11T06:03:32.006Z] Connected to device at 10.30.4.91
+[2025-06-11T06:08:01.414Z] Connected to device at 10.30.2.149
+[2025-06-11T06:08:01.606Z] Connected to device at 10.30.4.91
+[2025-06-11T06:08:10.873Z] Connected to device at 10.30.2.149
+[2025-06-11T06:08:10.954Z] Connected to device at 10.30.4.91
+[2025-06-11T06:09:14.145Z] Connected to device at 10.30.2.149
+[2025-06-11T06:09:14.319Z] Connected to device at 10.30.4.91
+[2025-06-11T06:09:31.447Z] Connected to device at 10.30.2.149
+[2025-06-11T06:09:31.640Z] Connected to device at 10.30.4.91
+[2025-06-11T06:10:36.187Z] Connection closed at 10.30.2.149
+[2025-06-11T06:10:36.189Z] Disconnected from device at 10.30.2.149
+[2025-06-11T06:10:36.191Z] Connection closed at 10.30.4.91
+[2025-06-11T06:10:36.192Z] Disconnected from device at 10.30.4.91
+[2025-06-11T06:10:46.224Z] Connected to device at 10.30.2.149
+[2025-06-11T06:10:46.413Z] Connected to device at 10.30.4.91
+[2025-06-11T06:13:04.820Z] Connected to device at 10.30.2.149
+[2025-06-11T06:13:04.984Z] Connected to device at 10.30.4.91
+[2025-06-11T06:15:38.391Z] Connected to device at 10.30.2.149
+[2025-06-11T06:15:38.575Z] Connected to device at 10.30.4.91
+[2025-06-11T06:15:43.770Z] Connected to device at 10.30.2.149
+[2025-06-11T06:15:43.971Z] Connected to device at 10.30.4.91
+[2025-06-11T06:16:59.264Z] Connection closed at 10.30.2.149
+[2025-06-11T06:16:59.265Z] Disconnected from device at 10.30.2.149
+[2025-06-11T06:16:59.267Z] Connection closed at 10.30.4.91
+[2025-06-11T06:16:59.268Z] Disconnected from device at 10.30.4.91
+[2025-06-11T06:17:33.034Z] Connected to device at 10.30.2.149
+[2025-06-11T06:17:33.249Z] Connected to device at 10.30.4.91
+[2025-06-11T06:18:46.891Z] Connected to device at 10.30.2.149
+[2025-06-11T06:18:47.074Z] Connected to device at 10.30.4.91
+[2025-06-11T06:19:31.344Z] Connected to device at 10.30.2.149
+[2025-06-11T06:19:31.430Z] Connected to device at 10.30.4.91
+[2025-06-11T06:22:32.615Z] Connected to device at 10.30.2.149
+[2025-06-11T06:22:32.789Z] Connected to device at 10.30.4.91
+[2025-06-11T06:23:39.599Z] Connection closed at 10.30.2.149
+[2025-06-11T06:23:39.600Z] Disconnected from device at 10.30.2.149
+[2025-06-11T06:23:39.682Z] Connection closed at 10.30.4.91
+[2025-06-11T06:23:39.684Z] Disconnected from device at 10.30.4.91
+[2025-06-11T06:24:05.262Z] Connected to device at 10.30.2.149
+[2025-06-11T06:24:05.466Z] Connected to device at 10.30.4.91
+[2025-06-11T06:25:23.173Z] Connected to device at 10.30.2.149
+[2025-06-11T06:25:23.354Z] Connected to device at 10.30.4.91
+[2025-06-11T06:30:38.925Z] Connected to device at 10.30.2.149
+[2025-06-11T06:30:39.118Z] Connected to device at 10.30.4.91
+[2025-06-11T06:30:57.607Z] Connected to device at 10.30.2.149
+[2025-06-11T06:30:57.793Z] Connected to device at 10.30.4.91
+[2025-06-11T06:33:50.295Z] Connected to device at 10.30.2.149
+[2025-06-11T06:33:50.469Z] Connected to device at 10.30.4.91
+[2025-06-11T06:55:23.397Z] Connected to device at 10.30.2.149
+[2025-06-11T06:55:23.563Z] Connected to device at 10.30.4.91
+[2025-06-11T06:55:46.728Z] Connected to device at 10.30.2.149
+[2025-06-11T06:55:46.895Z] Connected to device at 10.30.4.91
+[2025-06-11T07:01:31.263Z] Connected to device at 10.30.2.149
+[2025-06-11T07:01:31.435Z] Connected to device at 10.30.4.91
+[2025-06-11T07:11:10.440Z] Connected to device at 10.30.2.149
+[2025-06-11T07:11:10.608Z] Connected to device at 10.30.4.91
+[2025-06-11T07:25:33.675Z] Connected to device at 10.30.2.149
+[2025-06-11T07:25:33.834Z] Connected to device at 10.30.4.91
+[2025-06-11T07:26:29.285Z] Connected to device at 10.30.2.149
+[2025-06-11T07:26:29.491Z] Connected to device at 10.30.4.91
+[2025-06-11T07:35:48.017Z] Connected to device at 10.30.2.149
+[2025-06-11T07:35:48.174Z] Connected to device at 10.30.4.91
+[2025-06-11T07:48:14.468Z] Connected to device at 10.30.2.149
+[2025-06-11T07:48:14.650Z] Connected to device at 10.30.4.91
+[2025-06-11T08:50:31.052Z] Connected to device at 10.30.2.149
+[2025-06-11T08:50:31.241Z] Connected to device at 10.30.4.91
+[2025-06-11T08:50:35.788Z] Connected to device at 10.30.2.149
+[2025-06-11T08:50:35.984Z] Connected to device at 10.30.4.91
+[2025-06-11T08:50:54.520Z] Closed connection to device at 10.30.2.149
+[2025-06-11T08:50:54.521Z] Connection closed at 10.30.2.149
+[2025-06-11T08:50:54.522Z] Disconnected from device at 10.30.2.149
+[2025-06-11T08:50:54.524Z] Closed connection to device at 10.30.4.91
+[2025-06-11T08:50:54.524Z] Connection closed at 10.30.4.91
+[2025-06-11T08:50:54.525Z] Disconnected from device at 10.30.4.91

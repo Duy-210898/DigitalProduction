@@ -4,10 +4,13 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraSplashScreen;
+using DevExpress.XtraWaitForm;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -373,20 +376,33 @@ namespace DigitalProduction
 
                 if (response?.Users != null && response.Users.Count > 0)
                 {
-                    // Clear employees and populate with new data
+                    // Show SplashScreen
+                    SplashScreenManager.ShowForm(this.FindForm(), typeof(frmLoading), true, true, false);
+
+                    // Simulate loading progress (optional)
+                    for (int i = 1; i <= 100; i += 20)
+                    {
+                        SplashScreenManager.Default.SetWaitFormDescription($"Loading... {i}%");
+                        Thread.Sleep(10); // Adjust or remove if real data load is fast
+                    }
+
+                    // Process data (off UI thread)
                     employees.Clear();
                     foreach (var employee in response.Users)
                     {
                         employees.Add(employee);
                     }
 
-                    // Invoke UI updates on the UI thread
+                    // Invoke UI update
                     this.Invoke((MethodInvoker)delegate
                     {
-                        CreatelabelTotalControls(); // Create/update pagination info
-                        LoadDataGridView(); // Load data into the DataGridView
+                        CreatelabelTotalControls();
+                        LoadDataGridView();
                         ApplyLocalization();
                     });
+
+                    // Close splash screen
+                    SplashScreenManager.CloseForm(false);
                 }
                 else
                 {
@@ -410,7 +426,16 @@ namespace DigitalProduction
                     MessageBox.Show($"An error occurred: {ex.Message}");
                 });
             }
+            finally
+            {
+                // Ensure splash screen is closed even on error
+                if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                {
+                    SplashScreenManager.CloseForm(false);
+                }
+            }
         }
+
 
         // Create button container and other existing methods remain unchanged...
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Data;
 using DevExpress.Utils;
@@ -8,6 +10,7 @@ using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraSplashScreen;
 using DigitalProduction.Models;
 using DigitalProduction.ViewModels;
 
@@ -23,29 +26,68 @@ namespace DigitalProduction
         private GridView gridView_DeviceOutput;
         private Panel mainPanel;
         private FlowLayoutPanel filterPanel;
+        private WebSocketClient _pendingWebSocketClient;
 
         public ucDeviceOutput()
         {
             InitializeComponent();
+            // Defer full loading until control is loaded
+            this.Load += async (s, e) => await LoadWithSplashAsync();
+        }
+        private async void ucDeviceOutput_Load(object sender, EventArgs e)
+        {
+            await LoadWithSplashAsync();
+        }
+
+
+        private async Task LoadWithSplashAsync()
+        {
+            var parentForm = this.FindForm() ?? Application.OpenForms.Cast<Form>().FirstOrDefault();
+
+            if (parentForm != null)
+                SplashScreenManager.ShowForm(parentForm, typeof(frmLoading), true, true, false);
+
+            // Simulate progress
+            for (int i = 1; i <= 100; i += 20)
+            {
+                if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                {
+                    SplashScreenManager.Default.SetWaitFormDescription($"Loading... {i}%");
+                }
+                await Task.Delay(10);
+            }
+
+            // Now safe to initialize _viewModel
             _viewModel = new DeviceOutputListViewModel();
+
+            if (_pendingWebSocketClient != null)
+            {
+                _viewModel.SetWebSocketClient(_pendingWebSocketClient);
+                _pendingWebSocketClient = null;
+            }
             Console.WriteLine("Uc is loading");
 
-            // Create a main panel for layout management
+            // Proceed to ViewModel-dependent setup
+            InitializeViewModelUI();
+
+            if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                SplashScreenManager.CloseForm(false);
+        }
+        private void InitializeViewModelUI()
+        {
             mainPanel = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(5) // Add some padding for better spacing
+                Padding = new Padding(5)
             };
 
-            // Initialize filter controls
             initFilterDate();
             LoadFilters();
 
-            // Initialize DevExpress GridControl and GridView
             gridControl_DeviceOutput = new GridControl
             {
-                Dock = DockStyle.Fill, // Fill remaining space
-                Margin = new Padding(5) // Add margin to separate from filters
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5)
             };
 
             gridView_DeviceOutput = new GridView(gridControl_DeviceOutput)
@@ -55,8 +97,13 @@ namespace DigitalProduction
             };
 
             gridControl_DeviceOutput.MainView = gridView_DeviceOutput;
-
+            if (_viewModel == null)
+            {
+                MessageBox.Show("_viewModel is null before binding", "DEBUG");
+                return;
+            }
             gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
+
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
             gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
             this.Resize += UcDeviceOutput_Resize;
@@ -64,29 +111,26 @@ namespace DigitalProduction
             dateTimePickerStart.DataBindings.Add("Value", _viewModel, "FilterStartDate", true, DataSourceUpdateMode.OnPropertyChanged);
             dateTimePickerEnd.DataBindings.Add("Value", _viewModel, "FilterEndDate", true, DataSourceUpdateMode.OnPropertyChanged);
             txtFilter.DataBindings.Add("Text", _viewModel, "FilterKeyword", false, DataSourceUpdateMode.OnPropertyChanged);
+
             dateTimePickerStart.ValueChanged += DateTimePickerStart_ValueChanged;
             dateTimePickerEnd.ValueChanged += DateTimePickerEnd_ValueChanged;
 
-            // Add controls to the main panel
             mainPanel.Controls.Add(gridControl_DeviceOutput);
             this.Controls.Add(mainPanel);
-            this.Controls.Add(filterPanel); // Ensure filters stay at the top
+            this.Controls.Add(filterPanel);
 
             gridControl_DeviceOutput.ForceInitialize();
-            // Translate headers (after binding data)
             TranslateHeaders();
 
-            // refresh data
-            SimpleButton syncButton = new SimpleButton()
+            var syncButton = new SimpleButton
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(100, 40)
+                Size = new Size(100, 40),
+                ImageOptions = { Image = Properties.Resources.sync_icon }
             };
             syncButton.Click += BtnSyncData_Click;
-            syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
             filterPanel.Controls.Add(syncButton);
 
-            // === Apply selection options ===
             gridView_DeviceOutput.OptionsSelection.MultiSelect = true;
             gridView_DeviceOutput.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CellSelect;
             gridView_DeviceOutput.OptionsBehavior.EditorShowMode = EditorShowMode.MouseDown;
@@ -95,26 +139,30 @@ namespace DigitalProduction
             gridView_DeviceOutput.OptionsView.ShowFooter = true;
             gridView_DeviceOutput.OptionsSelection.EnableAppearanceFocusedRow = true;
 
-            gridView_DeviceOutput.SelectionChanged +=  gridView_DeviceOutput_SelectionChanged;
+            gridView_DeviceOutput.SelectionChanged += gridView_DeviceOutput_SelectionChanged;
             gridView_DeviceOutput.CustomSummaryCalculate += gridView_DeviceOutput_CustomSummaryCalculate;
 
             var sizeColumn = gridView_DeviceOutput.Columns.ColumnByFieldName("ActualSizeQty");
             if (sizeColumn != null)
             {
                 sizeColumn.Width = 120;
-                sizeColumn.OptionsColumn.FixedWidth = true; 
+                sizeColumn.OptionsColumn.FixedWidth = true;
                 sizeColumn.SummaryItem.SummaryType = SummaryItemType.Custom;
-                sizeColumn.SummaryItem.DisplayFormat = string.Format("{0}: {{0:N2}}", LocalizationManager.GetString("Total"));
+                sizeColumn.SummaryItem.DisplayFormat = $"{LocalizationManager.GetString("Total")}: {{0:N2}}";
             }
             else
             {
                 MessageBox.Show("Cột 'ActualCut' không tồn tại. Kiểm tra FieldName trong nguồn dữ liệu.");
             }
 
-            this.gridView_DeviceOutput.RowStyle += gridView_DeviceOutput_RowStyle;
             gridView_DeviceOutput.CustomDrawFooterCell += GridView_DeviceOutput_CustomDrawFooterCell;
-
+            gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
         }
+
+
+
+
+
 
         private void GridView_DeviceOutput_CustomDrawFooterCell(object sender, FooterCellCustomDrawEventArgs e)
         {
@@ -274,8 +322,16 @@ namespace DigitalProduction
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-            _viewModel.SetWebSocketClient(webSocketClient);
+            if (_viewModel != null)
+            {
+                _viewModel.SetWebSocketClient(webSocketClient);
+            }
+            else
+            {
+                _pendingWebSocketClient = webSocketClient;
+            }
         }
+
 
         private void TranslateHeaders()
         {

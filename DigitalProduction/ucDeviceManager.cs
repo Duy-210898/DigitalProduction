@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraSplashScreen;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -417,11 +419,26 @@ namespace DigitalProduction
 
                 if (action?.Equals("getDevices") == true)
                 {
-                    ResponseMessage<List<Device>> response = ResponseMessage<List<Device>>.FromJson(jsonData);
+                    var response = ResponseMessage<List<Device>>.FromJson(jsonData);
 
                     if (response?.Devices != null)
                     {
-                        // Ensure UI updates happen on the main thread
+                        var parentForm = this.FindForm();
+                        if (parentForm != null)
+                        {
+                            SplashScreenManager.ShowForm(parentForm, typeof(frmLoading), true, true, false);
+                        }
+
+                        // Simulate loading progress
+                        for (int i = 1; i <= 100; i += 20)
+                        {
+                            if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                            {
+                                SplashScreenManager.Default.SetWaitFormDescription($"Loading... {i}%");
+                            }
+                            Thread.Sleep(10); // Simulate load time
+                        }
+
                         SafeInvoke(() =>
                         {
                             PopulateDeviceDataTable(response.Devices);
@@ -431,19 +448,30 @@ namespace DigitalProduction
                     }
                     else
                     {
-                        SafeInvoke(() => ShowMessageBox("No Data Found", "Info", MessageBoxIcon.Information));
+                        SafeInvoke(() =>
+                            ShowMessageBox("No Data Found", "Info", MessageBoxIcon.Information));
                     }
                 }
             }
             catch (JsonSerializationException jsonEx)
             {
-                SafeInvoke(() => ShowMessageBox($"JSON Deserialization Error: {jsonEx.Message}", "Error", MessageBoxIcon.Error));
+                SafeInvoke(() =>
+                    ShowMessageBox($"JSON Deserialization Error: {jsonEx.Message}", "Error", MessageBoxIcon.Error));
             }
             catch (Exception ex)
             {
-                SafeInvoke(() => ShowMessageBox($"An error occurred: {ex.Message}", "Error", MessageBoxIcon.Error));
+                SafeInvoke(() =>
+                    ShowMessageBox($"An error occurred: {ex.Message}", "Error", MessageBoxIcon.Error));
+            }
+            finally
+            {
+                if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                {
+                    SplashScreenManager.CloseForm(false);
+                }
             }
         }
+
 
         // Helper method to safely invoke UI updates
         private void SafeInvoke(Action action)

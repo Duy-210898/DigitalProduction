@@ -11,6 +11,7 @@ using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Menu;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraSplashScreen;
 using DigitalProduction.Models;
 using GridviewHelp;
 using Newtonsoft.Json;
@@ -415,7 +416,7 @@ namespace DigitalProduction
             }
         }
 
-        private void WebSocket_OnMessage(string jsonData)
+        private async void WebSocket_OnMessage(string jsonData)
         {
             if (InvokeRequired)
             {
@@ -423,8 +424,25 @@ namespace DigitalProduction
                 return;
             }
 
+            var parentForm = this.FindForm(); // Ensure this is within a UserControl or Form
+
             try
             {
+                if (parentForm != null)
+                {
+                    SplashScreenManager.ShowForm(parentForm, typeof(frmLoading), true, true, false);
+                }
+
+                // Simulate progress (optional)
+                for (int i = 1; i <= 100; i += 20)
+                {
+                    if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                    {
+                        SplashScreenManager.Default.SetWaitFormDescription($"Loading... {i}%");
+                    }
+                    await Task.Delay(10); // async delay, avoid blocking UI thread
+                }
+
                 var response = ResponseMessage<List<Distribution>>.FromJson(jsonData);
                 Console.WriteLine(jsonData);
 
@@ -454,7 +472,13 @@ namespace DigitalProduction
             {
                 MessageBox.Show($"Error receiving WebSocket data:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
+            finally
+            {
+                if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                {
+                    SplashScreenManager.CloseForm(false);
+                }
+            }
         }
 
         // Implement the RowStyle event handler

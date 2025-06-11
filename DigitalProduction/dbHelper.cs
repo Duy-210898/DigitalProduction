@@ -1035,98 +1035,171 @@ namespace DigitalProduction
             }
         }
 
-        //public static void UpsertTargetInDay(
-        // DateTime targetDate,
-        // int departmentId,
-        // int productId,
-        // int targetQuantity,
-        // int employeeId)
+        public static void UpsertTargetInDay(
+         DateTime targetDate,
+         int departmentId,
+         int productId,
+         int targetQuantity,
+         int employeeId)
+        {
+            string sql = @"
+            IF EXISTS (
+                SELECT 1 FROM TargetInDay 
+                WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId
+            )
+            BEGIN
+                UPDATE TargetInDay
+                SET 
+                    TargetQuantity = @TargetQuantity,
+                    EmployeeId = @EmployeeId,
+                    UpdatedAt = GETDATE()
+                WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId;
+            END
+            ELSE
+            BEGIN
+                INSERT INTO TargetInDay (TargetDate, DepartmentId, ProductId, TargetQuantity, EmployeeId)
+                VALUES (@TargetDate, @DepartmentId, @ProductId, @TargetQuantity, @EmployeeId);
+            END";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Parameters.Add("@TargetDate", SqlDbType.Date).Value = targetDate;
+                    cmd.Parameters.Add("@DepartmentId", SqlDbType.Int).Value = departmentId;
+                    cmd.Parameters.Add("@ProductId", SqlDbType.Int).Value = productId;
+                    cmd.Parameters.Add("@TargetQuantity", SqlDbType.Int).Value = targetQuantity;
+                    cmd.Parameters.Add("@EmployeeId", SqlDbType.Int).Value = employeeId;
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        //public static async Task<List<TargetRealtimeInfo>> GetRealtimeTargetDataAsync(int month, int year)
         //{
+        //    var list = new List<TargetRealtimeInfo>();
+
         //    string sql = @"
-        //    IF EXISTS (
-        //        SELECT 1 FROM TargetInDay 
-        //        WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId
-        //    )
-        //    BEGIN
-        //        UPDATE TargetInDay
-        //        SET 
-        //            TargetQuantity = @TargetQuantity,
-        //            EmployeeId = @EmployeeId,
-        //            UpdatedAt = GETDATE()
-        //        WHERE TargetDate = @TargetDate AND DepartmentId = @DepartmentId AND ProductId = @ProductId;
-        //    END
-        //    ELSE
-        //    BEGIN
-        //        INSERT INTO TargetInDay (TargetDate, DepartmentId, ProductId, TargetQuantity, EmployeeId)
-        //        VALUES (@TargetDate, @DepartmentId, @ProductId, @TargetQuantity, @EmployeeId);
-        //    END";
+        //          SELECT 
+        //            ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
+        //            CAST(ac.UpdatedAt AS DATE) AS Timestamp,
+        //            o.OperatorID,
+        //            CASE 
+        //                WHEN CAST(t.TargetDate AS DATE) = CAST(ac.UpdatedAt AS DATE) THEN ISNULL(t.TargetQuantity, 0)
+        //                ELSE 0
+        //            END AS TargetQuantity,
+        //            SUM(ac.ActualCut) AS TargetActualQuantity
+        //        FROM DeviceOutput ac
+        //        LEFT JOIN PartSizeOrder pso 
+        //            ON ac.OrderID = pso.OrderId 
+        //            AND ac.SizeID = pso.SizeId 
+        //            AND ac.PartID = pso.PartId
+        //        LEFT JOIN DistributionData dd 
+        //            ON pso.PartSizeOrderId = dd.PartSizeOrderId 
+        //        LEFT JOIN ProductOrder po 
+        //            ON po.OrderId = ac.OrderId
+        //        LEFT JOIN Operator o 
+        //            ON o.OperatorID = dd.OperatorID
 
-        //    using (SqlConnection connection = new SqlConnection(connectionString))
+        //        -- OUTER APPLY: fetch latest target by Operator (EmployeeId)
+        //        OUTER APPLY (
+        //            SELECT TOP 1 *
+        //            FROM TargetInDay tid
+        //            WHERE 
+        //                tid.EmployeeId = o.EmployeeID
+        //                AND tid.TargetDate <= CAST(ac.UpdatedAt AS DATE)
+        //            ORDER BY tid.TargetDate DESC
+        //        ) t
+        //        WHERE 
+        //            YEAR(ac.UpdatedAt) = @Year
+        //            AND MONTH(ac.UpdatedAt) = @Month
+        //            AND o.OperatorID IS NOT NULL
+
+        //        GROUP BY 
+        //            ISNULL(o.OperatorName, 'Unknown'),
+        //            CAST(ac.UpdatedAt AS DATE),
+        //            t.TargetDate,
+        //            o.OperatorID,
+        //            t.TargetQuantity
+
+        //        ORDER BY 
+        //            CAST(ac.UpdatedAt AS DATE)
+        //    ";
+        //    using (SqlConnection conn = new SqlConnection(connectionString))
+        //    using (SqlCommand cmd = new SqlCommand(sql, conn))
         //    {
-        //        connection.Open();
+        //        cmd.Parameters.AddWithValue("@Month", month);
+        //        cmd.Parameters.AddWithValue("@Year", year);
 
-        //        using (SqlCommand cmd = new SqlCommand(sql, connection))
+        //        await conn.OpenAsync();
+        //        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
         //        {
-        //            cmd.Parameters.Add("@TargetDate", SqlDbType.Date).Value = targetDate;
-        //            cmd.Parameters.Add("@DepartmentId", SqlDbType.Int).Value = departmentId;
-        //            cmd.Parameters.Add("@ProductId", SqlDbType.Int).Value = productId;
-        //            cmd.Parameters.Add("@TargetQuantity", SqlDbType.Int).Value = targetQuantity;
-        //            cmd.Parameters.Add("@EmployeeId", SqlDbType.Int).Value = employeeId;
-
-        //            cmd.ExecuteNonQuery();
+        //            while (await reader.ReadAsync())
+        //            {
+        //                list.Add(new TargetRealtimeInfo
+        //                {
+        //                    OperatorID = Convert.ToInt32(reader["OperatorID"]),
+        //                    OperatorName = reader["OperatorName"].ToString(),
+        //                    Timestamp = Convert.ToDateTime(reader["Timestamp"]),
+        //                    TargetQuantity = Convert.ToInt32(reader["TargetQuantity"]),
+        //                    TargetActualQuantity = Convert.ToInt32(reader["TargetActualQuantity"]),
+        //                });
+        //            }
         //        }
         //    }
+
+        //    return list;
         //}
+
         public static async Task<List<TargetRealtimeInfo>> GetRealtimeTargetDataAsync(int month, int year)
         {
             var list = new List<TargetRealtimeInfo>();
 
             string sql = @"
-                  SELECT 
+                SELECT 
                     ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
-                    CAST(ac.UpdatedAt AS DATE) AS Timestamp,
+                    ch.CutDate AS Timestamp,
                     o.OperatorID,
                     CASE 
-                        WHEN CAST(t.TargetDate AS DATE) = CAST(ac.UpdatedAt AS DATE) THEN ISNULL(t.TargetQuantity, 0)
+                        WHEN CAST(t.TargetDate AS DATE) = ch.CutDate THEN ISNULL(t.TargetQuantity, 0)
                         ELSE 0
                     END AS TargetQuantity,
-                    SUM(ac.ActualCut) AS TargetActualQuantity
-                FROM DeviceOutput ac
+                    SUM(ch.CutQuantity) AS TargetActualQuantity
+                FROM CutHistory ch
                 LEFT JOIN PartSizeOrder pso 
-                    ON ac.OrderID = pso.OrderId 
-                    AND ac.SizeID = pso.SizeId 
-                    AND ac.PartID = pso.PartId
+                    ON ch.OrderID = pso.OrderId 
+                    AND ch.SizeID = pso.SizeId 
+                    AND ch.PartID = pso.PartId
                 LEFT JOIN DistributionData dd 
-                    ON pso.PartSizeOrderId = dd.PartSizeOrderId 
-                LEFT JOIN ProductOrder po 
-                    ON po.OrderId = ac.OrderId
-                LEFT JOIN Operator o 
+                    ON pso.PartSizeOrderId = dd.PartSizeOrderId
+                LEFT JOIN Operator o
                     ON o.OperatorID = dd.OperatorID
 
-                -- OUTER APPLY: fetch latest target by Operator (EmployeeId)
                 OUTER APPLY (
                     SELECT TOP 1 *
                     FROM TargetInDay tid
                     WHERE 
                         tid.EmployeeId = o.EmployeeID
-                        AND tid.TargetDate <= CAST(ac.UpdatedAt AS DATE)
+                        AND tid.TargetDate <= ch.CutDate
                     ORDER BY tid.TargetDate DESC
                 ) t
                 WHERE 
-                    YEAR(ac.UpdatedAt) = @Year
-                    AND MONTH(ac.UpdatedAt) = @Month
+                    YEAR(ch.CutDate) = @Year
+                    AND MONTH(ch.CutDate) = @Month
                     AND o.OperatorID IS NOT NULL
 
                 GROUP BY 
                     ISNULL(o.OperatorName, 'Unknown'),
-                    CAST(ac.UpdatedAt AS DATE),
+                    ch.CutDate,
                     t.TargetDate,
                     o.OperatorID,
                     t.TargetQuantity
 
-                ORDER BY 
-                    CAST(ac.UpdatedAt AS DATE)
+                ORDER BY ch.CutDate;
             ";
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
@@ -1152,6 +1225,130 @@ namespace DigitalProduction
 
             return list;
         }
+
+        //public static async Task<List<TargetRealtimeInfo>> GetRealtimeTargetDataAsync(int month, int year)
+        //{
+        //    var list = new List<TargetRealtimeInfo>();
+
+        //    string selectSql = @"
+        //        SELECT 
+        //            ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
+        //            CAST(ac.UpdatedAt AS DATE) AS Timestamp,
+        //            o.OperatorID,
+        //            CASE 
+        //                WHEN CAST(t.TargetDate AS DATE) = CAST(ac.UpdatedAt AS DATE) THEN ISNULL(t.TargetQuantity, 0)
+        //                ELSE 0
+        //            END AS TargetQuantity,
+        //            SUM(ac.ActualCut) AS TargetActualQuantity
+        //        FROM DeviceOutput ac
+        //        LEFT JOIN PartSizeOrder pso 
+        //            ON ac.OrderID = pso.OrderId 
+        //            AND ac.SizeID = pso.SizeId 
+        //            AND ac.PartID = pso.PartId
+        //        LEFT JOIN DistributionData dd 
+        //            ON pso.PartSizeOrderId = dd.PartSizeOrderId 
+        //        LEFT JOIN ProductOrder po 
+        //            ON po.OrderId = ac.OrderId
+        //        LEFT JOIN Operator o 
+        //            ON o.OperatorID = dd.OperatorID
+        //        OUTER APPLY (
+        //            SELECT TOP 1 *
+        //            FROM TargetInDay tid
+        //            WHERE 
+        //                tid.EmployeeId = o.EmployeeID
+        //                AND tid.TargetDate <= CAST(ac.UpdatedAt AS DATE)
+        //            ORDER BY tid.TargetDate DESC
+        //        ) t
+        //        WHERE 
+        //            YEAR(ac.UpdatedAt) = @Year
+        //            AND MONTH(ac.UpdatedAt) = @Month
+        //            AND o.OperatorID IS NOT NULL
+        //        GROUP BY 
+        //            ISNULL(o.OperatorName, 'Unknown'),
+        //            CAST(ac.UpdatedAt AS DATE),
+        //            t.TargetDate,
+        //            o.OperatorID,
+        //            t.TargetQuantity
+        //        ORDER BY CAST(ac.UpdatedAt AS DATE)
+        //    ";
+
+        //    using (SqlConnection conn = new SqlConnection(connectionString))
+        //    {
+        //        await conn.OpenAsync();
+
+        //        using (SqlCommand cmd = new SqlCommand(selectSql, conn))
+        //        {
+        //            cmd.Parameters.AddWithValue("@Month", month);
+        //            cmd.Parameters.AddWithValue("@Year", year);
+
+        //            using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+        //            {
+        //                while (await reader.ReadAsync())
+        //                {
+        //                    var info = new TargetRealtimeInfo
+        //                    {
+        //                        OperatorID = Convert.ToInt32(reader["OperatorID"]),
+        //                        OperatorName = reader["OperatorName"].ToString(),
+        //                        Timestamp = Convert.ToDateTime(reader["Timestamp"]),
+        //                        TargetQuantity = Convert.ToInt32(reader["TargetQuantity"]),
+        //                        TargetActualQuantity = Convert.ToInt32(reader["TargetActualQuantity"]),
+        //                    };
+
+        //                    list.Add(info);
+        //                }
+        //            }
+        //        }
+
+        //        // Loop and save each if quantity == 0 or not exists
+        //        foreach (var item in list)
+        //        {
+        //            // Get EmployeeID using OperatorID
+        //            var getEmpIdCommand = new SqlCommand("SELECT EmployeeID FROM dbo.Operator WHERE OperatorID = @OperatorID", conn);
+        //            getEmpIdCommand.Parameters.Add("@OperatorID", SqlDbType.Int).Value = item.OperatorID;
+
+        //            var employeeIdObj = await getEmpIdCommand.ExecuteScalarAsync();
+        //            if (employeeIdObj == null)
+        //            {
+        //                throw new InvalidOperationException($"OperatorID {item.OperatorID} does not exist in the Operator table.");
+        //            }
+
+        //            int employeeId = Convert.ToInt32(employeeIdObj);
+        //            string insertIfZeroSql = @"
+        //                INSERT INTO TargetInDay (TargetDate, DepartmentId, TargetQuantity, EmployeeId)
+        //                SELECT 
+        //                    @TargetDate, 
+        //                    @DepartmentID, 
+        //                    @TargetActualQuantity, 
+        //                    @EmployeeID
+        //                WHERE NOT EXISTS (
+        //                    SELECT 1 FROM TargetInDay tid
+        //                    WHERE tid.EmployeeId = @EmployeeID
+        //                      AND tid.TargetDate = @TargetDate
+        //                      AND tid.TargetQuantity = 0
+        //                )";
+
+        //            using (SqlCommand saveCmd = new SqlCommand(insertIfZeroSql, conn))
+        //            {
+        //                saveCmd.Parameters.AddWithValue("@TargetDate", item.Timestamp);
+        //                saveCmd.Parameters.AddWithValue("@DepartmentID", Global.CurrentUser.DepartmentID);
+        //                saveCmd.Parameters.AddWithValue("@TargetActualQuantity", 0);
+        //                saveCmd.Parameters.AddWithValue("@EmployeeID", employeeId);
+
+        //                try
+        //                {
+        //                    await saveCmd.ExecuteNonQueryAsync();
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    Console.WriteLine($"Error saving target for OperatorID: {item.OperatorID}, Date: {item.Timestamp}");
+        //                    Console.WriteLine($"Exception: {ex.Message}");
+        //                }
+        //            }
+        //        }
+        //    }
+        //        return list;
+        //}
+
 
         public static async Task SaveTargetQuantityAsync(TargetRealtimeInfo item)
         {

@@ -191,9 +191,8 @@ namespace DigitalProduction
             gridViewSchedule.RefreshData();
 
             // Iterate through filtered (visible) rows
-            for (int i = 0; i < gridViewSchedule.RowCount; i++)
+            for (int rowHandle = 0; rowHandle < gridViewSchedule.DataRowCount; rowHandle++)
             {
-                int rowHandle = gridViewSchedule.GetVisibleRowHandle(i);
                 if (gridViewSchedule.IsDataRow(rowHandle))
                 {
                     var row = gridViewSchedule.GetRow(rowHandle) as ProductionSchedule;

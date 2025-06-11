@@ -552,14 +552,14 @@ async function handleSaveDistributionData(ws, request) {
     // Lưu dữ liệu vào cơ sở dữ liệu
     const result = await saveDistributionDataToDB(data);
     if (!result || result.length === 0) {
-      console.log("⚠️ No results returned from the function.");
+   //   console.log("⚠️ No results returned from the function.");
       ws.send(JSON.stringify({
         action: 'saveDistributionData',
         status: 'error',
         message: `Failed to save distribution data: ${error.message}`
       }));
     } else if (result[0].DistributionDuplicate) {
-        console.log("🚨 Entry is a duplicate. Insertion skipped.");
+   //     console.log("🚨 Entry is a duplicate. Insertion skipped.");
          ws.send(JSON.stringify({
           action: 'saveDistributionData',
           status: 'error',
@@ -573,7 +573,7 @@ async function handleSaveDistributionData(ws, request) {
           message: 'Distribution data saved and sent to Modbus successfully'
         }));
     } else {
-        console.log("❌ Error: Entry was not inserted.");
+    //    console.log("❌ Error: Entry was not inserted.");
         ws.send(JSON.stringify({
           action: 'saveDistributionData',
           status: 'error',
@@ -604,11 +604,11 @@ async function handleSaveDistributionDatas(ws, request) {
 
   try {
     // Bỏ qua việc kiểm tra kết nối thiết bị
-    console.log(`Proceeding with saving data for device at ${IpAddress}...`);
+  //  console.log(`Proceeding with saving data for device at ${IpAddress}...`);
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     const result = await saveDistributionDataToDB(dataList);
-    console.log("Final Status:", result);
+  //  console.log("Final Status:", result);
     // Gửi phản hồi thành công
     ws.send(JSON.stringify({
       action: 'saveDistributionData',
@@ -686,7 +686,7 @@ async function handleGetOperatorDistribution(ws, request) {
       }));
     }
 
-    console.log(`Fetching distribution data for operatorID: ${operatorID}`);
+  //  console.log(`Fetching distribution data for operatorID: ${operatorID}`);
     const usersResponse = await getOperatorDistribution(operatorID);
 
     if (!usersResponse || usersResponse.length === 0) {

@@ -202,6 +202,26 @@ GO
 
 ALTER TABLE Operator ADD CONSTRAINT UQ_Operator_EmployeeID UNIQUE (EmployeeID);
 
+GO
+
+CREATE TABLE CutHistory (
+    CutHistoryID INT IDENTITY(1,1) PRIMARY KEY,
+    OrderID INT NOT NULL,
+    PartID INT NOT NULL,
+    SizeID INT NOT NULL,
+    EmployeeID INT NOT NULL, -- Operator performing the cut
+    CutQuantity INT NOT NULL CHECK (CutQuantity >= 0),
+    CutDate DATE NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+
+    -- Foreign Keys
+    CONSTRAINT FK_CutHistory_Order FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID),
+    CONSTRAINT FK_CutHistory_Part FOREIGN KEY (PartID) REFERENCES Part(PartID),
+    CONSTRAINT FK_CutHistory_Size FOREIGN KEY (SizeID) REFERENCES Size(SizeID),
+    CONSTRAINT FK_CutHistory_Employee FOREIGN KEY (EmployeeID) REFERENCES Operator(EmployeeID)
+);
+GO
+
 -- Foreign Key Constraints
 ALTER TABLE ProductionSchedule 
 	ADD CONSTRAINT FK_ProductionSchedule_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),

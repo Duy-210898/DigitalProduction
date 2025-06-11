@@ -217,7 +217,7 @@ async function setOrderIsComplete(OrderID) {
       return false;
     }
 
-    console.log(`Cập nhật trạng thái 'Complete' thành công cho OrderID: ${OrderID}`);
+  //  console.log(`Cập nhật trạng thái 'Complete' thành công cho OrderID: ${OrderID}`);
     return true; // Trả về true nếu cập nhật thành công
   } catch (error) {
     console.error('Lỗi khi cập nhật trạng thái Order thành Complete:', error.message);
@@ -248,14 +248,115 @@ async function setDistributionIsComplete(DistributionID, Status) {
 
     // Kiểm tra số lượng bản ghi bị ảnh hưởng
     if (result.rowsAffected[0] === 0) {
-      console.log(`Không tìm thấy DistributionID: ${DistributionID} trong bảng DistributionOrders.`);
+    //  console.log(`Không tìm thấy DistributionID: ${DistributionID} trong bảng DistributionOrders.`);
       return false;
     }
 
-    console.log(`Cập nhật trạng thái 'Complete' thành công cho DistributionID: ${DistributionID}`);
+    //console.log(`Cập nhật trạng thái 'Complete' thành công cho DistributionID: ${DistributionID}`);
     return true; // Trả về true nếu cập nhật thành công
   } catch (error) {
     console.error('Lỗi khi cập nhật trạng thái Distribution thành Complete:', error.message);
+    throw error;
+  }
+}
+
+async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate, EmployeeID }) {
+  try {
+    let actualCut = CutQuantity;
+    const pool = await initDatabase();
+
+    // 1. Ensure the EmployeeID exists in Operator table
+    // const employeeCheck = await pool.request()
+    //   .input("EmployeeID", sql.Int, EmployeeID)
+    //   .query(`
+    //     SELECT EmployeeID FROM Operator WHERE EmployeeID = @EmployeeID
+    //   `);
+
+    // if (employeeCheck.recordset.length === 0) {
+    //   console.log(`Not found EmployeeID ${EmployeeID}`);
+    //   return;
+    // }
+    
+
+    // 1. Check if CutHistory already has a record for this combination
+    let cutHistoryBefore = 0; 
+    const checkCuttingResult = await pool.request()
+      .input("OrderID", sql.Int, OrderID)
+      .input("PartID", sql.Int, PartID)
+      .input("SizeID", sql.Int, SizeID)
+      .input("CutDate", sql.Date, CutDate)
+      .input("EmployeeID", sql.Int, EmployeeID)
+      .query(`
+        SELECT  SUM(CutQuantity) AS TotalCutQuantity
+        FROM CutHistory
+        WHERE 
+          OrderID = @OrderID AND 
+          PartID = @PartID AND 
+          SizeID = @SizeID AND 
+          CAST(CutDate AS DATE) < @CutDate AND 
+          EmployeeID = @EmployeeID
+      `);
+      if (checkCuttingResult.recordset.length > 0) {
+        const existing = checkCuttingResult.recordset[0];
+
+        actualCut = CutQuantity - existing.TotalCutQuantity;
+        cutHistoryBefore = existing.TotalCutQuantity;
+        //console.log(`Had CutHistory for EmployeeID ${EmployeeID}, cutHistoryBefore ${cutHistoryBefore}`);
+      }
+
+    // 2. Check if CutHistory already has a record for this combination
+    const checkResult = await pool.request()
+      .input("OrderID", sql.Int, OrderID)
+      .input("PartID", sql.Int, PartID)
+      .input("SizeID", sql.Int, SizeID)
+      .input("CutDate", sql.Date, CutDate)
+      .input("EmployeeID", sql.Int, EmployeeID)
+      .query(`
+        SELECT CutHistoryID, CutQuantity
+        FROM CutHistory
+        WHERE 
+          OrderID = @OrderID AND 
+          PartID = @PartID AND 
+          SizeID = @SizeID AND 
+          CAST(CutDate AS DATE) = @CutDate AND 
+          EmployeeID = @EmployeeID
+      `);
+    
+    if (checkResult.recordset.length > 0) {
+      // Update existing record
+      const existing = checkResult.recordset[0];
+      CutQuantity = cutHistoryBefore !== 0 
+      ? CutQuantity - cutHistoryBefore
+      : existing.CutQuantity;
+
+      await pool.request()
+        .input("CutQuantity", sql.Int, CutQuantity)
+        .input("CutHistoryID", sql.Int, existing.CutHistoryID)
+        .query(`
+          UPDATE CutHistory
+          SET CutQuantity = @CutQuantity
+          WHERE CutHistoryID = @CutHistoryID
+        `);
+
+     // console.log(`Updated CutHistory: ${CutQuantity} for EmployeeID ${EmployeeID}`);
+    } else {
+      // Insert new record
+      await pool.request()
+        .input("OrderID", sql.Int, OrderID)
+        .input("PartID", sql.Int, PartID)
+        .input("SizeID", sql.Int, SizeID)
+        .input("CutQuantity", sql.Int, actualCut)
+        .input("CutDate", sql.Date, CutDate)
+        .input("EmployeeID", sql.Int, EmployeeID)
+        .query(`
+          INSERT INTO CutHistory (OrderID, PartID, SizeID, CutQuantity, CutDate, EmployeeID)
+          VALUES (@OrderID, @PartID, @SizeID, @CutQuantity, @CutDate, @EmployeeID)
+        `);
+
+      //console.log(`Inserted new CutHistory for EmployeeID ${EmployeeID}`);
+    }
+  } catch (error) {
+    console.error('Lỗi khi ghi CutHistory:', error.message);
     throw error;
   }
 }
@@ -359,11 +460,11 @@ async function saveActualDataToDB(data) {
       if (result[0].count === 0) {
         // If not exists, INSERT
         await executeQuery(DeviceOutputQuery, DeviceOutputInputs);
-        console.log(`✅ Inserted DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
+   //     console.log(`✅ Inserted DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
       } else {
         // If exists, UPDATE
         await executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
-        console.log(`✅ Updated DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
+     //   console.log(`✅ Updated DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
         
         const findPartSizeOrderIdQuery = `
           SELECT PartSizeOrderId 
@@ -393,7 +494,7 @@ async function saveActualDataToDB(data) {
           ];
 
           await executeQuery(updateDistributionQuery, updateDistributionInputs);
-          console.log(`🟢 Updated DistributionData UpdatedAt for PartSizeOrderID=${partSizeOrderId}`);
+         // console.log(`🟢 Updated DistributionData UpdatedAt for PartSizeOrderID=${partSizeOrderId}`);
         } else {
           console.warn(`⚠️ No PartSizeOrder found for OrderID=${OrderID}, SizeID=${size.SizeID}, PartID=${size.PartID}`);
         }
@@ -432,7 +533,7 @@ async function saveDistributionDataToDB(dataList) {
         const distributionExists = await recordExists("DistributionData", distributionConditions, pool);
     
         if (distributionExists) {
-          console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
+         // console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
           status.DistributionDuplicate = true;
           results.push(status);
           continue; // ⛔️ Skip entire item, including DefaultInfo
@@ -461,7 +562,7 @@ async function saveDistributionDataToDB(dataList) {
     
         const result = await request.query(distributionQuery);
         if (result.rowsAffected && result.rowsAffected[0] > 0) {
-          console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
+         // console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
           status.DistributionInserted = true;
         }
     
@@ -491,7 +592,7 @@ async function saveDistributionDataToDB(dataList) {
             );
           `;
           await request.query(defaultInfoQuery);
-          console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
+         // console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
         } else {
           const updateInfoQuery = `
             UPDATE DefaultInfo 
@@ -502,7 +603,7 @@ async function saveDistributionDataToDB(dataList) {
             WHERE ProductID = @ProductID AND PartID = @PartID AND Model = @Model;
           `;
           await request.query(updateInfoQuery);
-          console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
+        //  console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
         }
     
       } catch (err) {
@@ -513,7 +614,7 @@ async function saveDistributionDataToDB(dataList) {
       results.push(status);
     }    
 
-    console.log('✅ All unique data processed successfully.');
+   // console.log('✅ All unique data processed successfully.');
     return results; // Return status for all entries
 
   } catch (error) {
@@ -612,7 +713,7 @@ async function getDistributionDataFromDb(ipAddress) {
           Timestamp: timestamp,
           Data: groupedByTimestamp[timestamp]
       }));
-      console.log(soGroups);
+      //console.log(soGroups);
 
       const orderID = parseInt(row.OrderID, 10);
 
@@ -1031,7 +1132,7 @@ async function getUniquePages(masterWorkOrder) {
 }
 
 async function addDeviceToList({ ipAddress, machineName, plantName }) {
-  console.log(`Adding device with ipAddress: ${ipAddress}, machineName: ${machineName}, plantName: ${plantName}`);
+//  console.log(`Adding device with ipAddress: ${ipAddress}, machineName: ${machineName}, plantName: ${plantName}`);
 
   try {
     // Kiểm tra các tham số
@@ -1047,19 +1148,19 @@ async function addDeviceToList({ ipAddress, machineName, plantName }) {
     `;
 
     const plantInputs = [{ name: 'PlantName', type: sql.NVarChar, value: plantName.trim() }];
-    console.log(`Executing plant query with plantName: '${plantName.trim()}'`);
+   // console.log(`Executing plant query with plantName: '${plantName.trim()}'`);
 
     const plantResult = await executeQuery(plantQuery, plantInputs);
-    console.log(`Query result: ${JSON.stringify(plantResult)}`);
+   // console.log(`Query result: ${JSON.stringify(plantResult)}`);
 
     // Kiểm tra nếu không có PlantID
     if (!plantResult || plantResult.length === 0) {
-      console.log(`No Plant found with name: ${plantName}`);
+   //   console.log(`No Plant found with name: ${plantName}`);
       return { status: 'error', message: `No Plant found with name: ${plantName}` };  
     }
 
     const plantID = plantResult[0].PlantID;
-    console.log(`Found PlantID: ${plantID}`);
+   // console.log(`Found PlantID: ${plantID}`);
 
     const query = `
       INSERT INTO DeviceList (IpAddress, MachineName, PlantID, CreatedAt, IsActive, ConnectionStatus)
@@ -1405,5 +1506,6 @@ module.exports = {
   getSizeAndDistributionDataFromDb,
   getDistributionIDFromSizeID,
   getDistributionCompleteFromDb, 
-  getListOfSOsByMonthYear
+  getListOfSOsByMonthYear,
+  logCutHistoryToDB
 };
