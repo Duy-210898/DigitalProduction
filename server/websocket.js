@@ -229,24 +229,30 @@ async function handleGetDistributions(ws, request) {
     const formattedStartDate = formatDateForSQL(startDate);
     const formattedEndDate = formatDateForSQL(endDate);
     
+    // Paging
+    const pageNumber = parseInt(filter?.pageNumber || 1);
+    const pageSize = parseInt(filter?.pageSize || 100);
+
     console.log("Start Date:", formattedStartDate); // 2025-03-04 00:00:00.000
     console.log("End Date:", formattedEndDate);     // 2025-03-04 23:59:59.999
     // Gọi hàm getDistributionByDevice từ database.js để lấy dữ liệu phân phối
-    const distributionData = await getDistributions(startDate, endDate);
+    const { records, totalCount } = await getDistributions(startDate, endDate, pageNumber, pageSize);
 
-    if (!distributionData) {
+    if (!records || records.length === 0) {
       return ws.send(JSON.stringify({
         action: 'getDistributions',
-        status: 'error',
-        message: 'No distribution data found'
+        status: 'success',
+        distributionData: [],
+        totalCount: 0
       }));
     }
 
-    // Gửi phản hồi thành công với dữ liệu phân phối
+    // Success response
     ws.send(JSON.stringify({
       action: 'getDistributions',
       status: 'success',
-      distributionData: distributionData
+      distributionData: records,
+      totalCount: totalCount
     }));
 
   } catch (error) {

@@ -23,6 +23,8 @@ namespace DigitalProduction
         public T DistributionData { get; set; }
         [JsonProperty("deviceOutput", NullValueHandling = NullValueHandling.Ignore)]
         public T DeviceOutput { get; set; }
+        [JsonProperty("totalCount")]
+        public int TotalCount { get; set; }
 
         // Method to serialize the object into JSON string
         public string ToJson()

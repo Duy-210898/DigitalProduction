@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Utils.Menu;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Menu;
 using DevExpress.XtraGrid.Views.Grid;
@@ -22,83 +21,35 @@ namespace DigitalProduction
     {
         private BindingList<Distribution> distributionDataList = new BindingList<Distribution>();
         private WebSocketClient _webSocketClient;
-        private Panel paginationPanel;
-        private Label lblPageInfo;
-        private GridControl gridProgressManagement; // Use GridControl
-        private GridView gridViewProgressManagement; // Use GridView
-        private DateTimePicker dtpStartDate;
-        private DateTimePicker dtpEndDate;
-        private Label lblStartDate;
-        private Label lblEndDate;
         private DevExpress.XtraEditors.Repository.RepositoryItemComboBox noteComboBoxEditor;
         private Rectangle _reasonHeaderCheckBoxRect;
         private bool _reasonHeaderChecked = false;
-        private System.Windows.Forms.ComboBox cbxDevice;
-
+        private int currentPage = 1;
+        private int pageSize = 100;
+        private int totalCount = 0;
+        private ComboBoxEdit cmbPageSize;
+        private SimpleButton btnPrev;
+        private SimpleButton btnNext;
+        private LabelControl lblPagingInfo;
 
         public ucProgress()
         {
             InitializeComponent();
             LoadTextLabel();
+            this.Load += ucProgress_Load;
+        }
+        private void ucProgress_Load(object sender, EventArgs e)
+        {
+            // Make sure controls are created first
             InitializeControls();
+            InitPagingFooter(gridProgressManagement);
         }
 
         private void InitializeControls()
         {
-            // Create a container panel to manage layout
-            Panel containerPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(10)
-            };
-
-            // Use FlowLayoutPanel for better alignment
-            FlowLayoutPanel filterPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                Height = 50,
-                AutoSize = true,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false
-            };
-
-            lblStartDate = new Label
-            {
-                Text = LocalizationManager.GetString("StartDate"),
-                AutoSize = true,
-                Margin = new Padding(5, 15, 5, 5)
-            };
-
-            dtpStartDate = new DateTimePicker
-            {
-                Format = DateTimePickerFormat.Short,
-                Width = 100,
-                Margin = new Padding(5, 10, 10, 5)
-            };
-
-            lblEndDate = new Label
-            {
-                Text = LocalizationManager.GetString("EndDate"),
-                AutoSize = true,
-                Margin = new Padding(5, 15, 5, 5)
-            };
-
-            dtpEndDate = new DateTimePicker
-            {
-                Format = DateTimePickerFormat.Short,
-                Width = 100,
-                Margin = new Padding(5, 10, 10, 5)
-            };
-
             // Sync Data button
-            SimpleButton syncButton = new SimpleButton()
-            {
-                Text = LocalizationManager.GetString("Sync"),
-                Width = 90,
-                Height = 35,
-                Margin = new Padding(10, 10, 10, 5)
-            };
             syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
+            syncButton.Text = LocalizationManager.GetString("Sync");
             syncButton.Click += async (sender, e) =>
             {
                 try
@@ -120,76 +71,17 @@ namespace DigitalProduction
                 }
             };
 
-            dtpStartDate.ValueChanged += DateTimePicker_ValueChanged;
-            dtpEndDate.ValueChanged += DateTimePicker_ValueChanged;
+            dtpEndDate.EditValueChanged += DateTimePicker_ValueChanged;
+            dtpStartDate.EditValueChanged += DateTimePicker_ValueChanged;
 
-            cbxDevice = new System.Windows.Forms.ComboBox
-            {
-                Width = 150,
-                Margin = new Padding(5, 10, 10, 5)
-            };
-
-            SimpleButton btnApplyDevice = new SimpleButton
-            {
-                Text = LocalizationManager.GetString("TransferDevice"),
-                Width = 100,
-                Height = 35,
-                Margin = new Padding(5, 10, 10, 5)
-            };
             btnApplyDevice.Click += BtnApplyDevice_Click;
 
-            // Add controls to filter panel
-            filterPanel.Controls.Add(lblStartDate);
-            filterPanel.Controls.Add(dtpStartDate);
-            filterPanel.Controls.Add(lblEndDate);
-            filterPanel.Controls.Add(dtpEndDate);
-            filterPanel.Controls.Add(syncButton);
-            filterPanel.Controls.Add(cbxDevice);
-            filterPanel.Controls.Add(btnApplyDevice);
-
-            // Initialize GridControl
-            gridProgressManagement = new GridControl
-            {
-                Dock = DockStyle.Fill
-            };
-
-            gridViewProgressManagement = new GridView(gridProgressManagement)
-            {
-                OptionsBehavior = { Editable = true },
-                OptionsView = { ShowGroupPanel = false }
-            };
-
+            gridViewProgressManagement.OptionsBehavior.Editable = true;
+            gridViewProgressManagement.OptionsView.ShowGroupPanel = false;
             gridProgressManagement.MainView = gridViewProgressManagement;
 
             // Set grid control columns
             ConfigureGridControl();
-
-            // Initialize Pagination Panel
-            paginationPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Padding = new Padding(10)
-            };
-
-            lblPageInfo = new Label
-            {
-                Text = "Total Records: 0",
-                ForeColor = Color.Green,
-                Font = new Font("Arial", 10, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(20, 10)
-            };
-
-            paginationPanel.Controls.Add(lblPageInfo);
-
-            // Add components to container panel
-            containerPanel.Controls.Add(gridProgressManagement);
-            containerPanel.Controls.Add(filterPanel);
-            containerPanel.Controls.Add(paginationPanel);
-
-            // Add container panel to the UserControl
-            this.Controls.Add(containerPanel);
 
             // Subscribe to the RowStyle event
             gridViewProgressManagement.RowCellStyle += GridViewProgressManagement_RowCellStyle;
@@ -300,8 +192,8 @@ namespace DigitalProduction
 
         private void DateTimePicker_ValueChanged(object sender, EventArgs e)
         {
-            DateTime newStartDate = dtpStartDate.Value.Date;
-            DateTime newEndDate = dtpEndDate.Value.Date;
+            DateTime newStartDate = dtpStartDate.DateTime;
+            DateTime newEndDate = dtpEndDate.DateTime;
 
             if (newStartDate > newEndDate)
             {
@@ -316,19 +208,19 @@ namespace DigitalProduction
 
         private void AdjustDates(object sender, ref DateTime newStartDate, ref DateTime newEndDate)
         {
-            if (sender == dtpStartDate)
+            if (sender == dtpEndDate)
             {
-                dtpStartDate.ValueChanged -= DateTimePicker_ValueChanged;
+                dtpEndDate.EditValueChanged -= DateTimePicker_ValueChanged;
                 newStartDate = newEndDate;
-                dtpStartDate.Value = newStartDate;
-                dtpStartDate.ValueChanged += DateTimePicker_ValueChanged;
+                dtpEndDate.EditValue = newStartDate;
+                dtpEndDate.EditValueChanged += DateTimePicker_ValueChanged;
             }
-            else if (sender == dtpEndDate)
+            else if (sender == dtpStartDate)
             {
-                dtpEndDate.ValueChanged -= DateTimePicker_ValueChanged;
+                dtpStartDate.EditValueChanged -= DateTimePicker_ValueChanged;
                 newEndDate = newStartDate;
-                dtpEndDate.Value = newEndDate;
-                dtpEndDate.ValueChanged += DateTimePicker_ValueChanged;
+                dtpStartDate.EditValue = newEndDate;
+                dtpStartDate.EditValueChanged += DateTimePicker_ValueChanged;
             }
         }
 
@@ -363,7 +255,7 @@ namespace DigitalProduction
 
             gridProgressManagement.DataSource = filteredData;
             TranslateHeaders();
-            lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")} {filteredData.Count}";
+           // lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")} {filteredData.Count}";
         }
 
         private bool _isDataLoaded = false;
@@ -386,15 +278,31 @@ namespace DigitalProduction
 
         public async Task GetDataAndLoadToGridAsync()
         {
-            var request = new { app = Global.App,
+            if (dtpStartDate == null || dtpEndDate == null || _webSocketClient == null)
+            {
+                MessageBox.Show("Required controls or WebSocket client not initialized.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int pageNumber = currentPage;
+            int selectedPageSize = 100;
+
+            if (cmbPageSize?.SelectedItem != null && int.TryParse(cmbPageSize.SelectedItem.ToString(), out int parsedSize))
+                selectedPageSize = parsedSize;
+
+            var request = new
+            {
+                app = Global.App,
                 action = "getDistributions",
                 filter = new
                 {
-                    // Format dates as "yyyy-MM-dd" or adjust as required.
-                    startDate = dtpStartDate.Value.ToString("yyyy-MM-dd"),
-                    endDate = dtpEndDate.Value.ToString("yyyy-MM-dd"),
+                    startDate = dtpStartDate.DateTime.ToString("yyyy-MM-dd"),
+                    endDate = dtpEndDate.DateTime.ToString("yyyy-MM-dd"),
+                    pageNumber = pageNumber,
+                    pageSize = selectedPageSize
                 }
             };
+
             string jsonRequest = JsonConvert.SerializeObject(request);
 
             try
@@ -415,6 +323,7 @@ namespace DigitalProduction
                 MessageBox.Show("Request timed out.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
 
         private async void WebSocket_OnMessage(string jsonData)
         {
@@ -463,6 +372,8 @@ namespace DigitalProduction
                 {
                     Console.WriteLine("No Data Found or DistributionData is null");
                 }
+                totalCount = response.TotalCount;
+                UpdatePagingLabel();
             }
             catch (JsonException jsonEx)
             {
@@ -742,8 +653,106 @@ namespace DigitalProduction
         }
         private void LoadTextLabel()
         {
+            lblFilterDate.Text = LocalizationManager.GetString("FilterDate");
+            btnApplyDevice.Text = LocalizationManager.GetString("TransferDevice");
             this.Text = LocalizationManager.GetString("ListOfDistributions");
         }
+        private void InitPagingFooter(Control gridControl)
+        {
+            var pagingPanel = new DevExpress.XtraEditors.PanelControl
+            {
+                Dock = DockStyle.Bottom,
+                Height = 40,
+                BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder
+            };
+
+            cmbPageSize = new DevExpress.XtraEditors.ComboBoxEdit
+            {
+                Width = 70,
+                Location = new Point(10, 8)
+            };
+            cmbPageSize.Properties.Items.AddRange(new object[] { 50, 100, 200, 500 });
+            cmbPageSize.SelectedIndexChanged += async (s, e) =>
+            {
+                if (int.TryParse(cmbPageSize.SelectedItem?.ToString(), out int newSize))
+                {
+                    pageSize = newSize;
+                    currentPage = 1;
+                    await LoadCurrentPageAsync();
+                }
+            };
+            cmbPageSize.SelectedIndex = 1;
+            pagingPanel.Controls.Add(cmbPageSize);
+
+            btnNext = new DevExpress.XtraEditors.SimpleButton
+            {
+                Text = LocalizationManager.GetString("Next") + " »",
+                Location = new Point(cmbPageSize.Right + 10, 6)
+            };
+            btnNext.Click += async (s, e) =>
+            {
+                if (currentPage < GetTotalPages())
+                {
+                    currentPage++;
+                    await LoadCurrentPageAsync();
+                }
+            };
+            pagingPanel.Controls.Add(btnNext);
+
+            btnPrev = new DevExpress.XtraEditors.SimpleButton
+            {
+                Text = "« " + LocalizationManager.GetString("Previous"),
+                Location = new Point(btnNext.Right + 10, 6)
+            };
+            btnPrev.Click += async (s, e) =>
+            {
+                if (currentPage > 1)
+                {
+                    currentPage--;
+                    await LoadCurrentPageAsync();
+                }
+            };
+            pagingPanel.Controls.Add(btnPrev);
+
+            lblPagingInfo = new DevExpress.XtraEditors.LabelControl
+            {
+                Text = LocalizationManager.GetString("Page") +  "0 / 0",
+                Location = new Point(btnPrev.Right + 20, 10)
+            };
+            pagingPanel.Controls.Add(lblPagingInfo);
+
+            gridControl.Controls.Add(pagingPanel);
+            pagingPanel.BringToFront();
+        }
+        private async Task LoadCurrentPageAsync()
+        {
+            SetWebSocketClient(WebSocketClient.Instance);
+            await GetDataAndLoadToGridAsync();
+            UpdatePagingLabel();
+           // return Task.CompletedTask;
+        }
+
+        private int GetTotalPages()
+        {
+            return (int)Math.Ceiling((double)totalCount / pageSize);
+        }
+
+        private void UpdatePagingLabel()
+        {
+            int totalPages = GetTotalPages();
+            int start = (currentPage - 1) * pageSize + 1;
+            int end = Math.Min(currentPage * pageSize, totalCount);
+
+            if (lblPagingInfo != null)
+            {
+                lblPagingInfo.Text = $" {LocalizationManager.GetString("Page")} {currentPage} / {totalPages} ({LocalizationManager.GetString("TotalRecords")} {totalCount} rows)";
+            }
+
+            gridViewProgressManagement.OptionsView.ShowFooter = true;
+            gridViewProgressManagement.Columns[0].SummaryItem.SummaryType = DevExpress.Data.SummaryItemType.Custom;
+            gridViewProgressManagement.Columns[0].SummaryItem.DisplayFormat = $"Showing {start}–{end} of {totalCount}";
+        }
+
         public class Distribution
         {
             public int DistributionID { get; set; }
@@ -769,22 +778,6 @@ namespace DigitalProduction
             public string MaterialType => IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
 
             public int? Note { get; set; }
-
-            //// New read-only property for NoteDescription
-            //public string NoteDescription
-            //{
-            //    get
-            //    {
-            //        switch (Note)
-            //        {
-            //            case 1: return LocalizationManager.GetString("NotEnoughMaterials");
-            //            case 2: return LocalizationManager.GetString("ChangeOfPlan");
-            //            case 3: return LocalizationManager.GetString("ForgotToChooseSize");
-            //            case 0: return "Com";
-            //            default: return string.Empty;
-            //        }
-            //    }
-            //}
         }
     }
 }

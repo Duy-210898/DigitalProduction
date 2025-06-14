@@ -259,7 +259,17 @@ async function setDistributionIsComplete(DistributionID, Status) {
     throw error;
   }
 }
-
+/**
+ * Logs cut history to the database.
+ * 
+ * @param {Object} params - Parameters for logging cut history.
+ * @param {number} params.OrderID - Order ID.
+ * @param {number} params.PartID - Part ID.
+ * @param {number} params.CutQuantity - Cut quantity.
+ * @param {number} params.SizeID - Size ID.
+ * @param {Date} params.CutDate - Cut date.
+ * @param {number} params.EmployeeID - Employee ID.
+ */
 async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate, EmployeeID }) {
   try {
     let actualCut = CutQuantity;
@@ -329,6 +339,10 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
       ? CutQuantity - cutHistoryBefore
       : existing.CutQuantity;
 
+      if (CutQuantity < 0) {
+        console.warn('Error: CutQuantity cannot be negative');
+        return;
+      }
       await pool.request()
         .input("CutQuantity", sql.Int, CutQuantity)
         .input("CutHistoryID", sql.Int, existing.CutHistoryID)
@@ -340,6 +354,10 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
 
      // console.log(`Updated CutHistory: ${CutQuantity} for EmployeeID ${EmployeeID}`);
     } else {
+      if (actualCut < 0) {
+        console.warn('Error: actualCut cannot be negative');
+        return;
+      }
       // Insert new record
       await pool.request()
         .input("OrderID", sql.Int, OrderID)
@@ -1010,74 +1028,84 @@ async function getAllDeviceData() {
 
 
 // Fetch data from SQL Server
-async function getDistributions(startDate, endDate) {
+async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 100) {
   try {
-      // Kết nối tới cơ sở dữ liệu với cấu hình dbConfig
-      const pool = await sql.connect(dbConfig);
-      // SQL Query
-      const query = `
-          SELECT 
-              dd.DistributionID,
-              dd.DeviceID,
-              pr.SO,
-              d.IpAddress,
-              d.MachineName,
-              o.OperatorName,
-              u.EmployeeName,
-              pa.PartName,
-              se.Size,
-              ps.Unit,
-              ps.SizeQty,
-              m.MaterialName,
-              dd.InventoryQty,
-              dd.Status,
-              dd.CreatedAt,
-              dd.UpdatedAt,
-              dd.IsLeather,
-              dd.IsDelete,
-              dd.Note,
-              do.ActualSizeQty
-          FROM 
-              DistributionData dd
-          JOIN 
-              DeviceList d ON dd.DeviceID = d.DeviceID 
-          JOIN 
-              PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
-          JOIN 
-              Part pa ON pa.PartID = ps.PartID
-          JOIN 
-              Size se ON se.SizeID = ps.SizeID
-          JOIN 
-              Material m ON m.MaterialID = ps.MaterialID
-          JOIN 
-              Operator o ON dd.OperatorID = o.OperatorID
-          JOIN 
-              Users u ON dd.UserID = u.UserID
-          JOIN 
-              ProductOrder pr ON pr.OrderId = ps.OrderID
-          JOIN 
-              DeviceOutput do ON do.SizeID = ps.SizeId AND do.PartId = ps.PartId AND do.OrderID = ps.OrderId
-          WHERE 
-              dd.IsDelete = 0 AND 
-              dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
-          ORDER BY 
-              dd.UpdatedAt ASC;
-      `;
-      
-      // Execute the query with parameters
-      const request = pool.request();
-      request.input('startDate', sql.DateTime, startDate);
-      request.input('endDate', sql.DateTime, endDate);
-      
-      // Get the result
-      const result = await request.query(query);
-      
-      // Return the result rows
-      return result.recordset; 
+    const pool = await sql.connect(dbConfig);
+    const offset = (pageNumber - 1) * pageSize;
+
+    const request = pool.request();
+    request.input('startDate', sql.DateTime, startDate);
+    request.input('endDate', sql.DateTime, endDate);
+    request.input('offset', sql.Int, offset);
+    request.input('pageSize', sql.Int, pageSize);
+
+    // 1. Get paginated data
+    const dataQuery = `
+      SELECT 
+          dd.DistributionID,
+          dd.DeviceID,
+          pr.SO,
+          d.IpAddress,
+          d.MachineName,
+          o.OperatorName,
+          u.EmployeeName,
+          pa.PartName,
+          se.Size,
+          ps.Unit,
+          ps.SizeQty,
+          m.MaterialName,
+          dd.InventoryQty,
+          dd.Status,
+          dd.CreatedAt,
+          dd.UpdatedAt,
+          dd.IsLeather,
+          dd.IsDelete,
+          dd.Note,
+          do.ActualSizeQty
+      FROM 
+          DistributionData dd
+      JOIN DeviceList d ON dd.DeviceID = d.DeviceID 
+      JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+      JOIN Part pa ON pa.PartID = ps.PartID
+      JOIN Size se ON se.SizeID = ps.SizeID
+      JOIN Material m ON m.MaterialID = ps.MaterialID
+      JOIN Operator o ON dd.OperatorID = o.OperatorID
+      JOIN Users u ON dd.UserID = u.UserID
+      JOIN ProductOrder pr ON pr.OrderId = ps.OrderID
+      JOIN DeviceOutput do ON do.SizeID = ps.SizeId AND do.PartId = ps.PartId AND do.OrderID = ps.OrderId
+      WHERE 
+          dd.IsDelete = 0 AND 
+          dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
+      ORDER BY dd.UpdatedAt ASC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
+    `;
+
+    // 2. Get total count
+    const countQuery = `
+      SELECT COUNT(*) AS TotalCount
+      FROM DistributionData dd
+      JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+      WHERE dd.IsDelete = 0 AND dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate;
+    `;
+
+    const [dataResult, countResult] = await Promise.all([
+      request.query(dataQuery),
+      pool.request()
+        .input('startDate', sql.DateTime, startDate)
+        .input('endDate', sql.DateTime, endDate)
+        .query(countQuery)
+    ]);
+
+    return {
+      records: dataResult.recordset,
+      totalCount: countResult.recordset[0].TotalCount
+    };
+
   } catch (err) {
-      throw new Error('Database query failed: ' + err.message);
+    throw new Error('Database query failed: ' + err.message);
   }
 }
+
 
 async function getDistributionByDevice(ipAddress) {
   try {

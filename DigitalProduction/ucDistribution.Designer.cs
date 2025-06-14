@@ -429,7 +429,7 @@
             // numCuttingDieQty
             // 
             this.numCuttingDieQty.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numCuttingDieQty.Location = new System.Drawing.Point(235, 41);
+            this.numCuttingDieQty.Location = new System.Drawing.Point(235, 42);
             this.numCuttingDieQty.Name = "numCuttingDieQty";
             this.numCuttingDieQty.Size = new System.Drawing.Size(226, 23);
             this.numCuttingDieQty.TabIndex = 0;
@@ -447,7 +447,7 @@
             this.lblTotalPeicesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblTotalPeicesPerPair.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTotalPeicesPerPair.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblTotalPeicesPerPair.Location = new System.Drawing.Point(3, 109);
+            this.lblTotalPeicesPerPair.Location = new System.Drawing.Point(3, 111);
             this.lblTotalPeicesPerPair.Name = "lblTotalPeicesPerPair";
             this.lblTotalPeicesPerPair.Size = new System.Drawing.Size(226, 29);
             this.lblTotalPeicesPerPair.TabIndex = 7;
@@ -471,7 +471,7 @@
             this.lblCuttingDie.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblCuttingDie.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCuttingDie.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblCuttingDie.Location = new System.Drawing.Point(3, 38);
+            this.lblCuttingDie.Location = new System.Drawing.Point(3, 39);
             this.lblCuttingDie.Name = "lblCuttingDie";
             this.lblCuttingDie.Size = new System.Drawing.Size(226, 33);
             this.lblCuttingDie.TabIndex = 3;
@@ -483,7 +483,7 @@
             this.lblMaterialLayer.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblMaterialLayer.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMaterialLayer.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblMaterialLayer.Location = new System.Drawing.Point(3, 76);
+            this.lblMaterialLayer.Location = new System.Drawing.Point(3, 78);
             this.lblMaterialLayer.Name = "lblMaterialLayer";
             this.lblMaterialLayer.Size = new System.Drawing.Size(226, 33);
             this.lblMaterialLayer.TabIndex = 5;
@@ -493,7 +493,7 @@
             // numMaterialLayer
             // 
             this.numMaterialLayer.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numMaterialLayer.Location = new System.Drawing.Point(235, 79);
+            this.numMaterialLayer.Location = new System.Drawing.Point(235, 81);
             this.numMaterialLayer.Name = "numMaterialLayer";
             this.numMaterialLayer.Size = new System.Drawing.Size(226, 23);
             this.numMaterialLayer.TabIndex = 0;
@@ -501,7 +501,7 @@
             // numericTotalPeicesPerPair
             // 
             this.numericTotalPeicesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(235, 112);
+            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(235, 114);
             this.numericTotalPeicesPerPair.Name = "numericTotalPeicesPerPair";
             this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(226, 23);
             this.numericTotalPeicesPerPair.TabIndex = 6;

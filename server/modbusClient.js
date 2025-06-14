@@ -10,7 +10,6 @@ let storeDistributionData = {};
 // let previousData = {};  // Store previous data for comparison
 
 let modbusClients = {};
-let counter = 0;
 let register3000Address = 3000;
 const successLogPath = './success_log.txt';
 const errorLogPath = './error_log.txt';
@@ -177,7 +176,7 @@ async function connectToDevice(ipAddress, retries = 0) {
         console.error(`⚠️ Error during initial index update: ${err.message}`);
         logToFile(errorLogPath, `Initial index update failed: ${err.message}`);
       }
-  
+      console.log(`[INFO] Date reading to Modbus register: ${Date.now()}`);
       startReadingRegisters(client, ipAddress);
       writeToModbusRegister(client, ipAddress).catch(err => {
         console.error(`⚠️ Error writing to Modbus register: ${err.message}`);
@@ -268,7 +267,6 @@ async function startReadingRegisters(client, ipAddress) {
 
   setInterval(async () => {
     try {
-      ipAddress = '10.30.4.91';
       const entry = modbusClients[ipAddress];
       if (!entry || !entry.client || !entry.isConnected) {
         console.warn(`[${ipAddress}] Modbus client not connected — attempting initial connect...`);
@@ -431,6 +429,14 @@ async function checkAndSaveDistribution(client, ipAddress) {
           // }
 
           // Get OrderID and SizeID where status is 'Complete'
+          // First, update status where ActualCut equals SizeQty
+          sizeData.forEach(item => {
+            if (item.ActualCut === item.SizeQty) {
+              item.Status = 'Complete';
+            }
+          });
+
+          // Then filter and map the completed orders
           const completedOrders = sizeData
             .filter(item => item.Status === 'Complete')
             .map(item => ({
@@ -438,7 +444,6 @@ async function checkAndSaveDistribution(client, ipAddress) {
               SizeID: item.SizeID,
               PartID: item.PartID
             }));
-
           if (completedOrders.length > 0) {
             for (const completeOrder of completedOrders) {
               // Check if this OrderID and SizeID already processed
@@ -1653,15 +1658,19 @@ async function writeToModbusRegister(client, ipAddress, registerAddress = 8000) 
 
   async function writeLoop() {
     try {
-      const entry = modbusClients[ipAddress];
-      // 1) If no client or not connected, try to reconnect
+      let entry = modbusClients[ipAddress];
+
+      // 1) Reconnect if not connected or missing client
       if (!entry || !entry.client || entry.isConnected === false) {
         console.warn(`[${ipAddress}] No connection—reconnecting before write...`);
         try {
           await connectToDevice(ipAddress);
+          entry = modbusClients[ipAddress]; // Re-fetch after connection attempt
+          if (!entry || !entry.client) {
+            throw new Error('Client still undefined after reconnect');
+          }
         } catch (connErr) {
           console.error(`[${ipAddress}] Reconnect failed: ${connErr.message}`);
-          // schedule next attempt
           return setTimeout(writeLoop, 1000);
         }
       }
@@ -1671,19 +1680,17 @@ async function writeToModbusRegister(client, ipAddress, registerAddress = 8000) 
 
       // 3) Perform the write
       await entry.client.writeSingleRegister(registerAddress, counter);
-    //  console.info(`[${ipAddress}] Wrote ${counter} to register ${registerAddress}`);
+      // console.info(`[${ipAddress}] Wrote ${counter} to register ${registerAddress}`);
     } catch (err) {
       const errorMessage = `[${ipAddress}] Error writing to register ${registerAddress}: ${err.message}`;
       console.error(errorMessage);
       logToFile(errorLogPath, errorMessage);
     } finally {
-      // schedule the next write after 1s
       setTimeout(writeLoop, 1000);
     }
   }
 
-  // start the loop
-  writeLoop();
+  writeLoop(); // start loop
 }
 
 
@@ -1949,7 +1956,6 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
       } catch (error) {
         console.error("❌ Error writing to Modbus registers (Leather != 1): ", error);
       }
-
     }
 
     // Write SizeData

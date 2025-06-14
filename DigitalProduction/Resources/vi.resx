@@ -627,4 +627,13 @@
   <data name="Total" xml:space="preserve">
     <value>Tổng</value>
   </data>
+  <data name="Next" xml:space="preserve">
+    <value>Trước</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Trang</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Sau</value>
+  </data>
 </root>

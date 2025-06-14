@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,12 +70,26 @@ namespace DigitalProduction
                 try
                 {
                     _url = url;
+                    var uri = new Uri(_url);
+                    bool portIsOpen = await IsPortOpenAsync(uri.Host, uri.Port);
+                    if (!portIsOpen)
+                    {
+                        Console.WriteLine("❌ Cannot connect to localhost:8000.");
+                        ConnectionManager.Instance.IsConnected = false;
+                        continue;
+                    }
                     _webSocket = new ClientWebSocket();
                     await _webSocket.ConnectAsync(new Uri(url), CancellationToken.None);
 
+                    if (_webSocket == null && _webSocket.State != WebSocketState.Open)
+                    {
+                        Console.WriteLine("WebSocket not connected.");
+                        continue;
+                    }
                     ConnectionManager.Instance.IsConnected = true;
                     Console.WriteLine("WebSocket connected.");
-                    break; // Exit the loop on successful connection
+                    await Task.Delay(5000);
+                    //break; // Exit the loop on successful connection
                 }
                 catch (WebSocketException ex)
                 {
@@ -95,6 +112,32 @@ namespace DigitalProduction
                 }
             }
         }
+        private void HandleConnectionError(string message)
+        {
+            ConnectionManager.Instance.IsConnected = false;
+            OnErrorOccurred?.Invoke(message);
+            Console.WriteLine("Failed to connect. Retrying...");
+        }
+        public static async Task<bool> IsPortOpenAsync(string host, int port)
+        {
+            try
+            {
+                using (var client = new TcpClient())
+                {
+                    var connectTask = client.ConnectAsync(host, port);
+                    var timeoutTask = Task.Delay(1000); // 1 second timeout
+
+                    var completed = await Task.WhenAny(connectTask, timeoutTask);
+                    return completed == connectTask && client.Connected;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
         public void RegisterHandler(string requestId, Action<string> handler)
         {
             lock (_responseHandlers)

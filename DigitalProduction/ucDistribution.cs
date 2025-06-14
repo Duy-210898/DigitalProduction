@@ -19,11 +19,11 @@ namespace DigitalProduction
         private WebSocketClient _webSocketClient;
         private List<MaterialData> materialDataList;
         private HashSet<int> orderIDs = new HashSet<int>();
-        private int operatorID = 0;
-        private int deviceID = 0;
-        private int userID = 0;
+        private int? operatorID = 0;
+        private int? deviceID = 0;
+        private int? userID = 0;
         private int departmentID = 0;
-        private int productId = 0;
+        private int? productId = 0;
         private HashSet<int> sizeIDs = new HashSet<int>();
         private HashSet<int> partIDs = new HashSet<int>();
         private HashSet<int> partSizeOrderIDs = new HashSet<int>();
@@ -321,7 +321,7 @@ namespace DigitalProduction
             //totalPiecesPerPair = int.Parse(numericTotalPeicesPerPair.Text);
 
             //int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
-            bool isLeather = false;
+            bool? isLeather = false;
 
             // Use a HashSet to avoid duplicate PartSizeOrderIDs
             HashSet<int> uniquePSOIDs = new HashSet<int>();
@@ -340,15 +340,15 @@ namespace DigitalProduction
                     {
                         if (schedule == null) continue;
 
-                        int partID = schedule.PartId;
+                        int? partID = schedule.PartId;
                         int sizeID = schedule.SizeID;
                         int orderID = schedule.OrderID;
                         string model = schedule.Model;
-                        int inventory = (int)schedule.InventoryQty;
-                        int cuttingDieQty = (int)schedule.CuttingDieQty;
-                        int piecesPerPair = (int)schedule.PeicesPerPair;
-                        int materialLayer = (int)schedule.MaterialLayer;
-                        int TotalPiecesPerPair = (int)schedule.TotalPiecesPerPair;
+                        int? inventory = (int)schedule.InventoryQty;
+                        int? cuttingDieQty = (int)schedule.CuttingDieQty;
+                        int? piecesPerPair = (int)schedule.PeicesPerPair;
+                        int? materialLayer = (int)schedule.MaterialLayer;
+                        int? TotalPiecesPerPair = (int)schedule.TotalPiecesPerPair;
 
                         if (rdRawMaterial.Checked)
                         {
@@ -367,32 +367,31 @@ namespace DigitalProduction
                         }
                         productId = dbHelper.getProductIdByArt(schedule.ART);
 
-                        int psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
+                        int? psoID = dbHelper.getPartSizeOrderId(partID.Value, sizeID, orderID);
 
-                        if (psoID != -1 && !uniquePSOIDs.Contains(psoID))
+                        if (psoID != -1 && !uniquePSOIDs.Contains(psoID.Value))
                         {
                             var distributionData = new DistributionData
                             {
-                                DeviceID = deviceID,
-                                OperatorID = operatorID,
-                                UserID = userID,
-                                ProductID = productId,
-                                PartID = partID,
-                                Model = model,
-                                PartSizeOrderID = psoID,
-                                CuttingDieQty = cuttingDieQty,
-                                PiecesPerPair = piecesPerPair,
-                                MaterialLayer = materialLayer,
-                                InventoryQty = inventory,
-                                TotalPiecesPerPair = TotalPiecesPerPair,
-                                IsLeather = isLeather,
+                                DeviceID = deviceID ?? 0,
+                                OperatorID = operatorID ?? 0,
+                                UserID = userID ?? 0,
+                                ProductID = productId ?? 0,
+                                PartID = partID ?? 0,
+                                Model = model ?? "Unknown",
+                                PartSizeOrderID = psoID ?? 0,
+                                CuttingDieQty = cuttingDieQty ?? 0,
+                                PiecesPerPair = piecesPerPair ?? 0,
+                                MaterialLayer = materialLayer ?? 0,
+                                InventoryQty = inventory ?? 0,
+                                TotalPiecesPerPair = TotalPiecesPerPair ?? 0,
+                                IsLeather = isLeather ?? false,
                                 CreatedAt = DateTime.Now.AddSeconds(index),
                                 IsDelete = false,
                                 Status = "Pending",
                             };
-
                             results.Add(distributionData);
-                            uniquePSOIDs.Add(psoID);
+                            uniquePSOIDs.Add(psoID.Value);
                         }
                     }
                 }
@@ -495,6 +494,7 @@ namespace DigitalProduction
             try
             {
                 List<DistributionData> distributionData = getDistributionDataFromControls();
+                ResetSendDistribution();
                 if (distributionData != null && distributionData.Count > 0)
                 {
                     var request = new
@@ -547,7 +547,7 @@ namespace DigitalProduction
                 return;
             }
             if (cbxDevice.Text == "") {
-                ShowMessage.ShowWarning("Please select an material type option before proceeding.", "Warning");
+                ShowMessage.ShowWarning("Please select an device before proceeding.", "Warning");
                 return;
             }
             SendDistributionDataToServer();
@@ -998,6 +998,8 @@ namespace DigitalProduction
             lbl_operatorID.ResetText();
             lbl_operatorName.ResetText();
             countSO = 0;
+            rdRawMaterial.Checked = false;
+            rdLeather.Checked = false;
             table.Clear();
             productionSchedules.Clear();
             gridControlOverview.DataSource = null;
