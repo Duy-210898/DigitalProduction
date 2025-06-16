@@ -29,7 +29,7 @@ function setupWebSocket(server) {
     // Xử lý thông điệp từ client
     ws.on('message', (message) => {
         const time = new Date().toLocaleTimeString();
-        console.log(`[${time}] Received message: ${message}`);
+      //  console.log(`[${time}] Received message: ${message}`);
         handleClientMessage(ws, message);
     });
     // Khi client ngắt kết nối
@@ -135,70 +135,79 @@ async function handleClientMessage(ws, message) {
 
 
 // Hàm xử lý yêu cầu lấy dữ liệu sản lượng thực tế
-async function handleGetActualData(ws, request) {
+async function handleGetActualData(ws, request, retryCount = 0) {
   try {
     const { filter } = request;
 
-    // Get the current date in YYYY-MM-DD format
+    // Default page and pageSize
+    const page = filter?.page ?? 1;
+    const pageSize = filter?.pageSize ?? 100;
+
+    // Get current local date
     const currentDate = new Date();
     const formattedCurrentDate = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
-    
-    // Ensure startDate and endDate are Date objects
+
+    // Parse and normalize start/end dates
     const startDate = filter?.startDate ? new Date(filter.startDate) : new Date(formattedCurrentDate);
     let endDate = filter?.endDate ? new Date(filter.endDate) : new Date(formattedCurrentDate);
-    
-    // Set endDate to 23:59:59.999 in local time
-    endDate.setHours(23, 59, 59, 999);
-    // Add 1 day to the endDate
-    endDate.setDate(endDate.getDate());
-    
-    // Format dates for SQL (YYYY-MM-DD HH:mm:ss.SSS) - LOCAL TIME
-    const formatDateForSQL = (date) => {
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ` +
-             `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}.${String(date.getMilliseconds()).padStart(3, '0')}`;
-    };
-    
-    const formattedStartDate = formatDateForSQL(startDate);
-    const formattedEndDate = formatDateForSQL(endDate);
-    
-    console.log("Start Date:", formattedStartDate); // 2025-03-04 00:00:00.000
-    console.log("End Date:", formattedEndDate);     // 2025-03-04 23:59:59.999
-    
-    
-    // Fetch real-time data once and send response
-    const realTimeData = await getActualOutputData(startDate, endDate, retryCount = 0);    
+    endDate.setHours(23, 59, 59, 999); // End of day
 
-    if (!realTimeData) {
+    // // Format date as YYYY-MM-DD HH:mm:ss.SSS for SQL
+    // const formatDateForSQL = (date) => {
+    //   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ` +
+    //          `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}.${String(date.getMilliseconds()).padStart(3, '0')}`;
+    // };
+
+    // const formattedStartDate = formatDateForSQL(startDate);
+    // const formattedEndDate = formatDateForSQL(endDate);
+
+    // console.log("Start Date:", formattedStartDate);
+    // console.log("End Date:", formattedEndDate);
+    // console.log("Page:", page, "| PageSize:", pageSize);
+
+    // Fetch real-time paginated data
+    const realTimeData = await getActualOutputData(startDate, endDate, page, pageSize);
+
+    if (!realTimeData || realTimeData.Data.length === 0) {
       return ws.send(JSON.stringify({
         action: 'getActualData',
         status: 'error',
-        message: 'No real-time data found'
+        message: 'No real-time data found for given filters'
       }));
     }
 
-    // Send the real-time data once
+    // Send the result back
     ws.send(JSON.stringify({
       action: 'getActualData',
       status: 'success',
-      realTime: realTimeData
+      page: realTimeData.Page,
+      pageSize: realTimeData.PageSize,
+      TotalCount: realTimeData.TotalCount,
+      totalPages: realTimeData.TotalPages,
+      data: realTimeData.Data
     }));
 
-    // 🛑 Ensure only one 'close' listener per WebSocket
-    const closeHandler = () => {
-      ws.removeListener('close', closeHandler); // 🛠 Remove the event listener to prevent memory leaks
+    // 🛑 Prevent stacking multiple listeners
+    ws.removeAllListeners('close');
+    ws.on('close', () => {
       console.log('Client disconnected.');
-    };
-
-    ws.removeAllListeners('close'); // 🛑 Prevent multiple listeners from stacking
-    ws.on('close', closeHandler); // Attach the single close event
+    });
 
   } catch (error) {
+    console.error('Error in handleGetActualData:', error.message);
+
     if (error.message.includes('timeout') && retryCount < 3) {
-        // Retry after a delay
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
-        return getActualOutputData(startDate, endDate, retryCount + 1);
+      console.log(`Retrying (${retryCount + 1}/3)...`);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
+      return handleGetActualData(ws, request, retryCount + 1);
     }
-    throw error; // Throw the error if it exceeded retry attempts
+
+    // Send error message to client
+    ws.send(JSON.stringify({
+      action: 'getActualData',
+      status: 'error',
+      message: 'Failed to fetch data. Please try again later.'
+    }));
   }
 }
 

@@ -91,8 +91,10 @@ async function getSizeDataFromDB(ipAddress, orderID, partName) {
   }
 }
 
-async function getActualOutputData(startDate, endDate) {
-  const query = `
+async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100) {
+  const offset = (page - 1) * pageSize;
+
+  const dataQuery = `
     SELECT 
       po.OrderID,
       po.MasterWorkOrder,
@@ -133,64 +135,70 @@ async function getActualOutputData(startDate, endDate) {
       o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
       do.PiecesPerPair, do.MaterialLayer, do.CuttingDieQty, 
       do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt, do.UpdatedAt, p.PartName
-      ORDER BY do.UpdatedAt ASC;
+    ORDER BY do.UpdatedAt ASC
+    OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
   `;
-  
-  let transaction;
+
+  const countQuery = `
+    SELECT COUNT(*) AS TotalCount
+    FROM DeviceOutput do
+    WHERE do.UpdatedAt >= @startDate AND do.UpdatedAt < @endDate;
+  `;
+
   try {
     const pool = await initDatabase();
-    transaction = new sql.Transaction(pool);
-    await transaction.begin();
-    
-    const request = transaction.request();
-    request.input('startDate', sql.DateTime, startDate);
-    request.input('endDate', sql.DateTime, endDate);
 
-    const result = await request.query(query);
-    
-    await transaction.commit();
-    
-    if (result.recordset.length > 0) {
-      const filteredOutputData = result.recordset
-        .filter(record => record.SizeQty > 0)
-        .map(record => ({
-          PartName: record.PartName,
-          MachineName: record.MachineName,
-          SO: record.SO,
-          IsLeather: record.IsLeather,
-          OperatorName: record.OperatorName,
-          Size: record.Size,
-          SizeQty: record.SizeQty,
-          PiecesPerPair: record.PiecesPerPair,
-          MaterialLayer: record.MaterialLayer,
-          CuttingDieQty: record.CuttingDieQty,
-          ActualCut: record.ActualCut,
-          ActualSizeQty: record.ActualSizeQty,
-          ActualPieces: record.ActualPieces,
-          TotalPiecesPerPair: record.TotalPiecesPerPair,
-          Timestamp: record.Timestamp,
-          UpdatedAt: record.UpdatedAt
-        }));
-      
-      return {
-        OutputData: filteredOutputData 
-      };
-    } else {
-      return null;
-    }
+    // Run count query first
+    const countRequest = pool.request();
+    countRequest.input('startDate', sql.DateTime, startDate);
+    countRequest.input('endDate', sql.DateTime, endDate);
+    const countResult = await countRequest.query(countQuery);
+    const totalCount = countResult.recordset[0]?.TotalCount || 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    // Run data query next
+    const dataRequest = pool.request();
+    dataRequest.input('startDate', sql.DateTime, startDate);
+    dataRequest.input('endDate', sql.DateTime, endDate);
+    dataRequest.input('offset', sql.Int, offset);
+    dataRequest.input('pageSize', sql.Int, pageSize);
+    const dataResult = await dataRequest.query(dataQuery);
+
+    const filteredOutputData = dataResult.recordset
+      .filter(record => record.SizeQty > 0)
+      .map(record => ({
+        PartName: record.PartName,
+        MachineName: record.MachineName,
+        SO: record.SO,
+        IsLeather: record.IsLeather,
+        OperatorName: record.OperatorName,
+        Size: record.Size,
+        SizeQty: record.SizeQty,
+        PiecesPerPair: record.PiecesPerPair,
+        MaterialLayer: record.MaterialLayer,
+        CuttingDieQty: record.CuttingDieQty,
+        ActualCut: record.ActualCut,
+        ActualSizeQty: record.ActualSizeQty,
+        ActualPieces: record.ActualPieces,
+        TotalPiecesPerPair: record.TotalPiecesPerPair,
+        InventoryQty: record.InventoryQty,
+        Timestamp: record.Timestamp,
+        UpdatedAt: record.UpdatedAt
+      }));
+
+    return {
+      Page: page,
+      PageSize: pageSize,
+      TotalCount: totalCount,
+      TotalPages: totalPages,
+      Data: filteredOutputData
+    };
   } catch (error) {
     console.error('Error fetching actual output data from database:', error.message);
-    if (transaction) {
-      try {
-        await transaction.rollback();
-        console.log('Transaction rolled back.');
-      } catch (rollbackError) {
-        console.error('Error during transaction rollback:', rollbackError.message);
-      }
-    }
     throw error;
   }
 }
+
 
 async function setOrderIsComplete(OrderID) {
   // Kiểm tra OrderID hợp lệ

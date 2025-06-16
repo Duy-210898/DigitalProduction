@@ -103,7 +103,7 @@ namespace DigitalProduction
                 return;
             }
             gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
-
+            _viewModel.InitPagingFooter(gridControl_DeviceOutput);
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
             gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
             this.Resize += UcDeviceOutput_Resize;
@@ -148,7 +148,7 @@ namespace DigitalProduction
                 sizeColumn.Width = 120;
                 sizeColumn.OptionsColumn.FixedWidth = true;
                 sizeColumn.SummaryItem.SummaryType = SummaryItemType.Custom;
-                sizeColumn.SummaryItem.DisplayFormat = $"{LocalizationManager.GetString("Total")}: {{0:N2}}";
+                sizeColumn.SummaryItem.DisplayFormat = $"{LocalizationManager.GetString("TotalRecords")}: {{0:N2}}";
             }
             else
             {
@@ -158,11 +158,6 @@ namespace DigitalProduction
             gridView_DeviceOutput.CustomDrawFooterCell += GridView_DeviceOutput_CustomDrawFooterCell;
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
         }
-
-
-
-
-
 
         private void GridView_DeviceOutput_CustomDrawFooterCell(object sender, FooterCellCustomDrawEventArgs e)
         {

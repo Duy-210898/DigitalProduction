@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using DevExpress.XtraEditors;
+using DevExpress.XtraGrid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -16,7 +20,13 @@ namespace DigitalProduction.ViewModels
         private System.Threading.Timer _pollingTimer; // Dùng Timer chạy nền thay vì WinForms Timer
         private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
         private string _lastJsonData;
-
+        private static int currentPage = 1;
+        private static int pageSize = 100;
+        private int totalCount = 0;
+        private static ComboBoxEdit cmbPageSize;
+        private static SimpleButton btnPrev;
+        private static SimpleButton btnNext;
+        private static LabelControl lblPagingInfo;
 
         private bool _isRecentlyUpdated;
 
@@ -170,7 +180,7 @@ namespace DigitalProduction.ViewModels
             _webSocketClient = webSocket ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseRealTime += WebSocket_OnMessage;
 
-            RequestData();
+          //  RequestData();
             // Bắt đầu polling kiểm tra thay đổi trong SQL Server
             StartPolling();
         }
@@ -207,25 +217,25 @@ namespace DigitalProduction.ViewModels
 
         public async void RequestData()
         {
-            // Check if the WebSocket is open before sending.
             if (_webSocketClient != null)
             {
-                // Build the request object including the filter parameters.
                 var request = new
                 {
                     app = Global.App,
                     action = "getActualData",
                     filter = new
                     {
-                        // Format dates as "yyyy-MM-dd" or adjust as required.
-                        startDate = FilterStartDate.HasValue ? FilterStartDate.Value.ToString("yyyy-MM-dd") : null,
-                        endDate = FilterEndDate.HasValue ? FilterEndDate.Value.ToString("yyyy-MM-dd") : null,
+                        startDate = FilterStartDate?.ToString("yyyy-MM-dd"),
+                        endDate = FilterEndDate?.ToString("yyyy-MM-dd"),
                         partName = string.IsNullOrEmpty(FilterPartName) ? null : FilterPartName,
                         machineName = string.IsNullOrEmpty(FilterMachineName) ? null : FilterMachineName,
                         so = string.IsNullOrEmpty(FilterSO) ? null : FilterSO,
-                        operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName
+                        operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName,
+                        page = PageNumber,
+                        pageSize = PageSize
                     }
                 };
+
                 string jsonRequest = JsonConvert.SerializeObject(request);
                 try
                 {
@@ -248,7 +258,6 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine("WebSocket is not open or is null in RequestData.");
             }
         }
-
         private void WebSocket_OnMessage(string jsonData)
         {
             _lastJsonData = jsonData; // cache last received data
@@ -268,35 +277,45 @@ namespace DigitalProduction.ViewModels
             {
                 Console.WriteLine($"Received WebSocket Data: {jsonData}");
                 var response = JsonConvert.DeserializeObject<WebSocketResponse>(jsonData);
-
-                if (response?.RealTime != null && response.Status == "success")
+                if (response.Status.Equals("success") && response.Data.Count > 0)
                 {
-                    var keyword = FilterKeyword?.Trim().ToLower(); // Normalize keyword for comparison
+                    Console.WriteLine($"Status: {response.Status}, Total Items: {response.TotalCount}");
+                    // Paging metadata
+                    int currentPage = response.Page;
+                    int totalPages = response.TotalPages;
+                    totalCount = response.TotalCount;
 
-                    var cleanedKeyword = string.IsNullOrWhiteSpace(keyword) || FilterKeyword == LocalizationManager.GetString("Search") ? "" : keyword.ToLower();
-                    var filteredData = response.RealTime.OutputData
-                        .Where(d =>
-                            string.IsNullOrEmpty(keyword) || // Show all if no keyword
-                            (d.PartName?.ToLower().Contains(cleanedKeyword) ?? false) ||
-                            (d.MachineName?.ToLower().Contains(cleanedKeyword) ?? false) ||
-                            (d.SO?.ToLower().Contains(cleanedKeyword) ?? false) ||
-                            (d.OperatorName?.ToLower().Contains(cleanedKeyword) ?? false))
-                        .ToList();
+                    // Display or bind to UI
+                    PageNumber = currentPage;
+                    lblPagingInfo.Text = $"{LocalizationManager.GetString("Page")} {currentPage} / {totalPages} | {LocalizationManager.GetString("TotalRecords")} {totalCount}";
 
-                    UpdateData(new RealTimeData { OutputData = filteredData });
+                    // Apply keyword filtering if needed
+                    string keyword = FilterKeyword?.Trim().ToLower();
+                    bool hasKeyword = !string.IsNullOrWhiteSpace(keyword) && FilterKeyword != LocalizationManager.GetString("Search");
+                    string cleanedKeyword = hasKeyword ? keyword : "";
+
+                    var filteredData = response.Data
+                   .Where(d =>
+                       !hasKeyword ||
+                       (d.PartName?.ToLower().Contains(cleanedKeyword) ?? false) ||
+                       (d.MachineName?.ToLower().Contains(cleanedKeyword) ?? false) ||
+                       (d.SO?.ToLower().Contains(cleanedKeyword) ?? false) ||
+                       (d.OperatorName?.ToLower().Contains(cleanedKeyword) ?? false))
+                   .ToList();
+
+                    // Then update your UI or data context
+                    UpdateData(filteredData);
                 }
                 else
                 {
-                    Console.WriteLine("error.");
+                    Console.WriteLine("Error or empty response.");
                     if (BindingDeviceOutputs.Count > 0)
                     {
-                        // Reset DataGridView by clearing BindingDeviceOutputs
                         BindingDeviceOutputs.RaiseListChangedEvents = false;
                         BindingDeviceOutputs.Clear();
                         BindingDeviceOutputs.RaiseListChangedEvents = true;
                         BindingDeviceOutputs.ResetBindings();
-
-                        OnPropertyChanged(nameof(BindingDeviceOutputs)); // Ensure UI updates
+                        OnPropertyChanged(nameof(BindingDeviceOutputs));
                     }
                 }
             }
@@ -306,10 +325,11 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-        private void UpdateData(RealTimeData realTimeData)
+
+        private void UpdateData(List<DeviceOutput> realTimeData)
         {
 
-            if (realTimeData.OutputData == null || !realTimeData.OutputData.Any())
+            if (realTimeData == null || !realTimeData.Any())
             {
                 Console.WriteLine("No OutputData received from WebSocket.");
                 BindingDeviceOutputs.Clear();
@@ -318,7 +338,7 @@ namespace DigitalProduction.ViewModels
 
             var headersDictionary = new Dictionary<string, DeviceOutput>();
 
-            var groupedData = realTimeData.OutputData
+            var groupedData = realTimeData
                 .GroupBy(d => new { UpdatedAt = d.UpdatedAt != null ? d.UpdatedAt.Value.ToString("yyyyMMdd") :  string.Empty, d.PartName, d.MachineName, d.SO, d.OperatorName })
                 .SelectMany(group =>
                 {
@@ -552,7 +572,144 @@ namespace DigitalProduction.ViewModels
                 });
             }
         }
+        //private void btnNext_Click(object sender, EventArgs e)
+        //{
+        //    if (PageNumber < TotalPages)
+        //    {
+        //        PageNumber++;
+        //        RequestData();
+        //    }
+        //}
 
+        //private void btnPrevious_Click(object sender, EventArgs e)
+        //{
+        //    if (PageNumber > 1)
+        //    {
+        //        PageNumber--;
+        //        RequestData();
+        //    }
+        //}
+
+        public void InitPagingFooter(Control gridControl)
+        {
+            var padding = 10;
+
+            var pagingPanel = new DevExpress.XtraEditors.PanelControl
+            {
+                Dock = DockStyle.Bottom,
+                Height = 40,
+                BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder
+            };
+
+            // ComboBox for page size
+            cmbPageSize = new DevExpress.XtraEditors.ComboBoxEdit
+            {
+                Width = 80,
+                Location = new Point(padding, 8),
+                ToolTip = LocalizationManager.GetString("SelectPageSize")
+            };
+            cmbPageSize.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            cmbPageSize.Properties.Items.AddRange(new object[] { 50, 100, 200, 500 });
+            // Set initial value before assigning the event
+            cmbPageSize.SelectedItem = pageSize;
+            cmbPageSize.SelectedIndexChanged += async (s, e) =>
+            {
+                if (int.TryParse(cmbPageSize.SelectedItem?.ToString(), out int newSize))
+                {
+                    pageSize = newSize;
+                    currentPage = 1;
+                    await LoadCurrentPageAsync();
+                }
+            };
+            pagingPanel.Controls.Add(cmbPageSize);
+
+            // Next button
+            btnNext = new DevExpress.XtraEditors.SimpleButton
+            {
+                Text = LocalizationManager.GetString("Next") + " »",
+                Location = new Point(cmbPageSize.Right + padding, 6),
+                ToolTip = LocalizationManager.GetString("GoToNextPage")
+            };
+            btnNext.Click += async (s, e) =>
+            {
+                if (currentPage < GetTotalPages())
+                {
+                    currentPage++;
+                    await LoadCurrentPageAsync();
+                }
+            };
+            pagingPanel.Controls.Add(btnNext);
+
+            // Previous button
+            btnPrev = new DevExpress.XtraEditors.SimpleButton
+            {
+                Text = "« " + LocalizationManager.GetString("Previous"),
+                Location = new Point(btnNext.Right + padding, 6),
+                ToolTip = LocalizationManager.GetString("GoToPreviousPage")
+            };
+            btnPrev.Click += async (s, e) =>
+            {
+                if (currentPage > 1)
+                {
+                    currentPage--;
+                    await LoadCurrentPageAsync();
+                }
+            };
+            pagingPanel.Controls.Add(btnPrev);
+
+            // Paging info label
+            lblPagingInfo = new DevExpress.XtraEditors.LabelControl
+            {
+                Text = $"{LocalizationManager.GetString("Page")} {currentPage} / {GetTotalPages()}",
+                Location = new Point(btnPrev.Right + padding * 2, 10),
+                Width = 250,
+                AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.Vertical
+            };
+            pagingPanel.Controls.Add(lblPagingInfo);
+
+            // Add panel to grid control
+            gridControl.Controls.Add(pagingPanel);
+            pagingPanel.BringToFront();
+        }
+        private async Task LoadCurrentPageAsync()
+        {
+            SetWebSocketClient(WebSocketClient.Instance);
+            if (_webSocketClient == null)
+            {
+                Console.WriteLine("WebSocket is not connected.");
+                return;
+            }
+            try
+            {
+                var request = new
+                {
+                    app = Global.App,
+                    action = "getActualData",
+                    filter = new
+                    {
+                        startDate = FilterStartDate?.ToString("yyyy-MM-dd"),
+                        endDate = FilterEndDate?.ToString("yyyy-MM-dd"),
+                        partName = string.IsNullOrEmpty(FilterPartName) ? null : FilterPartName,
+                        machineName = string.IsNullOrEmpty(FilterMachineName) ? null : FilterMachineName,
+                        so = string.IsNullOrEmpty(FilterSO) ? null : FilterSO,
+                        operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName,
+                        page = currentPage,
+                        pageSize = pageSize
+                    }
+                };
+
+                string json = JsonConvert.SerializeObject(request);
+                await _webSocketClient.SendRealTimeAsync(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending LoadCurrentPageAsync: {ex.Message}");
+            }
+        }
+        private int GetTotalPages()
+        {
+            return (int)Math.Ceiling((double)totalCount / pageSize);
+        }
         public void Dispose()
         {
             _pollingTimer?.Dispose();
@@ -563,16 +720,25 @@ namespace DigitalProduction.ViewModels
             Console.WriteLine("ViewModel disposed.");
         }
 
-        public class RealTimeData
-        {
-            public List<DeviceOutput> OutputData { get; set; }
-        }
+        //public class RealTimeData
+        //{
+        //    public List<DeviceOutput> Data { get; set; }
+
+        //}
 
         public class WebSocketResponse
         {
             public string Action { get; set; }
             public string Status { get; set; }
-            public RealTimeData RealTime { get; set; }
+            public List<DeviceOutput> Data { get; set; }
+            // Pagination info
+            public int Page { get; set; }
+            public int PageSize { get; set; }
+            public int TotalCount { get; set; }
+            public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
         }
+        public int PageNumber { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public int PageSize { get; set; } = 100;
     }
 }
