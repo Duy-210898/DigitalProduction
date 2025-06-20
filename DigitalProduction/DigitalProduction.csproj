@@ -25,7 +25,7 @@
     <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>84</ApplicationRevision>
+    <ApplicationRevision>86</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -212,10 +212,10 @@
     <Compile Include="Models\CuttingReportModel.cs" />
     <Compile Include="Models\PartItem.cs" />
     <Compile Include="SqlDataImporter.cs" />
-    <Compile Include="ucCuttingReport.cs">
+    <Compile Include="Frm_User\ucCuttingReport.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucCuttingReport.Designer.cs">
+    <Compile Include="Frm_User\ucCuttingReport.Designer.cs">
       <DependentUpon>ucCuttingReport.cs</DependentUpon>
     </Compile>
     <Compile Include="DeviceOutputListViewModel.cs" />
@@ -251,91 +251,91 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ucOperatorManagement.cs">
+    <Compile Include="Frm_User\ucOperatorManagement.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucOperatorManagement.Designer.cs">
+    <Compile Include="Frm_User\ucOperatorManagement.Designer.cs">
       <DependentUpon>ucOperatorManagement.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucRegisterDevice.cs">
+    <Compile Include="Frm_User\ucRegisterDevice.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucRegisterDevice.Designer.cs">
+    <Compile Include="Frm_User\ucRegisterDevice.Designer.cs">
       <DependentUpon>ucRegisterDevice.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucRegisterOperator.cs">
+    <Compile Include="Frm_User\ucRegisterOperator.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucRegisterOperator.Designer.cs">
+    <Compile Include="Frm_User\ucRegisterOperator.Designer.cs">
       <DependentUpon>ucRegisterOperator.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucRegisterUser.cs">
+    <Compile Include="Frm_User\ucRegisterUser.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucRegisterUser.Designer.cs">
+    <Compile Include="Frm_User\ucRegisterUser.Designer.cs">
       <DependentUpon>ucRegisterUser.cs</DependentUpon>
     </Compile>
     <Compile Include="ResponseMessage.cs" />
     <Compile Include="SecurityHelper.cs" />
     <Compile Include="ShowMessage.cs" />
-    <Compile Include="ucDeviceManager.cs">
+    <Compile Include="Frm_User\ucDeviceManager.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucDeviceManager.Designer.cs">
+    <Compile Include="Frm_User\ucDeviceManager.Designer.cs">
       <DependentUpon>ucDeviceManager.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucDeviceOutput.cs">
+    <Compile Include="Frm_User\ucDeviceOutput.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucDeviceOutput.Designer.cs">
+    <Compile Include="Frm_User\ucDeviceOutput.Designer.cs">
       <DependentUpon>ucDeviceOutput.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucDistribution.cs">
+    <Compile Include="Frm_User\ucDistribution.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucDistribution.Designer.cs">
+    <Compile Include="Frm_User\ucDistribution.Designer.cs">
       <DependentUpon>ucDistribution.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucProgress.cs">
+    <Compile Include="Frm_User\ucProgress.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucProgress.Designer.cs">
+    <Compile Include="Frm_User\ucProgress.Designer.cs">
       <DependentUpon>ucProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucProgressManagement.cs">
+    <Compile Include="Frm_User\ucProgressManagement.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucProgressManagement.Designer.cs">
+    <Compile Include="Frm_User\ucProgressManagement.Designer.cs">
       <DependentUpon>ucProgressManagement.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucReportOder.cs">
+    <Compile Include="Frm_User\ucReportOder.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucReportOder.Designer.cs">
+    <Compile Include="Frm_User\ucReportOder.Designer.cs">
       <DependentUpon>ucReportOder.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucSchedule_View.cs">
+    <Compile Include="Frm_User\ucSchedule_View.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucSchedule_View.Designer.cs">
+    <Compile Include="Frm_User\ucSchedule_View.Designer.cs">
       <DependentUpon>ucSchedule_View.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucViewDistribution.cs">
+    <Compile Include="Frm_User\ucViewDistribution.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucViewDistribution.Designer.cs">
+    <Compile Include="Frm_User\ucViewDistribution.Designer.cs">
       <DependentUpon>ucViewDistribution.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucSchedule.cs">
+    <Compile Include="Frm_User\ucSchedule.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucSchedule.Designer.cs">
+    <Compile Include="Frm_User\ucSchedule.Designer.cs">
       <DependentUpon>ucSchedule.cs</DependentUpon>
     </Compile>
-    <Compile Include="ucUserManagement.cs">
+    <Compile Include="Frm_User\ucUserManagement.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ucUserManagement.Designer.cs">
+    <Compile Include="Frm_User\ucUserManagement.Designer.cs">
       <DependentUpon>ucUserManagement.cs</DependentUpon>
     </Compile>
     <Compile Include="Validation\ValidationType.cs" />
@@ -347,8 +347,7 @@
     <EmbeddedResource Include="frmLoading.resx">
       <DependentUpon>frmLoading.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\licenses.licx" />
-    <EmbeddedResource Include="ucCuttingReport.resx">
+    <EmbeddedResource Include="Frm_User\ucCuttingReport.resx">
       <DependentUpon>ucCuttingReport.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmLogin.resx">
@@ -362,17 +361,17 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucOperatorManagement.resx">
+    <EmbeddedResource Include="Frm_User\ucOperatorManagement.resx">
       <DependentUpon>ucOperatorManagement.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucRegisterDevice.resx">
+    <EmbeddedResource Include="Frm_User\ucRegisterDevice.resx">
       <DependentUpon>ucRegisterDevice.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucRegisterOperator.resx">
+    <EmbeddedResource Include="Frm_User\ucRegisterOperator.resx">
       <DependentUpon>ucRegisterOperator.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucRegisterUser.resx">
+    <EmbeddedResource Include="Frm_User\ucRegisterUser.resx">
       <DependentUpon>ucRegisterUser.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -382,34 +381,34 @@
     <EmbeddedResource Include="Resources\vi.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucDeviceManager.resx">
+    <EmbeddedResource Include="Frm_User\ucDeviceManager.resx">
       <DependentUpon>ucDeviceManager.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucDeviceOutput.resx">
+    <EmbeddedResource Include="Frm_User\ucDeviceOutput.resx">
       <DependentUpon>ucDeviceOutput.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucDistribution.resx">
+    <EmbeddedResource Include="Frm_User\ucDistribution.resx">
       <DependentUpon>ucDistribution.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucProgress.resx">
+    <EmbeddedResource Include="Frm_User\ucProgress.resx">
       <DependentUpon>ucProgress.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucProgressManagement.resx">
+    <EmbeddedResource Include="Frm_User\ucProgressManagement.resx">
       <DependentUpon>ucProgressManagement.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucReportOder.resx">
+    <EmbeddedResource Include="Frm_User\ucReportOder.resx">
       <DependentUpon>ucReportOder.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucSchedule_View.resx">
+    <EmbeddedResource Include="Frm_User\ucSchedule_View.resx">
       <DependentUpon>ucSchedule_View.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucViewDistribution.resx">
+    <EmbeddedResource Include="Frm_User\ucViewDistribution.resx">
       <DependentUpon>ucViewDistribution.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucSchedule.resx">
+    <EmbeddedResource Include="Frm_User\ucSchedule.resx">
       <DependentUpon>ucSchedule.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ucUserManagement.resx">
+    <EmbeddedResource Include="Frm_User\ucUserManagement.resx">
       <DependentUpon>ucUserManagement.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App.config" />

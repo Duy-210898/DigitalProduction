@@ -242,8 +242,8 @@ async function handleGetDistributions(ws, request) {
     const pageNumber = parseInt(filter?.pageNumber || 1);
     const pageSize = parseInt(filter?.pageSize || 100);
 
-    console.log("Start Date:", formattedStartDate); // 2025-03-04 00:00:00.000
-    console.log("End Date:", formattedEndDate);     // 2025-03-04 23:59:59.999
+    // console.log("Start Date:", formattedStartDate); // 2025-03-04 00:00:00.000
+    // console.log("End Date:", formattedEndDate);     // 2025-03-04 23:59:59.999
     // Gọi hàm getDistributionByDevice từ database.js để lấy dữ liệu phân phối
     const { records, totalCount } = await getDistributions(startDate, endDate, pageNumber, pageSize);
 

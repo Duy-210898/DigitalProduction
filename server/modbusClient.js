@@ -262,6 +262,10 @@ async function connectToDevice(ipAddress, retries = 0) {
 }
 
 async function startReadingRegisters(client, ipAddress) {
+  if (!modbusClients[ipAddress]) {
+    console.warn(`modbusClients[${ipAddress}] is undefined`);
+    modbusClients[ipAddress] = { readerLoopStarted: false };
+}
   if (modbusClients[ipAddress].readerLoopStarted) return;
   modbusClients[ipAddress].readerLoopStarted = true;
 
@@ -336,8 +340,14 @@ async function checkAndSaveDistribution(client, ipAddress) {
       processDistributionData(client, ipAddress, distributionData, register1000);
     }
     else {
-    //  console.log(`Register 1000 already has value ${orderID} for IP ${ipAddress}`);
+      //  console.log(`Register 1000 already has value ${orderID} for IP ${ipAddress}`);
 
+      storeDistributionData[ipAddress] = {};
+      //retry get storeDistributionData
+      if (Object.keys(storeDistributionData[ipAddress]).length === 0) {
+        await fetchStoreDistributionData(ipAddress, orderID, isLeather);
+      }
+      if (storeDistributionData[ipAddress] == null) { return }
       // Store orderID in modbusClients
       if (!modbusClients[ipAddress]) {
         modbusClients[ipAddress] = {};
@@ -352,7 +362,6 @@ async function checkAndSaveDistribution(client, ipAddress) {
         const distributionData = await getDistributionDataFromDb(ipAddress);
         if (distributionData == null) {
 
-          storeDistributionData[ipAddress] = {};
           modbusClients[ipAddress].previousSizeData = [];
           modbusClients[ipAddress].previousData = {};
           modbusClients[ipAddress].indexMultipleSOs = 0;
@@ -379,11 +388,6 @@ async function checkAndSaveDistribution(client, ipAddress) {
         storeDistributionData[ipAddress] = {};
       }
 
-      //retry get storeDistributionData
-      if (Object.keys(storeDistributionData[ipAddress]).length === 0) {
-        await fetchStoreDistributionData(ipAddress, orderID, isLeather);
-      }
-      if (storeDistributionData[ipAddress] == null) { return }
       try {
 
         // check complete size mutiple SO
@@ -470,7 +474,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
                   const { DistributionID } = distributionIDFromSize.DistributionID[0];
 
                   await setDistributionIsComplete(DistributionID, 'Complete');
-                //  console.log(`✅ Completed DistributionID: ${DistributionID}`);
+                  // console.log(`✅ Completed DistributionID: ${DistributionID}`);
 
                   // Save to previousCompletedOrders for tracking
                   previousCompletedOrders.push({
@@ -488,7 +492,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
               }
             }
           } else {
-            console.log("⚠️ No completed orders found in current sizeData.");
+          //  console.log("⚠️ No completed orders found in current sizeData.");
           }
         }
         // Check choose size
@@ -641,7 +645,7 @@ async function processDistributionData(client, ipAddress, distributionData, retr
 
       // Convert Map to an array
       distributionData.SizeData = Array.from(sizeTotals.values());
-      console.log("Total Sizes:", distributionData.SizeData);
+      //console.log("Total Sizes:", distributionData.SizeData);
 
       const registerSoAddress = [
         35, 40, 117, 122, 127, 132, 137, 142, 147, 152,
@@ -1157,7 +1161,7 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
           await client.writeSingleRegister(actualAddress + 4, newData.actualPieces);
           await client.writeSingleRegister(actualAddress + 8, newData.actualQtys);
 
-          console.log(`✅ Written values for sizeID ${sizeID} ${sizeAddressID} ${newData.actualQtys} ${actualAddress} at index ${index} IPAdress ${ipAddress}`);
+         // console.log(`✅ Written values for sizeID ${sizeID} ${sizeAddressID} ${newData.actualQtys} ${actualAddress} at index ${index} IPAdress ${ipAddress}`);
 
         //   if (existing) {
         //     Object.assign(existing, newData);
@@ -1764,7 +1768,7 @@ async function writeSizeDataToModbus(client) {
       console.error(`Invalid OrderID: ${orderID}`);
       return;
     }
-    console.log(`OrderID: ${orderID}`);
+  //  console.log(`OrderID: ${orderID}`);
 
     // Kiểm tra partName hợp lệ
     if (!partName || partName.trim() === "") {
@@ -1961,7 +1965,7 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
     // Write SizeData
     await writeRegisterSizeData(client, ipAddress, data.SizeData, data.Leather);
     await writeActualSizesForMultipleSOs(ipAddress, client, data.Leather);
-    console.log('Data successfully saved to Modbus');
+  //  console.log('Data successfully saved to Modbus');
   } catch (error) {
     console.error(`Error saving distribution data to Modbus: ${error.message}`);
     throw new Error(`Failed to save distribution data: ${error.message}`);
@@ -2049,7 +2053,7 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
 
       await client.writeSingleRegister(registerSize[i].SizeQty, item.SizeQty || 0);
       await client.writeSingleRegister(registerSize[i].InventoryQty, item.InventoryQty || 0);
-      console.log(`Successfully written to Modbus for SizeID ${item.SizeID}`);
+   //   console.log(`Successfully written to Modbus for SizeID ${item.SizeID}`);
     } catch (error) {
       console.error(`Error writing to Modbus for SizeID ${item.SizeID}:`, error);
     }

@@ -284,16 +284,16 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
     const pool = await initDatabase();
 
     // 1. Ensure the EmployeeID exists in Operator table
-    // const employeeCheck = await pool.request()
-    //   .input("EmployeeID", sql.Int, EmployeeID)
-    //   .query(`
-    //     SELECT EmployeeID FROM Operator WHERE EmployeeID = @EmployeeID
-    //   `);
+    const employeeCheck = await pool.request()
+      .input("EmployeeID", sql.Int, EmployeeID)
+      .query(`
+        SELECT EmployeeID FROM Operator WHERE EmployeeID = @EmployeeID
+      `);
 
-    // if (employeeCheck.recordset.length === 0) {
-    //   console.log(`Not found EmployeeID ${EmployeeID}`);
-    //   return;
-    // }
+    if (employeeCheck.recordset.length === 0) {
+      console.log(`Not found EmployeeID ${EmployeeID}`);
+      return;
+    }
     
 
     // 1. Check if CutHistory already has a record for this combination
@@ -476,9 +476,9 @@ async function saveActualDataToDB(data) {
       ];
 
       // Log input parameters for debugging
-      DeviceOutputInputs.forEach(param => {
-        console.log(`${param.name}: ${param.value} (Type: ${param.type?.name || param.type})`);
-      });
+      // DeviceOutputInputs.forEach(param => {
+      //   console.log(`${param.name}: ${param.value} (Type: ${param.type?.name || param.type})`);
+      // });
 
       // Execute check query
       const result = await executeQuery(checkDeviceOutputQuery, inputs);
@@ -1212,7 +1212,7 @@ async function addDeviceToList({ ipAddress, machineName, plantName }) {
 
     // Thực thi câu truy vấn insert
     await executeQuery(query, inputs);
-    console.log(`Device ${machineName} added successfully with PlantID ${plantID}`);
+   // console.log(`Device ${machineName} added successfully with PlantID ${plantID}`);
 
     return { status: 'success', message: `Device ${machineName} added successfully.` };
   } catch (error) {

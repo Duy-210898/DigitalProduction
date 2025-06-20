@@ -58,10 +58,10 @@
             // gridProgressManagement
             // 
             this.gridProgressManagement.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridProgressManagement.Location = new System.Drawing.Point(3, 56);
+            this.gridProgressManagement.Location = new System.Drawing.Point(3, 60);
             this.gridProgressManagement.MainView = this.gridViewProgressManagement;
             this.gridProgressManagement.Name = "gridProgressManagement";
-            this.gridProgressManagement.Size = new System.Drawing.Size(695, 466);
+            this.gridProgressManagement.Size = new System.Drawing.Size(889, 498);
             this.gridProgressManagement.TabIndex = 0;
             this.gridProgressManagement.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewProgressManagement,
@@ -89,7 +89,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10.24287F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 89.75713F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(701, 525);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(895, 561);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // tableLayoutPanel2
@@ -97,7 +97,6 @@
             this.tableLayoutPanel2.ColumnCount = 2;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 34.67626F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65.32374F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel3, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.stackPanel1, 1, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -105,7 +104,7 @@
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(695, 47);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(889, 51);
             this.tableLayoutPanel2.TabIndex = 1;
             // 
             // tableLayoutPanel3
@@ -122,14 +121,14 @@
             this.tableLayoutPanel3.RowCount = 2;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 47.05882F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 52.94118F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(235, 41);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(302, 45);
             this.tableLayoutPanel3.TabIndex = 6;
             // 
             // dtpStartDate
             // 
             this.dtpStartDate.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dtpStartDate.EditValue = new System.DateTime(2025, 6, 14, 12, 50, 33, 282);
-            this.dtpStartDate.Location = new System.Drawing.Point(3, 22);
+            this.dtpStartDate.EditValue = new System.DateTime(2025, 6, 16, 0, 0, 0, 0);
+            this.dtpStartDate.Location = new System.Drawing.Point(3, 24);
             this.dtpStartDate.Name = "dtpStartDate";
             this.dtpStartDate.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -137,20 +136,20 @@
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.dtpStartDate.Properties.CalendarView = DevExpress.XtraEditors.Repository.CalendarView.Vista;
             this.dtpStartDate.Properties.VistaDisplayMode = DevExpress.Utils.DefaultBoolean.True;
-            this.dtpStartDate.Size = new System.Drawing.Size(103, 20);
+            this.dtpStartDate.Size = new System.Drawing.Size(134, 20);
             this.dtpStartDate.TabIndex = 3;
             // 
             // dtpEndDate
             // 
             this.dtpEndDate.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dtpEndDate.EditValue = new System.DateTime(2025, 6, 14, 12, 50, 33, 282);
-            this.dtpEndDate.Location = new System.Drawing.Point(112, 22);
+            this.dtpEndDate.EditValue = new System.DateTime(2025, 6, 16, 0, 0, 0, 0);
+            this.dtpEndDate.Location = new System.Drawing.Point(143, 24);
             this.dtpEndDate.Name = "dtpEndDate";
             this.dtpEndDate.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.dtpEndDate.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.dtpEndDate.Size = new System.Drawing.Size(120, 20);
+            this.dtpEndDate.Size = new System.Drawing.Size(156, 20);
             this.dtpEndDate.TabIndex = 0;
             // 
             // lblFilterDate
@@ -171,9 +170,9 @@
             this.stackPanel1.Controls.Add(this.btnApplyDevice);
             this.stackPanel1.Controls.Add(this.syncButton);
             this.stackPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.stackPanel1.Location = new System.Drawing.Point(244, 3);
+            this.stackPanel1.Location = new System.Drawing.Point(311, 3);
             this.stackPanel1.Name = "stackPanel1";
-            this.stackPanel1.Size = new System.Drawing.Size(448, 41);
+            this.stackPanel1.Size = new System.Drawing.Size(575, 45);
             this.stackPanel1.TabIndex = 8;
             this.stackPanel1.UseSkinIndents = true;
             // 
@@ -181,7 +180,7 @@
             // 
             this.cbxDevice.Dock = System.Windows.Forms.DockStyle.Left;
             this.cbxDevice.FormattingEnabled = true;
-            this.cbxDevice.Location = new System.Drawing.Point(13, 10);
+            this.cbxDevice.Location = new System.Drawing.Point(13, 11);
             this.cbxDevice.Name = "cbxDevice";
             this.cbxDevice.Size = new System.Drawing.Size(118, 21);
             this.cbxDevice.TabIndex = 4;
@@ -189,7 +188,7 @@
             // btnApplyDevice
             // 
             this.btnApplyDevice.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnApplyDevice.Location = new System.Drawing.Point(135, 9);
+            this.btnApplyDevice.Location = new System.Drawing.Point(135, 10);
             this.btnApplyDevice.Name = "btnApplyDevice";
             this.btnApplyDevice.Size = new System.Drawing.Size(115, 23);
             this.btnApplyDevice.TabIndex = 8;
@@ -197,7 +196,7 @@
             // 
             // syncButton
             // 
-            this.syncButton.Location = new System.Drawing.Point(254, 3);
+            this.syncButton.Location = new System.Drawing.Point(254, 5);
             this.syncButton.Name = "syncButton";
             this.syncButton.Size = new System.Drawing.Size(124, 35);
             this.syncButton.TabIndex = 7;
@@ -209,7 +208,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "ucProgress";
-            this.Size = new System.Drawing.Size(701, 525);
+            this.Size = new System.Drawing.Size(895, 561);
             ((System.ComponentModel.ISupportInitialize)(this.gridProgressManagement)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewProgressManagement)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();

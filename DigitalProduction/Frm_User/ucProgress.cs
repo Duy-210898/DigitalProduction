@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Utils.Menu;
@@ -40,6 +41,8 @@ namespace DigitalProduction
         }
         private void ucProgress_Load(object sender, EventArgs e)
         {
+            dtpStartDate.EditValue =  DateTime.Today;
+            dtpEndDate.EditValue = DateTime.Today;
             // Make sure controls are created first
             InitializeControls();
             InitPagingFooter(gridProgressManagement);
@@ -307,20 +310,24 @@ namespace DigitalProduction
 
             try
             {
+                Thread.Sleep(500);
                 string response = await _webSocketClient.SendAsync(jsonRequest);
-                if (string.IsNullOrEmpty(response))
+                if (response != null)
                 {
-                    MessageBox.Show("No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    ConnectionManager.Instance.IsReconnecting = true;
+                    if (string.IsNullOrEmpty(response))
+                    WebSocket_OnMessage(response);
+                    _isDataLoaded = true;
+                }
+                else {
+
+                    //MessageBox.Show("InvalidOperation or No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //ConnectionManager.Instance.IsReconnecting = true;
                     return;
                 }
-
-                WebSocket_OnMessage(response);
-                _isDataLoaded = true;
             }
-            catch (TimeoutException)
+            catch (Exception ex)
             {
-                MessageBox.Show("Request timed out.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("ERROR EX => " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -635,7 +642,6 @@ namespace DigitalProduction
                 gridViewProgressManagement.RefreshData();
             }
         }
-
 
         private void GridViewProgressManagement_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
         {

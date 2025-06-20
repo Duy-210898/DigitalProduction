@@ -199,4 +199,3 @@ D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraScheduler.v
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucViewDistribution.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucSchedule_View.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.frmLoading.resources
-D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses
