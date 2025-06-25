@@ -1282,12 +1282,11 @@ async function getProductionSchedule(so) {
   }
 }
 
-async function getListOfSOsByMonthYear(month, year) {
+async function getListOfSOsByYear(year) {
   try {
     if (!pool) await initDatabase();
 
     const result = await pool.request()
-      .input('Month', sql.Int, month)
       .input('Year', sql.Int, year)
       .query(`
         SELECT DISTINCT po.SO, po.CreatedAt
@@ -1297,12 +1296,12 @@ async function getListOfSOsByMonthYear(month, year) {
         JOIN Part pa ON pso.PartId = pa.PartId
         JOIN Material m ON pso.MaterialID = m.MaterialID
         JOIN Size s ON pso.SizeId = s.SizeID
-        WHERE MONTH(po.CreatedAt) = @Month AND YEAR(po.CreatedAt) = @Year
+        WHERE YEAR(po.CreatedAt) = @Year
       `);
 
     return result.recordset.map(row => ({ SO: row.SO, CreatedAt: row.CreatedAt }));
   } catch (err) {
-    console.error('Error getting SO list by month/year:', err.message);
+    console.error('Error getting SO list by year:', err.message);
     return [];
   }
 }
@@ -1542,6 +1541,6 @@ module.exports = {
   getSizeAndDistributionDataFromDb,
   getDistributionIDFromSizeID,
   getDistributionCompleteFromDb, 
-  getListOfSOsByMonthYear,
+  getListOfSOsByYear,
   logCutHistoryToDB
 };

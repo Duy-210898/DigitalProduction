@@ -124,6 +124,7 @@
             this.gridControlPerformance.Name = "gridControlPerformance";
             this.gridControlPerformance.Size = new System.Drawing.Size(853, 410);
             this.gridControlPerformance.TabIndex = 1;
+            this.gridControlPerformance.UseEmbeddedNavigator = true;
             this.gridControlPerformance.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewPeformance});
             // 

@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 const { connectToDevice, isHostReachable, modbusClients } = require('./modbusClient');
-const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList, getOperatorList, getAllProductionSchedule, getDistributions, getOperatorDistribution, getListOfSOsByMonthYear} = require('./database');
+const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList, getOperatorList, getAllProductionSchedule, getDistributions, getOperatorDistribution, getListOfSOsByYear} = require('./database');
 const { setClients } = require('./notifications'); 
 const { Time } = require('mssql');
 
@@ -99,8 +99,8 @@ async function handleClientMessage(ws, message) {
         case 'getOperatorDistribution':
           await handleGetOperatorDistribution(ws, request);
           break;
-        case 'getListOfSOsByMonthYear':
-          await handleGetListOfSOsByMonthYear(ws, request);
+        case 'getListOfSOsByYear':
+          await handleGetListOfSOsByYear(ws, request);
           break;
         default:
           console.log('Unknown action for CuttingProject:', action);
@@ -455,30 +455,29 @@ async function handleAddDevice(ws, request) {
 //   }
 // }
 
-async function handleGetListOfSOsByMonthYear(ws, request) {
+async function handleGetListOfSOsByYear(ws, request) {
   try {
-    const month = request.month ?? null;
     const year = request.year ?? null;
 
-    if (!month || !year) {
+    if (!year) {
       ws.send(JSON.stringify({
-        action: 'getListOfSOsByMonthYear',
+        action: 'getListOfSOsByYear',
         status: 'error',
         message: 'Month and year are required'
       }));
       return;
     }
 
-    const soList = await getListOfSOsByMonthYear(month, year);
+    const soList = await getListOfSOsByYear(year);
     ws.send(JSON.stringify({
-      action: 'getListOfSOsByMonthYear',
+      action: 'getListOfSOsByYear',
       status: 'success',
       data: soList
     }));
   } catch (error) {
-    console.error('Error in handleGetListOfSOsByMonthYear:', error.message);
+    console.error('Error in handleGetListOfSOsByYear:', error.message);
     ws.send(JSON.stringify({
-      action: 'getListOfSOsByMonthYear',
+      action: 'getListOfSOsByYear',
       status: 'error',
       message: 'Failed to retrieve SO list'
     }));

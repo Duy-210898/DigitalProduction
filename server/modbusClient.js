@@ -124,10 +124,14 @@ async function handleDisconnection(ipAddress) {
 }
 
 async function connectToDevice(ipAddress, retries = 0) {
+  // if (typeof ipAddress === 'object') {
+  //   delete modbusClients[ipAddress];
+  //   return
+  // }
+  
   if (!modbusClients[ipAddress]) {
     modbusClients[ipAddress] = {};
   }
-
   const modbusClient = modbusClients[ipAddress];
 
   if (modbusClient.isDisconnected) {
@@ -159,6 +163,7 @@ async function connectToDevice(ipAddress, retries = 0) {
       console.log(`✅ Connected to device at ${ipAddress}`);
       logToFile(successLogPath, `Connected to device at ${ipAddress}`);
   
+      //ipAddress = '10.30.4.91';
       modbusClients[ipAddress] = {
         client,
         socket,
@@ -169,7 +174,7 @@ async function connectToDevice(ipAddress, retries = 0) {
         indexMultiplePartNames: 0,
         readerLoopStarted: false
       };
-  
+
       try {
         await updateDeviceConnectionStatus(ipAddress, true);
       } catch (err) {
@@ -177,8 +182,8 @@ async function connectToDevice(ipAddress, retries = 0) {
         logToFile(errorLogPath, `Initial index update failed: ${err.message}`);
       }
       console.log(`[INFO] Date reading to Modbus register: ${Date.now()}`);
-      startReadingRegisters(client, ipAddress);
-      writeToModbusRegister(client, ipAddress).catch(err => {
+      startReadingRegisters(ipAddress);
+      writeToModbusRegister(ipAddress).catch(err => {
         console.error(`⚠️ Error writing to Modbus register: ${err.message}`);
         logToFile(errorLogPath, `Write error: ${err.message}`);
       });
@@ -197,7 +202,7 @@ async function connectToDevice(ipAddress, retries = 0) {
         const regVal = resp.response._body.values[0];
         await clearDeleteBit(client, regVal, register3000Address, 2);
       } catch (e) {
-       // console.warn(`⚠️ Could not clear delete bit on error: ${e.message}`);
+        console.warn(`⚠️ Could not clear delete bit on error: ${e.message}`);
       }
   
       // Clean up client registry
@@ -261,11 +266,16 @@ async function connectToDevice(ipAddress, retries = 0) {
   });  
 }
 
-async function startReadingRegisters(client, ipAddress) {
+async function startReadingRegisters(ipAddress) {
+  if (typeof ipAddress === 'object') {
+    delete modbusClients[ipAddress];
+    return;
+  }
   if (!modbusClients[ipAddress]) {
     console.warn(`modbusClients[${ipAddress}] is undefined`);
     modbusClients[ipAddress] = { readerLoopStarted: false };
-}
+    return;
+  }
   if (modbusClients[ipAddress].readerLoopStarted) return;
   modbusClients[ipAddress].readerLoopStarted = true;
 
@@ -294,6 +304,7 @@ async function startReadingRegisters(client, ipAddress) {
         return;
       }
   
+      if (!client || client === undefined) return;
       // Read and store the Operator ID
       await readOperatorID(client, ipAddress);
   
@@ -367,6 +378,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
           modbusClients[ipAddress].indexMultipleSOs = 0;
           modbusClients[ipAddress].indexMultiplePartNames = 0;
           modbusClients[ipAddress].sizeDataInfo.sizeID = [];
+          modbusClients[ipAddress].hasMultipleSOs = false;
         }
 
         // get index SOs and Part if available
@@ -1199,7 +1211,7 @@ function isBitSetString(binaryStr, bitPosition) {
 }
 async function readOperatorID(client, ipAddress) {
   try {
-    const data = await client.readHoldingRegisters(3105, 2);
+    const data = await client.readHoldingRegisters(1018, 2);
     if (!data) return;
     const lowRegister = data.response._body.values[0];  // Low register (16 bits)
     const highRegister = data.response._body.values[1]; // High register (16 bits)
@@ -1209,7 +1221,7 @@ async function readOperatorID(client, ipAddress) {
     modbusClients[ipAddress].operatorID = operatorID;
     //console.info(`OperatorID: ${operatorID} IP: ${ipAddress}`);
   } catch (error) {
-    const errorMsg = `Error reading register 3105 for IP ${ipAddress}: ${error.message}`;
+    const errorMsg = `Error reading register 1018 for IP ${ipAddress}: ${error.message}`;
     console.error(errorMsg);
     logToFile(errorLogPath, errorMsg);
   }
@@ -1271,7 +1283,7 @@ async function readActualData(client, ipAddress) {
     if (index === -1) {
       return;
     }
-    if (sizeInfo.sizeID == undefined || sizeInfo.sizeID[index] == null) return;
+    if (sizeInfo === undefined || sizeInfo.sizeID == undefined || sizeInfo.sizeID[index] == null) return;
 
     const sizeAddressID = sizeInfo.sizeID[index];
 
@@ -1546,11 +1558,7 @@ async function processActualDataChange(
   const isNewData = !modbusClients[ipAddress].previousData[sizeID];
   let hasChanges = false;
 
-  if (isLeather) {
-    hasChanges = isNewData;
-  } else {
-    hasChanges = isNewData || JSON.stringify(newData) !== JSON.stringify(prevData);
-  }
+  hasChanges = isNewData || JSON.stringify(newData) !== JSON.stringify(prevData);
 
   if (hasChanges) {
    // console.log(`Data changed or first-time load for sizeID ${sizeID}, updating DB...`, newData);
@@ -1657,45 +1665,52 @@ async function processSizeID(ipAddress, isLeather) {
  * Continuously writes an incrementing counter to the given register,
  * reconnecting automatically if the client is disconnected.
  */
-async function writeToModbusRegister(client, ipAddress, registerAddress = 8000) {
+async function writeToModbusRegister(ipAddress, registerAddress = 8000) {
   let counter = 0;
 
   async function writeLoop() {
     try {
+      if (typeof ipAddress === 'object') {
+        delete modbusClients[ipAddress];
+        return;
+      }
       let entry = modbusClients[ipAddress];
 
-      // 1) Reconnect if not connected or missing client
+      // 🔁 Reconnect if necessary
       if (!entry || !entry.client || entry.isConnected === false) {
-        console.warn(`[${ipAddress}] No connection—reconnecting before write...`);
+        console.warn(`[${ipAddress}] No connection — attempting reconnect before write...`);
         try {
           await connectToDevice(ipAddress);
-          entry = modbusClients[ipAddress]; // Re-fetch after connection attempt
+          entry = modbusClients[ipAddress];
           if (!entry || !entry.client) {
             throw new Error('Client still undefined after reconnect');
           }
         } catch (connErr) {
-          console.error(`[${ipAddress}] Reconnect failed: ${connErr.message}`);
-          return setTimeout(writeLoop, 1000);
+          const reconnectErrMsg = `[${ipAddress}] Reconnect failed: ${connErr.message}`;
+          console.error(reconnectErrMsg);
+          logToFile(errorLogPath, reconnectErrMsg);
+          return setTimeout(writeLoop, 1000); // retry later
         }
       }
 
-      // 2) Increment and wrap the counter
+      // 🔢 Increment and wrap the counter
       counter = (counter + 1) % 60000;
 
-      // 3) Perform the write
+      // ✍️ Write to register
       await entry.client.writeSingleRegister(registerAddress, counter);
-      // console.info(`[${ipAddress}] Wrote ${counter} to register ${registerAddress}`);
+      console.log(`[${ipAddress}] Wrote value ${counter} to register ${registerAddress}`);
     } catch (err) {
       const errorMessage = `[${ipAddress}] Error writing to register ${registerAddress}: ${err.message}`;
       console.error(errorMessage);
       logToFile(errorLogPath, errorMessage);
     } finally {
-      setTimeout(writeLoop, 1000);
+      setTimeout(writeLoop, 1000); // Loop every second
     }
   }
 
-  writeLoop(); // start loop
+  writeLoop(); // 🔁 Start the loop
 }
+
 
 
 function startMonitoring() {
@@ -1942,6 +1957,7 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
 
     // Write defaultValue
     const defaultValue = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
+    if (defaultValue == undefined) return;
     if (data.Leather == 1) {
       const BASE_REGISTER = 886;
       try {

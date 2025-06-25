@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
+using DigitalProduction.Frm_Admin;
 
 namespace DigitalProduction
 {

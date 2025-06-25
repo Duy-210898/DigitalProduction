@@ -344,7 +344,8 @@ namespace DigitalProduction
                         int sizeID = schedule.SizeID;
                         int orderID = schedule.OrderID;
                         string model = schedule.Model;
-                        int? inventory = (int)schedule.InventoryQty;
+                        int? inventory = schedule.InventoryQty.HasValue? schedule.InventoryQty.Value : 0;
+                        //int? inventory = (int)schedule.InventoryQty;
                         int? cuttingDieQty = (int)schedule.CuttingDieQty;
                         int? piecesPerPair = (int)schedule.PeicesPerPair;
                         int? materialLayer = (int)schedule.MaterialLayer;

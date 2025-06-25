@@ -54,17 +54,7 @@ namespace DigitalProduction.ViewModels
                     _filterKeyword = value;
                     OnPropertyChanged(nameof(FilterKeyword));
                     // Re-filter using cached WebSocket data
-                    if (!string.IsNullOrEmpty(_lastJsonData))
-                    {
-                        if (_syncContext != null)
-                        {
-                            _syncContext.Post(_ => ProcessWebSocketMessage(_lastJsonData), null);
-                        }
-                        else
-                        {
-                            ProcessWebSocketMessage(_lastJsonData);
-                        }
-                    }
+                    ReapplyFilters();
                 }
             }
         }
@@ -78,8 +68,7 @@ namespace DigitalProduction.ViewModels
                 {
                     FilterService.Instance.FilterStartDate = value ?? DateTime.Today;
                     OnPropertyChanged(nameof(FilterStartDate));
-                    // Call RequestData when the date changes
-                    RequestData();
+                    SyncData();
                 }
             }
         }
@@ -93,11 +82,21 @@ namespace DigitalProduction.ViewModels
                 {
                     FilterService.Instance.FilterEndDate = value ?? DateTime.Today;
                     OnPropertyChanged(nameof(FilterEndDate));
-                    // Call RequestData when the date changes
-                    RequestData();
+                    SyncData();
                 }
             }
         }
+
+        private void ReapplyFilters()
+        {
+            if (string.IsNullOrEmpty(_lastJsonData)) return;
+
+            if (_syncContext != null)
+                _syncContext.Post(_ => ProcessWebSocketMessage(_lastJsonData), null);
+            else
+                ProcessWebSocketMessage(_lastJsonData);
+        }
+
 
         public string FilterMachineName
         {

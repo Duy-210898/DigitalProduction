@@ -163,7 +163,7 @@
     <value>Hủy</value>
   </data>
   <data name="Size" xml:space="preserve">
-    <value>Kích thước</value>
+    <value>Size</value>
   </data>
   <data name="SizeQty" xml:space="preserve">
     <value>Số lượng</value>
@@ -421,7 +421,7 @@
     <value>Vui lòng nhập mã người vận hành!!!</value>
   </data>
   <data name="InventoryQty" xml:space="preserve">
-    <value>Số lượng tồn kho</value>
+    <value>Tồn kho</value>
   </data>
   <data name="MaterialLayer" xml:space="preserve">
     <value>Số lớp vật liệu</value>
@@ -635,5 +635,8 @@
   </data>
   <data name="Previous" xml:space="preserve">
     <value>Sau</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Trang tổng quan</value>
   </data>
 </root>

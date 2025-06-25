@@ -102,6 +102,7 @@ namespace DigitalProduction
                 MessageBox.Show("_viewModel is null before binding", "DEBUG");
                 return;
             }
+
             gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
             _viewModel.InitPagingFooter(gridControl_DeviceOutput);
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
@@ -225,7 +226,7 @@ namespace DigitalProduction
         private void BtnSyncData_Click(object sender, EventArgs e)
         {
             TranslateHeaders();
-           // _viewModel.SyncData();
+           _viewModel.SyncData();
         }
 
         private void LoadFilters()
@@ -359,6 +360,18 @@ namespace DigitalProduction
             gridView.OptionsCustomization.AllowFilter = false;
             gridView.OptionsCustomization.AllowSort = false;
             gridView.OptionsMenu.ShowAutoFilterRowItem = false;
+            gridView.Columns["MachineName"].Width += 50;
+            gridView.Columns["OperatorName"].Width += 60;
+            gridView.Columns["PartName"].Width += 50;
+            var memoEdit = new DevExpress.XtraEditors.Repository.RepositoryItemMemoEdit();
+            gridControl_DeviceOutput.RepositoryItems.Add(memoEdit);
+
+            foreach (GridColumn column in gridView_DeviceOutput.Columns)
+            {
+                column.AppearanceCell.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
+                column.ColumnEdit = memoEdit;
+            }
+
             gridView.ActiveFilter.Clear();
 
             gridView.Appearance.HeaderPanel.ForeColor = Color.Black;

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DigitalProduction.Models;
+using static DigitalProduction.ucProgress;
 using static DigitalProduction.ucReportOrder;
 
 namespace DigitalProduction
@@ -1600,6 +1601,188 @@ namespace DigitalProduction
 
             return result;
         }
+
+        public static List<Distribution> GetDistributionData(DateTime from, DateTime to, int deviceId, string so, string status)
+        {
+            List<Distribution> list = new List<Distribution>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    string query = @"
+                       SELECT 
+                            d.*, 
+                            o.SO,
+                            p.PartName, 
+                            s.Size,
+                            op.OperatorName,
+                            u.Username,
+                            dl.IpAddress,
+                            dl.MachineName,
+                            m.MaterialName,
+                            pso.SizeQty,
+                            pso.Unit
+                        FROM DistributionData d
+                        INNER JOIN PartSizeOrder pso ON d.PartSizeOrderId = pso.PartSizeOrderId
+                        INNER JOIN ProductOrder o ON o.OrderID = pso.OrderId
+                        INNER JOIN Part p ON p.PartId = pso.PartId
+                        INNER JOIN Size s ON s.SizeID = pso.SizeId
+                        LEFT JOIN Operator op ON d.OperatorID = op.OperatorID
+                        LEFT JOIN Users u ON d.UserID = u.UserID
+                        LEFT JOIN DeviceList dl ON d.DeviceID = dl.DeviceID
+                        LEFT JOIN Material m ON m.MaterialID = pso.MaterialId
+                        WHERE d.CreatedAt >= @From AND d.CreatedAt < @To
+                        ";
+
+                    if (!string.IsNullOrEmpty(status))
+                    {
+                        query += " AND d.Status = @Status";
+                    }
+
+                    if (!string.IsNullOrEmpty(so))
+                    {
+                        query += " AND o.SO = @SO";
+                    }
+
+                    if (deviceId != 0)
+                    {
+                        query += " AND d.DeviceID = @DeviceID";
+                    }
+
+                    query += " ORDER BY d.CreatedAt DESC";
+                    cmd.CommandText = query;
+
+                    cmd.Parameters.AddWithValue("@From", from);
+                    cmd.Parameters.AddWithValue("@To", to);
+
+                    if (!string.IsNullOrEmpty(status))
+                        cmd.Parameters.AddWithValue("@Status", status);
+
+                    if (!string.IsNullOrEmpty(so))
+                        cmd.Parameters.AddWithValue("@SO", so);
+
+                    if (deviceId != 0)
+                        cmd.Parameters.AddWithValue("@DeviceID", deviceId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new Distribution
+                            {
+                                DistributionID = Convert.ToInt32(reader["DistributionID"]),
+                                DeviceID = Convert.ToInt32(reader["DeviceID"]),
+                                IpAddress = reader["IpAddress"]?.ToString(),
+                                MachineName = reader["MachineName"]?.ToString(),
+                                Status = reader["Status"].ToString(),
+                                CreatedAt = Convert.ToDateTime(reader["CreatedAt"]),
+                                SO = reader["SO"].ToString(),
+                                PartName = reader["PartName"].ToString(),
+                                Size = reader["Size"].ToString(),
+                                Unit = reader["Unit"]?.ToString(),
+                                SizeQty = reader["SizeQty"] != DBNull.Value ? Convert.ToInt32(reader["SizeQty"]) : 0,
+                                MaterialName = reader["MaterialName"]?.ToString(),
+                                OperatorName = reader["OperatorName"]?.ToString(),
+                                EmployeeName = reader["Username"]?.ToString(),
+                                IsLeather = Convert.ToBoolean(reader["IsLeather"]),
+                                Note = reader["Note"] != DBNull.Value ? Convert.ToInt32(reader["Note"]) : (int?)null,
+                                UpdatedAt = reader["UpdatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["UpdatedAt"]) : DateTime.MinValue,
+                            });
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+        public static void DeleteDistributionById(int id)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM DistributionData WHERE DistributionID = @ID";
+                    cmd.Parameters.AddWithValue("@ID", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public static void DeleteDistributionByIds(List<int> distributionIds)
+        {
+            if (distributionIds == null || distributionIds.Count == 0) return;
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string ids = string.Join(",", distributionIds);
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $"DELETE FROM DistributionData WHERE DistributionID IN ({ids})";
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public static void DeleteDistributionAndDeviceOutput(List<int> distributionIds)
+        {
+            if (distributionIds == null || distributionIds.Count == 0) return;
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                foreach (int distId in distributionIds)
+                {
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        // Get PartSizeOrder info
+                        cmd.CommandText = @"
+                    SELECT PartID, SizeID, OrderID 
+                    FROM PartSizeOrder 
+                    WHERE PartSizeOrderID = (SELECT PartSizeOrderId FROM DistributionData WHERE DistributionID = @DistID)";
+                        cmd.Parameters.AddWithValue("@DistID", distId);
+
+                        int partId = 0, sizeId = 0, orderId = 0;
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                partId = Convert.ToInt32(reader["PartID"]);
+                                sizeId = Convert.ToInt32(reader["SizeID"]);
+                                orderId = Convert.ToInt32(reader["OrderID"]);
+                            }
+                        }
+
+                        if (partId != 0)
+                        {
+                            // Delete DeviceOutput
+                            using (SqlCommand deleteOutput = conn.CreateCommand())
+                            {
+                                deleteOutput.CommandText = @"
+                            DELETE FROM DeviceOutput
+                            WHERE PartID = @PartID AND SizeID = @SizeID AND OrderID = @OrderID";
+                                deleteOutput.Parameters.AddWithValue("@PartID", partId);
+                                deleteOutput.Parameters.AddWithValue("@SizeID", sizeId);
+                                deleteOutput.Parameters.AddWithValue("@OrderID", orderId);
+                                deleteOutput.ExecuteNonQuery();
+                            }
+                        }
+
+                        // Delete DistributionData
+                        using (SqlCommand deleteDist = conn.CreateCommand())
+                        {
+                            deleteDist.CommandText = "DELETE FROM DistributionData WHERE DistributionID = @DistID";
+                            deleteDist.Parameters.AddWithValue("@DistID", distId);
+                            deleteDist.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
 

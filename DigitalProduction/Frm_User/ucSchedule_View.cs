@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -20,7 +21,7 @@ namespace DigitalProduction
     {
         private BindingList<ProductionSchedule> productionSchedules = new BindingList<ProductionSchedule>();
         private WebSocketClient _webSocketClient;
-        private DateTime? selectedMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        private int? selectedYear = DateTime.Today.Year;
         private Label lblTotalRecords;
         private Button btnSaveData;
         // Keep track of selected items
@@ -34,6 +35,10 @@ namespace DigitalProduction
             SetupGridControl();
             InitializeTotalLabel();
             InitializeMonthFilter();
+
+            dateTimePickerSchedule.Format = DateTimePickerFormat.Custom;
+            dateTimePickerSchedule.CustomFormat = "yyyy";
+            dateTimePickerSchedule.ShowUpDown = true;
 
             lblFilterDate.Text = LocalizationManager.GetString("FilterDate");
             lblSelectSO.Text = LocalizationManager.GetString("SelectSO");
@@ -54,6 +59,11 @@ namespace DigitalProduction
             view.Columns.AddVisible("CreatedAt", LocalizationManager.GetString("CreatedAt"));
             view.Columns["CreatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
             view.Columns["CreatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy";
+            gridLookUpEditSO.Properties.PopupFilterMode = PopupFilterMode.Contains;
+
+            // Optional: improve filtering UI
+            view.OptionsView.ShowAutoFilterRow = true;
+            view.Columns["SO"].OptionsFilter.AutoFilterCondition = AutoFilterCondition.Contains;
 
             // Setup checkbox selection in GridView
             view.OptionsView.ShowIndicator = false;
@@ -287,11 +297,12 @@ namespace DigitalProduction
         {
             dateTimePickerSchedule.ValueChanged += async (sender, e) =>
             {
-                selectedMonth = new DateTime(dateTimePickerSchedule.Value.Year, dateTimePickerSchedule.Value.Month, 1);
+                selectedYear = dateTimePickerSchedule.Value.Year;
 
-                await GetListOfSOsByMonthYearAsync();
+                await GetListOfSOsByYearAsync();
             };
         }
+
 
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
@@ -306,7 +317,7 @@ namespace DigitalProduction
 
             if (productionSchedules.Count == 0)
             {
-                _ = GetListOfSOsByMonthYearAsync();
+                _ = GetListOfSOsByYearAsync();
                // _ = GetDataAndLoadToGridAsync();
             }
         }
@@ -325,14 +336,13 @@ namespace DigitalProduction
             await _webSocketClient.SendAsync(jsonRequest);
         }
 
-        public async Task GetListOfSOsByMonthYearAsync()
+        public async Task GetListOfSOsByYearAsync()
         {
             var request = new
             {
                 app = Global.App,
-                action = "getListOfSOsByMonthYear",
-                month = selectedMonth?.Month,
-                year = selectedMonth?.Year
+                action = "getListOfSOsByYear",
+                year = selectedYear
             };
 
             string jsonRequest = JsonConvert.SerializeObject(request);
@@ -369,7 +379,7 @@ namespace DigitalProduction
                             }
                             break;
 
-                        case "getListOfSOsByMonthYear":
+                        case "getListOfSOsByYear":
                             var soListResponse = JsonConvert.DeserializeObject<ResponseMessage<List<SalesOrder>>>(jsonData);
                             if (soListResponse?.Data != null)
                             {
@@ -478,6 +488,7 @@ namespace DigitalProduction
                     e.CheckedComboBox.BorderStyle = BorderStyles.Office2003;
                 }
             };
+            LoadSizeItemsToCheckedComboBox(comboSize, comboxPartName, gridViewSchedule);
         }
 
         private void HideGridColumns()
@@ -514,14 +525,11 @@ namespace DigitalProduction
         private void ApplyMonthFilter()
         {
             var filteredData = productionSchedules
-                .Where(schedule => selectedMonth == null ||
-                                  (schedule.CreatedAt.Year == selectedMonth.Value.Year &&
-                                   schedule.CreatedAt.Month == selectedMonth.Value.Month))
-                .ToList();
+               .Where(schedule => selectedYear == null ||
+                                 (schedule.CreatedAt.Year == selectedYear)).ToList();
 
             // Update the grid control's data point
             gridControlSchedule.DataSource = filteredData;
-            gridViewSchedule.PopulateColumns();
 
             // Reset and apply grouping
             gridViewSchedule.ClearGrouping();
@@ -529,10 +537,10 @@ namespace DigitalProduction
             gridViewSchedule.ExpandAllGroups();
             gridViewSchedule.RefreshData();
 
-            if (!filteredData.Any())
-            {
-                ShowMessage.ShowInfo(LocalizationManager.GetString("NoRecords"));
-            }
+            //if (!filteredData.Any())
+            //{
+            //    ShowMessage.ShowInfo(LocalizationManager.GetString("NoRecords"));
+            //}
 
             UpdateTotalLabel();
         }
@@ -556,7 +564,121 @@ namespace DigitalProduction
         }
         private void BtnSync_Click(object sender, EventArgs e)
         {
-            _ = GetListOfSOsByMonthYearAsync();
+            _ = GetListOfSOsByYearAsync();
+        }
+
+        private void LoadSizeItemsToCheckedComboBox(CheckedComboBoxEdit comboBoxSize, CheckedComboBoxEdit comboBoxPart, GridView gridView)
+        {
+            comboBoxSize.Properties.BeginUpdate();
+            comboBoxPart.Properties.BeginUpdate();
+
+            comboBoxSize.Properties.Items.Clear();
+            comboBoxPart.Properties.Items.Clear();
+
+            var list = gridView.DataSource as IEnumerable<object>;
+            if (list == null)
+            {
+                comboBoxSize.Properties.EndUpdate();
+                comboBoxPart.Properties.EndUpdate();
+                return;
+            }
+
+            var sizeSet = new HashSet<string>();
+            var partSet = new HashSet<string>();
+
+            foreach (var item in list)
+            {
+                var type = item.GetType();
+
+                var sizeValue = type.GetProperty("Size")?.GetValue(item)?.ToString();
+                if (!string.IsNullOrEmpty(sizeValue))
+                    sizeSet.Add(sizeValue);
+
+                var partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
+                if (!string.IsNullOrEmpty(partValue))
+                    partSet.Add(partValue);
+            }
+
+            // Sort numeric and non-numeric sizes
+            var numericSizes = sizeSet
+                .Where(s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                .Select(s => new
+                {
+                    Original = s,
+                    Parsed = double.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture)
+                })
+                .OrderBy(x => x.Parsed)
+                .Select(x => x.Original)
+                .ToList();
+
+            var nonNumericSizes = sizeSet
+                .Where(s => !double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var size in numericSizes.Concat(nonNumericSizes))
+                comboBoxSize.Properties.Items.Add(size);
+
+            foreach (var part in partSet.OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
+                comboBoxPart.Properties.Items.Add(part);
+
+            // Optional: Set drop-down row count for better display
+            comboBoxSize.Properties.DropDownRows = Math.Min(10, comboBoxSize.Properties.Items.Count);
+            comboBoxPart.Properties.DropDownRows = Math.Min(10, comboBoxPart.Properties.Items.Count);
+
+            // Set larger popup size
+            comboBoxSize.Properties.PopupFormMinSize = new Size(200, 350);
+            comboBoxPart.Properties.PopupFormMinSize = new Size(200, 350);
+
+            comboBoxSize.Properties.EndUpdate();
+            comboBoxPart.Properties.EndUpdate();
+
+            // Optional: auto-expand combo if items exist
+            if (comboBoxSize.Properties.Items.Count > 0)
+                comboBoxPart.ShowPopup();
+        }
+        private void ApplyCombinedFilters()
+        {
+            var sizeValues = GetCheckedValues(comboSize, gridViewSchedule, "Size");
+            var partValues = GetCheckedValues(comboxPartName, gridViewSchedule, "PartName");
+
+            List<string> filters = new List<string>();
+
+            if (sizeValues.Any())
+                filters.Add($"[Size] IN ({string.Join(", ", sizeValues)})");
+
+            if (partValues.Any())
+                filters.Add($"[PartName] IN ({string.Join(", ", partValues)})");
+
+            gridViewSchedule.ActiveFilterString = string.Join(" AND ", filters);
+        }
+
+        private List<string> GetCheckedValues(CheckedComboBoxEdit comboBox, GridView gridView, string fieldName)
+        {
+            bool isNumericColumn = gridView.Columns[fieldName].ColumnType != typeof(string);
+
+            return comboBox.Properties.Items
+                .Cast<CheckedListBoxItem>()
+                .Where(item => item.CheckState == CheckState.Checked)
+                .Select(item => item.Value?.ToString())
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Select(v =>
+                {
+                    if (isNumericColumn && double.TryParse(v, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                        return v; // keep unquoted
+                    else
+                        return $"'{v.Replace("'", "''")}'"; // quote for string
+                })
+                .ToList();
+        }
+
+        private void comboSize_EditValueChanged(object sender, EventArgs e)
+        {
+            ApplyCombinedFilters();
+        }
+        private void comboPartName_EditValueChanged(object sender, EventArgs e)
+        {
+            ApplyCombinedFilters();
         }
 
         public class SalesOrder

@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using DevExpress.XtraBars;
 using DevExpress.XtraBars.FluentDesignSystem;
 using DevExpress.XtraBars.Navigation;
+using DigitalProduction.Frm_Admin;
 
 namespace DigitalProduction
 {
@@ -15,6 +16,7 @@ namespace DigitalProduction
     {
         private AccordionControlElement previousSelectedElement;
         private BarButtonItem btnLogOut;
+        private BarButtonItem btnDashboard;
 
         private WebSocketClient _webSocketClient;
         private ResourceManager resourceManager;
@@ -29,6 +31,7 @@ namespace DigitalProduction
             InitializeComponent();
             _webSocketClient = WebSocketClient.Instance;
             InitializeLogOutButton();
+            InitializeLDashboardButton();
             InitializeStatusMapping();
 
             accordionControl1.ElementClick += AccordionControl1_ElementClick;
@@ -111,6 +114,21 @@ namespace DigitalProduction
             btnLogOut.ItemClick += BtnLogOut_ItemClick;
 
             barSubItem1.AddItem(btnLogOut);
+        }
+        private void InitializeLDashboardButton()
+        {
+            btnDashboard = new BarButtonItem();
+            btnDashboard.Caption = LocalizationManager.GetString("Dashboard");
+            btnDashboard.ItemClick += BtnDashboard_ItemClick;
+
+            barSubItem1.AddItem(btnDashboard);
+        }
+
+        private void BtnDashboard_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            //this.Hide();
+            frmDashboard frmDashboard = new frmDashboard();
+            frmDashboard.Show();
         }
 
         private void BtnLogOut_ItemClick(object sender, ItemClickEventArgs e)

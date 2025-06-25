@@ -163,6 +163,23 @@ namespace DigitalProduction
             };
 
             GridViewHelper.CustomizeGroupText(gridViewProgressManagement);
+            gridViewProgressManagement.OptionsView.RowAutoHeight = true;
+            gridViewProgressManagement.Columns["MaterialName"].Width += 80;
+            gridViewProgressManagement.Columns["MachineName"].Width += 60;
+            gridViewProgressManagement.Columns["SO"].Width += 50;
+            var memoEdit = new DevExpress.XtraEditors.Repository.RepositoryItemMemoEdit();
+            gridProgressManagement.RepositoryItems.Add(memoEdit);
+
+            foreach (GridColumn column in gridViewProgressManagement.Columns)
+            {
+                if (column.FieldName == "MaterialName")
+                {
+                    continue;
+                }
+                column.AppearanceCell.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
+                column.ColumnEdit = memoEdit;
+            }
+
             //gridViewProgressManagement.CustomDrawGroupRow += gridViewProgressManagement_CustomDrawGroupRow;
         }
         //private void gridViewProgressManagement_CustomDrawGroupRow(object sender, RowObjectCustomDrawEventArgs e)
@@ -445,6 +462,7 @@ namespace DigitalProduction
             }
             gridViewProgressManagement.Columns["DeviceID"].Visible = false;
             gridViewProgressManagement.Columns["Note"].Visible = false;
+            gridViewProgressManagement.Columns["NoteReason"].Visible = false;
             gridViewProgressManagement.Columns["IpAddress"].Visible = false;
             gridViewProgressManagement.Columns["DistributionID"].Visible = false;
             gridViewProgressManagement.Columns["IsLeather"].Visible = false;
@@ -784,6 +802,28 @@ namespace DigitalProduction
             public string MaterialType => IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
 
             public int? Note { get; set; }
+
+            public string NoteReason
+            {
+                get
+                {
+                    if (!Note.HasValue)
+                        return string.Empty;
+
+                    switch (Note.Value)
+                    {
+                        case 0:
+                            return "1 - " + LocalizationManager.GetString("NotEnoughMaterials");
+                        case 1:
+                            return "2 - " + LocalizationManager.GetString("ChangeOfPlan");
+                        case 2:
+                            return "3 - " + LocalizationManager.GetString("ForgotToChooseSize");
+                        default:
+                            return string.Empty;
+                    }
+                }
+            }
+
         }
     }
 }

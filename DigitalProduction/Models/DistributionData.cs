@@ -18,6 +18,8 @@ namespace DigitalProduction.Models
 
     public class DistributionData
     {
+        public int DistributionID { get; set; }
+
         public int DeviceID { get; set; }
 
         public int PartSizeOrderID { get; set; }
@@ -45,6 +47,11 @@ namespace DigitalProduction.Models
         public bool IsLeather { get; set; }
 
         public bool IsDelete { get; set; }
+
+        public string SO { get; set; }
+        public string PartName { get; set; }
+        public string Size { get; set; }
+
     }
 
     public class SizeData
