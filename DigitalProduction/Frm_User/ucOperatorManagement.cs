@@ -26,6 +26,8 @@ namespace DigitalProduction
         private LabelControl lblPageInfo;
         private DataGridView dataGridView_OperatorManagement;
         private bool isEditing = false;
+        private TextBox txtOperatorId;
+        private Label lblResult;
 
         public ucOperatorManagement()
         {
@@ -392,8 +394,8 @@ namespace DigitalProduction
         public async Task GetDataAndLoadToGridAsync()
         {
             if (Global.CurrentUser == null) { return; }
-            int departmentID = Global.CurrentUser.DepartmentID;
-            var request = new { app = Global.App, action = "getOperators", departmentID };
+            //int departmentID = Global.CurrentUser.DepartmentID;
+            var request = new { app = Global.App, action = "getOperators" };
             string jsonRequest = JsonConvert.SerializeObject(request);
             await _webSocketClient.SendAsync(jsonRequest);
         }
@@ -574,33 +576,107 @@ namespace DigitalProduction
 
         private void CreateButtonContainer()
         {
-            // Create a PanelControl to hold the button
-            groupPanelButtonContainer = new PanelControl()
+            // Create container panel
+            groupPanelButtonContainer = new PanelControl
             {
                 Dock = DockStyle.Top,
-                Height = 50 // Adjust the height to suit your layout
+                Height = 60
             };
-
             Controls.Add(groupPanelButtonContainer);
-            button = new SimpleButton()
+
+            int marginLeft = 10;
+            int marginTop = 10;
+            int spacing = 10;
+
+            // 🔹 TextBox for OperatorID (with placeholder simulation)
+            txtOperatorId = new TextBox
+            {
+                Location = new Point(marginLeft, marginTop),
+                Size = new Size(100, 25),
+                ForeColor = Color.Gray,
+                Text = LocalizationManager.GetString("EmployeeID")
+            };
+            txtOperatorId.GotFocus += (s, e) =>
+            {
+                if (txtOperatorId.Text == LocalizationManager.GetString("EmployeeID"))
+                {
+                    txtOperatorId.Text = "";
+                    txtOperatorId.ForeColor = Color.Black;
+                }
+            };
+            txtOperatorId.LostFocus += (s, e) =>
+            {
+                if (string.IsNullOrWhiteSpace(txtOperatorId.Text))
+                {
+                    txtOperatorId.Text = LocalizationManager.GetString("EmployeeID");
+                    txtOperatorId.ForeColor = Color.Gray;
+                }
+            };
+            groupPanelButtonContainer.Controls.Add(txtOperatorId);
+
+            // 🔹 Find EmployeeID button
+            SimpleButton btnFind = new SimpleButton
+            {
+                Text = LocalizationManager.GetString("FindEmployeeCode"),
+                Size = new Size(120, 25),
+                Location = new Point(txtOperatorId.Right + spacing, marginTop)
+            };
+            btnFind.Click += BtnFind_Click;
+            groupPanelButtonContainer.Controls.Add(btnFind);
+
+            // 🔹 Register Operator button
+            button = new SimpleButton
             {
                 Text = LocalizationManager.GetString("RegisterOperator"),
-                Size = new Size(105, 40)
+                Size = new Size(120, 25),
+                Location = new Point(btnFind.Right + spacing, marginTop)
             };
-
-            groupPanelButtonContainer.Controls.Add(button);
             button.Click += Button_Click;
-            button.Location = new Point(10, 5);
-            // Sync Data button
-            SimpleButton syncButton = new SimpleButton()
+            groupPanelButtonContainer.Controls.Add(button);
+
+            // 🔹 Sync button
+            SimpleButton syncButton = new SimpleButton
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(100, 40)
+                Size = new Size(100, 25),
+                Location = new Point(button.Right + spacing, marginTop),
+                ImageOptions = { Image = Properties.Resources.sync_icon }
             };
-            syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
-            syncButton.Click += SyncButton_Click; // Event for syncing data
+            syncButton.Click += SyncButton_Click;
             groupPanelButtonContainer.Controls.Add(syncButton);
-            syncButton.Location = new Point(120, 5); // Adjust the location accordingly
+
+            // 🔹 Result Label
+            lblResult = new Label
+            {
+                Location = new Point(marginLeft, txtOperatorId.Bottom + 5),
+                AutoSize = true,
+                Font = new Font("Segoe UI", 8, FontStyle.Bold),
+                Text = ""
+            };
+            groupPanelButtonContainer.Controls.Add(lblResult);
+        }
+
+        private void BtnFind_Click(object sender, EventArgs e)
+        {
+            string filterText = txtOperatorId.Text.Trim();
+
+            if (!string.IsNullOrWhiteSpace(filterText) && filterText != LocalizationManager.GetString("EmployeeID"))
+            {
+                var filteredList = employees
+                    .Where(o => o.EmployeeID.ToString().Contains(filterText))
+                    .ToList();
+
+                dataGridView_OperatorManagement.DataSource = new BindingSource { DataSource = filteredList };
+                lblResult.Text = $"🔍 Showing {filteredList.Count} result(s)";
+            }
+            else
+            {
+                // ✅ Show full list
+                dataGridView_OperatorManagement.DataSource = new BindingSource { DataSource = employees };
+                lblResult.Text = $"✅ Showing all {employees.Count} employees";
+            }
+
+            ApplyLocalization(); // <-- Reapply header labels and action column
         }
 
         private void Button_Click(object sender, EventArgs e)

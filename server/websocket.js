@@ -553,56 +553,49 @@ async function handleGetUniquePages(ws, request) {
 async function handleSaveDistributionData(ws, request) {
   const { data } = request;
 
-  if (!data) {
+  // Check data object exists and has the required lists
+  if (!data || !Array.isArray(data.Distributions) || data.Distributions.length === 0) {
     return ws.send(JSON.stringify({
       action: 'saveDistributionData',
       status: 'error',
-      message: 'Missing required data'
+      message: 'Missing or invalid Distributions list'
     }));
   }
 
   try {
+    const results = await saveDistributionDataToDB(data);
 
-    // Lưu dữ liệu vào cơ sở dữ liệu
-    const result = await saveDistributionDataToDB(data);
-    if (!result || result.length === 0) {
-   //   console.log("⚠️ No results returned from the function.");
-      ws.send(JSON.stringify({
-        action: 'saveDistributionData',
-        status: 'error',
-        message: `Failed to save distribution data: ${error.message}`
-      }));
-    } else if (result[0].DistributionDuplicate) {
-   //     console.log("🚨 Entry is a duplicate. Insertion skipped.");
-         ws.send(JSON.stringify({
-          action: 'saveDistributionData',
-          status: 'error',
-          message: 'Entry is a duplicate. Insertion skipped!!'
-        }));
-    } else if (result[0].DistributionInserted) {
-         // Gửi phản hồi thành công
-        ws.send(JSON.stringify({
-          action: 'saveDistributionData',
-          status: 'success',
-          message: 'Distribution data saved and sent to Modbus successfully'
-        }));
-    } else {
-    //    console.log("❌ Error: Entry was not inserted.");
-        ws.send(JSON.stringify({
-          action: 'saveDistributionData',
-          status: 'error',
-          message: `Failed to save distribution data`
-        }));
-    }
+    const successCount = results.filter(r => r.DistributionInserted).length;
+    const duplicateCount = results.filter(r => r.DistributionDuplicate).length;
+    const errorCount = results.filter(r => r.Error).length;
+
+    const messages = [];
+
+    if (successCount > 0)
+      messages.push(`✅ ${successCount} distribution(s) saved successfully.`);
+
+    if (duplicateCount > 0)
+      messages.push(`⚠️ ${duplicateCount} duplicate(s) skipped.`);
+
+    if (errorCount > 0)
+      messages.push(`❌ ${errorCount} error(s) occurred.`);
+
+    ws.send(JSON.stringify({
+      action: 'saveDistributionData',
+      status: errorCount > 0 ? 'partial' : 'success',
+      message: messages.join(' ')
+    }));
+
   } catch (error) {
-    console.error("Error saving distribution data:" + error.message);
+    console.error("❌ Critical error saving distribution data:", error.message);
     ws.send(JSON.stringify({
       action: 'saveDistributionData',
       status: 'error',
-      message: `Failed to save distribution data: ${error.message}`
+      message: `Critical failure while saving data: ${error.message}`
     }));
   }
 }
+
 // Xử lý yêu cầu lưu trữ dữ liệu phân phối vào Modbus
 async function handleSaveDistributionDatas(ws, request) {
   const { data } = request;
@@ -663,19 +656,17 @@ async function handleGetUsers(ws) {
 
 // Xử lý yêu cầu lấy thông tin users
 async function handleGetOperators(ws, request) {
-  const { departmentID } = request;
-  if (!departmentID) {
-    return ws.send(JSON.stringify({ action: 'getOperators', status: 'error', message: 'Missing departmentID parameter' }));
-  }
+  const departmentID = request.departmentID || 0; // Default to 0 = get all
 
   try {
     const usersResponse = await getOperatorList(departmentID);
     ws.send(JSON.stringify({ action: 'getOperators', users: usersResponse }));
   } catch (error) {
     console.error('Error getting users:', error);
-    ws.send(JSON.stringify({ error: 'Failed to retrieve operators' }));
+    ws.send(JSON.stringify({ action: 'getOperators', status: 'error', message: 'Failed to retrieve operators' }));
   }
 }
+
 // Xử lý yêu cầu lấy thông tin operator from HMI
 async function handleGetOperatorDistribution(ws, request) {
   const { IpAddress } = request;

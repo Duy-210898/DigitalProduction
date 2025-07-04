@@ -25,7 +25,7 @@
     <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>94</ApplicationRevision>
+    <ApplicationRevision>96</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -217,8 +217,19 @@
     <Compile Include="Frm_Admin\frmDashboard.Designer.cs">
       <DependentUpon>frmDashboard.cs</DependentUpon>
     </Compile>
+    <Compile Include="Frm_User\SubDistributionDetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Frm_User\SubDistributionDetailForm.Designer.cs">
+      <DependentUpon>SubDistributionDetailForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Models\CuttingReportModel.cs" />
     <Compile Include="Models\PartItem.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SqlDataImporter.cs" />
     <Compile Include="Frm_User\ucCuttingReport.cs">
       <SubType>UserControl</SubType>
@@ -254,11 +265,6 @@
     <Compile Include="NotificationManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Frm_User\ucOperatorManagement.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -483,6 +489,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon_digital.ico" />
+    <Content Include="Resources\icon_Add.png" />
     <None Include="Resources\save_icon.png" />
     <None Include="Resources\reset_icon.png" />
     <None Include="Resources\foreColor_icon.png" />

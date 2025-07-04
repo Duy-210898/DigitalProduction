@@ -7,6 +7,9 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using DigitalProduction.Models;
 namespace DigitalProduction
 {
     public class WebSocketClient : IDisposable
@@ -153,48 +156,52 @@ namespace DigitalProduction
                 _responseHandlers.Remove(requestId);
             }
         }
-      
 
-        // Send a message to the WebSocket server and wait for a response
+
         public async Task<string> SendAsync(string message)
         {
-            if (_webSocket == null || _webSocket.State != WebSocketState.Open)
-            {
-                OnErrorOccurred?.Invoke("WebSocket is not connected.");
-                return null;
-            }
-
             try
             {
+                if (_webSocket == null ||
+                    _webSocket.State == WebSocketState.Aborted ||
+                    _webSocket.State == WebSocketState.Closed)
+                {
+                    _webSocket?.Dispose();
+                    _webSocket = new ClientWebSocket();
+                    await _webSocket.ConnectAsync(new Uri(_url), _cts.Token);
+                }
+
                 ResponseCompletionSource = new TaskCompletionSource<string>();
 
-                // Send the message to the server
-                await _webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)),
-                                           WebSocketMessageType.Text, true, _cts.Token);
+                await _webSocket.SendAsync(
+                    new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)),
+                    WebSocketMessageType.Text,
+                    true,
+                    _cts.Token);
 
-                // Receive response (in the same method after sending the request)
-                var buffer = new ArraySegment<byte>(new byte[12840]);
-
-                StringBuilder sb = new StringBuilder();
-                WebSocketReceiveResult result;
-                do
+                string responseMessage = await ReceiveFullWebSocketMessageAsync();
+                if (string.IsNullOrEmpty(responseMessage))
                 {
-                    result = await _webSocket.ReceiveAsync(buffer, _cts.Token);
-                    var chunk = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Trim();
-                    sb.Append(chunk.ToString());
-                    if (result.MessageType == WebSocketMessageType.Close)
-                    {
-                        NotifyDisconnection();
-                        return null;
-                    }
-                } while (!result.EndOfMessage);
+                    // Rollback due to null or empty WebSocket response
+                    await SendAsync(message);
 
-                // Convert the received byte array to a string and parse as JSON
-                string responseMessage = sb.ToString();
+                    OnErrorOccurred?.Invoke("Empty or null response received from WebSocket.");
+                    return null;
+                }
 
-                // Trigger the OnResponseReceived event with the response message
+                if (string.IsNullOrWhiteSpace(responseMessage))
+                {
+                    OnErrorOccurred?.Invoke("Empty or null response received.");
+                    return null;
+                }
+
+                if (!IsValidJson(responseMessage, out string validationError))
+                {
+                    OnErrorOccurred?.Invoke("Invalid JSON format: " + validationError);
+                    return null;
+                }
                 OnResponseReceived?.Invoke(responseMessage);
-
+                ValidateEntries(responseMessage);
                 return responseMessage;
             }
             catch (Exception ex)
@@ -203,6 +210,124 @@ namespace DigitalProduction
                 return null;
             }
         }
+
+        public void ValidateEntries(string json)
+        {
+            try
+            {
+                var root = JObject.Parse(json);
+                var items = root["distributionData"] as JArray;
+                if (items == null)
+                {
+                    OnErrorOccurred?.Invoke("distributionData is missing or invalid.");
+                    return;
+                }
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    var token = items[i];
+                    if (token == null)
+                    {
+                        OnErrorOccurred?.Invoke($"Null entry at index {i}.");
+                        continue;
+                    }
+
+                    try
+                    {
+                        var materialName = token["MaterialName"]?.ToString();
+                        if (materialName == null)
+                        {
+                            OnErrorOccurred?.Invoke($"Missing MaterialName at index {i}.");
+                        }
+
+                        var entry = token.ToObject<DistributionData>();
+                        if (entry == null)
+                        {
+                            OnErrorOccurred?.Invoke($"Failed to deserialize entry at index {i}.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        OnErrorOccurred?.Invoke($"Invalid item at index {i}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                OnErrorOccurred?.Invoke("JSON parsing failed: " + ex.Message);
+            }
+        }
+
+        private bool IsValidJson(string json, out string error)
+        {
+            error = null;
+
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                error = "JSON string is empty or null.";
+                return false;
+            }
+
+            try
+            {
+                JToken.Parse(json);
+                return true;
+            }
+            catch (JsonReaderException ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+        }
+
+        private async Task<string> ReceiveFullWebSocketMessageAsync()
+        {
+            var buffer = new byte[8192];
+            var sb = new StringBuilder();
+
+            while (true)
+            {
+                WebSocketReceiveResult result;
+                try
+                {
+                    result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
+                }
+                catch (WebSocketException ex)
+                {
+                    OnErrorOccurred?.Invoke("WebSocket error: " + ex.Message);
+                    NotifyDisconnection();
+                    return null;
+                }
+                catch (InvalidOperationException ex)
+                {
+                    OnErrorOccurred?.Invoke("Invalid operation: " + ex.Message);
+                    return null;
+                }
+
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    NotifyDisconnection();
+                    return null;
+                }
+
+                // Defensive check
+                if (buffer == null || result.Count == 0)
+                {
+                    OnErrorOccurred?.Invoke("Received empty or null buffer.");
+                    return null;
+                }
+
+                sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+
+                if (result.EndOfMessage)
+                    break;
+            }
+
+            string json = sb.ToString();
+
+            return json;
+        }
+
         public async Task<string> SendRealTimeAsync(string message)
         {
             if (_webSocket == null || _webSocket.State != WebSocketState.Open)

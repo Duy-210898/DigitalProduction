@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -67,8 +66,8 @@ namespace DigitalProduction.ViewModels
                 if (FilterService.Instance.FilterStartDate != value)
                 {
                     FilterService.Instance.FilterStartDate = value ?? DateTime.Today;
-                    OnPropertyChanged(nameof(FilterStartDate));
                     SyncData();
+                    OnPropertyChanged(nameof(FilterStartDate));
                 }
             }
         }
@@ -81,8 +80,8 @@ namespace DigitalProduction.ViewModels
                 if (FilterService.Instance.FilterEndDate != value)
                 {
                     FilterService.Instance.FilterEndDate = value ?? DateTime.Today;
-                    OnPropertyChanged(nameof(FilterEndDate));
                     SyncData();
+                    OnPropertyChanged(nameof(FilterEndDate));
                 }
             }
         }

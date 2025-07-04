@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ucDistribution));
             this.lblFactory = new System.Windows.Forms.Label();
             this.lblLastNo = new System.Windows.Forms.Label();
             this.lblArt = new System.Windows.Forms.Label();
@@ -46,9 +47,9 @@
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.btnDeleteData = new DevExpress.XtraEditors.SimpleButton();
             this.lbl_Name = new System.Windows.Forms.Label();
+            this.gridLookUpOperator = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.btnSend = new DevExpress.XtraEditors.SimpleButton();
-            this.lbl_operatorID = new System.Windows.Forms.Label();
-            this.lbl_operatorName = new System.Windows.Forms.Label();
             this.lblSelectMachine = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
@@ -65,10 +66,11 @@
             this.btnSaveInventory = new DevExpress.XtraEditors.SimpleButton();
             this.txtInventory = new System.Windows.Forms.TextBox();
             this.lblInventoryQty = new System.Windows.Forms.Label();
-            this.cbxDevice = new System.Windows.Forms.ComboBox();
             this.panelMaterialType = new System.Windows.Forms.Panel();
             this.rdLeather = new System.Windows.Forms.RadioButton();
             this.rdRawMaterial = new System.Windows.Forms.RadioButton();
+            this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
             this.gridViewOverview = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2.SuspendLayout();
@@ -76,6 +78,8 @@
             this.tableLayoutPanel3.SuspendLayout();
             this.panel2.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpOperator.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView2)).BeginInit();
             this.panel5.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
@@ -85,6 +89,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).BeginInit();
             this.tableLayoutPanel5.SuspendLayout();
             this.panelMaterialType.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).BeginInit();
             this.SuspendLayout();
@@ -252,14 +258,15 @@
             // tableLayoutPanel3
             // 
             this.tableLayoutPanel3.AutoSize = true;
+            this.tableLayoutPanel3.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.tableLayoutPanel3.ColumnCount = 2;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 51.12782F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 48.87218F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.52417F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.47583F));
             this.tableLayoutPanel3.Controls.Add(this.panel2, 1, 2);
             this.tableLayoutPanel3.Controls.Add(this.lblSelectMachine, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.panel5, 0, 2);
-            this.tableLayoutPanel3.Controls.Add(this.cbxDevice, 1, 1);
             this.tableLayoutPanel3.Controls.Add(this.panelMaterialType, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.gridLookUpDevice, 1, 1);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(20, 78);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
@@ -276,45 +283,49 @@
             this.panel2.AutoSize = true;
             this.panel2.Controls.Add(this.tableLayoutPanel7);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(479, 79);
+            this.panel2.Location = new System.Drawing.Point(492, 79);
             this.panel2.Margin = new System.Windows.Forms.Padding(3, 3, 20, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(432, 205);
+            this.panel2.Size = new System.Drawing.Size(419, 205);
             this.panel2.TabIndex = 6;
             // 
             // tableLayoutPanel7
             // 
             this.tableLayoutPanel7.ColumnCount = 2;
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 48.61111F));
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 51.38889F));
             this.tableLayoutPanel7.Controls.Add(this.btnDeleteData, 0, 3);
             this.tableLayoutPanel7.Controls.Add(this.lbl_Name, 0, 0);
+            this.tableLayoutPanel7.Controls.Add(this.gridLookUpOperator, 0, 1);
             this.tableLayoutPanel7.Controls.Add(this.btnSend, 1, 3);
-            this.tableLayoutPanel7.Controls.Add(this.lbl_operatorID, 0, 2);
-            this.tableLayoutPanel7.Controls.Add(this.lbl_operatorName, 0, 1);
             this.tableLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel7.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel7.Name = "tableLayoutPanel7";
             this.tableLayoutPanel7.RowCount = 4;
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 19.5122F));
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.2439F));
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(432, 205);
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(419, 205);
             this.tableLayoutPanel7.TabIndex = 10;
             // 
             // btnDeleteData
             // 
+            this.btnDeleteData.Appearance.BackColor = System.Drawing.Color.White;
             this.btnDeleteData.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDeleteData.Appearance.ForeColor = System.Drawing.Color.Black;
+            this.btnDeleteData.Appearance.Options.UseBackColor = true;
             this.btnDeleteData.Appearance.Options.UseFont = true;
+            this.btnDeleteData.Appearance.Options.UseForeColor = true;
             this.btnDeleteData.AutoSize = true;
             this.btnDeleteData.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnDeleteData.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnDeleteData.ImageOptions.SvgImage")));
             this.btnDeleteData.Location = new System.Drawing.Point(50, 156);
             this.btnDeleteData.LookAndFeel.SkinName = "Dark Side";
             this.btnDeleteData.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnDeleteData.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
             this.btnDeleteData.Name = "btnDeleteData";
-            this.btnDeleteData.Size = new System.Drawing.Size(51, 46);
+            this.btnDeleteData.Size = new System.Drawing.Size(86, 46);
             this.btnDeleteData.TabIndex = 9;
             this.btnDeleteData.Text = "Delete";
             this.btnDeleteData.Click += new System.EventHandler(this.btnDeleteData_Click);
@@ -323,10 +334,32 @@
             // 
             this.lbl_Name.Location = new System.Drawing.Point(3, 0);
             this.lbl_Name.Name = "lbl_Name";
-            this.lbl_Name.Size = new System.Drawing.Size(210, 33);
+            this.lbl_Name.Size = new System.Drawing.Size(197, 33);
             this.lbl_Name.TabIndex = 5;
             this.lbl_Name.Text = "Operator Name";
             this.lbl_Name.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // gridLookUpOperator
+            // 
+            this.gridLookUpOperator.Location = new System.Drawing.Point(3, 43);
+            this.gridLookUpOperator.Name = "gridLookUpOperator";
+            this.gridLookUpOperator.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.gridLookUpOperator.Properties.Appearance.Options.UseBackColor = true;
+            this.gridLookUpOperator.Properties.AutoHeight = false;
+            this.gridLookUpOperator.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpOperator.Properties.NullText = "";
+            this.gridLookUpOperator.Properties.PopupView = this.gridView2;
+            this.gridLookUpOperator.Size = new System.Drawing.Size(197, 25);
+            this.gridLookUpOperator.TabIndex = 10;
+            // 
+            // gridView2
+            // 
+            this.gridView2.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridView2.Name = "gridView2";
+            this.gridView2.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridView2.OptionsView.RowAutoHeight = true;
+            this.gridView2.OptionsView.ShowGroupPanel = false;
             // 
             // btnSend
             // 
@@ -334,41 +367,25 @@
             this.btnSend.Appearance.Options.UseFont = true;
             this.btnSend.AutoSize = true;
             this.btnSend.Dock = System.Windows.Forms.DockStyle.Left;
-            this.btnSend.Location = new System.Drawing.Point(266, 156);
+            this.btnSend.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnSend.ImageOptions.SvgImage")));
+            this.btnSend.Location = new System.Drawing.Point(253, 156);
             this.btnSend.LookAndFeel.SkinName = "Dark Side";
             this.btnSend.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnSend.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(120, 46);
+            this.btnSend.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.True;
+            this.btnSend.Size = new System.Drawing.Size(155, 46);
             this.btnSend.TabIndex = 4;
             this.btnSend.Text = "Send Distribution";
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             // 
-            // lbl_operatorID
-            // 
-            this.lbl_operatorID.Location = new System.Drawing.Point(3, 102);
-            this.lbl_operatorID.Name = "lbl_operatorID";
-            this.lbl_operatorID.Size = new System.Drawing.Size(210, 22);
-            this.lbl_operatorID.TabIndex = 7;
-            this.lbl_operatorID.Text = "lbl ID";
-            this.lbl_operatorID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lbl_operatorID.Visible = false;
-            // 
-            // lbl_operatorName
-            // 
-            this.lbl_operatorName.Location = new System.Drawing.Point(3, 51);
-            this.lbl_operatorName.Name = "lbl_operatorName";
-            this.lbl_operatorName.Size = new System.Drawing.Size(210, 28);
-            this.lbl_operatorName.TabIndex = 6;
-            this.lbl_operatorName.Text = "Name";
-            this.lbl_operatorName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // lblSelectMachine
             // 
+            this.lblSelectMachine.BackColor = System.Drawing.SystemColors.Window;
             this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblSelectMachine.Location = new System.Drawing.Point(479, 0);
+            this.lblSelectMachine.Location = new System.Drawing.Point(492, 0);
             this.lblSelectMachine.Name = "lblSelectMachine";
-            this.lblSelectMachine.Size = new System.Drawing.Size(449, 36);
+            this.lblSelectMachine.Size = new System.Drawing.Size(436, 36);
             this.lblSelectMachine.TabIndex = 0;
             this.lblSelectMachine.Text = "Select Machine";
             this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -379,7 +396,7 @@
             this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel5.Location = new System.Drawing.Point(3, 79);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(470, 205);
+            this.panel5.Size = new System.Drawing.Size(483, 205);
             this.panel5.TabIndex = 7;
             // 
             // tableLayoutPanel4
@@ -396,7 +413,7 @@
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.58537F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 76.09756F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.829268F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(470, 205);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(483, 205);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // tableLayoutPanel6
@@ -423,23 +440,23 @@
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(464, 150);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(477, 150);
             this.tableLayoutPanel6.TabIndex = 8;
             // 
             // numCuttingDieQty
             // 
             this.numCuttingDieQty.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numCuttingDieQty.Location = new System.Drawing.Point(235, 42);
+            this.numCuttingDieQty.Location = new System.Drawing.Point(241, 42);
             this.numCuttingDieQty.Name = "numCuttingDieQty";
-            this.numCuttingDieQty.Size = new System.Drawing.Size(226, 23);
+            this.numCuttingDieQty.Size = new System.Drawing.Size(233, 23);
             this.numCuttingDieQty.TabIndex = 0;
             // 
             // numPiecesPerPair
             // 
             this.numPiecesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numPiecesPerPair.Location = new System.Drawing.Point(235, 3);
+            this.numPiecesPerPair.Location = new System.Drawing.Point(241, 3);
             this.numPiecesPerPair.Name = "numPiecesPerPair";
-            this.numPiecesPerPair.Size = new System.Drawing.Size(226, 23);
+            this.numPiecesPerPair.Size = new System.Drawing.Size(233, 23);
             this.numPiecesPerPair.TabIndex = 0;
             // 
             // lblTotalPeicesPerPair
@@ -449,7 +466,7 @@
             this.lblTotalPeicesPerPair.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblTotalPeicesPerPair.Location = new System.Drawing.Point(3, 111);
             this.lblTotalPeicesPerPair.Name = "lblTotalPeicesPerPair";
-            this.lblTotalPeicesPerPair.Size = new System.Drawing.Size(226, 29);
+            this.lblTotalPeicesPerPair.Size = new System.Drawing.Size(232, 29);
             this.lblTotalPeicesPerPair.TabIndex = 7;
             this.lblTotalPeicesPerPair.Text = "Total Peices Per Pair";
             this.lblTotalPeicesPerPair.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -461,7 +478,7 @@
             this.lblPeicesPerPair.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblPeicesPerPair.Location = new System.Drawing.Point(3, 0);
             this.lblPeicesPerPair.Name = "lblPeicesPerPair";
-            this.lblPeicesPerPair.Size = new System.Drawing.Size(226, 33);
+            this.lblPeicesPerPair.Size = new System.Drawing.Size(232, 33);
             this.lblPeicesPerPair.TabIndex = 4;
             this.lblPeicesPerPair.Text = "Peices Per Pair:";
             this.lblPeicesPerPair.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -473,7 +490,7 @@
             this.lblCuttingDie.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblCuttingDie.Location = new System.Drawing.Point(3, 39);
             this.lblCuttingDie.Name = "lblCuttingDie";
-            this.lblCuttingDie.Size = new System.Drawing.Size(226, 33);
+            this.lblCuttingDie.Size = new System.Drawing.Size(232, 33);
             this.lblCuttingDie.TabIndex = 3;
             this.lblCuttingDie.Text = "Cutting Die Quanity:";
             this.lblCuttingDie.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -485,7 +502,7 @@
             this.lblMaterialLayer.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblMaterialLayer.Location = new System.Drawing.Point(3, 78);
             this.lblMaterialLayer.Name = "lblMaterialLayer";
-            this.lblMaterialLayer.Size = new System.Drawing.Size(226, 33);
+            this.lblMaterialLayer.Size = new System.Drawing.Size(232, 33);
             this.lblMaterialLayer.TabIndex = 5;
             this.lblMaterialLayer.Text = "Material Layer:";
             this.lblMaterialLayer.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -493,17 +510,17 @@
             // numMaterialLayer
             // 
             this.numMaterialLayer.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numMaterialLayer.Location = new System.Drawing.Point(235, 81);
+            this.numMaterialLayer.Location = new System.Drawing.Point(241, 81);
             this.numMaterialLayer.Name = "numMaterialLayer";
-            this.numMaterialLayer.Size = new System.Drawing.Size(226, 23);
+            this.numMaterialLayer.Size = new System.Drawing.Size(233, 23);
             this.numMaterialLayer.TabIndex = 0;
             // 
             // numericTotalPeicesPerPair
             // 
             this.numericTotalPeicesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(235, 114);
+            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(241, 114);
             this.numericTotalPeicesPerPair.Name = "numericTotalPeicesPerPair";
-            this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(226, 23);
+            this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(233, 23);
             this.numericTotalPeicesPerPair.TabIndex = 6;
             // 
             // tableLayoutPanel5
@@ -521,7 +538,7 @@
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(464, 28);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(477, 28);
             this.tableLayoutPanel5.TabIndex = 8;
             // 
             // btnSaveInventory
@@ -529,12 +546,13 @@
             this.btnSaveInventory.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSaveInventory.Appearance.Options.UseFont = true;
             this.btnSaveInventory.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnSaveInventory.Location = new System.Drawing.Point(406, 3);
+            this.btnSaveInventory.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSaveInventory.ImageOptions.Image")));
+            this.btnSaveInventory.Location = new System.Drawing.Point(415, 3);
             this.btnSaveInventory.LookAndFeel.SkinName = "Dark Side";
             this.btnSaveInventory.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnSaveInventory.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
             this.btnSaveInventory.Name = "btnSaveInventory";
-            this.btnSaveInventory.Size = new System.Drawing.Size(55, 22);
+            this.btnSaveInventory.Size = new System.Drawing.Size(59, 22);
             this.btnSaveInventory.TabIndex = 5;
             this.btnSaveInventory.Text = "Save";
             this.btnSaveInventory.Click += new System.EventHandler(this.btnSaveInventory_Click);
@@ -542,9 +560,9 @@
             // txtInventory
             // 
             this.txtInventory.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtInventory.Location = new System.Drawing.Point(235, 3);
+            this.txtInventory.Location = new System.Drawing.Point(241, 3);
             this.txtInventory.Name = "txtInventory";
-            this.txtInventory.Size = new System.Drawing.Size(118, 23);
+            this.txtInventory.Size = new System.Drawing.Size(121, 23);
             this.txtInventory.TabIndex = 1;
             // 
             // lblInventoryQty
@@ -561,18 +579,6 @@
             this.lblInventoryQty.Text = "Inventory Quanity:";
             this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // cbxDevice
-            // 
-            this.cbxDevice.Dock = System.Windows.Forms.DockStyle.Top;
-            this.cbxDevice.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxDevice.FormattingEnabled = true;
-            this.cbxDevice.Location = new System.Drawing.Point(476, 39);
-            this.cbxDevice.Margin = new System.Windows.Forms.Padding(0, 3, 20, 3);
-            this.cbxDevice.Name = "cbxDevice";
-            this.cbxDevice.Size = new System.Drawing.Size(435, 26);
-            this.cbxDevice.TabIndex = 5;
-            this.cbxDevice.SelectedValueChanged += new System.EventHandler(this.cbxDevice_SelectedValueChanged);
-            // 
             // panelMaterialType
             // 
             this.panelMaterialType.Controls.Add(this.rdLeather);
@@ -580,7 +586,7 @@
             this.panelMaterialType.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMaterialType.Location = new System.Drawing.Point(3, 3);
             this.panelMaterialType.Name = "panelMaterialType";
-            this.panelMaterialType.Size = new System.Drawing.Size(470, 30);
+            this.panelMaterialType.Size = new System.Drawing.Size(483, 30);
             this.panelMaterialType.TabIndex = 6;
             // 
             // rdLeather
@@ -608,6 +614,28 @@
             this.rdRawMaterial.Text = "radioButton1";
             this.rdRawMaterial.UseVisualStyleBackColor = true;
             this.rdRawMaterial.CheckedChanged += new System.EventHandler(this.rdRawMaterial_CheckedChanged);
+            // 
+            // gridLookUpDevice
+            // 
+            this.gridLookUpDevice.Location = new System.Drawing.Point(492, 39);
+            this.gridLookUpDevice.Name = "gridLookUpDevice";
+            this.gridLookUpDevice.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.gridLookUpDevice.Properties.Appearance.Options.UseBackColor = true;
+            this.gridLookUpDevice.Properties.AutoHeight = false;
+            this.gridLookUpDevice.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpDevice.Properties.NullText = "";
+            this.gridLookUpDevice.Properties.PopupView = this.gridView1;
+            this.gridLookUpDevice.Size = new System.Drawing.Size(200, 25);
+            this.gridLookUpDevice.TabIndex = 9;
+            // 
+            // gridView1
+            // 
+            this.gridView1.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridView1.Name = "gridView1";
+            this.gridView1.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridView1.OptionsView.RowAutoHeight = true;
+            this.gridView1.OptionsView.ShowGroupPanel = false;
             // 
             // gridControlOverview
             // 
@@ -640,6 +668,8 @@
             this.panel2.ResumeLayout(false);
             this.tableLayoutPanel7.ResumeLayout(false);
             this.tableLayoutPanel7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpOperator.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView2)).EndInit();
             this.panel5.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
@@ -652,6 +682,8 @@
             this.tableLayoutPanel5.PerformLayout();
             this.panelMaterialType.ResumeLayout(false);
             this.panelMaterialType.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).EndInit();
             this.ResumeLayout(false);
@@ -678,11 +710,8 @@
         private System.Windows.Forms.Label lblProductionDate;
         private System.Windows.Forms.Label lblCreatedDate;
         private System.Windows.Forms.Panel panel4;
-        private System.Windows.Forms.ComboBox cbxDevice;
         private System.Windows.Forms.Panel panel2;
         private DevExpress.XtraEditors.SimpleButton btnDeleteData;
-        private System.Windows.Forms.Label lbl_operatorID;
-        private System.Windows.Forms.Label lbl_operatorName;
         private System.Windows.Forms.Label lbl_Name;
         private DevExpress.XtraEditors.SimpleButton btnSend;
         private System.Windows.Forms.Panel panel5;
@@ -703,5 +732,9 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
         private DevExpress.XtraGrid.GridControl gridControlOverview;
         private DevExpress.XtraGrid.Views.Grid.GridView gridViewOverview;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpDevice;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpOperator;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView2;
     }
 }

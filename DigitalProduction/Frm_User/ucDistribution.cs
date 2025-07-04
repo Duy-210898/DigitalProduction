@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DevExpress.Data.Controls.ExpressionEditor;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraEditors.Repository;
+using DevExpress.XtraExport.Helpers;
 using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
@@ -30,6 +36,7 @@ namespace DigitalProduction
         private List<SizeData> sizeDataList = new List<SizeData>();
         private List<List<ProductionSchedule>> productionSchedules = new List<List<ProductionSchedule>>();
         private DataTable table = new DataTable();
+        private bool isDeviceData = false;
         private int countSO = 0;
 
         public ucDistribution()
@@ -37,7 +44,8 @@ namespace DigitalProduction
             dbHelper = new DbHelper();
             InitializeComponent();
             ApplyLocalization();
-            lbl_operatorName.Visible = false;
+
+            loadOperatorDistribution();
             loadDeviceDistribution();
             txtInventory.KeyPress += TxtInventory_KeyPress;
             rdRawMaterial.CheckedChanged += MaterialFilterChanged;
@@ -197,16 +205,16 @@ namespace DigitalProduction
                             case "getSchedule":
                                 HandleGetScheduleResponse(scheduleResponse);
                                 break;
-                            case "getOperatorDistribution":
-                                if (scheduleResponse.Status == "success" && scheduleResponse.Employee != null)
-                                {
-                                    loadOperator(scheduleResponse.Employee[0]);
-                                }
-                                else {
-                                    lbl_operatorName.ResetText();
-                                    ShowMessage.ShowError(scheduleResponse.Message, LocalizationManager.GetString("Error"));
-                                }
-                                break;
+                            //case "getOperatorDistribution":
+                            //    if (scheduleResponse.Status == "success" && scheduleResponse.Employee != null)
+                            //    {
+                            //        loadOperator(scheduleResponse.Employee[0]);
+                            //    }
+                            //    else {
+                            //      //  lbl_operatorName.ResetText();
+                            //        ShowMessage.ShowError(scheduleResponse.Message, LocalizationManager.GetString("Error"));
+                            //    }
+                            //    break;
                             case "saveDistributionData":
                                 Console.WriteLine("Suscess");
                                 break;
@@ -261,34 +269,42 @@ namespace DigitalProduction
             ShowMessage.ShowError("Error" + message);
         }
 
-
-        private async void cbxDevice_SelectedValueChanged(object sender, EventArgs e)
+        private async void gridLookUpDevice_EditValueChanged(object sender, EventArgs e)
         {
-            if (cbxDevice.SelectedIndex > 0)
+            if (gridLookUpDevice.EditValue == null)
+                return;
+
+            // Get selected DeviceID
+            if (int.TryParse(gridLookUpDevice.EditValue.ToString(), out int deviceID) && deviceID > 0)
             {
-                string deviceID = cbxDevice.SelectedValue.ToString();
-                string IpAddress = await dbHelper.GetIPAddressByDeviceIDAsync(int.Parse(deviceID));
-                if (!string.IsNullOrEmpty(deviceID) || !string.IsNullOrEmpty(IpAddress))
+                string ipAddress = await dbHelper.GetIPAddressByDeviceIDAsync(deviceID);
+
+                if (!string.IsNullOrEmpty(ipAddress))
                 {
-                    SendGetOpertaionAndScheduleRequestAsync(String.Empty, IpAddress, "getOperatorDistribution");
+                     SendGetOpertaionAndScheduleRequestAsync(string.Empty, ipAddress, "getOperatorDistribution");
+                }
+                else
+                {
+                    MessageBox.Show("⚠️ No IP address found for the selected device.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
 
-        private void loadOperator(Employee employee)
-        {
-            if (employee != null)
-            {
-                lbl_operatorName.Visible = true;
-                lbl_operatorID.Text = employee.OperatorID.ToString();
-                lbl_operatorName.Text = string.Join("-", employee.OperatorName, employee.EmployeeID);
-                lbl_operatorName.Font = new Font("Arial", 10, FontStyle.Bold);
 
-            }
-            else {
-                lbl_operatorName.Visible = false;
-            }
-        }
+        //private void loadOperator(Employee employee)
+        //{
+        //    if (employee != null)
+        //    {
+        //        lbl_operatorName.Visible = true;
+        //        lbl_operatorID.Text = employee.OperatorID.ToString();
+        //        lbl_operatorName.Text = string.Join("-", employee.OperatorName, employee.EmployeeID);
+        //        lbl_operatorName.Font = new Font("Arial", 10, FontStyle.Bold);
+
+        //    }
+        //    else {
+        //        lbl_operatorName.Visible = false;
+        //    }
+        //}
 
         private async void SendGetOpertaionAndScheduleRequestAsync(string so, string IpAddress, string key)
         {
@@ -299,161 +315,246 @@ namespace DigitalProduction
         private void loadDeviceDistribution()
         {
             List<Device> machines = DbHelper.getlistMachines();
-            machines.Insert(0, new Device { DeviceID = 0, MachineName = "" });
-            cbxDevice.DataSource = machines;
-            cbxDevice.DisplayMember = "MachineName";
-            cbxDevice.ValueMember = "DeviceID";
-            cbxDevice.SelectedIndex = 0;
-            cbxDevice.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            gridLookUpDevice.Properties.DataSource = machines;
+            gridLookUpDevice.Properties.DisplayMember = "MachineName";
+            gridLookUpDevice.Properties.ValueMember = "DeviceID";
+
+            // Optional: Disable typing if you want DropDownList style
+            gridLookUpDevice.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+
+            // Hide all columns except "MachineName"
+            gridLookUpDevice.Properties.View.Columns.Clear();
+            gridLookUpDevice.Properties.PopulateViewColumns();
+            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridLookUpDevice.Properties.View.Columns)
+            {
+                column.Visible = column.FieldName == "MachineName";
+            }
+            // Enable autocomplete & search
+            gridLookUpDevice.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            gridLookUpDevice.Properties.AutoComplete = true;
+
+            // Enable incremental search
+            gridLookUpDevice.Properties.ImmediatePopup = true;
+            gridLookUpDevice.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
+            gridLookUpDevice.Properties.AllowNullInput = DevExpress.Utils.DefaultBoolean.True;
+            gridLookUpDevice.Properties.NullText = "";
+
+            // Filter mode
+            gridLookUpDevice.Properties.View.OptionsView.ShowAutoFilterRow = true;
+            gridLookUpDevice.Properties.View.ActiveFilterEnabled = true;
+        }
+        private void loadOperatorDistribution()
+        {
+            List<Employee> employees= DbHelper.getOperatorsByDepartment();
+
+            gridLookUpOperator.Properties.DataSource = employees;
+            gridLookUpOperator.Properties.DisplayMember = "OperatorName";
+            gridLookUpOperator.Properties.ValueMember = "EmployeeID";
+
+            // Optional: Disable typing if you want DropDownList style
+            gridLookUpOperator.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+
+            // Hide all columns except "MachineName"
+            gridLookUpOperator.Properties.View.Columns.Clear();
+            gridLookUpOperator.Properties.PopulateViewColumns();
+            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridLookUpOperator.Properties.View.Columns)
+            {
+                column.Visible = column.FieldName == "OperatorName";
+            }
+            // Enable autocomplete & search
+            gridLookUpOperator.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            gridLookUpOperator.Properties.AutoComplete = true;
+
+            // Enable incremental search
+            gridLookUpOperator.Properties.ImmediatePopup = true;
+            gridLookUpOperator.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
+            gridLookUpOperator.Properties.AllowNullInput = DevExpress.Utils.DefaultBoolean.True;
+            gridLookUpOperator.Properties.NullText = "";
+
+            // Filter mode
+            gridLookUpOperator.Properties.View.OptionsView.ShowAutoFilterRow = true;
+            gridLookUpOperator.Properties.View.ActiveFilterEnabled = true;
         }
 
-        private List<DistributionData> getDistributionDataFromControls()
+        //private List<DistributionData> getDistributionDataFromControls()
+        //{
+        //    partSizeOrderIDs.Clear();
+        //    List<DistributionData> results = new List<DistributionData>();
+        //    userID = Global.CurrentUser != null ? Global.CurrentUser.UserID : 0;
+        //    departmentID = Global.CurrentUser != null ? Global.CurrentUser.DepartmentID : 0;
+        //    deviceID = int.Parse(gridLookUpDevice.Properties.ValueMember.ToString());
+        //    bool? isLeather = false;
+
+        //    // Use a HashSet to avoid duplicate PartSizeOrderIDs
+        //    HashSet<int> uniquePSOIDs = new HashSet<int>();
+        //    // Clear previous results
+        //    partSizeOrderIDs.Clear();
+
+        //    if (productionSchedules.Count != 0)
+        //    {
+        //        if (rdLeather.Checked)
+        //        {
+        //            isLeather = true;
+        //        }
+        //        foreach (var (group, index) in productionSchedules.Select((g, i) => (g, i)))
+        //        {
+        //            foreach (var schedule in group)
+        //            {
+        //                if (schedule == null) continue;
+
+        //                int? partID = schedule.PartId;
+        //                int sizeID = schedule.SizeID;
+        //                int orderID = schedule.OrderID;
+        //                string model = schedule.Model;
+        //                int? inventory = schedule.InventoryQty.HasValue ? schedule.InventoryQty.Value : 0;
+        //                int? cuttingDieQty = (int)schedule.CuttingDieQty;
+        //                int? piecesPerPair = (int)schedule.PeicesPerPair;
+        //                int? materialLayer = (int)schedule.MaterialLayer;
+        //                int? TotalPiecesPerPair = (int)schedule.TotalPiecesPerPair;
+
+        //                if (rdRawMaterial.Checked)
+        //                {
+        //                    if (cuttingDieQty == 0 || piecesPerPair == 0 || materialLayer == 0)
+        //                    {
+        //                        ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
+        //                        return null;
+        //                    }
+        //                }
+        //                if (rdLeather.Checked)
+        //                {
+        //                    if (TotalPiecesPerPair == 0)
+        //                    {
+        //                        ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
+        //                        return null;
+        //                    }
+        //                }
+        //                productId = dbHelper.getProductIdByArt(schedule.ART);
+
+        //                int? psoID = dbHelper.getPartSizeOrderId(partID.Value, sizeID, orderID);
+
+        //                if (psoID != -1 && !uniquePSOIDs.Contains(psoID.Value))
+        //                {
+        //                    var distributionData = new DistributionData
+        //                    {
+        //                        DeviceID = deviceID ?? 0,
+        //                        OperatorID = operatorID ?? 0,
+        //                        UserID = userID ?? 0,
+        //                        ProductID = productId ?? 0,
+        //                        PartID = partID ?? 0,
+        //                        Model = model ?? "Unknown",
+        //                        PartSizeOrderID = psoID ?? 0,
+        //                        CuttingDieQty = cuttingDieQty ?? 0,
+        //                        PiecesPerPair = piecesPerPair ?? 0,
+        //                        MaterialLayer = materialLayer ?? 0,
+        //                        InventoryQty = inventory ?? 0,
+        //                        TotalPiecesPerPair = TotalPiecesPerPair ?? 0,
+        //                        IsLeather = isLeather ?? false,
+        //                        CreatedAt = DateTime.Now.AddSeconds(index),
+        //                        IsDelete = false,
+        //                        Status = "Pending",
+        //                    };
+        //                    results.Add(distributionData);
+        //                    uniquePSOIDs.Add(psoID.Value);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return results;
+        //}
+
+        private DistributionPayload getDistributionDataFromControls(bool isDeviceData)
         {
             partSizeOrderIDs.Clear();
-            List<DistributionData> results = new List<DistributionData>();
-            userID = Global.CurrentUser != null ? Global.CurrentUser.UserID : 0;
-            departmentID = Global.CurrentUser != null ? Global.CurrentUser.DepartmentID : 0;
-            deviceID = int.Parse(cbxDevice.SelectedValue.ToString());
-            operatorID = int.Parse(lbl_operatorID.Text);
-            //cuttingDieQty = int.Parse(numCuttingDieQty.Text);
-            //piecesPerPair = int.Parse(numPiecesPerPair.Text);
-            //materialLayer = int.Parse(numMaterialLayer.Text);
-            //totalPiecesPerPair = int.Parse(numericTotalPeicesPerPair.Text);
+            var payload = new DistributionPayload();
+            var uniquePSOIDs = new HashSet<int>();
 
-            //int productId = dbHelper.getProductIdByArt(lblArt.Text.Split(':')[1]);
-            bool? isLeather = false;
-
-            // Use a HashSet to avoid duplicate PartSizeOrderIDs
-            HashSet<int> uniquePSOIDs = new HashSet<int>();
-            // Clear previous results
-            partSizeOrderIDs.Clear();
-
-            if (productionSchedules.Count != 0)
+            int userID = Global.CurrentUser?.UserID ?? 0;
+            int departmentID = Global.CurrentUser?.DepartmentID ?? 0;
+            int deviceID = int.TryParse(gridLookUpDevice.EditValue?.ToString(), out int devID) ? devID : 0;
+            int operatorID = 0;
+            if (!isDeviceData)
             {
-                if (rdLeather.Checked)
+                operatorID = int.TryParse(gridLookUpOperator.EditValue?.ToString(), out int operID) ? operID : 0;
+            }
+            bool isLeather = rdLeather.Checked;
+
+            if (productionSchedules.Count == 0)
+                return payload;
+
+            foreach (var (group, index) in productionSchedules.Select((g, i) => (g, i)))
+            {
+                foreach (var schedule in group)
                 {
-                    isLeather = true;
-                }
-                foreach (var (group, index) in productionSchedules.Select((g, i) => (g, i)))
-                {
-                    foreach (var schedule in group)
+                    if (schedule == null) continue;
+
+                    int partID = schedule.PartId;
+                    int sizeID = schedule.SizeID;
+                    int orderID = schedule.OrderID;
+                    string model = schedule.Model ?? "Unknown";
+                    int inventory = schedule.InventoryQty ?? 0;
+                    int cuttingDieQty = schedule.CuttingDieQty ?? 0;
+                    int piecesPerPair = schedule.PeicesPerPair ?? 0;
+                    int materialLayer = schedule.MaterialLayer ?? 0;
+                    int totalPiecesPerPair = schedule.TotalPiecesPerPair ?? 0;
+
+                    // Validation
+                    if (rdRawMaterial.Checked && (cuttingDieQty == 0 || piecesPerPair == 0 || materialLayer == 0))
                     {
-                        if (schedule == null) continue;
+                        ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
+                        return null;
+                    }
 
-                        int? partID = schedule.PartId;
-                        int sizeID = schedule.SizeID;
-                        int orderID = schedule.OrderID;
-                        string model = schedule.Model;
-                        int? inventory = schedule.InventoryQty.HasValue? schedule.InventoryQty.Value : 0;
-                        //int? inventory = (int)schedule.InventoryQty;
-                        int? cuttingDieQty = (int)schedule.CuttingDieQty;
-                        int? piecesPerPair = (int)schedule.PeicesPerPair;
-                        int? materialLayer = (int)schedule.MaterialLayer;
-                        int? TotalPiecesPerPair = (int)schedule.TotalPiecesPerPair;
+                    if (rdLeather.Checked && totalPiecesPerPair == 0)
+                    {
+                        ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
+                        return null;
+                    }
 
-                        if (rdRawMaterial.Checked)
+                    int productId = dbHelper.getProductIdByArt(schedule.ART);
+                    int? psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
+                    if (psoID == -1 || uniquePSOIDs.Contains(psoID.Value)) continue;
+
+                    var dist = new DistributionData
+                    {
+                        DeviceID = deviceID,
+                        OperatorID = isDeviceData ? schedule.OperatorID : operatorID,
+                        UserID = userID,
+                        ProductID = productId,
+                        PartID = partID,
+                        Model = model,
+                        PartSizeOrderID = psoID.Value,
+                        CuttingDieQty = cuttingDieQty,
+                        PiecesPerPair = piecesPerPair,
+                        MaterialLayer = materialLayer,
+                        InventoryQty = inventory,
+                        TotalPiecesPerPair = totalPiecesPerPair,
+                        IsLeather = isLeather,
+                        CreatedAt = DateTime.Now.AddSeconds(index),
+                        IsDelete = false,
+                        Status = "Pending"
+                    };
+
+                    payload.Distributions.Add(dist);
+                    uniquePSOIDs.Add(psoID.Value);
+
+                    if (isDeviceData && schedule.AssignedOperators != null && schedule.AssignedOperators.Count > 0)
+                    {
+                        foreach (var operatorInfo in schedule.AssignedOperators)
                         {
-                            if (cuttingDieQty == 0 || piecesPerPair == 0 || materialLayer == 0)
+                            payload.SubDistributions.Add(new OperatorInfo
                             {
-                                ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
-                                return null;
-                            }
-                        }
-                        if (rdLeather.Checked) {
-                            if (TotalPiecesPerPair == 0)
-                            {
-                                ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDataCutting"));
-                                return null;
-                            }
-                        }
-                        productId = dbHelper.getProductIdByArt(schedule.ART);
-
-                        int? psoID = dbHelper.getPartSizeOrderId(partID.Value, sizeID, orderID);
-
-                        if (psoID != -1 && !uniquePSOIDs.Contains(psoID.Value))
-                        {
-                            var distributionData = new DistributionData
-                            {
-                                DeviceID = deviceID ?? 0,
-                                OperatorID = operatorID ?? 0,
-                                UserID = userID ?? 0,
-                                ProductID = productId ?? 0,
-                                PartID = partID ?? 0,
-                                Model = model ?? "Unknown",
-                                PartSizeOrderID = psoID ?? 0,
-                                CuttingDieQty = cuttingDieQty ?? 0,
-                                PiecesPerPair = piecesPerPair ?? 0,
-                                MaterialLayer = materialLayer ?? 0,
-                                InventoryQty = inventory ?? 0,
-                                TotalPiecesPerPair = TotalPiecesPerPair ?? 0,
-                                IsLeather = isLeather ?? false,
-                                CreatedAt = DateTime.Now.AddSeconds(index),
-                                IsDelete = false,
-                                Status = "Pending",
-                            };
-                            results.Add(distributionData);
-                            uniquePSOIDs.Add(psoID.Value);
+                                DeviceID = operatorInfo.DeviceID,
+                                OperatorID = operatorInfo.OperatorID,
+                                InventoryQty = operatorInfo.InventoryQty,
+                                SizeQty = operatorInfo.SizeQty
+                            });
                         }
                     }
                 }
             }
 
-                //foreach (int orderID in orderIDs)
-                //{
-                //    if (partIDs.Count >= 20)
-                //    {
-                //        ShowMessage.ShowWarning("PartName no longer than 20", "Warning");
-                //        break;
-                //    }
-                //    // 1 part has many sizes - care part
-                //    if (rdRawMaterial.Checked)
-                //    {
-                //        // get partoderID
-                //        foreach (int i in sizeIDs)
-                //        {
-                //            partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partIDs.FirstOrDefault(), i, orderID));
-                //        }
-                //    }
-                //    // 1-3 size has many parts - care size
-                //    else
-                //    {
-                //        isLeather = true;
-                //        foreach (int i in sizeIDs)
-                //        {
-                //            foreach (int partId in partIDs)
-                //            {
-                //                partSizeOrderIDs.Add(dbHelper.getPartSizeOrderId(partId, i, orderID));
-                //            }
-                //        }
-                //    }
-                //}
-
-                //if (partSizeOrderIDs.Count != 0)
-                //{
-                //    // save on DB
-                //    foreach (int i in partSizeOrderIDs)
-                //    {
-                //        var distributionData = new DistributionData
-                //        {
-                //            DeviceID = deviceID,
-                //            OperatorID = operatorID,
-                //            UserID = userID,
-                //            ProductID = productId,
-                //            PartSizeOrderID = i,
-                //            CuttingDieQty = cuttingDieQty,
-                //            PiecesPerPair = piecesPerPair,
-                //            MaterialLayer = materialLayer,
-                //            InventoryQty = inventory,
-                //            TotalPiecesPerPair = totalPiecesPerPair,
-                //            IsLeather = isLeather,
-                //            CreatedAt = DateTime.Now,
-                //            IsDelete = false,
-                //            Status = "Pending",
-                //        };
-                //        results.Add(distributionData);
-                //    }
-                //}
-            return results;
+            return payload;
         }
 
         private void ApplyLocalization()
@@ -472,7 +573,6 @@ namespace DigitalProduction
                 { btnDeleteData, "Refresh" },
                 { lblInventoryQty, "InventoryQty" },
                 {lblPeicesPerPair, "PeicesPerPair" },
-                //{lblTargetInDay, "TargetInDay" },
                 {lblCuttingDie, "CuttingDieQty" },
                 {lblMaterialLayer, "MaterialLayer" },
                 {lblTotalPeicesPerPair, "TotalPeicesPerPair" },
@@ -485,50 +585,91 @@ namespace DigitalProduction
                 control.Key.Text = LocalizationManager.GetString(control.Value) + (control.Key is Label ? ":" : "");
             }
 
-            cbxDevice.Text = LocalizationManager.GetString("SelectDevice");
+            gridLookUpDevice.EditValue = LocalizationManager.GetString("SelectDevice");
             rdLeather.Text = LocalizationManager.GetString("leatherMaterial");
             rdRawMaterial.Text = LocalizationManager.GetString("rawMaterial");
         }
 
         private async void SendDistributionDataToServer()
         {
+            //try
+            //{
+            //    List<DistributionData> distributionData = getDistributionDataFromControls(isDeviceData);
+            //    ResetSendDistribution();
+            //    if (distributionData != null && distributionData.Count > 0)
+            //    {
+            //        var request = new
+            //        {
+            //            app = Global.App,
+            //            action = "saveDistributionData",
+            //            data = distributionData
+            //        };
+
+            //        string jsonRequestWrapper = JsonConvert.SerializeObject(request);
+
+            //        // Gửi yêu cầu và nhận phản hồi từ máy chủ
+            //        string jsonResponse = await _webSocketClient.SendAsync(jsonRequestWrapper);
+
+            //        if (!string.IsNullOrEmpty(jsonResponse))
+            //        {
+            //            var response = JsonConvert.DeserializeObject<Response>(jsonResponse);
+
+            //            if (response != null && response.Status == "success")
+            //            {
+            //                ResetSendDistribution();
+            //                ShowMessage.ShowInfo(response.Message, "Sucess");
+            //            }
+            //            else
+            //            {
+            //                ShowMessage.ShowError(response.Message, "Error");
+            //            }
+            //        }
+            //        else
+            //        {
+            //            MessageBox.Show("No response received from the server.");
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    ConnectionManager.Instance.IsReconnecting = true;
+            //    MessageBox.Show("An error occurred while sending data: " + ex.Message);
+            //}
             try
             {
-                List<DistributionData> distributionData = getDistributionDataFromControls();
+                DistributionPayload payload = getDistributionDataFromControls(isDeviceData);
+                if (payload == null || payload.Distributions.Count == 0)
+                    return;
+
                 ResetSendDistribution();
-                if (distributionData != null && distributionData.Count > 0)
+
+                var request = new
                 {
-                    var request = new
+                    app = Global.App,
+                    action = "saveDistributionData",
+                    data = payload
+                };
+                string jsonRequestWrapper = JsonConvert.SerializeObject(request);
+
+                string jsonResponse = await _webSocketClient.SendAsync(jsonRequestWrapper);
+
+                if (!string.IsNullOrEmpty(jsonResponse))
+                {
+                    var response = JsonConvert.DeserializeObject<Response>(jsonResponse);
+
+                    if (response != null && response.Status == "success")
                     {
-                        app = Global.App,
-                        action = "saveDistributionData",
-                        data = distributionData
-                    };
-
-                    string jsonRequestWrapper = JsonConvert.SerializeObject(request);
-
-                    // Gửi yêu cầu và nhận phản hồi từ máy chủ
-                    string jsonResponse = await _webSocketClient.SendAsync(jsonRequestWrapper);
-
-                    if (!string.IsNullOrEmpty(jsonResponse))
-                    {
-                        var response = JsonConvert.DeserializeObject<Response>(jsonResponse);
-
-                        if (response != null && response.Status == "success")
-                        {
-                            //DbHelper.UpsertTargetInDay(DateTime.Now, departmentID, productId, int.Parse(txt_targetInDay.Text), operatorID);
-                            ResetSendDistribution();
-                            ShowMessage.ShowInfo(response.Message, "Sucess");
-                        }
-                        else
-                        {
-                            ShowMessage.ShowError(response.Message, "Error");
-                        }
+                        ResetSendDistribution();
+                        ShowMessage.ShowInfo(response.Message, "Success");
                     }
                     else
                     {
-                        MessageBox.Show("No response received from the server.");
+                        ShowMessage.ShowError(response.Message, "Error");
                     }
+                }
+                else
+                {
+                    MessageBox.Show("No response received from the server.");
                 }
             }
             catch (Exception ex)
@@ -547,7 +688,7 @@ namespace DigitalProduction
                 ShowMessage.ShowWarning("Please select an material type option before proceeding.", "Warning");
                 return;
             }
-            if (cbxDevice.Text == "") {
+            if (gridLookUpDevice.EditValue.ToString() == "") {
                 ShowMessage.ShowWarning("Please select an device before proceeding.", "Warning");
                 return;
             }
@@ -573,8 +714,9 @@ namespace DigitalProduction
             }
         }
 
-        private void UpdateUIGridViewOverview(List<List<ProductionSchedule>> filteredSchedulesGroups)
+        private void UpdateUIGridViewOverview(List<List<ProductionSchedule>> filteredSchedulesGroups, bool isDeviceData)
         {
+
             gridControlOverview.Dock = DockStyle.Fill;
             gridViewOverview.OptionsView.ColumnAutoWidth = true;
             gridViewOverview.OptionsView.RowAutoHeight = true;
@@ -586,7 +728,7 @@ namespace DigitalProduction
             gridViewOverview.Appearance.Row.Font = new Font("Segoe UI", 10);
 
             //    DataTable table = new DataTable();
-          
+
             table = new DataTable();
             table.Columns.Add("GroupSO", typeof(string));
             table.Columns.Add("SO", typeof(string));
@@ -598,6 +740,10 @@ namespace DigitalProduction
             table.Columns.Add("MaterialLayer", typeof(int));
             table.Columns.Add("TotalPiecesPerPair", typeof(int));
             table.Columns.Add("InventoryQty", typeof(int));
+            table.Columns.Add("OperatorName", typeof(string));
+            table.Columns.Add("EmployeeID", typeof(int));
+            table.Columns.Add("DeviceName", typeof(string));
+            table.Columns.Add("DeviceID", typeof(int));
 
 
             gridControlOverview.DataSource = null;
@@ -650,21 +796,226 @@ namespace DigitalProduction
                     table.Rows.Add(groupSO, mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQty, 0, 0, 0, 0, 0);
                 }
             }
-
             gridControlOverview.DataSource = table;
 
             TranslateGridControlOverviewHeaders();
             gridViewOverview.ClearSelection();
 
-            // Group by GroupSO column
-            //gridViewOverview.GroupCount = 1;
+            // Group by GroupSO
             gridViewOverview.Columns["GroupSO"].GroupIndex = 0;
             gridViewOverview.OptionsSelection.MultiSelect = true;
             gridViewOverview.OptionsSelection.MultiSelectMode = GridMultiSelectMode.RowSelect;
-
-            // gridViewOverview.Columns["GroupSO"].GroupIndex = 0;
             gridViewOverview.ExpandAllGroups();
+
+            // Device-specific UI additions
+            if (isDeviceData)
+            {
+                // Add Action column if not present
+                if (gridViewOverview.Columns["Action"] == null)
+                {
+                    var actionButtonEdit = new RepositoryItemButtonEdit
+                    {
+                        TextEditStyle = TextEditStyles.HideTextEditor
+                    };
+
+                    actionButtonEdit.Buttons.Clear();
+                    actionButtonEdit.Buttons.Add(new EditorButton(ButtonPredefines.Glyph)
+                    {
+                        ImageOptions = { Image = Properties.Resources.icon_Add },
+                        ToolTip = "Duplicate",
+                        Tag = "Duplicate"
+                    });
+                    actionButtonEdit.Buttons.Add(new EditorButton(ButtonPredefines.Delete)
+                    {
+                        ToolTip = "Delete",
+                        Tag = "Delete"
+                    });
+
+                    actionButtonEdit.ButtonClick += gridViewOverview_ActionButtonClick;
+
+                    if (!gridControlOverview.RepositoryItems.Contains(actionButtonEdit))
+                        gridControlOverview.RepositoryItems.Add(actionButtonEdit);
+
+                    gridViewOverview.Columns.Add(new GridColumn
+                    {
+                        Caption = LocalizationManager.GetString("Action"),
+                        Name = "colActionButtons",
+                        FieldName = "Action",
+                        ColumnEdit = actionButtonEdit,
+                        Visible = true,
+                        Width = 80
+                    });
+
+                    // Add cursor hover effect
+                    gridViewOverview.MouseMove += (s, e) =>
+                    {
+                        var hitInfo = gridViewOverview.CalcHitInfo(e.Location);
+                        gridControlOverview.Cursor = (hitInfo.InRowCell && hitInfo.Column?.FieldName == "Action")
+                            ? Cursors.Hand
+                            : Cursors.Default;
+                    };
+                }
+
+                // Show & reposition the columns
+                gridViewOverview.BeginUpdate();
+                try
+                {
+                    var columnsWithIndex = new (string Name, int Index)[]
+                    {
+                        ("DeviceName",  gridViewOverview.Columns.Count - 5),
+                        ("DeviceID",    gridViewOverview.Columns.Count - 4),
+                        ("OperatorName",  gridViewOverview.Columns.Count - 3),
+                        ("EmployeeID",    gridViewOverview.Columns.Count - 2),
+                        ("Action",        gridViewOverview.Columns.Count - 1)
+                    };
+
+                    foreach (var (name, index) in columnsWithIndex)
+                    {
+                        var column = gridViewOverview.Columns[name];
+                        if (column != null)
+                        {
+                            column.Visible = true;
+                            column.VisibleIndex = index;
+                        }
+                    }
+                }
+                finally
+                {
+                    gridViewOverview.EndUpdate();
+                }
+            }
+            else
+            {
+                // Hide the device-related columns
+                foreach (var name in new[] { "DeviceName", "DeviceID", "OperatorName", "EmployeeID", "Action" })
+                {
+                    var column = gridViewOverview.Columns[name];
+                    if (column != null)
+                        column.Visible = false;
+                }
+            }
+
+            // Attach only once (you can wrap this if needed to avoid multiple binds)
+            gridViewOverview.CellValueChanged += gridViewOverview_CellValueChanged;
+            gridViewOverview.ShowingEditor += gridViewOverview_ShowingEditor;
+
         }
+        private void gridViewOverview_ShowingEditor(object sender, CancelEventArgs e)
+        {
+            GridView view = sender as GridView;
+            int rowHandle = view.FocusedRowHandle;
+            GridColumn column = view.FocusedColumn;
+
+            if (!view.IsValidRowHandle(rowHandle) || column == null)
+                return;
+
+            // Always allow "Action" column to be edited
+            if (column.FieldName == "Action")
+                return;
+
+            // Get the current row's GroupSO
+            string currentGroupSO = view.GetRowCellValue(rowHandle, "GroupSO")?.ToString();
+            if (string.IsNullOrEmpty(currentGroupSO)) return;
+
+            // Find the first visible row in this GroupSO → it's the parent
+            for (int i = 0; i < view.RowCount; i++)
+            {
+                int handle = view.GetVisibleRowHandle(i);
+                if (!view.IsValidRowHandle(handle)) continue;
+
+                string groupSO = view.GetRowCellValue(handle, "GroupSO")?.ToString();
+                if (groupSO == currentGroupSO)
+                {
+                    // If the current row is the parent and not "Action" column → block edit
+                    if (handle == rowHandle)
+                    {
+                        e.Cancel = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void gridViewOverview_CellValueChanged(object sender, CellValueChangedEventArgs e)
+        {
+            if (e.Column.FieldName != "SizeQty") return;
+
+            int changedRowHandle = e.RowHandle;
+            if (!gridViewOverview.IsValidRowHandle(changedRowHandle)) return;
+
+            // Get current row's GroupSO
+            string groupSO = gridViewOverview.GetRowCellValue(changedRowHandle, "GroupSO")?.ToString();
+            if (string.IsNullOrEmpty(groupSO)) return;
+
+            // Find all rows in the same group
+            int mainRowHandle = -1;
+            int totalChildQty = 0;
+            int childCount = 0;
+
+            for (int i = 0; i < gridViewOverview.RowCount; i++)
+            {
+                int handle = gridViewOverview.GetVisibleRowHandle(i);
+                if (!gridViewOverview.IsValidRowHandle(handle)) continue;
+
+                string thisGroup = gridViewOverview.GetRowCellValue(handle, "GroupSO")?.ToString();
+                if (thisGroup != groupSO) continue;
+
+                if (mainRowHandle == -1)
+                {
+                    mainRowHandle = handle; // First row of group = parent
+                }
+                else
+                {
+                    // Child rows — sum their SizeQty
+                    object val = gridViewOverview.GetRowCellValue(handle, "SizeQty");
+                    if (val != null && int.TryParse(val.ToString(), out int qty))
+                    {
+                        totalChildQty += qty;
+                        childCount++;
+                    }
+                }
+            }
+
+            // Now get the main row's SizeQty (limit)
+            if (mainRowHandle != -1)
+            {
+                int mainQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(mainRowHandle, "SizeQty"));
+
+                if (totalChildQty > mainQty)
+                {
+                    // Reset the changed value to 0 or recalculate allowed value
+                    gridViewOverview.SetRowCellValue(changedRowHandle, "SizeQty", 0);
+
+                    MessageBox.Show(
+                        $"❌ Total of child SizeQty ({totalChildQty}) exceeds the main row's SizeQty ({mainQty}).\nResetting this value.",
+                        "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning
+                    );
+                }
+            }
+        }
+        private void gridViewOverview_ActionButtonClick(object sender, ButtonPressedEventArgs e)
+        {
+            int rowHandle = gridViewOverview.FocusedRowHandle;
+            if (rowHandle < 0) return;
+
+            DataRowView rowView = gridViewOverview.GetRow(rowHandle) as DataRowView;
+            if (rowView == null) return;
+
+            if (e.Button.Kind == ButtonPredefines.Glyph && e.Button.ToolTip == "Duplicate")
+            {
+                // Duplicate logic
+                DataRow newRow = table.NewRow();
+                newRow.ItemArray = (object[])rowView.Row.ItemArray.Clone();
+                newRow["InventoryQty"] = 0;
+                newRow["SizeQty"] = 0;
+                table.Rows.Add(newRow);
+            }
+            else if (e.Button.Kind == ButtonPredefines.Delete)
+            {
+                 rowView.Row.Delete();
+            }
+        }
+
 
         private void TranslateGridControlOverviewHeaders()
         {
@@ -684,15 +1035,18 @@ namespace DigitalProduction
             var sizeData = sizeDataList.FirstOrDefault(s => s.SizeID == sizeId);
             return sizeData != null ? sizeData.Size : string.Empty;
         }
-        public void ReceiveFilteredData(List<ProductionSchedule> filteredSchedules)
+        public void ReceiveFilteredData(List<ProductionSchedule> filteredSchedules, bool isDeviceData)
         {
+            this.isDeviceData = isDeviceData;
+
             HandleReceivedSchedule(filteredSchedules);
             Console.WriteLine($"Received {filteredSchedules.Count} schedules.");
             // Collect unique SizeIDs and PartIDs
             sizeIDs = new HashSet<int>(filteredSchedules.Select(s => s.SizeID));
             partIDs = new HashSet<int>(filteredSchedules.Select(s => s.PartId));
-            if (partIDs.Count > 20) {
-               ShowMessage.ShowWarning("PartName no longer than 20", "Warning");
+            if (partIDs.Count > 20)
+            {
+                ShowMessage.ShowWarning("PartName no longer than 20", "Warning");
             }
             else
             {
@@ -745,10 +1099,9 @@ namespace DigitalProduction
                         productionSchedules.Add(filteredSchedules);
                     }
                 }
+
+                UpdateUIGridViewOverview(productionSchedules, isDeviceData);
             }
-
-            UpdateUIGridViewOverview(productionSchedules);
-
         }
 
         bool AreSchedulesEqual(List<ProductionSchedule> list1, List<ProductionSchedule> list2)
@@ -803,18 +1156,84 @@ namespace DigitalProduction
                     return;
                 }
 
-                gridViewOverview.SetRowCellValue(selectedRowHandle, "InventoryQty", inventory);
+                // fill cell OperatorName, Device and InventoryQty
+                string selectedOperatorName = gridLookUpOperator.Text.ToString().Trim();
+                int? selectedOperatorID = null;
 
+                if (int.TryParse(gridLookUpOperator.EditValue?.ToString().Trim(), out int tempOperatorID))
+                {
+                    selectedOperatorID = tempOperatorID;
+                }
+                string selectedDeviceName = gridLookUpDevice.Text.ToString().Trim();
+                int selectedDeviceID = Convert.ToInt32(gridLookUpDevice.EditValue.ToString().Trim());
+                if (isDeviceData)
+                {
+                    // Skip row 0
+                    if (selectedRowHandle == 0) return;
+                    gridViewOverview.SetRowCellValue(selectedRowHandle, "DeviceName", selectedDeviceName);
+                    gridViewOverview.SetRowCellValue(selectedRowHandle, "DeviceID", selectedDeviceID);
+                    gridViewOverview.SetRowCellValue(selectedRowHandle, "OperatorName", selectedOperatorName);
+                    gridViewOverview.SetRowCellValue(selectedRowHandle, "EmployeeID", selectedOperatorID);
+
+                }
+                gridViewOverview.SetRowCellValue(selectedRowHandle, "InventoryQty", inventory);
+                gridViewOverview.RefreshRow(selectedRowHandle);
+
+                //string normalizedSize = size?.Trim();
+                //foreach (var group in productionSchedules)
+                //{
+                //    foreach (var schedule in group)
+                //    {
+                //        string scheduleSize = GetSizeName(schedule.SizeID);
+                //        string operatorID = gridLookUpOperator.EditValue.ToString().Trim();
+                //        if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
+                //            string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
+                //        {
+                //            schedule.OperatorID = Int32.Parse(operatorID);
+                //            schedule.InventoryQty = inventory;
+                //        }
+                //    }
+                //}
+                // Update productionSchedules
                 string normalizedSize = size?.Trim();
+
                 foreach (var group in productionSchedules)
                 {
                     foreach (var schedule in group)
                     {
                         string scheduleSize = GetSizeName(schedule.SizeID);
+
                         if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
                             string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
                         {
+                            schedule.OperatorID = (int)selectedOperatorID;
                             schedule.InventoryQty = inventory;
+                        }
+                    }
+                }
+                if (isDeviceData)
+                {
+                    foreach (var group in productionSchedules)
+                    {
+                        foreach (var schedule in group)
+                        {
+                            string scheduleSize = GetSizeName(schedule.SizeID);
+
+                            if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Remove any existing operator entry with same ID (to avoid duplicates)
+                                schedule.AssignedOperators.RemoveAll(op => op.OperatorID == selectedOperatorID);
+
+                                // Add this operator as assigned for this schedule
+                                schedule.AssignedOperators.Add(new OperatorInfo
+                                {
+                                    DeviceID = selectedDeviceID,
+                                    OperatorID = (int)selectedOperatorID,
+                                    InventoryQty = inventory,
+                                    SizeQty = sizeQty
+                                });
+                            }
                         }
                     }
                 }
@@ -855,7 +1274,6 @@ namespace DigitalProduction
                         int cuttingDieQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "CuttingDieQty") ?? 0);
                         int materialLayer = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "MaterialLayer") ?? 0);
                         int totalPiecesPerPair = Convert.ToInt32(gridViewOverview.GetRowCellValue(rowHandle, "TotalPiecesPerPair") ?? 0);
-
 
                         // Loop through production schedules and find the matching schedule
                         foreach (var group in productionSchedules)
@@ -991,13 +1409,14 @@ namespace DigitalProduction
             }
 
             gridViewOverview.RefreshData();
-            ShowMessage.ShowInfo("All rows updated successfully.");
+         //   ShowMessage.ShowInfo("All rows updated successfully.");
         }
         private void ResetSendDistribution()
         {
             loadDeviceDistribution();
-            lbl_operatorID.ResetText();
-            lbl_operatorName.ResetText();
+            loadOperatorDistribution();
+            //lbl_operatorID.ResetText();
+            //lbl_operatorName.ResetText();
             countSO = 0;
             rdRawMaterial.Checked = false;
             rdLeather.Checked = false;
@@ -1006,5 +1425,18 @@ namespace DigitalProduction
             gridControlOverview.DataSource = null;
             sizeDataList = new List<SizeData>();
         }
+        public class DistributionPayload
+        {
+            public List<DistributionData> Distributions { get; set; } = new List<DistributionData>();
+            public List<OperatorInfo> SubDistributions { get; set; } = new List<OperatorInfo>();
+        }
+        public class OperatorInfo
+        {
+            public int OperatorID { get; set; }
+            public int DeviceID { get; set; }
+            public int InventoryQty { get; set; }
+            public int SizeQty { get; set; }
+        }
+
     }
 }

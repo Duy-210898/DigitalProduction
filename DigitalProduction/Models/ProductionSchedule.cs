@@ -1,4 +1,6 @@
 ﻿using System;
+using static DigitalProduction.ucDistribution;
+using System.Collections.Generic;
 
 namespace DigitalProduction.Models
 {
@@ -7,6 +9,7 @@ namespace DigitalProduction.Models
         public ProductionSchedule() { }
 
         public int OrderID { get; set; }
+        public int OperatorID { get; set; }
         public int DepartmentID { get; set; }
         public string GroupSO { get; set; }
         public string Factory { get; set; }
@@ -37,6 +40,7 @@ namespace DigitalProduction.Models
         public int? MaterialLayer { get; set; } = 0;
         public int? TotalPiecesPerPair { get; set; } = 0;
         public string Status { get; set; }
+        public List<OperatorInfo> AssignedOperators { get; set; } = new List<OperatorInfo>();
     }
 
 }

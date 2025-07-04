@@ -196,7 +196,7 @@ namespace DigitalProduction.Frm_Admin
                 var row = view.GetRow(rowHandle);
                 if (row is Distribution item)
                 {
-                    if (item.Status == "Pending")
+                    if (item.Status == "Pending" || item.Status == "Complete")
                     {
                         idsToDelete.Add(item.DistributionID);
                     }

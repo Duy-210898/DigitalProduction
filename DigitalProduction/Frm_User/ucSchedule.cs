@@ -14,7 +14,6 @@ using DevExpress.XtraSplashScreen;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static OfficeOpenXml.ExcelErrorValue;
 
 namespace DigitalProduction
 {
@@ -24,7 +23,7 @@ namespace DigitalProduction
         private WebSocketClient _webSocketClient;
         private int? selectedYear = DateTime.Today.Year;
         private Label lblTotalRecords;
-        private Button btnSendData;
+        private SimpleButton btnSendData, btnDevideData;
         // Keep track of selected items
         List<SalesOrder> selectedSalesOrders = new List<SalesOrder>();
         private readonly string[] columnsToHide = { "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
@@ -140,9 +139,8 @@ namespace DigitalProduction
             }
         }
 
-        private async void BtnSendData_Click(object sender, EventArgs e)
+        private async void BtnSendData_Click(object sender, EventArgs e, bool isDeviceData)
         {
-
             // avoid dupliacte
             List<ProductionSchedule> filteredSchedules = GetFilteredData().Distinct(new ProductionScheduleComparer()).ToList();
 
@@ -184,13 +182,12 @@ namespace DigitalProduction
                 {
                     if (userControl is ucDistribution distributionControl)
                     {
-                        distributionControl.ReceiveFilteredData(filteredSchedules);
+                        distributionControl.ReceiveFilteredData(filteredSchedules, isDeviceData);
                     }
                 }
 
                 // 🔥 Highlight "Distribution" in Accordion Menu
                 mainForm.HighlightSelectedItem(mainForm.btnDistribution);
-
                 MessageBox.Show($"Sent {filteredSchedules.Count} records to Distribution!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -274,9 +271,20 @@ namespace DigitalProduction
             // Optional: expand top-level groups manually (if performance is acceptable)
             gridViewSchedule.ExpandAllGroups(); // Caution: use only with small to medium datasets
 
+            gridViewSchedule.CustomDrawFooterCell += (s, e) =>
+            {
+                e.Appearance.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+                e.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
+                e.Appearance.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
+                e.Info.DisplayText += "\n"; // force line break
+
+                e.Appearance.Options.UseFont = true;
+                e.Appearance.Options.UseTextOptions = true;
+            };
 
             // Setup columns and grouping
             GroupGridViewColumns();
+            gridViewSchedule.LayoutChanged();
         }
 
 
@@ -316,19 +324,32 @@ namespace DigitalProduction
                 Padding = new Padding(5)
             };
 
-            btnSendData = new System.Windows.Forms.Button
+            btnSendData = new SimpleButton
             {
                 Text = LocalizationManager.GetString("SelectData"),
-                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
+                Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold),
                 BackColor = System.Drawing.Color.LightBlue,
                 AutoSize = true,
                 Margin = new Padding(10, 0, 0, 0) // Adds space between label and button
             };
-            btnSendData.Click += BtnSendData_Click;
+            btnSendData.Click += (s, e) => BtnSendData_Click(s, e, false);
 
             // Add components to FlowLayoutPanel
             bottomPanel.Controls.Add(lblTotalRecords);
             bottomPanel.Controls.Add(btnSendData);
+
+            btnDevideData = new SimpleButton
+            { 
+                Text = LocalizationManager.GetString("SelectDevideData"),
+                Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold),
+                BackColor = System.Drawing.Color.LightBlue,
+                AutoSize = true,
+                Margin = new Padding(10, 0, 0, 0) // Adds space between label and button
+            };
+            btnDevideData.Click += (s, e) => BtnSendData_Click(s, e, true);
+
+            // Add components to FlowLayoutPanel
+            bottomPanel.Controls.Add(btnDevideData);
 
             // Add to UserControl
             Controls.Add(bottomPanel);

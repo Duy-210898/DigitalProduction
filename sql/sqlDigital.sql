@@ -4,9 +4,10 @@ GO
 -- Table: Department
 CREATE TABLE Department (
     DepartmentID INT PRIMARY KEY IDENTITY(1,1),
-    DepartmentName VARCHAR(100),
+    DepartmentName NVARCHAR(200),
     IsActive BIT
 );
+
 GO
 CREATE TABLE Position (
     PositionID INT PRIMARY KEY IDENTITY(1,1),
@@ -105,9 +106,10 @@ GO
 -- Table: DeviceOutput
 CREATE TABLE DeviceOutput (
     OutputID INT PRIMARY KEY IDENTITY(1,1),
-	PartId INT,
-	SizeID INT,
-	OrderID INT,
+	OperatorID INT NOT NULL,
+	PartId INT NOT NULL,
+	SizeID INT NOT NULL,
+	OrderID INT NOT NULL,
 	IsLeather INT,
     PiecesPerPair INT,
     MaterialLayer INT,
@@ -136,6 +138,27 @@ CREATE TABLE DistributionData (
     IsLeather BIT,
     IsDelete BIT,
 	Note INT
+);
+
+GO
+-- Table: SubDistribution
+CREATE TABLE SubDistribution (
+    SubDistributionID INT PRIMARY KEY IDENTITY(1,1),
+    DistributionID INT NOT NULL, -- FK to parent
+    UserID INT,
+    DeviceID INT,
+    PartSizeOrderId INT,
+    OperatorID INT,
+    InventoryQty INT,
+	SizeQty INT,
+    Status VARCHAR(50) DEFAULT 'Pending',
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME,
+    IsLeather BIT,
+    IsDelete BIT DEFAULT 0,
+    Note VARCHAR(255),
+    FOREIGN KEY (DistributionID) REFERENCES DistributionData(DistributionID)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 GO
@@ -234,7 +257,8 @@ ALTER TABLE TargetInDay
 ALTER TABLE DeviceOutput
 	ADD CONSTRAINT FK_DeviceOutput_Size FOREIGN KEY (SizeID) REFERENCES Size(SizeID),
 	CONSTRAINT FK_DeviceOutput_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID),
-	CONSTRAINT FK_DeviceOutput_PartID FOREIGN KEY (PartID) REFERENCES Part(PartID);
+	CONSTRAINT FK_DeviceOutput_PartID FOREIGN KEY (PartID) REFERENCES Part(PartID),
+	CONSTRAINT FK_DeviceOutput_OperatorID FOREIGN KEY (OperatorID) REFERENCES Operator(EmployeeId);
 GO
 ALTER TABLE DefaultInfo
 	ADD CONSTRAINT FK_DefaultInfo_Part FOREIGN KEY (PartID) REFERENCES Part(PartID),

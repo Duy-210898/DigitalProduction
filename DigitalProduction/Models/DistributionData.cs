@@ -54,6 +54,26 @@ namespace DigitalProduction.Models
 
     }
 
+    public class SubDistribution
+    {
+        public int SubDistributionID { get; set; }
+        public int DistributionID { get; set; }
+        public int UserID { get; set; }
+        public int DeviceID { get; set; }
+        public string MachineName { get; set; }
+        public int PartSizeOrderId { get; set; }
+        public int SizeQty { get; set; }
+        public int OperatorID { get; set; }
+        public string OperatorName { get; set; }
+        public int InventoryQty { get; set; }
+        public string Status { get; set; } = "Pending";
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; }
+        public bool IsLeather { get; set; }
+        public bool IsDelete { get; set; } = false;
+        public string Note { get; set; }
+    }
+
     public class SizeData
     {
         public int SizeID { get; set; }

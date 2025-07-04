@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Utils.Menu;
 using DevExpress.XtraEditors;
+using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Menu;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
+using DigitalProduction.Frm_User;
 using DigitalProduction.Models;
 using GridviewHelp;
 using Newtonsoft.Json;
@@ -32,7 +33,7 @@ namespace DigitalProduction
         private SimpleButton btnPrev;
         private SimpleButton btnNext;
         private LabelControl lblPagingInfo;
-
+        private Dictionary<int, List<SubDistribution>> _subDistributionCache = new Dictionary<int, List<SubDistribution>>();
         public ucProgress()
         {
             InitializeComponent();
@@ -84,7 +85,7 @@ namespace DigitalProduction
             gridProgressManagement.MainView = gridViewProgressManagement;
 
             // Set grid control columns
-            ConfigureGridControl();
+            ConfigureGridControlAsync();
 
             // Subscribe to the RowStyle event
             gridViewProgressManagement.RowCellStyle += GridViewProgressManagement_RowCellStyle;
@@ -140,7 +141,7 @@ namespace DigitalProduction
             cbxDevice.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
-        private void ConfigureGridControl()
+        private async Task ConfigureGridControlAsync()
         {
             // Clear existing columns
             gridViewProgressManagement.Columns.Clear();
@@ -163,19 +164,14 @@ namespace DigitalProduction
             };
 
             GridViewHelper.CustomizeGroupText(gridViewProgressManagement);
-            gridViewProgressManagement.OptionsView.RowAutoHeight = true;
-            gridViewProgressManagement.Columns["MaterialName"].Width += 80;
-            gridViewProgressManagement.Columns["MachineName"].Width += 60;
-            gridViewProgressManagement.Columns["SO"].Width += 50;
+            gridViewProgressManagement.BestFitColumns();
+            gridViewProgressManagement.Columns["OperatorName"].VisibleIndex = 2;
+            //gridViewProgressManagement.Columns["SO"].Width += 50;
             var memoEdit = new DevExpress.XtraEditors.Repository.RepositoryItemMemoEdit();
             gridProgressManagement.RepositoryItems.Add(memoEdit);
 
             foreach (GridColumn column in gridViewProgressManagement.Columns)
             {
-                if (column.FieldName == "MaterialName")
-                {
-                    continue;
-                }
                 column.AppearanceCell.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
                 column.ColumnEdit = memoEdit;
             }
@@ -261,16 +257,24 @@ namespace DigitalProduction
                 ).ToList()
             );
 
-            UpdateGridControl(filteredData);
+            _ = UpdateGridControlAsync(filteredData);
         }
 
 
-        private void UpdateGridControl(BindingList<Distribution> filteredData)
+        private async Task UpdateGridControlAsync(BindingList<Distribution> filteredData)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action(() => UpdateGridControl(filteredData)));
+                _ = this.Invoke(new Action(() => UpdateGridControlAsync(filteredData)));
                 return;
+            }
+            _subDistributionCache.Clear();
+
+            // 2. Preload all SubDistributions into the cache
+            foreach (var distribution in filteredData)
+            {
+                var subList = await DbHelper.GetSubDistributions(distribution.DistributionID);
+                _subDistributionCache[distribution.DistributionID] = subList;
             }
 
             gridProgressManagement.DataSource = filteredData;
@@ -327,7 +331,6 @@ namespace DigitalProduction
 
             try
             {
-                Thread.Sleep(500);
                 string response = await _webSocketClient.SendAsync(jsonRequest);
                 if (response != null)
                 {
@@ -337,9 +340,10 @@ namespace DigitalProduction
                 }
                 else {
 
-                    //MessageBox.Show("InvalidOperation or No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //  MessageBox.Show("InvalidOperation or No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     //ConnectionManager.Instance.IsReconnecting = true;
-                    return;
+                    // Retry logic or callback method
+                   return;
                 }
             }
             catch (Exception ex)
@@ -347,7 +351,6 @@ namespace DigitalProduction
                 MessageBox.Show("ERROR EX => " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
 
         private async void WebSocket_OnMessage(string jsonData)
         {
@@ -389,7 +392,7 @@ namespace DigitalProduction
                             distributionDataList.Add(distribution);
                     }
 
-                    UpdateGridControl(new BindingList<Distribution>(distributionDataList));
+                    _ = UpdateGridControlAsync(new BindingList<Distribution>(distributionDataList));
                     loadDeviceDistribution();
                 }
                 else
@@ -466,6 +469,10 @@ namespace DigitalProduction
             gridViewProgressManagement.Columns["IpAddress"].Visible = false;
             gridViewProgressManagement.Columns["DistributionID"].Visible = false;
             gridViewProgressManagement.Columns["IsLeather"].Visible = false;
+            gridViewProgressManagement.Columns["MaterialName"].Visible = false;
+            gridViewProgressManagement.Columns["EmployeeName"].Visible = false;
+            gridViewProgressManagement.Columns["CreatedAt"].Visible = false;
+            gridViewProgressManagement.Columns["UpdatedAt"].Visible = false;
             gridViewProgressManagement.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
 
 
@@ -589,7 +596,8 @@ namespace DigitalProduction
                                 e.Cancel = true;
                                 Console.WriteLine("Editing is disabled for Inventory column when status is not 'Stop'.");
                             }
-                            else {
+                            else
+                            {
                                 e.Cancel = false;
                             }
                         }
@@ -616,14 +624,209 @@ namespace DigitalProduction
                                 DbHelper.UpdateInventoryQty(distribution.DistributionID, Convert.ToInt32(e.Value), "Complete");
                                 Console.WriteLine($"Updated InventoryQty for DistributionID: {distribution.DistributionID} to {e.Value}");
                             }
-                            else {
+                            else
+                            {
                                 Console.WriteLine($"Can't update InventoryQty for DistributionID: {distribution.DistributionID} to {e.Value}");
                             }
                         }
                     }
                 };
             }
+            // 1. Ensure button visibility mode is set
+            //gridViewProgressManagement.OptionsView.ShowButtonMode = DevExpress.XtraGrid.Views.Base.ShowButtonModeEnum.ShowAlways;
+
+            //// 2. Create unbound column
+            //GridColumn colDetail = new GridColumn
+            //{
+            //    Caption = "Detail",
+            //    Name = "colDetail",
+            //    FieldName = "btnDetail",
+            //    UnboundType = DevExpress.Data.UnboundColumnType.String,
+            //    Visible = true,
+            //    Width = 100
+            //};
+
+            //// 3. Create the button editor
+            //var btnDetail = new RepositoryItemButtonEdit
+            //{
+            //    TextEditStyle = TextEditStyles.HideTextEditor
+            //};
+
+            //btnDetail.Buttons.Clear();
+            //btnDetail.Buttons.Add(new EditorButton(ButtonPredefines.Glyph)
+            //{
+            //    Caption = "Show Detail", // Show this text on the button
+            //    Kind = ButtonPredefines.Glyph
+            //});
+
+
+            //// 4. Add repository to the grid
+            //gridProgressManagement.RepositoryItems.Add(btnDetail);
+            //colDetail.ColumnEdit = btnDetail;
+
+            //// 5. Add the column if it doesn't exist
+            //if (gridViewProgressManagement.Columns.ColumnByFieldName("btnDetail") == null)
+            //{
+            //    gridViewProgressManagement.Columns.Add(colDetail);
+            //}
+            // Create detail view
+            gridViewProgressManagement.OptionsDetail.EnableMasterViewMode = true;
+            gridViewProgressManagement.OptionsDetail.ShowDetailTabs = false;
+            gridViewProgressManagement.OptionsDetail.AllowOnlyOneMasterRowExpanded = true;
+
+            // Register level
+            gridProgressManagement.LevelTree.Nodes.Clear(); // optional, clean old levels
+            gridProgressManagement.LevelTree.Nodes.Add("SubDistributions", CreateSubDistributionView());
+
+            gridViewProgressManagement.MasterRowGetRelationCount += (s, e) =>
+            {
+                e.RelationCount = 1;
+            };
+
+            gridViewProgressManagement.MasterRowGetRelationName += (s, e) =>
+            {
+                e.RelationName = "SubDistributions";
+            };
+
+            gridViewProgressManagement.MasterRowEmpty += (s, e) =>
+            {
+                var view = s as GridView;
+                var masterRow = view.GetRow(e.RowHandle) as Distribution;
+
+                if (masterRow == null || !_subDistributionCache.TryGetValue(masterRow.DistributionID, out var subList) || subList.Count == 0)
+                {
+                    e.IsEmpty = true;  // Hide "+"
+                }
+                else
+                {
+                    e.IsEmpty = false; // Show "+"
+                }
+            };
+
+            gridViewProgressManagement.MasterRowGetChildList += (s, e) =>
+            {
+                var view = s as GridView;
+                var masterRow = view.GetRow(e.RowHandle) as Distribution;
+
+                if (masterRow != null &&
+                    _subDistributionCache.TryGetValue(masterRow.DistributionID, out var subList))
+                {
+                    e.ChildList = subList;
+                }
+                else
+                {
+                    e.ChildList = null;
+                }
+            };
+            gridViewProgressManagement.RefreshData();
+            //gridViewProgressManagement.RowCellClick += (s, e) =>
+            //{
+            //    if (e.Column.FieldName == "btnDetail")
+            //    {
+            //        int rowHandle = e.RowHandle;
+            //        if (rowHandle >= 0)
+            //        {
+            //            var distributionID = Convert.ToInt32(gridViewProgressManagement.GetRowCellValue(rowHandle, "DistributionID"));
+            //            if (_subDistributionCache.TryGetValue(distributionID, out var hasSub) && hasSub)
+            //            {
+            //                ShowSubDistributionDetails(distributionID);
+            //            }
+            //        }
+            //    }
+            //};
+            // 6. Set data for unbound column
+            //gridViewProgressManagement.CustomUnboundColumnData += (s, e) =>
+            //{
+            //    if (e.IsGetData && e.Column.FieldName == "btnDetail")
+            //    {
+            //        var distributionID = Convert.ToInt32(gridViewProgressManagement.GetListSourceRowCellValue(e.ListSourceRowIndex, "DistributionID"));
+            //        e.Value = _subDistributionCache.TryGetValue(distributionID, out var hasSub) && hasSub ? "Show Detail" : "";
+            //    }
+            //};
+
+            //// 7. Conditionally show or hide the button
+            //gridViewProgressManagement.CustomRowCellEdit += (s, e) =>
+            //{
+            //    if (e.Column.FieldName == "btnDetail")
+            //    {
+            //        int distributionID = Convert.ToInt32(gridViewProgressManagement.GetRowCellValue(e.RowHandle, "DistributionID"));
+            //        if (_subDistributionCache.TryGetValue(distributionID, out var hasSub) && hasSub)
+            //        {
+            //            e.RepositoryItem = btnDetail;
+            //        }
+            //        else
+            //        {
+            //            e.RepositoryItem = null;
+            //        }
+            //    }
+            //};
+
         }
+        private GridView CreateSubDistributionView()
+        {
+            string GetTranslation(string key)
+            {
+                return LocalizationManager.GetString(key); // Or your custom method
+            }
+
+            GridView detailView = new GridView(gridProgressManagement);
+
+            detailView.ViewCaption = "Sub-Distributions";
+            detailView.OptionsView.ShowGroupPanel = false;
+            detailView.OptionsBehavior.Editable = true;
+
+            detailView.Columns.AddVisible("MachineName", GetTranslation("MachineName"));
+            detailView.Columns.AddVisible("OperatorName", GetTranslation("OperatorName"));
+            detailView.Columns.AddVisible("SizeQty", GetTranslation("SizeQty"));
+            detailView.Columns.AddVisible("Status", GetTranslation("Status"));
+            detailView.Columns.AddVisible("InventoryQty", GetTranslation("InventoryQty"));
+
+            detailView.RowCellStyle += (s, e) =>
+            {
+                if (e.Column.FieldName == "Status")
+                {
+                    string status = e.CellValue?.ToString();
+
+                    if (status == "Complete")
+                    {
+                        e.Appearance.BackColor = Color.LightGreen;
+                    }
+                    else if (status == "Pending")
+                    {
+                        e.Appearance.BackColor = Color.LightYellow;
+                    }
+                    else if (status == "Stop")
+                    {
+                        e.Appearance.BackColor = Color.LightCoral;
+                    }
+                }
+            };
+
+            return detailView;
+        }
+
+        private async void ShowSubDistributionDetails(int DistributionID)
+        {
+            try
+            {
+                var subList = await DbHelper.GetSubDistributions(DistributionID);
+
+                if (subList == null || subList.Count == 0)
+                {
+                    MessageBox.Show("No SubDistributions found for this entry.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var detailForm = new SubDistributionDetailForm(subList);
+                detailForm.StartPosition = FormStartPosition.CenterParent;
+                detailForm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to load sub-distributions: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void GridViewProgressManagement_CustomDrawColumnHeader(object sender, ColumnHeaderCustomDrawEventArgs e)
         {
             if (e.Column != null && e.Column.FieldName == LocalizationManager.GetString("Reason"))

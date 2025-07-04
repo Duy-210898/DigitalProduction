@@ -345,14 +345,14 @@ namespace DigitalProduction
             gridView.Columns["IsGroupHeader"]?.SetVisible(false);
             gridView.Columns["IsRecentlyUpdated"]?.SetVisible(false);
 
-            StyleNumericColumn(gridView.Columns["ActualSizeQty"], 9);
+            StyleNumericColumn(gridView.Columns["ActualSizeQty"], 11);
             StyleNumericColumn(gridView.Columns["TotalPiecesPerPair"], 14, Color.Blue, bold: true);
             StyleNumericColumn(gridView.Columns["ActualCut"], 0, bold: true);
             StyleNumericColumn(gridView.Columns["ActualPieces"], 0, bold: true);
             StyleNumericColumn(gridView.Columns["InventoryQty"], 0, bold: true);
             StyleNumericColumn(gridView.Columns["CuttingDieQty"], 0, bold: true);
             StyleNumericColumn(gridView.Columns["MaterialLayer"], 0, bold: true);
-            StyleNumericColumn(gridView.Columns["SizeQty"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns["SizeQty"], 6, bold: true);
             StyleNumericColumn(gridView.Columns["PiecesPerPair"], 0, bold: true);
 
 
@@ -360,19 +360,16 @@ namespace DigitalProduction
             gridView.OptionsCustomization.AllowFilter = false;
             gridView.OptionsCustomization.AllowSort = false;
             gridView.OptionsMenu.ShowAutoFilterRowItem = false;
-            gridView.Columns["MachineName"].Width += 50;
-            gridView.Columns["OperatorName"].Width += 60;
-            gridView.Columns["PartName"].Width += 50;
-            var memoEdit = new DevExpress.XtraEditors.Repository.RepositoryItemMemoEdit();
-            gridControl_DeviceOutput.RepositoryItems.Add(memoEdit);
-
-            foreach (GridColumn column in gridView_DeviceOutput.Columns)
-            {
-                column.AppearanceCell.TextOptions.WordWrap = DevExpress.Utils.WordWrap.Wrap;
-                column.ColumnEdit = memoEdit;
-            }
-
-            gridView.ActiveFilter.Clear();
+            gridView.Columns["MachineName"].Width = 110;
+            gridView.Columns["OperatorName"].Width = 130;
+            gridView.Columns["PartName"].Width = 100;
+            gridView.Columns["SO"].Width = 80;
+            gridView.Columns["MaterialType"].Width = 100;
+            gridView.Columns["SizeQty"].Width = 70;
+            gridView.Columns["SO"].VisibleIndex = 0;
+            gridView.Columns["TotalPiecesPerPair"].VisibleIndex = 12;
+            gridView.Columns["Timestamp"].Visible= false;
+            gridView.Columns["UpdatedAt"].Visible = false;
 
             gridView.Appearance.HeaderPanel.ForeColor = Color.Black;
             gridView.Appearance.HeaderPanel.Font = new Font(gridView.Appearance.Row.Font, FontStyle.Bold);

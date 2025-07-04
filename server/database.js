@@ -1,5 +1,5 @@
 const sql = require('mssql');
-
+const fs = require('fs');
 // Database Configuration
 const dbConfig = {
   user: 'sa',
@@ -10,10 +10,25 @@ const dbConfig = {
     encrypt: false, // Disable encryption (use `true` for Azure)
     trustServerCertificate: true, // Trust self-signed certificates
   },
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000,
+  },
+  requestTimeout: 30000,
 };
 
 let pool; // Global connection pool
 
+function logToFile(filePath, message) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+  fs.appendFile(filePath, logMessage, (err) => {
+    if (err) {
+      console.error(`Failed to write log to ${filePath}: ${err.message}`);
+    }
+  });
+}
 // Khởi tạo kết nối cơ sở dữ liệu
 async function initDatabase() {
   try {
@@ -30,19 +45,24 @@ async function initDatabase() {
 }
 
 // Hàm thực thi truy vấn SQL chung
-async function executeQuery(query, inputs = []) {
-  try {
-    const request = (await initDatabase()).request();
-    inputs.forEach(input => {
-      request.input(input.name, input.type, input.value);
-    });
-    const result = await request.query(query);
-    return result.recordset;
-  } catch (err) {
-    console.error('Lỗi khi truy vấn cơ sở dữ liệu:', err.message);
-    throw err;
+async function executeQuery(query, inputs = [], retries = 3, delay = 1000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const request = (await initDatabase()).request();
+      inputs.forEach(input => {
+        request.input(input.name, input.type, input.value);
+      });
+      const result = await request.query(query);
+      return result.recordset;
+    } catch (err) {
+      console.error(`❌ Query failed (attempt ${attempt}): ${err.message}`);
+      if (attempt === retries) throw err;
+      await new Promise(res => setTimeout(res, delay));
+      delay *= 2; // exponential backoff
+    }
   }
 }
+
 async function getSizeDataFromDB(ipAddress, orderID, partName) {
   const query = `
     SELECT Distinct
@@ -95,7 +115,7 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
   const offset = (page - 1) * pageSize;
 
   const dataQuery = `
-    SELECT 
+      SELECT 
       po.OrderID,
       po.MasterWorkOrder,
       po.SO,
@@ -107,7 +127,10 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
       s.Size,
       dl.MachineName,
       pso.SizeID,
-      pso.SizeQty,
+
+      -- Use Sub.SizeQty if exists, otherwise fallback to pso.SizeQty
+      ISNULL(SUM(sub.SizeQty), pso.SizeQty) AS SizeQty,
+
       do.PiecesPerPair,
       do.MaterialLayer,
       do.CuttingDieQty,
@@ -118,6 +141,7 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
       do.InventoryQty,
       do.CreatedAt AS Timestamp,
       do.UpdatedAt AS UpdatedAt
+
     FROM ProductOrder po
     JOIN Product pr ON po.ProductId = pr.ProductId
     JOIN PartSizeOrder pso ON po.OrderID = pso.OrderId
@@ -126,6 +150,7 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
     JOIN Material m ON pso.MaterialID = m.MaterialID
     JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID AND do.PartID = p.PartID
     JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId
+    LEFT JOIN SubDistribution sub ON sub.DistributionID = dd.DistributionID AND sub.PartSizeOrderId = dd.PartSizeOrderId
     JOIN DeviceList dl ON dl.DeviceID = dd.DeviceID
     JOIN Operator o ON dd.OperatorID = o.OperatorID
     WHERE do.UpdatedAt >= @startDate AND do.UpdatedAt < @endDate
@@ -135,6 +160,7 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
       o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
       do.PiecesPerPair, do.MaterialLayer, do.CuttingDieQty, 
       do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt, do.UpdatedAt, p.PartName
+
     ORDER BY do.UpdatedAt ASC
     OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
   `;
@@ -233,7 +259,64 @@ async function setOrderIsComplete(OrderID) {
   }
 }
 
+async function setSubDistributionComplete(SubDistributionID, Status) {
+  if (!Number.isInteger(SubDistributionID) || SubDistributionID <= 0) {
+    throw new Error('SubDistributionID không hợp lệ. Nó phải là số nguyên dương.');
+  }
 
+  try {
+    const pool = await initDatabase();
+    const request = pool.request();
+
+    request.input('SubDistributionID', sql.Int, SubDistributionID);
+    request.input('Status', sql.VarChar(50), Status);
+
+    const result = await request.query(`
+      UPDATE SubDistribution
+      SET Status = @Status
+      WHERE SubDistributionID = @SubDistributionID;
+    `);
+
+    const affected = result.rowsAffected?.[0] || 0;
+
+    if (affected === 0) {
+      console.warn(`Không có bản ghi nào được cập nhật cho SubDistributionID = ${SubDistributionID}`);
+      return false;
+    }
+
+    console.log(`✅ Cập nhật thành công SubDistributionID = ${SubDistributionID} với Status = '${Status}'`);
+    return true;
+
+  } catch (err) {
+    console.error('❌ Lỗi khi cập nhật trạng thái SubDistribution:', err.message);
+    throw err;
+  }
+}
+async function getSubDistributions(distributionID) {
+  try {
+    const query = `
+      SELECT 
+        SubDistributionID,
+        DistributionID,
+        PartSizeOrderId,
+        SizeQty,
+        Status
+      FROM SubDistribution
+      WHERE DistributionID = @DistributionID AND IsDelete = 0
+    `;
+
+    const request = new sql.Request();
+    request.input('DistributionID', sql.Int, distributionID);
+
+    const result = await request.query(query);
+
+    return result.recordset;
+  } catch (error) {
+    console.error(`❌ Error fetching SubDistributions for DistributionID=${distributionID}:`, error.message);
+    logToFile(errorLogPath, `Error fetching SubDistributions for DistributionID=${distributionID}: ${error.message}`);
+    return [];
+  }
+}
 async function setDistributionIsComplete(DistributionID, Status) {
   // Kiểm tra DistributionID hợp lệ
   if (!DistributionID || DistributionID <= 0) {
@@ -388,7 +471,7 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
 }
 
 async function saveActualDataToDB(data) {
-  const { OrderID, SizeData, IsLeather } = data;
+  const { OrderID, OperatorID, SizeData, IsLeather } = data;
 
   // Kiểm tra OrderID trước khi tiếp tục
   if (!OrderID || OrderID === 0) {
@@ -403,6 +486,7 @@ async function saveActualDataToDB(data) {
 
       const inputs = [
         { name: 'OrderID', type: sql.Int, value: OrderID },
+        { name: 'OperatorID', type: sql.Int, value: OperatorID },
         { name: 'SizeID', type: sql.Int, value: size.SizeID },
         { name: 'PartID', type: sql.Int, value: size.PartID },
         { name: 'IsLeather', type: sql.Int, value: IsLeather }
@@ -411,16 +495,16 @@ async function saveActualDataToDB(data) {
       // Check if entry exists
       const checkDeviceOutputQuery = `
         SELECT COUNT(*) AS count FROM DeviceOutput 
-        WHERE OrderID = @OrderID AND SizeID = @SizeID AND PartID = @PartID AND IsLeather = @IsLeather
+        WHERE OrderID = @OrderID AND SizeID = @SizeID AND PartID = @PartID AND IsLeather = @IsLeather AND OperatorID = @OperatorID
       `;
 
       // Insert Query
       const DeviceOutputQuery = `
         INSERT INTO DeviceOutput (
-            OrderID, SizeID, PartID, PiecesPerPair, MaterialLayer, CuttingDieQty, 
+            OrderID, OperatorID, SizeID, PartID, PiecesPerPair, MaterialLayer, CuttingDieQty, 
             ActualCut, ActualPieces, ActualSizeQty, TotalPiecesPerPair, IsLeather, CreatedAt, UpdatedAt
         ) VALUES (
-            @OrderID, @SizeID, @PartID, @PiecesPerPair, @MaterialLayer, @CuttingDieQty, 
+            @OrderID, @OperatorID, @SizeID, @PartID, @PiecesPerPair, @MaterialLayer, @CuttingDieQty, 
             @ActualCut, @ActualPieces, @ActualSizeQty, @TotalPiecesPerPair, @IsLeather, GETDATE(), GETDATE() 
         );
       `;
@@ -428,6 +512,7 @@ async function saveActualDataToDB(data) {
       // Inputs for Insert
       const DeviceOutputInputs = [
         { name: 'OrderID', type: sql.Int, value: OrderID },
+        { name: 'OperatorID', type: sql.Int, value: OperatorID },
         { name: 'SizeID', type: sql.Int, value: size.SizeID },
         { name: 'PartID', type: sql.Int, value: size.PartID },
         { name: 'IsLeather', type: sql.Int, value: IsLeather },
@@ -455,6 +540,7 @@ async function saveActualDataToDB(data) {
           UpdatedAt = GETDATE()
         WHERE
           OrderID = @OrderID
+          AND OperatorID = @OperatorID
           AND SizeID = @SizeID
           AND PartID = @PartID
           AND IsLeather = @IsLeather
@@ -463,6 +549,7 @@ async function saveActualDataToDB(data) {
       // Inputs for Update
       const updateDeviceOutputInputs = [
         { name: 'OrderID', type: sql.Int, value: OrderID },
+        { name: 'OperatorID', type: sql.Int, value: OperatorID },
         { name: 'SizeID', type: sql.Int, value: size.SizeID },
         { name: 'PartID', type: sql.Int, value: size.PartID },
         { name: 'IsLeather', type: sql.Int, value: IsLeather },
@@ -475,18 +562,13 @@ async function saveActualDataToDB(data) {
         { name: 'TotalPiecesPerPair', type: sql.Int, value: size.TotalPiecesPerPair }
       ];
 
-      // Log input parameters for debugging
-      // DeviceOutputInputs.forEach(param => {
-      //   console.log(`${param.name}: ${param.value} (Type: ${param.type?.name || param.type})`);
-      // });
-
       // Execute check query
       const result = await executeQuery(checkDeviceOutputQuery, inputs);
 
       if (result[0].count === 0) {
         // If not exists, INSERT
         await executeQuery(DeviceOutputQuery, DeviceOutputInputs);
-   //     console.log(`✅ Inserted DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
+       //console.log(`✅ Inserted DeviceOutput for OrderID: ${OrderID}, SizeID: ${size.SizeID}, PartID: ${size.PartID}`);
       } else {
         // If exists, UPDATE
         await executeQuery(updateDeviceOutputQuery, updateDeviceOutputInputs);
@@ -532,15 +614,132 @@ async function saveActualDataToDB(data) {
   }
 }
 // Function to save distribution data and default info
-async function saveDistributionDataToDB(dataList) {
+// async function saveDistributionDataToDB(dataList) {
+//   let pool;
+//   let results = []; // Store status of each data entry
+
+//   try {
+//     pool = await sql.connect(dbConfig);
+
+//     for (const data of dataList) {
+//       let status = {
+//         PartID: data.PartID,
+//         Model: data.Model,
+//         DeviceID: data.DeviceID,
+//         ProductID: data.ProductID,
+//         DistributionInserted: false,
+//         DistributionDuplicate: false,
+//         Error: null,
+//       };
+    
+//       try {
+//         const distributionConditions = {
+//           PartSizeOrderID: { type: sql.Int, value: data.PartSizeOrderID }
+//         };
+    
+//         // 🚫 Check for duplicate DistributionData
+//         const distributionExists = await recordExists("DistributionData", distributionConditions, pool);
+    
+//         if (distributionExists) {
+//          // console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
+//           status.DistributionDuplicate = true;
+//           results.push(status);
+//           continue; // ⛔️ Skip entire item, including DefaultInfo
+//         }
+    
+//         // ✅ Insert DistributionData
+//         const distributionQuery = `
+//           INSERT INTO DistributionData (
+//             DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt , UpdatedAt, IsLeather, IsDelete, UserID
+//           ) VALUES (
+//             @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @UpdatedAt, @IsLeather, @IsDelete, @UserID
+//           );
+//         `;
+    
+//         let request = pool.request();
+//         request.input('DeviceID', sql.Int, data.DeviceID);
+//         request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
+//         request.input('OperatorID', sql.Int, data.OperatorID);
+//         request.input('InventoryQty', sql.Int, data.InventoryQty);
+//         request.input('Status', sql.NVarChar, data.Status || 'Pending');
+//         request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
+//         request.input('UpdatedAt', sql.DateTime, data.UpdatedAt || new Date());
+//         request.input('IsLeather', sql.Bit, data.IsLeather);
+//         request.input('IsDelete', sql.Bit, data.IsDelete || 0);
+//         request.input('UserID', sql.Int, data.UserID);
+    
+//         const result = await request.query(distributionQuery);
+//         if (result.rowsAffected && result.rowsAffected[0] > 0) {
+//          // console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
+//           status.DistributionInserted = true;
+//         }
+    
+//         // 🧩 Only do DefaultInfo if DistributionData was inserted
+//         const defaultInfoConditions = {
+//           PartID: { type: sql.Int, value: data.PartID },
+//           Model: { type: sql.VarChar, value: data.Model },
+//           ProductID: { type: sql.Int, value: data.ProductID }
+//         };
+//         const defaultInfoExists = await recordExists("DefaultInfo", defaultInfoConditions, pool);
+    
+//         request = pool.request();
+//         request.input('ProductID', sql.Int, data.ProductID);
+//         request.input('PartID', sql.Int, data.PartID);
+//         request.input('Model', sql.VarChar, data.Model);
+//         request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
+//         request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
+//         request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
+//         request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
+    
+//         if (!defaultInfoExists) {
+//           const defaultInfoQuery = `
+//             INSERT INTO DefaultInfo (
+//               ProductID, PartID, Model, PiecesPerPair, CuttingDieQty, MaterialLayer, TotalPiecesPerPair
+//             ) VALUES (
+//               @ProductID, @PartID, @Model, @PiecesPerPair, @CuttingDieQty, @MaterialLayer, @TotalPiecesPerPair
+//             );
+//           `;
+//           await request.query(defaultInfoQuery);
+//          // console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
+//         } else {
+//           const updateInfoQuery = `
+//             UPDATE DefaultInfo 
+//             SET PiecesPerPair = @PiecesPerPair, 
+//                 CuttingDieQty = @CuttingDieQty, 
+//                 MaterialLayer = @MaterialLayer, 
+//                 TotalPiecesPerPair = @TotalPiecesPerPair
+//             WHERE ProductID = @ProductID AND PartID = @PartID AND Model = @Model;
+//           `;
+//           await request.query(updateInfoQuery);
+//         //  console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
+//         }
+    
+//       } catch (err) {
+//         console.error(`❌ Error processing DeviceID ${data.DeviceID}: ${err.message}`);
+//         status.Error = err.message;
+//       }
+    
+//       results.push(status);
+//     }    
+
+//    // console.log('✅ All unique data processed successfully.');
+//     return results; // Return status for all entries
+
+//   } catch (error) {
+//     console.error('❌ Critical error saving data:', error.message);
+//     return { success: false, error: error.message };
+//   }
+// }
+
+async function saveDistributionDataToDB(distributionList) {
   let pool;
-  let results = []; // Store status of each data entry
+  const results = [];
 
   try {
     pool = await sql.connect(dbConfig);
 
-    for (const data of dataList) {
-      let status = {
+    for (const data of distributionList.Distributions) {
+      const status = {
         PartID: data.PartID,
         Model: data.Model,
         DeviceID: data.DeviceID,
@@ -549,110 +748,135 @@ async function saveDistributionDataToDB(dataList) {
         DistributionDuplicate: false,
         Error: null,
       };
-    
+
       try {
-        const distributionConditions = {
+        const exists = await recordExists("DistributionData", {
           PartSizeOrderID: { type: sql.Int, value: data.PartSizeOrderID }
-        };
-    
-        // 🚫 Check for duplicate DistributionData
-        const distributionExists = await recordExists("DistributionData", distributionConditions, pool);
-    
-        if (distributionExists) {
-         // console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
+        }, pool);
+
+        if (exists) {
           status.DistributionDuplicate = true;
           results.push(status);
-          continue; // ⛔️ Skip entire item, including DefaultInfo
+          continue;
         }
-    
-        // ✅ Insert DistributionData
-        const distributionQuery = `
-          INSERT INTO DistributionData (
-            DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt , UpdatedAt, IsLeather, IsDelete, UserID
-          ) VALUES (
-            @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @UpdatedAt, @IsLeather, @IsDelete, @UserID
-          );
-        `;
-    
-        let request = pool.request();
+
+        // Insert into DistributionData
+        const request = pool.request();
         request.input('DeviceID', sql.Int, data.DeviceID);
         request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
         request.input('OperatorID', sql.Int, data.OperatorID);
         request.input('InventoryQty', sql.Int, data.InventoryQty);
-        request.input('Status', sql.NVarChar, data.Status || 'Pending');
+        request.input('Status', sql.VarChar, data.Status || 'Pending');
         request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
         request.input('UpdatedAt', sql.DateTime, data.UpdatedAt || new Date());
         request.input('IsLeather', sql.Bit, data.IsLeather);
         request.input('IsDelete', sql.Bit, data.IsDelete || 0);
         request.input('UserID', sql.Int, data.UserID);
-    
-        const result = await request.query(distributionQuery);
-        if (result.rowsAffected && result.rowsAffected[0] > 0) {
-         // console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
-          status.DistributionInserted = true;
-        }
-    
-        // 🧩 Only do DefaultInfo if DistributionData was inserted
-        const defaultInfoConditions = {
+
+        const insertResult = await request.query(`
+          INSERT INTO DistributionData (
+            DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status,
+            CreatedAt, UpdatedAt, IsLeather, IsDelete, UserID
+          ) OUTPUT INSERTED.DistributionID
+          VALUES (
+            @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status,
+            @CreatedAt, @UpdatedAt, @IsLeather, @IsDelete, @UserID
+          );
+        `);
+
+        const insertedDistributionId = insertResult.recordset[0].DistributionID;
+        status.DistributionInserted = true;
+
+        // Insert or update DefaultInfo
+        const defaultInfoExists = await recordExists("DefaultInfo", {
           PartID: { type: sql.Int, value: data.PartID },
           Model: { type: sql.VarChar, value: data.Model },
           ProductID: { type: sql.Int, value: data.ProductID }
-        };
-        const defaultInfoExists = await recordExists("DefaultInfo", defaultInfoConditions, pool);
-    
-        request = pool.request();
-        request.input('ProductID', sql.Int, data.ProductID);
-        request.input('PartID', sql.Int, data.PartID);
-        request.input('Model', sql.VarChar, data.Model);
-        request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
-        request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
-        request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
-        request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
-    
+        }, pool);
+
+        const infoRequest = pool.request();
+        infoRequest.input('ProductID', sql.Int, data.ProductID);
+        infoRequest.input('PartID', sql.Int, data.PartID);
+        infoRequest.input('Model', sql.VarChar, data.Model);
+        infoRequest.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
+        infoRequest.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
+        infoRequest.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
+        infoRequest.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
+
         if (!defaultInfoExists) {
-          const defaultInfoQuery = `
+          await infoRequest.query(`
             INSERT INTO DefaultInfo (
               ProductID, PartID, Model, PiecesPerPair, CuttingDieQty, MaterialLayer, TotalPiecesPerPair
             ) VALUES (
               @ProductID, @PartID, @Model, @PiecesPerPair, @CuttingDieQty, @MaterialLayer, @TotalPiecesPerPair
             );
-          `;
-          await request.query(defaultInfoQuery);
-         // console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
+          `);
         } else {
-          const updateInfoQuery = `
-            UPDATE DefaultInfo 
-            SET PiecesPerPair = @PiecesPerPair, 
-                CuttingDieQty = @CuttingDieQty, 
-                MaterialLayer = @MaterialLayer, 
-                TotalPiecesPerPair = @TotalPiecesPerPair
+          await infoRequest.query(`
+            UPDATE DefaultInfo SET
+              PiecesPerPair = @PiecesPerPair,
+              CuttingDieQty = @CuttingDieQty,
+              MaterialLayer = @MaterialLayer,
+              TotalPiecesPerPair = @TotalPiecesPerPair
             WHERE ProductID = @ProductID AND PartID = @PartID AND Model = @Model;
-          `;
-          await request.query(updateInfoQuery);
-        //  console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
+          `);
         }
-    
+
+        // Insert nested SubDistributions (if any)
+        if (Array.isArray(distributionList.SubDistributions)) {
+          const relatedSubs = distributionList.SubDistributions.filter(sub =>
+            sub.DeviceID === data.DeviceID &&
+            sub.OperatorID === data.OperatorID
+          );
+        
+          for (const sub of relatedSubs) {
+            const subRequest = pool.request();
+            subRequest.input('DistributionID', sql.Int, insertedDistributionId);
+            subRequest.input('UserID', sql.Int, data.UserID);
+            subRequest.input('SizeQty', sql.Int, sub.SizeQty);
+            subRequest.input('DeviceID', sql.Int, sub.DeviceID);
+            subRequest.input('PartSizeOrderId', sql.Int, data.PartSizeOrderID);
+            subRequest.input('OperatorID', sql.Int, sub.OperatorID);
+            subRequest.input('InventoryQty', sql.Int, sub.InventoryQty);
+            subRequest.input('Status', sql.VarChar, data.Status || 'Pending');
+            subRequest.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
+            subRequest.input('UpdatedAt', sql.DateTime, data.UpdatedAt || new Date());
+            subRequest.input('IsLeather', sql.Bit, data.IsLeather);
+            subRequest.input('IsDelete', sql.Bit, data.IsDelete || 0);
+            subRequest.input('Note', sql.VarChar, sub.Note || null);
+
+            await subRequest.query(`
+              INSERT INTO SubDistribution (
+                DistributionID, UserID, SizeQty,  DeviceID, PartSizeOrderId, OperatorID, InventoryQty,
+                Status, CreatedAt, UpdatedAt, IsLeather, IsDelete, Note
+              ) VALUES (
+                @DistributionID, @UserID, @SizeQty, @DeviceID, @PartSizeOrderId, @OperatorID, @InventoryQty,
+                @Status, @CreatedAt, @UpdatedAt, @IsLeather, @IsDelete, @Note
+              );
+            `);
+          }
+        }
       } catch (err) {
-        console.error(`❌ Error processing DeviceID ${data.DeviceID}: ${err.message}`);
+        console.error(`❌ Error on DeviceID ${data.DeviceID}: ${err.message}`);
         status.Error = err.message;
       }
-    
+
       results.push(status);
-    }    
+    }
 
-   // console.log('✅ All unique data processed successfully.');
-    return results; // Return status for all entries
+    return results;
 
-  } catch (error) {
-    console.error('❌ Critical error saving data:', error.message);
-    return { success: false, error: error.message };
+  } catch (err) {
+    console.error('❌ Critical database error:', err.message);
+    return { success: false, error: err.message };
   }
 }
+
 
 async function getDistributionDataFromDb(ipAddress) {
   try {
     const query = `
-        SELECT  
+      SELECT  
           pr.OrderID,
           pr.MasterWorkOrder,
           pr.SO,
@@ -660,6 +884,7 @@ async function getDistributionDataFromDb(ipAddress) {
           dd.IsLeather,
           p.Model,
           o.OperatorName AS UserName,
+          o.EmployeeID AS OperatorID,
           p.ART,
           pa.PartID,
           pa.PartName,
@@ -668,17 +893,21 @@ async function getDistributionDataFromDb(ipAddress) {
           m.MaterialName,
           se.SizeID,
           se.Size,
-          ps.SizeQty,
-          dd.InventoryQty,
+
+          --SizeQty from SubDistribution, fallback to PartSizeOrder
+          ISNULL(sd.SizeQty, ps.SizeQty) AS SizeQty,
+
+          ISNULL(sd.InventoryQty, dd.InventoryQty) AS InventoryQty,
           di.PiecesPerPair,
           di.CuttingDieQty,
           di.MaterialLayer,
           di.TotalPiecesPerPair,
           do.ActualCut,
-	        do.ActualPieces,
-	        do.ActualSizeQty,
-          dd.Status,
+          do.ActualPieces,
+          do.ActualSizeQty,
+          ISNULL(sd.Status, dd.Status) AS Status,
           dd.CreatedAt
+
       FROM 
           DistributionData AS dd
       JOIN 
@@ -692,26 +921,35 @@ async function getDistributionDataFromDb(ipAddress) {
       JOIN 
           Material AS m ON m.MaterialID = ps.MaterialID
       JOIN 
-          Operator AS o ON dd.OperatorID = o.OperatorID  
-      JOIN 
           ProductOrder AS pr ON ps.OrderId = pr.OrderID
       JOIN 
           Product AS p ON pr.ProductId = p.ProductId
       LEFT JOIN 
-          DeviceOutput AS do ON do.SizeID = se.SizeID
-                      AND do.OrderID = pr.OrderID AND do.PartID = pa.PartID
+          DefaultInfo AS di ON di.ProductID = p.ProductId AND di.PartID = pa.PartId AND di.Model = p.Model
       LEFT JOIN 
-          DefaultInfo AS di ON di.ProductID = p.ProductId  AND di.PartID = pa.PartId AND di.Model = p.Model
+          DeviceOutput AS do ON do.SizeID = se.SizeID AND do.OrderID = pr.OrderID AND do.PartID = pa.PartID
+
+      -- SubDistribution join
+      LEFT JOIN 
+          SubDistribution AS sd ON sd.DistributionID = dd.DistributionID
+
+      -- Operator from sub or fallback
+      LEFT JOIN 
+          Operator AS o ON o.OperatorID = ISNULL(sd.OperatorID, dd.OperatorID)
+
       WHERE 
           dd.IsDelete = 0  
           AND d.IpAddress = @IpAddress
-          AND dd.Status IN ('Complete', 'Pending') 
+          AND ISNULL(sd.Status, dd.Status) IN ('Complete', 'Pending') 
           AND EXISTS (
-              SELECT *
+              SELECT 1
               FROM DistributionData AS sub_dd
-              WHERE sub_dd.Status = 'Pending' AND FORMAT(dd.CreatedAt, 'dd/MM/yyyy HH:mm:ss') = FORMAT(sub_dd.CreatedAt, 'dd/MM/yyyy HH:mm:ss'))
+              WHERE sub_dd.Status = 'Pending'
+                AND FORMAT(dd.CreatedAt, 'dd/MM/yyyy HH:mm:ss') = FORMAT(sub_dd.CreatedAt, 'dd/MM/yyyy HH:mm:ss')
+          )
       ORDER BY 
           dd.CreatedAt ASC;
+
     `;
 
     const request = new sql.Request();
@@ -814,6 +1052,7 @@ async function getDistributionDataFromDb(ipAddress) {
 
       // Return the formatted data
       return {
+        OperatorID: row.OperatorID,
         OrderID: orderID,
         OrderIDWithSOs: soGroups,
         SO: row.SO,
@@ -955,72 +1194,130 @@ async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather, note
   }
 }
 
-
 async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID, partID) {
   try {
     const query = `
-      	  SELECT  
-              dd.DistributionID, 
-              ps.PartSizeOrderId,
-              se.SizeID
-          FROM 
-              DistributionData AS dd
-          JOIN 
-              DeviceList AS d ON dd.DeviceID = d.DeviceID
-          JOIN 
-              PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
-          JOIN 
-              Part AS pa ON pa.PartID = ps.PartID
-          JOIN 
-              Size AS se ON se.SizeID = ps.SizeID
-          JOIN 
-              ProductOrder AS pr ON pr.OrderId = ps.OrderID
-          WHERE 
-              dd.IsDelete = 0  
-              AND d.IpAddress = @IpAddress
-              AND dd.Status = 'Pending'
-              AND ps.OrderId = @OrderId
-              AND dd.IsLeather = @IsLeather
-              AND se.SizeID = @SizeID
-              AND pa.PartID = @PartID
-          GROUP BY 
-              dd.DistributionID, ps.PartSizeOrderId, se.SizeID;
+      SELECT DISTINCT  
+        dd.DistributionID, 
+        ps.PartSizeOrderId,
+        se.SizeID
+      FROM DistributionData dd
+      JOIN DeviceList d ON dd.DeviceID = d.DeviceID
+      JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
+      JOIN Part pa ON pa.PartID = ps.PartID
+      JOIN Size se ON se.SizeID = ps.SizeID
+      JOIN ProductOrder pr ON pr.OrderId = ps.OrderID
+      WHERE 
+        dd.IsDelete = 0
+        AND d.IpAddress = @IpAddress
+        AND dd.Status = 'Pending'
+        AND ps.OrderId = @OrderId
+        AND dd.IsLeather = @IsLeather
+        AND se.SizeID = @SizeID
+        AND pa.PartID = @PartID
     `;
-    
+
     const request = new sql.Request();
     request.input('IpAddress', sql.VarChar, ipAddress);
     request.input('OrderId', sql.Int, orderId);
     request.input('IsLeather', sql.Int, isLeather);
     request.input('SizeID', sql.Int, sizeID);
     request.input('PartID', sql.Int, partID);
-    
-    const result = await request.query(query);
-    
-    if (result.recordset.length > 0) {
-      const distributionIDData = result.recordset
-        .map(item => ({
-          DistributionID: item.DistributionID,
-          SizeID: item.PartSizeID
-        }))
-        .filter((value, index, self) =>
-          index === self.findIndex(
-            t => t.DistributionID === value.DistributionID &&
-                 t.SizeID === value.SizeID
-          )
-        );
 
-      return {
-        DistributionID: distributionIDData
-      };
+    const result = await request.query(query);
+
+    if (result.recordset.length > 0) {
+      const distributionIDData = result.recordset.map(item => ({
+        DistributionID: item.DistributionID,
+        SizeID: item.SizeID
+      }));
+
+      return { DistributionID: distributionIDData };
     } else {
-      return null; 
+      return null;
     }
   } catch (error) {
-    console.error(`Error fetching distribution data from DB: ${error.message}`);
+    console.error(`❌ Error fetching distribution data: ${error.message}`);
     logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
     throw error;
   }
 }
+
+// async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID, partID) {
+//   try {
+//     const query = `
+//           SELECT  
+//           dd.DistributionID, 
+//           ps.PartSizeOrderId,
+//           se.SizeID
+//       FROM 
+//           DistributionData AS dd
+//       JOIN 
+//           DeviceList AS d ON dd.DeviceID = d.DeviceID
+//       JOIN 
+//           PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
+//       JOIN 
+//           Part AS pa ON pa.PartID = ps.PartID
+//       JOIN 
+//           Size AS se ON se.SizeID = ps.SizeID
+//       JOIN 
+//           ProductOrder AS pr ON pr.OrderId = ps.OrderID
+//       LEFT JOIN 
+//           SubDistribution AS sub ON sub.DistributionID = dd.DistributionID
+//                             AND sub.PartSizeOrderId = ps.PartSizeOrderId
+//                             AND sub.SizeQty > 0  -- Optional: to ensure meaningful subs
+//       WHERE 
+//           dd.IsDelete = 0  
+//           AND d.IpAddress = @IpAddress
+//           AND dd.Status = 'Pending'
+//           AND ps.OrderId = @OrderId
+//           AND dd.IsLeather = @IsLeather
+//           AND se.SizeID = @SizeID
+//           AND pa.PartID = @PartID
+//           AND EXISTS (
+//               SELECT 1 FROM SubDistribution s 
+//               WHERE s.DistributionID = dd.DistributionID 
+//                 AND s.PartSizeOrderId = ps.PartSizeOrderId
+//           )
+//       GROUP BY 
+//           dd.DistributionID, ps.PartSizeOrderId, se.SizeID;
+  
+//     `;
+    
+//     const request = new sql.Request();
+//     request.input('IpAddress', sql.VarChar, ipAddress);
+//     request.input('OrderId', sql.Int, orderId);
+//     request.input('IsLeather', sql.Int, isLeather);
+//     request.input('SizeID', sql.Int, sizeID);
+//     request.input('PartID', sql.Int, partID);
+    
+//     const result = await request.query(query);
+    
+//     if (result.recordset.length > 0) {
+//       const distributionIDData = result.recordset
+//         .map(item => ({
+//           DistributionID: item.DistributionID,
+//           SizeID: item.PartSizeID
+//         }))
+//         .filter((value, index, self) =>
+//           index === self.findIndex(
+//             t => t.DistributionID === value.DistributionID &&
+//                  t.SizeID === value.SizeID
+//           )
+//         );
+
+//       return {
+//         DistributionID: distributionIDData
+//       };
+//     } else {
+//       return null; 
+//     }
+//   } catch (error) {
+//     console.error(`Error fetching distribution data from DB: ${error.message}`);
+//     logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
+//     throw error;
+//   }
+// }
 async function getAllDeviceData() {
   try {
     const pool = await sql.connect(dbConfig);
@@ -1472,15 +1769,23 @@ async function getUserList() {
 async function getOperatorList(departmentID) {
   try {
     const pool = await sql.connect(dbConfig);
-    const result = await pool.request()
-    .input('DepartmentID', sql.Int, departmentID)
-    .query('SELECT * FROM [CuttingProjectData].[dbo].[Operator] WHERE  Operator.DepartmentID = @DepartmentID');
+    const request = pool.request();
+
+    let query = 'SELECT * FROM [CuttingProjectData].[dbo].[Operator]';
+
+    if (departmentID && departmentID > 0) {
+      request.input('DepartmentID', sql.Int, departmentID);
+      query += ' WHERE DepartmentID = @DepartmentID';
+    }
+
+    const result = await request.query(query);
     return result.recordset;
   } catch (error) {
     console.error('Error fetching user list from database:', error.message);
     throw error;
   }
 }
+
 // Lấy danh sách users EmployeeID
 async function getOperatorDistribution(employeeID) {
   try {
@@ -1534,6 +1839,7 @@ module.exports = {
   getActualOutputData,
   setOrderIsComplete,
   setDistributionIsComplete,
+  setSubDistributionComplete,
   getUserList,
   getOperatorList,
   getDistributions,
@@ -1542,5 +1848,6 @@ module.exports = {
   getDistributionIDFromSizeID,
   getDistributionCompleteFromDb, 
   getListOfSOsByYear,
-  logCutHistoryToDB
+  logCutHistoryToDB,
+  getSubDistributions
 };

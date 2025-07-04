@@ -430,7 +430,7 @@
     <value>Số miếng trên đôi</value>
   </data>
   <data name="TotalPeicesPerPair" xml:space="preserve">
-    <value>Tổng số miếng trên đôi</value>
+    <value>Số lần chặt trên đôi</value>
   </data>
   <data name="CuttingReport" xml:space="preserve">
     <value>Báo cáo đơn chặt</value>
@@ -508,7 +508,7 @@
     <value>Yêu cầu lựa chọn</value>
   </data>
   <data name="SelectSize" xml:space="preserve">
-    <value>Chọn kích thước</value>
+    <value>Chọn Size</value>
   </data>
   <data name="RequiredPart" xml:space="preserve">
     <value>Vui lòng chọn bộ vị...</value>
@@ -638,5 +638,11 @@
   </data>
   <data name="Dashboard" xml:space="preserve">
     <value>Trang tổng quan</value>
+  </data>
+  <data name="SelectDevideData" xml:space="preserve">
+    <value>Chọn SO cần chia</value>
+  </data>
+  <data name="FindEmployeeCode" xml:space="preserve">
+    <value>Tìm mã nhân viên</value>
   </data>
 </root>

@@ -42,8 +42,10 @@ namespace DigitalProduction
 
             lblFilterDate.Text = LocalizationManager.GetString("FilterDate");
             lblSelectSO.Text = LocalizationManager.GetString("SelectSO");
+            lb_PartName.Text = LocalizationManager.GetString("SelectPart");
+            lb_Size.Text = LocalizationManager.GetString("SelectSize");
 
-          //  cboSO.EditValueChanged += cboSO_EditValueChanged;
+            //  cboSO.EditValueChanged += cboSO_EditValueChanged;
             InitializeSyncButton();
 
             //cboSO.Properties.TextEditStyle = TextEditStyles.Standard;

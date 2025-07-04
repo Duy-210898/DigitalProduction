@@ -504,8 +504,42 @@ namespace DigitalProduction
                 }
             }
         }
+        public static List<Employee> getOperatorsByDepartment()
+        {
+            List<Employee> operators = new List<Employee>();
 
-        public List<Employee> getOperatorsByDepartment(int departmentID)
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Define the query with the parameter
+                string query = "SELECT * FROM [CuttingProjectData].[dbo].[Operator]";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+
+                    // Execute the query and read the data
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // Create a new Operator object and populate it
+                            Employee operatorData = new Employee
+                            {
+                                EmployeeID = (int)reader["OperatorID"],
+                                OperatorName = reader["OperatorName"].ToString()
+                            };
+
+                            // Add the operator to the list
+                            operators.Add(operatorData);
+                        }
+                    }
+                }
+            }
+
+            return operators;
+        }
+        public static List<Employee> getOperatorsByDepartment(int departmentID)
         {
             List<Employee> operators = new List<Employee>();
 
@@ -1736,16 +1770,18 @@ namespace DigitalProduction
 
                 foreach (int distId in distributionIds)
                 {
+                    int partId = 0, sizeId = 0, orderId = 0, operatorId = 0;
+
+                    // 1. Get full info from joined DistributionData + PartSizeOrder
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        // Get PartSizeOrder info
                         cmd.CommandText = @"
-                    SELECT PartID, SizeID, OrderID 
-                    FROM PartSizeOrder 
-                    WHERE PartSizeOrderID = (SELECT PartSizeOrderId FROM DistributionData WHERE DistributionID = @DistID)";
+                            SELECT pso.PartID, pso.SizeID, pso.OrderID, dd.OperatorID
+                            FROM DistributionData dd
+                            JOIN PartSizeOrder pso ON dd.PartSizeOrderID = pso.PartSizeOrderID
+                            WHERE dd.DistributionID = @DistID";
                         cmd.Parameters.AddWithValue("@DistID", distId);
 
-                        int partId = 0, sizeId = 0, orderId = 0;
                         using (var reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
@@ -1753,36 +1789,164 @@ namespace DigitalProduction
                                 partId = Convert.ToInt32(reader["PartID"]);
                                 sizeId = Convert.ToInt32(reader["SizeID"]);
                                 orderId = Convert.ToInt32(reader["OrderID"]);
+                                operatorId = Convert.ToInt32(reader["OperatorID"]);
                             }
                         }
+                    }
 
-                        if (partId != 0)
-                        {
-                            // Delete DeviceOutput
-                            using (SqlCommand deleteOutput = conn.CreateCommand())
-                            {
-                                deleteOutput.CommandText = @"
-                            DELETE FROM DeviceOutput
-                            WHERE PartID = @PartID AND SizeID = @SizeID AND OrderID = @OrderID";
-                                deleteOutput.Parameters.AddWithValue("@PartID", partId);
-                                deleteOutput.Parameters.AddWithValue("@SizeID", sizeId);
-                                deleteOutput.Parameters.AddWithValue("@OrderID", orderId);
-                                deleteOutput.ExecuteNonQuery();
-                            }
-                        }
+                    // 2. Delete DeviceOutput if valid IDs
+                    if (partId != 0 && sizeId != 0 && orderId != 0 && operatorId != 0)
+                    {
+                        // get ID of operator
+                        operatorId = GetEmployeeIdByOperatorId(conn, operatorId);
 
-                        // Delete DistributionData
-                        using (SqlCommand deleteDist = conn.CreateCommand())
+                        using (SqlCommand deleteOutput = conn.CreateCommand())
                         {
-                            deleteDist.CommandText = "DELETE FROM DistributionData WHERE DistributionID = @DistID";
-                            deleteDist.Parameters.AddWithValue("@DistID", distId);
-                            deleteDist.ExecuteNonQuery();
+                            deleteOutput.CommandText = @"
+                                DELETE FROM DeviceOutput
+                                WHERE PartID = @PartID AND SizeID = @SizeID AND OrderID = @OrderID AND OperatorID = @OperatorID";
+                            deleteOutput.Parameters.AddWithValue("@PartID", partId);
+                            deleteOutput.Parameters.AddWithValue("@SizeID", sizeId);
+                            deleteOutput.Parameters.AddWithValue("@OrderID", orderId);
+                            deleteOutput.Parameters.AddWithValue("@OperatorID", operatorId);
+                            deleteOutput.ExecuteNonQuery();
                         }
+                    }
+
+                    // 3. Optionally delete SubDistribution first (if FK exists)
+                    using (SqlCommand deleteSub = conn.CreateCommand())
+                    {
+                        deleteSub.CommandText = "DELETE FROM SubDistribution WHERE DistributionID = @DistID";
+                        deleteSub.Parameters.AddWithValue("@DistID", distId);
+                        deleteSub.ExecuteNonQuery();
+                    }
+
+                    // 4. Delete DistributionData
+                    using (SqlCommand deleteDist = conn.CreateCommand())
+                    {
+                        deleteDist.CommandText = "DELETE FROM DistributionData WHERE DistributionID = @DistID";
+                        deleteDist.Parameters.AddWithValue("@DistID", distId);
+                        deleteDist.ExecuteNonQuery();
                     }
                 }
             }
         }
+        public static int GetEmployeeIdByOperatorId(SqlConnection conn, int operatorId)
+        {
+            int employeeId = 0;
 
+            using (SqlCommand getEmployeeCmd = conn.CreateCommand())
+            {
+                getEmployeeCmd.CommandText = @"SELECT EmployeeID FROM Operator WHERE OperatorID = @OperatorID";
+                getEmployeeCmd.Parameters.AddWithValue("@OperatorID", operatorId);
+
+                var result = getEmployeeCmd.ExecuteScalar();
+                if (result != null && result != DBNull.Value)
+                {
+                    employeeId = Convert.ToInt32(result);
+                }
+            }
+
+            return employeeId;
+        }
+
+        public static async Task<bool> HasSubDistributions(int distributionID)
+        {
+            try
+            {
+                string query = @"
+                    SELECT COUNT(1) AS SubCount
+                    FROM SubDistribution
+                    WHERE DistributionID = @DistributionID
+                    AND IsDelete = 0";
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.Add("@DistributionID", SqlDbType.Int).Value = distributionID;
+
+                        var result = await command.ExecuteScalarAsync();
+
+                        int subCount = Convert.ToInt32(result);
+                        return subCount > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"❌ Error checking for subdistributions: {ex.Message}");
+                return false;
+            }
+        }
+        public static async Task<List<SubDistribution>> GetSubDistributions(int distributionID)
+        {
+            var result = new List<SubDistribution>();
+
+            try
+            {
+                using (var conn = new SqlConnection(connectionString))
+                {
+                    await conn.OpenAsync();
+
+                    string query = @"
+                        SELECT 
+                            sd.SubDistributionID,
+                            sd.DistributionID,
+                            sd.PartSizeOrderId,
+                            sd.Status,
+                            sd.CreatedAt,
+                            o.OperatorName,
+                            ps.SizeQty,
+                            ISNULL(sd.InventoryQty, dd.InventoryQty) AS InventoryQty,
+                            dl.MachineName
+                        FROM SubDistribution sd
+                        JOIN PartSizeOrder ps ON sd.PartSizeOrderId = ps.PartSizeOrderId
+                        JOIN DistributionData dd ON sd.DistributionID = dd.DistributionID
+                        LEFT JOIN Operator o ON o.OperatorID = sd.OperatorID
+                        LEFT JOIN DeviceList dl ON dd.DeviceID = dl.DeviceID
+                        WHERE sd.IsDelete = 0
+                          AND sd.DistributionID = @DistributionID";
+
+                    using (var cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@DistributionID", distributionID);
+
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var sub = new SubDistribution
+                                {
+                                    SubDistributionID = reader.GetInt32(0),
+                                    DistributionID = reader.GetInt32(1),
+                                    PartSizeOrderId = reader.GetInt32(2),
+                                    Status = reader.GetString(3),
+                                    CreatedAt = reader.GetDateTime(4),
+
+                                    // Extended info
+                                    OperatorName = reader.IsDBNull(5) ? null : reader.GetString(5),
+                                    SizeQty = reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
+                                    InventoryQty = reader.IsDBNull(7) ? 0 : reader.GetInt32(7),
+                                    MachineName = reader.IsDBNull(8) ? null : reader.GetString(8)
+                                };
+
+                                result.Add(sub);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error in GetSubDistributions: {ex.Message}");
+                throw;
+            }
+
+            return result;
+        }
     }
 }
 
