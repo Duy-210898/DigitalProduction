@@ -128,9 +128,9 @@ GO
 CREATE TABLE DistributionData (
     DistributionID INT PRIMARY KEY IDENTITY(1,1),
 	UserID INT,
-    DeviceID INT,
+    DeviceID INT NULL,
     PartSizeOrderId INT,
-    OperatorID INT,
+    OperatorID INT NULL,
     InventoryQty INT,
     Status VARCHAR(50) DEFAULT 'Pending',
     CreatedAt DATETIME DEFAULT GETDATE(),
@@ -146,9 +146,9 @@ CREATE TABLE SubDistribution (
     SubDistributionID INT PRIMARY KEY IDENTITY(1,1),
     DistributionID INT NOT NULL, -- FK to parent
     UserID INT,
-    DeviceID INT,
+    DeviceID INT NULL,
     PartSizeOrderId INT,
-    OperatorID INT,
+    OperatorID INT NULL,
     InventoryQty INT,
 	SizeQty INT,
     Status VARCHAR(50) DEFAULT 'Pending',

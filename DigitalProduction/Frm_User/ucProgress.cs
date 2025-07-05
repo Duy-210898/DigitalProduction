@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Utils.Menu;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Menu;
 using DevExpress.XtraGrid.Views.Grid;
@@ -85,7 +84,7 @@ namespace DigitalProduction
             gridProgressManagement.MainView = gridViewProgressManagement;
 
             // Set grid control columns
-            ConfigureGridControlAsync();
+            ConfigureGridControl();
 
             // Subscribe to the RowStyle event
             gridViewProgressManagement.RowCellStyle += GridViewProgressManagement_RowCellStyle;
@@ -141,7 +140,7 @@ namespace DigitalProduction
             cbxDevice.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
-        private async Task ConfigureGridControlAsync()
+        private void ConfigureGridControl()
         {
             // Clear existing columns
             gridViewProgressManagement.Columns.Clear();
@@ -984,7 +983,7 @@ namespace DigitalProduction
         {
             public int DistributionID { get; set; }
             public string SO { get; set; }
-            public int DeviceID { get; set; }
+            public int? DeviceID { get; set; }
             public string IpAddress { get; set; }
             public string MachineName { get; set; }
             public string PartName { get; set; }

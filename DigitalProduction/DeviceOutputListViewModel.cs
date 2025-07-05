@@ -66,7 +66,7 @@ namespace DigitalProduction.ViewModels
                 if (FilterService.Instance.FilterStartDate != value)
                 {
                     FilterService.Instance.FilterStartDate = value ?? DateTime.Today;
-                    SyncData();
+                    _ = SyncDataAsync();
                     OnPropertyChanged(nameof(FilterStartDate));
                 }
             }
@@ -80,7 +80,7 @@ namespace DigitalProduction.ViewModels
                 if (FilterService.Instance.FilterEndDate != value)
                 {
                     FilterService.Instance.FilterEndDate = value ?? DateTime.Today;
-                    SyncData();
+                    _ = SyncDataAsync();
                     OnPropertyChanged(nameof(FilterEndDate));
                 }
             }
@@ -148,10 +148,10 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-        public void SyncData()
+        public async Task SyncDataAsync()
         {
             // Re-fetch or refresh the BindingDeviceOutputs
-            RequestData(); // Or however your logic pulls data
+            await LoadCurrentPageAsync(); // Or however your logic pulls data
         }
 
         public BindingList<DeviceOutput> BindingDeviceOutputs
@@ -199,7 +199,7 @@ namespace DigitalProduction.ViewModels
                 if (hasUpdates)
                 {
                     Console.WriteLine("SQL data changed, requesting new data...");
-                    RequestData();
+                    await LoadCurrentPageAsync();
                 }
                 else {
                     Console.WriteLine("No SQL updates found.");
@@ -213,49 +213,49 @@ namespace DigitalProduction.ViewModels
 
 
 
-        public async void RequestData()
-        {
-            if (_webSocketClient != null)
-            {
-                var request = new
-                {
-                    app = Global.App,
-                    action = "getActualData",
-                    filter = new
-                    {
-                        startDate = FilterStartDate?.ToString("yyyy-MM-dd"),
-                        endDate = FilterEndDate?.ToString("yyyy-MM-dd"),
-                        partName = string.IsNullOrEmpty(FilterPartName) ? null : FilterPartName,
-                        machineName = string.IsNullOrEmpty(FilterMachineName) ? null : FilterMachineName,
-                        so = string.IsNullOrEmpty(FilterSO) ? null : FilterSO,
-                        operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName,
-                        page = PageNumber,
-                        pageSize = PageSize
-                    }
-                };
+        //public async void RequestData()
+        //{
+        //    if (_webSocketClient != null)
+        //    {
+        //        var request = new
+        //        {
+        //            app = Global.App,
+        //            action = "getActualData",
+        //            filter = new
+        //            {
+        //                startDate = FilterStartDate?.ToString("yyyy-MM-dd"),
+        //                endDate = FilterEndDate?.ToString("yyyy-MM-dd"),
+        //                partName = string.IsNullOrEmpty(FilterPartName) ? null : FilterPartName,
+        //                machineName = string.IsNullOrEmpty(FilterMachineName) ? null : FilterMachineName,
+        //                so = string.IsNullOrEmpty(FilterSO) ? null : FilterSO,
+        //                operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName,
+        //                page = currentPage,
+        //                pageSize = pageSize
+        //            }
+        //        };
 
-                string jsonRequest = JsonConvert.SerializeObject(request);
-                try
-                {
-                    await _webSocketClient.SendRealTimeAsync(jsonRequest);
-                }
-                catch (System.Net.WebSockets.WebSocketException ex)
-                {
-                    ConnectionManager.Instance.IsReconnecting = true;
-                    Console.WriteLine("WebSocket exception in RequestData: " + ex.Message);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    ConnectionManager.Instance.IsReconnecting = true;
-                    Console.WriteLine("Invalid operation in RequestData: " + ex.Message);
-                }
-            }
-            else
-            {
-                ConnectionManager.Instance.IsReconnecting = true;
-                Console.WriteLine("WebSocket is not open or is null in RequestData.");
-            }
-        }
+        //        string jsonRequest = JsonConvert.SerializeObject(request);
+        //        try
+        //        {
+        //            await _webSocketClient.SendRealTimeAsync(jsonRequest);
+        //        }
+        //        catch (System.Net.WebSockets.WebSocketException ex)
+        //        {
+        //            ConnectionManager.Instance.IsReconnecting = true;
+        //            Console.WriteLine("WebSocket exception in RequestData: " + ex.Message);
+        //        }
+        //        catch (InvalidOperationException ex)
+        //        {
+        //            ConnectionManager.Instance.IsReconnecting = true;
+        //            Console.WriteLine("Invalid operation in RequestData: " + ex.Message);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        ConnectionManager.Instance.IsReconnecting = true;
+        //        Console.WriteLine("WebSocket is not open or is null in RequestData.");
+        //    }
+        //}
         private void WebSocket_OnMessage(string jsonData)
         {
             _lastJsonData = jsonData; // cache last received data
@@ -699,7 +699,7 @@ namespace DigitalProduction.ViewModels
                 string json = JsonConvert.SerializeObject(request);
                 await _webSocketClient.SendRealTimeAsync(json);
             }
-            catch (Exception ex)
+            catch (Exception ex )
             {
                 Console.WriteLine($"Error sending LoadCurrentPageAsync: {ex.Message}");
             }

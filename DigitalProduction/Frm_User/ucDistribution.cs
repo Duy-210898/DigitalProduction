@@ -5,12 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DevExpress.Data.Controls.ExpressionEditor;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Repository;
-using DevExpress.XtraExport.Helpers;
+using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
@@ -36,6 +35,7 @@ namespace DigitalProduction
         private List<SizeData> sizeDataList = new List<SizeData>();
         private List<List<ProductionSchedule>> productionSchedules = new List<List<ProductionSchedule>>();
         private DataTable table = new DataTable();
+        private DataTable subDistributionDataSource = new DataTable();
         private bool isDeviceData = false;
         private int countSO = 0;
 
@@ -471,10 +471,11 @@ namespace DigitalProduction
 
             int userID = Global.CurrentUser?.UserID ?? 0;
             int departmentID = Global.CurrentUser?.DepartmentID ?? 0;
-            int deviceID = int.TryParse(gridLookUpDevice.EditValue?.ToString(), out int devID) ? devID : 0;
+            int deviceID = 0;
             int operatorID = 0;
             if (!isDeviceData)
             {
+                deviceID = int.TryParse(gridLookUpDevice.EditValue?.ToString(), out int devID) ? devID : 0;
                 operatorID = int.TryParse(gridLookUpOperator.EditValue?.ToString(), out int operID) ? operID : 0;
             }
             bool isLeather = rdLeather.Checked;
@@ -517,7 +518,7 @@ namespace DigitalProduction
 
                     var dist = new DistributionData
                     {
-                        DeviceID = deviceID,
+                        DeviceID = isDeviceData ? schedule.DeviceID : deviceID,
                         OperatorID = isDeviceData ? schedule.OperatorID : operatorID,
                         UserID = userID,
                         ProductID = productId,
@@ -729,7 +730,7 @@ namespace DigitalProduction
 
             //    DataTable table = new DataTable();
 
-            table = new DataTable();
+            table = new DataTable("DistributionData");
             table.Columns.Add("GroupSO", typeof(string));
             table.Columns.Add("SO", typeof(string));
             table.Columns.Add("PartName", typeof(string));
@@ -740,11 +741,24 @@ namespace DigitalProduction
             table.Columns.Add("MaterialLayer", typeof(int));
             table.Columns.Add("TotalPiecesPerPair", typeof(int));
             table.Columns.Add("InventoryQty", typeof(int));
-            table.Columns.Add("OperatorName", typeof(string));
-            table.Columns.Add("EmployeeID", typeof(int));
-            table.Columns.Add("DeviceName", typeof(string));
-            table.Columns.Add("DeviceID", typeof(int));
+           // table.Columns.Add("OperatorName", typeof(string));
+            //table.Columns.Add("EmployeeID", typeof(int));
+          //  table.Columns.Add("DeviceName", typeof(string));
+            //table.Columns.Add("DeviceID", typeof(int));
 
+
+            subDistributionDataSource = new DataTable("SubDistributions");
+
+            subDistributionDataSource.Columns.Add("SubDistributionID", typeof(int));
+            subDistributionDataSource.Columns.Add("SO", typeof(string)); // Foreign Key
+            subDistributionDataSource.Columns.Add("PartName", typeof(string));
+            subDistributionDataSource.Columns.Add("Size", typeof(int));
+            subDistributionDataSource.Columns.Add("SizeQty", typeof(int));
+            subDistributionDataSource.Columns.Add("InventoryQty", typeof(int));
+            subDistributionDataSource.Columns.Add("DeviceName", typeof(string));
+            subDistributionDataSource.Columns.Add("DeviceID", typeof(int));
+            subDistributionDataSource.Columns.Add("EmployeeID", typeof(int));
+            subDistributionDataSource.Columns.Add("OperatorName", typeof(string));
 
             gridControlOverview.DataSource = null;
             foreach (var (scheduleGroup, index) in filteredSchedulesGroups.Select((g, i) => (g, i)))
@@ -825,11 +839,6 @@ namespace DigitalProduction
                         ToolTip = "Duplicate",
                         Tag = "Duplicate"
                     });
-                    actionButtonEdit.Buttons.Add(new EditorButton(ButtonPredefines.Delete)
-                    {
-                        ToolTip = "Delete",
-                        Tag = "Delete"
-                    });
 
                     actionButtonEdit.ButtonClick += gridViewOverview_ActionButtonClick;
 
@@ -856,26 +865,205 @@ namespace DigitalProduction
                     };
                 }
 
-                // Show & reposition the columns
+
+
+                // Attach only once (you can wrap this if needed to avoid multiple binds)
+                gridViewOverview.ShowingEditor += gridViewOverview_ShowingEditor;
+                DataSet dataSet = new DataSet();
+                dataSet.Tables.Add(table);
+                dataSet.Tables.Add(subDistributionDataSource);
+
+                // Create relationship between DistributionID in parent and child
+                dataSet.Relations.Add("SubDistributions",
+                    table.Columns["SO"],
+                    subDistributionDataSource.Columns["SO"]);
+
+                gridControlOverview.DataSource = dataSet;
+                gridControlOverview.DataMember = "DistributionData"; // parent table
+
+                GridView detailView = new GridView(gridControlOverview);
+                gridControlOverview.LevelTree.Nodes.Add("SubDistributions", detailView);
+
+                detailView.OptionsView.ShowGroupPanel = false;
+                detailView.OptionsBehavior.Editable = true;
+
+                detailView.Columns.AddVisible("Size", "Size");
+                detailView.Columns.AddVisible("SizeQty", "SizeQty");
+                detailView.Columns.AddVisible("PartName", "PartName");
+                detailView.Columns.AddVisible("InventoryQty", "InventoryQty");
+
+                List<Employee> employees = DbHelper.getOperatorsByDepartment();
+                List<Device> machines = DbHelper.getlistMachines();
+                // create loop up edit
+                RepositoryItemGridLookUpEdit deviceLookup = new RepositoryItemGridLookUpEdit
+                {
+                    DataSource = machines,
+                    DisplayMember = "MachineName",  // or "DeviceName"
+                    ValueMember = "DeviceID",    // or "DeviceID"
+                    NullText = "",
+                    TextEditStyle = TextEditStyles.Standard, // Allows typing & autocomplete
+                    AutoComplete = true,
+                    ImmediatePopup = true,
+                    PopupFilterMode = PopupFilterMode.Contains,
+                    AllowNullInput = DevExpress.Utils.DefaultBoolean.True
+                };
+
+                // Optional: Only show "MachineName" column
+                deviceLookup.PopulateViewColumns();
+                foreach (GridColumn column in deviceLookup.View.Columns)
+                {
+                    column.Visible = column.FieldName == "MachineName";
+                }
+
+                // Show auto-filter row (search box)
+                deviceLookup.View.OptionsView.ShowAutoFilterRow = true;
+                deviceLookup.View.ActiveFilterEnabled = true;
+
+                RepositoryItemGridLookUpEdit operatorLookup = new RepositoryItemGridLookUpEdit
+                {
+                    DataSource = employees,
+                    DisplayMember = "OperatorName",
+                    ValueMember = "EmployeeID",
+                    NullText = "",
+                    TextEditStyle = TextEditStyles.Standard,
+                    AutoComplete = true,
+                    ImmediatePopup = true,
+                    PopupFilterMode = PopupFilterMode.Contains,
+                    AllowNullInput = DevExpress.Utils.DefaultBoolean.True
+                };
+
+                // Optional: Only show "OperatorName" column
+                operatorLookup.PopulateViewColumns();
+                foreach (GridColumn column in operatorLookup.View.Columns)
+                {
+                    column.Visible = column.FieldName == "OperatorName";
+                }
+
+                // Show auto-filter row (search box)
+                operatorLookup.View.OptionsView.ShowAutoFilterRow = true;
+                operatorLookup.View.ActiveFilterEnabled = true;
+
+
+                // Add to repository
+                gridControlOverview.RepositoryItems.Add(deviceLookup);
+                gridControlOverview.RepositoryItems.Add(operatorLookup);
+
+                // Add to detailView columns
+                var colDevice = detailView.Columns.AddField("DeviceName");
+                colDevice.Caption = "Device";
+                colDevice.Visible = true;
+                colDevice.ColumnEdit = deviceLookup;
+
+                var colOperator = detailView.Columns.AddField("OperatorName");
+                colOperator.Caption = "Operator";
+                colOperator.Visible = true;
+                colOperator.ColumnEdit = operatorLookup;
+
+                // save operator and device in edit
+                deviceLookup.EditValueChanged += (s, e) =>
+                {
+                    GridLookUpEdit editor = s as GridLookUpEdit;
+                    if (editor == null) return;
+
+                    // Get current value (DeviceID)
+                    if (int.TryParse(editor.EditValue?.ToString(), out int selectedDeviceID))
+                    {
+                        // Get the DetailView and row handle
+                        detailView = (editor.Parent as GridControl)?.FocusedView as GridView;
+                        if (detailView == null) return;
+
+                        int rowHandle = detailView.FocusedRowHandle;
+                        if (!detailView.IsValidRowHandle(rowHandle)) return;
+
+                        // Update the DataTable (subDistributionDataSource)
+                        detailView.SetRowCellValue(rowHandle, "DeviceID", selectedDeviceID);
+
+                        Console.WriteLine($"✅ DeviceID saved: {selectedDeviceID}");
+                    }
+                };
+                operatorLookup.EditValueChanged += (s, e) =>
+                {
+                    GridLookUpEdit editor = s as GridLookUpEdit;
+                    if (editor == null) return;
+
+                    // Get selected EmployeeID
+                    if (int.TryParse(editor.EditValue?.ToString(), out int selectedOperatorID))
+                    {
+                        // Get the DetailView and row handle
+                        detailView = (editor.Parent as GridControl)?.FocusedView as GridView;
+                        if (detailView == null) return;
+
+                        int rowHandle = detailView.FocusedRowHandle;
+                        if (!detailView.IsValidRowHandle(rowHandle)) return;
+
+                        // Save to the dataset
+                        detailView.SetRowCellValue(rowHandle, "EmployeeID", selectedOperatorID);
+
+                        Console.WriteLine($"✅ OperatorID saved: {selectedOperatorID}");
+                    }
+                };
+
+
+                // Create Delete button for detail rows
+                RepositoryItemButtonEdit childDeleteButton = new RepositoryItemButtonEdit
+                {
+                    TextEditStyle = TextEditStyles.HideTextEditor
+                };
+                childDeleteButton.Buttons.Clear(); // Ensure no duplicates
+                childDeleteButton.Buttons.Add(new EditorButton(ButtonPredefines.Delete)
+                {
+                    ToolTip = "Delete child row"
+                });
+
+                // Register once only
+                if (!gridControlOverview.RepositoryItems.Contains(childDeleteButton))
+                    gridControlOverview.RepositoryItems.Add(childDeleteButton);
+
+                // Create button column (use dummy FieldName)
+                if (detailView.Columns["DeleteBtn"] == null) // Prevent double-add
+                {
+                    GridColumn deleteCol = new GridColumn
+                    {
+                        Caption = "Delete",
+                        FieldName = "DeleteBtn", // dummy, not in DataTable
+                        ColumnEdit = childDeleteButton,
+                        Visible = true,
+                        Width = 60,
+                        UnboundType = DevExpress.Data.UnboundColumnType.String // required since it's not in the DataTable
+                    };
+
+                    detailView.Columns.Add(deleteCol);
+                }
+                childDeleteButton.ButtonClick += (s, eArgs) =>
+                {
+                    // Get the active editor (grid control will provide this context)
+                    ButtonEdit editor = s as ButtonEdit;
+                    if (editor == null) return;
+
+                    // Get the GridControl via editor’s parent
+                    GridControl grid = editor.Parent as GridControl;
+                    if (grid == null) return;
+
+                    // Now get the view that contains this editor (detailView)
+                    GridView view = grid.FocusedView as GridView;
+                    if (view == null) return;
+
+                    int rowHandle = view.FocusedRowHandle;
+                    if (view.IsValidRowHandle(rowHandle))
+                    {
+                        view.DeleteRow(rowHandle);
+                    }
+                };
+                detailView.CellValueChanged += DetailView_CellValueChanged;
                 gridViewOverview.BeginUpdate();
                 try
                 {
-                    var columnsWithIndex = new (string Name, int Index)[]
+                    for (int i = 0; i < gridViewOverview.DataRowCount; i++)
                     {
-                        ("DeviceName",  gridViewOverview.Columns.Count - 5),
-                        ("DeviceID",    gridViewOverview.Columns.Count - 4),
-                        ("OperatorName",  gridViewOverview.Columns.Count - 3),
-                        ("EmployeeID",    gridViewOverview.Columns.Count - 2),
-                        ("Action",        gridViewOverview.Columns.Count - 1)
-                    };
-
-                    foreach (var (name, index) in columnsWithIndex)
-                    {
-                        var column = gridViewOverview.Columns[name];
-                        if (column != null)
+                        int rowHandle = gridViewOverview.GetVisibleRowHandle(i);
+                        if (gridViewOverview.IsGroupRow(rowHandle))
                         {
-                            column.Visible = true;
-                            column.VisibleIndex = index;
+                            gridViewOverview.ExpandGroupRow(rowHandle);
                         }
                     }
                 }
@@ -894,10 +1082,6 @@ namespace DigitalProduction
                         column.Visible = false;
                 }
             }
-
-            // Attach only once (you can wrap this if needed to avoid multiple binds)
-            gridViewOverview.CellValueChanged += gridViewOverview_CellValueChanged;
-            gridViewOverview.ShowingEditor += gridViewOverview_ShowingEditor;
 
         }
         private void gridViewOverview_ShowingEditor(object sender, CancelEventArgs e)
@@ -936,86 +1120,84 @@ namespace DigitalProduction
             }
         }
 
-        private void gridViewOverview_CellValueChanged(object sender, CellValueChangedEventArgs e)
+        private void DetailView_CellValueChanged(object sender, CellValueChangedEventArgs e)
         {
             if (e.Column.FieldName != "SizeQty") return;
 
-            int changedRowHandle = e.RowHandle;
-            if (!gridViewOverview.IsValidRowHandle(changedRowHandle)) return;
+            GridView detailView = sender as GridView;
+            if (detailView == null || e.RowHandle < 0) return;
 
-            // Get current row's GroupSO
-            string groupSO = gridViewOverview.GetRowCellValue(changedRowHandle, "GroupSO")?.ToString();
-            if (string.IsNullOrEmpty(groupSO)) return;
+            DataRow childRow = detailView.GetDataRow(e.RowHandle);
+            if (childRow == null) return;
 
-            // Find all rows in the same group
-            int mainRowHandle = -1;
-            int totalChildQty = 0;
-            int childCount = 0;
+            int distributionID = Convert.ToInt32(childRow["SO"]);
 
-            for (int i = 0; i < gridViewOverview.RowCount; i++)
+            // Get parent row
+            DataRow parentRow = table.AsEnumerable()
+                .FirstOrDefault(r => Convert.ToInt32(r["SO"]) == distributionID);
+
+            if (parentRow == null) return;
+
+            int parentSizeQty = parentRow["SizeQty"] != DBNull.Value ? Convert.ToInt32(parentRow["SizeQty"]) : 0;
+
+            // Sum SizeQty of all child rows with this DistributionID
+            int totalChildQty = subDistributionDataSource.AsEnumerable()
+                .Where(r => r.RowState != DataRowState.Deleted && Convert.ToInt32(r["SO"]) == distributionID)
+                .Sum(r => r["SizeQty"] != DBNull.Value ? Convert.ToInt32(r["SizeQty"]) : 0);
+
+            if (totalChildQty > parentSizeQty)
             {
-                int handle = gridViewOverview.GetVisibleRowHandle(i);
-                if (!gridViewOverview.IsValidRowHandle(handle)) continue;
+                // Show warning and revert change
+                detailView.SetRowCellValue(e.RowHandle, e.Column, 0);
 
-                string thisGroup = gridViewOverview.GetRowCellValue(handle, "GroupSO")?.ToString();
-                if (thisGroup != groupSO) continue;
-
-                if (mainRowHandle == -1)
-                {
-                    mainRowHandle = handle; // First row of group = parent
-                }
-                else
-                {
-                    // Child rows — sum their SizeQty
-                    object val = gridViewOverview.GetRowCellValue(handle, "SizeQty");
-                    if (val != null && int.TryParse(val.ToString(), out int qty))
-                    {
-                        totalChildQty += qty;
-                        childCount++;
-                    }
-                }
-            }
-
-            // Now get the main row's SizeQty (limit)
-            if (mainRowHandle != -1)
-            {
-                int mainQty = Convert.ToInt32(gridViewOverview.GetRowCellValue(mainRowHandle, "SizeQty"));
-
-                if (totalChildQty > mainQty)
-                {
-                    // Reset the changed value to 0 or recalculate allowed value
-                    gridViewOverview.SetRowCellValue(changedRowHandle, "SizeQty", 0);
-
-                    MessageBox.Show(
-                        $"❌ Total of child SizeQty ({totalChildQty}) exceeds the main row's SizeQty ({mainQty}).\nResetting this value.",
-                        "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning
-                    );
-                }
+                MessageBox.Show(
+                    $"❌ Total of child SizeQty ({totalChildQty}) exceeds the parent's SizeQty ({parentSizeQty}).\nResetting this value.",
+                    "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning
+                );
             }
         }
+
         private void gridViewOverview_ActionButtonClick(object sender, ButtonPressedEventArgs e)
         {
+            if (e.Button.ToolTip != "Duplicate") return;
+
             int rowHandle = gridViewOverview.FocusedRowHandle;
             if (rowHandle < 0) return;
 
-            DataRowView rowView = gridViewOverview.GetRow(rowHandle) as DataRowView;
+            var rowView = gridViewOverview.GetRow(rowHandle) as DataRowView;
             if (rowView == null) return;
 
-            if (e.Button.Kind == ButtonPredefines.Glyph && e.Button.ToolTip == "Duplicate")
-            {
-                // Duplicate logic
-                DataRow newRow = table.NewRow();
-                newRow.ItemArray = (object[])rowView.Row.ItemArray.Clone();
-                newRow["InventoryQty"] = 0;
-                newRow["SizeQty"] = 0;
-                table.Rows.Add(newRow);
-            }
-            else if (e.Button.Kind == ButtonPredefines.Delete)
-            {
-                 rowView.Row.Delete();
-            }
-        }
+            int parentSO = Convert.ToInt32(rowView["SO"]);
+            int parentSize = Convert.ToInt32(rowView["Size"]);
+            string parentPartName = rowView["PartName"].ToString();
+            int parentSizeQty = rowView["SizeQty"] != DBNull.Value ? Convert.ToInt32(rowView["SizeQty"]) : 0;
 
+            // Sum all existing SizeQty in child rows of this parent
+            int totalChildQty = subDistributionDataSource.AsEnumerable()
+                .Where(r => r.RowState != DataRowState.Deleted && Convert.ToInt32(r["SO"]) == parentSO)
+                .Sum(r => r["SizeQty"] != DBNull.Value ? Convert.ToInt32(r["SizeQty"]) : 0);
+
+            // Case 2: Block if already full
+            if (totalChildQty >= parentSizeQty)
+            {
+                MessageBox.Show($"❌ Cannot add more rows. Child total SizeQty ({totalChildQty}) already reached parent SizeQty ({parentSizeQty}).",
+                    "Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Case 1: Auto-fill SizeQty if exactly one row left
+            int remainingQty = parentSizeQty - totalChildQty;
+
+            DataRow child = subDistributionDataSource.NewRow();
+            child["SO"] = parentSO;
+            child["PartName"] = parentPartName;
+            child["Size"] = parentSize;
+            child["SizeQty"] = remainingQty;  // auto fill the rest
+            child["InventoryQty"] = 0;
+
+            subDistributionDataSource.Rows.Add(child);
+            gridViewOverview.SetMasterRowExpanded(rowHandle, true);
+        }
 
         private void TranslateGridControlOverviewHeaders()
         {
@@ -1028,7 +1210,6 @@ namespace DigitalProduction
                 }
             }
         }
-
 
         private string GetSizeName(int sizeId)
         {
@@ -1139,6 +1320,129 @@ namespace DigitalProduction
 
             int[] selectedRows = gridViewOverview.GetSelectedRows();
 
+
+            if (selectedRows.Length < 1)
+            {
+                // No rows selected — update all visible rows
+                for (int i = 0; i < gridViewOverview.RowCount; i++)
+                {
+                    int rowHandle = gridViewOverview.GetVisibleRowHandle(i);
+                    if (!gridViewOverview.IsDataRow(rowHandle)) continue;
+
+                    string partName = gridViewOverview.GetRowCellValue(rowHandle, "PartName")?.ToString();
+                    string size = gridViewOverview.GetRowCellValue(rowHandle, "Size")?.ToString()?.Trim();
+                    string normalizedSize = size?.Trim();
+
+                    int inventory = int.TryParse(txtInventory.Text, out int inv) ? inv : 0;
+                    object sizeQtyObj = gridViewOverview.GetRowCellValue(rowHandle, "SizeQty");
+                    int sizeQty = sizeQtyObj != DBNull.Value ? Convert.ToInt32(sizeQtyObj) : 0;
+
+                    if (sizeQty != 0 && inventory > sizeQty)
+                    {
+                        ShowMessage.ShowInfo($"Inventory must be ≤ SizeQty for: {partName} - {normalizedSize}");
+                        continue;
+                    }
+
+                    gridViewOverview.SetRowCellValue(rowHandle, "InventoryQty", inventory);
+
+                    foreach (var group in productionSchedules)
+                    {
+                        foreach (var schedule in group)
+                        {
+                            string scheduleSize = GetSizeName(schedule.SizeID);
+
+                            if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
+                            {
+                                schedule.InventoryQty = inventory;
+                            }
+                        }
+                    }
+
+                    // Update all values
+                    int piecesPerPair = (int)numPiecesPerPair.Value;
+                    int cuttingDieQty = (int)numCuttingDieQty.Value;
+                    int materialLayer = (int)numMaterialLayer.Value;
+                    int totalPiecesPerPair = (int)numericTotalPeicesPerPair.Value;
+
+                    foreach (var group in productionSchedules)
+                    {
+                        foreach (var schedule in group)
+                        {
+                            string scheduleSize = GetSizeName(schedule.SizeID);
+                            if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (rdRawMaterial.Checked)
+                                {
+                                    schedule.PeicesPerPair = piecesPerPair;
+                                    schedule.CuttingDieQty = cuttingDieQty;
+                                    schedule.MaterialLayer = materialLayer;
+
+                                    gridViewOverview.SetRowCellValue(rowHandle, "PeicesPerPair", schedule.PeicesPerPair);
+                                    gridViewOverview.SetRowCellValue(rowHandle, "CuttingDieQty", schedule.CuttingDieQty);
+                                    gridViewOverview.SetRowCellValue(rowHandle, "MaterialLayer", schedule.MaterialLayer);
+                                }
+                                if (rdLeather.Checked)
+                                {
+                                    schedule.TotalPiecesPerPair = totalPiecesPerPair;
+                                    gridViewOverview.SetRowCellValue(rowHandle, "TotalPiecesPerPair", schedule.TotalPiecesPerPair);
+                                }
+                            }
+                        }
+                    }
+
+                    Console.WriteLine($"[Updated All] {partName} - {normalizedSize} => Inventory: {inventory}");
+                }
+                if (isDeviceData) {
+
+                    foreach (DataRow parentRow in table.Rows)
+                    {
+                        if (parentRow.RowState == DataRowState.Deleted) continue;
+
+                        int soID = Convert.ToInt32(parentRow["SO"]);
+
+                        // Find matching child rows for this DistributionID
+                        var matchingChildRows = subDistributionDataSource.AsEnumerable()
+                            .Where(r => r.RowState != DataRowState.Deleted && Convert.ToInt32(r["SO"]) == soID);
+
+                        foreach (DataRow child in matchingChildRows)
+                        {
+                            int? deviceID = (child.ItemArray[6] == null || child.ItemArray[6] == DBNull.Value)
+                                ? (int?)null
+                                : Convert.ToInt32(child.ItemArray[6]);
+
+                            int? operatorID = (child.ItemArray[9] == null || child.ItemArray[9] == DBNull.Value)
+                                ? (int?)null
+                                : Convert.ToInt32(child.ItemArray[9]);
+
+                            int inventoryQty = child["InventoryQty"] != DBNull.Value ? Convert.ToInt32(child["InventoryQty"]) : 0;
+                            int childSizeQty = child["SizeQty"] != DBNull.Value ? Convert.ToInt32(child["SizeQty"]) : 0;
+
+                            // Now apply updates to productionSchedules
+                            foreach (var group in productionSchedules)
+                            {
+                                foreach (var schedule in group)
+                                {
+                                    schedule.AssignedOperators.RemoveAll(op => op.OperatorID == operatorID);
+
+                                    schedule.AssignedOperators.Add(new OperatorInfo
+                                    {
+                                        OperatorID = operatorID,
+                                        DeviceID = deviceID,
+                                        InventoryQty = inventoryQty,
+                                        SizeQty = childSizeQty
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                gridViewOverview.RefreshData();
+                ShowMessage.ShowInfo("All rows updated successfully.");
+                return;
+            }
             if (selectedRows.Length > 0)
             {
                 int inventory = int.TryParse(txtInventory.Text, out int result) ? result : 0;
@@ -1146,6 +1450,9 @@ namespace DigitalProduction
                 int selectedRowHandle = selectedRows[0];
                 string partName = gridViewOverview.GetRowCellValue(selectedRowHandle, "PartName")?.ToString();
                 string size = gridViewOverview.GetRowCellValue(selectedRowHandle, "Size")?.ToString();
+
+                // Update productionSchedules
+                string normalizedSize = size?.Trim();
 
                 object sizeQtyObj = gridViewOverview.GetRowCellValue(selectedRowHandle, "SizeQty");
                 int sizeQty = sizeQtyObj != DBNull.Value ? Convert.ToInt32(sizeQtyObj) : 0;
@@ -1156,63 +1463,25 @@ namespace DigitalProduction
                     return;
                 }
 
-                // fill cell OperatorName, Device and InventoryQty
-                string selectedOperatorName = gridLookUpOperator.Text.ToString().Trim();
-                int? selectedOperatorID = null;
-
-                if (int.TryParse(gridLookUpOperator.EditValue?.ToString().Trim(), out int tempOperatorID))
+                if (!isDeviceData)
                 {
-                    selectedOperatorID = tempOperatorID;
-                }
-                string selectedDeviceName = gridLookUpDevice.Text.ToString().Trim();
-                int selectedDeviceID = Convert.ToInt32(gridLookUpDevice.EditValue.ToString().Trim());
-                if (isDeviceData)
-                {
-                    // Skip row 0
-                    if (selectedRowHandle == 0) return;
-                    gridViewOverview.SetRowCellValue(selectedRowHandle, "DeviceName", selectedDeviceName);
-                    gridViewOverview.SetRowCellValue(selectedRowHandle, "DeviceID", selectedDeviceID);
-                    gridViewOverview.SetRowCellValue(selectedRowHandle, "OperatorName", selectedOperatorName);
-                    gridViewOverview.SetRowCellValue(selectedRowHandle, "EmployeeID", selectedOperatorID);
-
-                }
-                gridViewOverview.SetRowCellValue(selectedRowHandle, "InventoryQty", inventory);
-                gridViewOverview.RefreshRow(selectedRowHandle);
-
-                //string normalizedSize = size?.Trim();
-                //foreach (var group in productionSchedules)
-                //{
-                //    foreach (var schedule in group)
-                //    {
-                //        string scheduleSize = GetSizeName(schedule.SizeID);
-                //        string operatorID = gridLookUpOperator.EditValue.ToString().Trim();
-                //        if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
-                //            string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
-                //        {
-                //            schedule.OperatorID = Int32.Parse(operatorID);
-                //            schedule.InventoryQty = inventory;
-                //        }
-                //    }
-                //}
-                // Update productionSchedules
-                string normalizedSize = size?.Trim();
-
-                foreach (var group in productionSchedules)
-                {
-                    foreach (var schedule in group)
+                    // fill cell OperatorName, Device and InventoryQty
+                    string selectedOperatorName = gridLookUpOperator.Text.ToString().Trim();
+                    int? selectedOperatorID = null;
+                    if (int.TryParse(gridLookUpOperator.EditValue?.ToString().Trim(), out int tempOperatorID))
                     {
-                        string scheduleSize = GetSizeName(schedule.SizeID);
-
-                        if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
-                            string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
-                        {
-                            schedule.OperatorID = (int)selectedOperatorID;
-                            schedule.InventoryQty = inventory;
-                        }
+                        selectedOperatorID = tempOperatorID;
                     }
-                }
-                if (isDeviceData)
-                {
+
+                    int? selectedDeviceID = null;
+                    if (int.TryParse(gridLookUpDevice.EditValue?.ToString().Trim(), out int tempDeviceID))
+                    {
+                        selectedDeviceID = tempDeviceID;
+                    }
+
+                    gridViewOverview.SetRowCellValue(selectedRowHandle, "InventoryQty", inventory);
+                    gridViewOverview.RefreshRow(selectedRowHandle);
+
                     foreach (var group in productionSchedules)
                     {
                         foreach (var schedule in group)
@@ -1222,21 +1491,58 @@ namespace DigitalProduction
                             if (string.Equals(schedule.PartName, partName, StringComparison.OrdinalIgnoreCase) &&
                                 string.Equals(scheduleSize, normalizedSize, StringComparison.OrdinalIgnoreCase))
                             {
-                                // Remove any existing operator entry with same ID (to avoid duplicates)
-                                schedule.AssignedOperators.RemoveAll(op => op.OperatorID == selectedOperatorID);
-
-                                // Add this operator as assigned for this schedule
-                                schedule.AssignedOperators.Add(new OperatorInfo
-                                {
-                                    DeviceID = selectedDeviceID,
-                                    OperatorID = (int)selectedOperatorID,
-                                    InventoryQty = inventory,
-                                    SizeQty = sizeQty
-                                });
+                                schedule.OperatorID = (int)selectedOperatorID;
+                                schedule.DeviceID = (int)selectedDeviceID;
+                                schedule.InventoryQty = inventory;
                             }
                         }
                     }
                 }
+                else
+                {
+                    foreach (DataRow parentRow in table.Rows)
+                    {
+                        if (parentRow.RowState == DataRowState.Deleted) continue;
+
+                        int soID = Convert.ToInt32(parentRow["SO"]);
+
+                        // Find matching child rows for this DistributionID
+                        var matchingChildRows = subDistributionDataSource.AsEnumerable()
+                            .Where(r => r.RowState != DataRowState.Deleted && Convert.ToInt32(r["SO"]) == soID);
+
+                        foreach (DataRow child in matchingChildRows)
+                        {
+                            int? deviceID = (child.ItemArray[6] == null || child.ItemArray[6] == DBNull.Value)
+                                ? (int?)null
+                                : Convert.ToInt32(child.ItemArray[6]);
+
+                            int? operatorID = (child.ItemArray[9] == null || child.ItemArray[9] == DBNull.Value)
+                                ? (int?)null
+                                : Convert.ToInt32(child.ItemArray[9]);
+
+                            int inventoryQty = child["InventoryQty"] != DBNull.Value ? Convert.ToInt32(child["InventoryQty"]) : 0;
+                            int childSizeQty = child["SizeQty"] != DBNull.Value ? Convert.ToInt32(child["SizeQty"]) : 0;
+
+                            // Now apply updates to productionSchedules
+                            foreach (var group in productionSchedules)
+                            {
+                                foreach (var schedule in group)
+                                {
+                                    schedule.AssignedOperators.RemoveAll(op => op.OperatorID == operatorID);
+
+                                    schedule.AssignedOperators.Add(new OperatorInfo
+                                    {
+                                        OperatorID = operatorID,
+                                        DeviceID = deviceID,
+                                        InventoryQty = inventoryQty,
+                                        SizeQty = childSizeQty
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Log the results
                 Console.WriteLine($"Selected PartName: {partName}");
                 Console.WriteLine($"Selected Size: {normalizedSize}");
@@ -1415,16 +1721,23 @@ namespace DigitalProduction
         {
             loadDeviceDistribution();
             loadOperatorDistribution();
-            //lbl_operatorID.ResetText();
-            //lbl_operatorName.ResetText();
+
             countSO = 0;
             rdRawMaterial.Checked = false;
             rdLeather.Checked = false;
-            table.Clear();
+
+            // ✅ Clear the child table before the parent table to prevent constraint errors
+            if (subDistributionDataSource != null)
+                subDistributionDataSource.Clear();
+
+            if (table != null)
+                table.Clear();
+
             productionSchedules.Clear();
             gridControlOverview.DataSource = null;
             sizeDataList = new List<SizeData>();
         }
+
         public class DistributionPayload
         {
             public List<DistributionData> Distributions { get; set; } = new List<DistributionData>();
@@ -1432,8 +1745,8 @@ namespace DigitalProduction
         }
         public class OperatorInfo
         {
-            public int OperatorID { get; set; }
-            public int DeviceID { get; set; }
+            public int? OperatorID { get; set; }
+            public int? DeviceID { get; set; }
             public int InventoryQty { get; set; }
             public int SizeQty { get; set; }
         }

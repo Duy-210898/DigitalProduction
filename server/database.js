@@ -151,8 +151,8 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
     JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID AND do.PartID = p.PartID
     JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId
     LEFT JOIN SubDistribution sub ON sub.DistributionID = dd.DistributionID AND sub.PartSizeOrderId = dd.PartSizeOrderId
-    JOIN DeviceList dl ON dl.DeviceID = dd.DeviceID
-    JOIN Operator o ON dd.OperatorID = o.OperatorID
+    LEFT JOIN Operator o ON o.OperatorID = ISNULL(sub.OperatorID, dd.OperatorID)
+    LEFT JOIN DeviceList dl ON dl.DeviceID = ISNULL(sub.DeviceID, dd.DeviceID)
     WHERE do.UpdatedAt >= @startDate AND do.UpdatedAt < @endDate
     GROUP BY
       po.OrderID, do.IsLeather, do.TotalPiecesPerPair, 
@@ -362,33 +362,35 @@ async function setDistributionIsComplete(DistributionID, Status) {
  * @param {number} params.EmployeeID - Employee ID.
  */
 async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate, EmployeeID }) {
+  const pool = await initDatabase();
+  const transaction = new sql.Transaction(pool);
+
   try {
     let actualCut = CutQuantity;
-    const pool = await initDatabase();
 
-    // 1. Ensure the EmployeeID exists in Operator table
-    const employeeCheck = await pool.request()
+    // Start transaction
+    await transaction.begin();
+
+    // Check if Operator (EmployeeID) exists
+    const employeeCheck = await transaction.request()
       .input("EmployeeID", sql.Int, EmployeeID)
-      .query(`
-        SELECT EmployeeID FROM Operator WHERE EmployeeID = @EmployeeID
-      `);
+      .query(`SELECT EmployeeID FROM Operator WHERE EmployeeID = @EmployeeID`);
 
     if (employeeCheck.recordset.length === 0) {
-      console.log(`Not found EmployeeID ${EmployeeID}`);
+      console.warn(`❌ EmployeeID ${EmployeeID} not found`);
+      await transaction.rollback();
       return;
     }
-    
 
-    // 1. Check if CutHistory already has a record for this combination
-    let cutHistoryBefore = 0; 
-    const checkCuttingResult = await pool.request()
+    // Check for past cuts before CutDate
+    const pastCutResult = await transaction.request()
       .input("OrderID", sql.Int, OrderID)
       .input("PartID", sql.Int, PartID)
       .input("SizeID", sql.Int, SizeID)
       .input("CutDate", sql.Date, CutDate)
       .input("EmployeeID", sql.Int, EmployeeID)
       .query(`
-        SELECT  SUM(CutQuantity) AS TotalCutQuantity
+        SELECT SUM(CutQuantity) AS TotalCutQuantity
         FROM CutHistory
         WHERE 
           OrderID = @OrderID AND 
@@ -397,16 +399,18 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
           CAST(CutDate AS DATE) < @CutDate AND 
           EmployeeID = @EmployeeID
       `);
-      if (checkCuttingResult.recordset.length > 0) {
-        const existing = checkCuttingResult.recordset[0];
 
-        actualCut = CutQuantity - existing.TotalCutQuantity;
-        cutHistoryBefore = existing.TotalCutQuantity;
-        //console.log(`Had CutHistory for EmployeeID ${EmployeeID}, cutHistoryBefore ${cutHistoryBefore}`);
-      }
+    const cutHistoryBefore = pastCutResult.recordset[0].TotalCutQuantity ?? 0;
+    actualCut = CutQuantity - cutHistoryBefore;
 
-    // 2. Check if CutHistory already has a record for this combination
-    const checkResult = await pool.request()
+    if (actualCut < 0) {
+      console.warn('❌ Invalid CutQuantity: result is negative');
+      await transaction.rollback();
+      return;
+    }
+
+    // Check for same-day entry
+    const existingEntry = await transaction.request()
       .input("OrderID", sql.Int, OrderID)
       .input("PartID", sql.Int, PartID)
       .input("SizeID", sql.Int, SizeID)
@@ -422,35 +426,23 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
           CAST(CutDate AS DATE) = @CutDate AND 
           EmployeeID = @EmployeeID
       `);
-    
-    if (checkResult.recordset.length > 0) {
-      // Update existing record
-      const existing = checkResult.recordset[0];
-      CutQuantity = cutHistoryBefore !== 0 
-      ? CutQuantity - cutHistoryBefore
-      : existing.CutQuantity;
 
-      if (CutQuantity < 0) {
-        console.warn('Error: CutQuantity cannot be negative');
-        return;
-      }
-      await pool.request()
-        .input("CutQuantity", sql.Int, CutQuantity)
-        .input("CutHistoryID", sql.Int, existing.CutHistoryID)
+    if (existingEntry.recordset.length > 0) {
+      const { CutHistoryID } = existingEntry.recordset[0];
+
+      // Update CutQuantity
+      await transaction.request()
+        .input("CutHistoryID", sql.Int, CutHistoryID)
+        .input("CutQuantity", sql.Int, actualCut)
         .query(`
           UPDATE CutHistory
           SET CutQuantity = @CutQuantity
           WHERE CutHistoryID = @CutHistoryID
         `);
 
-     // console.log(`Updated CutHistory: ${CutQuantity} for EmployeeID ${EmployeeID}`);
     } else {
-      if (actualCut < 0) {
-        console.warn('Error: actualCut cannot be negative');
-        return;
-      }
-      // Insert new record
-      await pool.request()
+      // Insert new CutHistory record
+      await transaction.request()
         .input("OrderID", sql.Int, OrderID)
         .input("PartID", sql.Int, PartID)
         .input("SizeID", sql.Int, SizeID)
@@ -461,14 +453,19 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
           INSERT INTO CutHistory (OrderID, PartID, SizeID, CutQuantity, CutDate, EmployeeID)
           VALUES (@OrderID, @PartID, @SizeID, @CutQuantity, @CutDate, @EmployeeID)
         `);
-
-      //console.log(`Inserted new CutHistory for EmployeeID ${EmployeeID}`);
     }
+
+    // Commit transaction
+    await transaction.commit();
+    // console.log(`✅ CutHistory saved successfully for EmployeeID ${EmployeeID}`);
+    
   } catch (error) {
-    console.error('Lỗi khi ghi CutHistory:', error.message);
+    await transaction.rollback();
+    console.error('❌ Error logging CutHistory with transaction:', error.message);
     throw error;
   }
 }
+
 
 async function saveActualDataToDB(data) {
   const { OrderID, OperatorID, SizeData, IsLeather } = data;
@@ -762,10 +759,12 @@ async function saveDistributionDataToDB(distributionList) {
 
         // Insert into DistributionData
         const request = pool.request();
-        request.input('DeviceID', sql.Int, data.DeviceID);
-        request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
-        request.input('OperatorID', sql.Int, data.OperatorID);
+        const deviceID = parseInt(data.DeviceID, 10);
+        request.input('DeviceID', sql.Int, isNaN(deviceID) || deviceID === 0 ? null : deviceID);
+        const operatorID = parseInt(data.OperatorID, 10);
+        request.input('OperatorID', sql.Int, isNaN(operatorID) || operatorID === 0 ? null : operatorID);
         request.input('InventoryQty', sql.Int, data.InventoryQty);
+        request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
         request.input('Status', sql.VarChar, data.Status || 'Pending');
         request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
         request.input('UpdatedAt', sql.DateTime, data.UpdatedAt || new Date());
@@ -824,19 +823,18 @@ async function saveDistributionDataToDB(distributionList) {
 
         // Insert nested SubDistributions (if any)
         if (Array.isArray(distributionList.SubDistributions)) {
-          const relatedSubs = distributionList.SubDistributions.filter(sub =>
-            sub.DeviceID === data.DeviceID &&
-            sub.OperatorID === data.OperatorID
-          );
+          const relatedSubs = distributionList.SubDistributions
         
           for (const sub of relatedSubs) {
             const subRequest = pool.request();
             subRequest.input('DistributionID', sql.Int, insertedDistributionId);
             subRequest.input('UserID', sql.Int, data.UserID);
             subRequest.input('SizeQty', sql.Int, sub.SizeQty);
-            subRequest.input('DeviceID', sql.Int, sub.DeviceID);
+            const deviceID = parseInt(sub.DeviceID, 10);
+            subRequest.input('DeviceID', sql.Int, isNaN(deviceID) || deviceID === 0 ? null : deviceID);
+            const operatorID = parseInt(sub.OperatorID, 10);
+            subRequest.input('OperatorID', sql.Int, isNaN(operatorID) || operatorID === 0 ? null : operatorID);
             subRequest.input('PartSizeOrderId', sql.Int, data.PartSizeOrderID);
-            subRequest.input('OperatorID', sql.Int, sub.OperatorID);
             subRequest.input('InventoryQty', sql.Int, sub.InventoryQty);
             subRequest.input('Status', sql.VarChar, data.Status || 'Pending');
             subRequest.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
@@ -847,7 +845,7 @@ async function saveDistributionDataToDB(distributionList) {
 
             await subRequest.query(`
               INSERT INTO SubDistribution (
-                DistributionID, UserID, SizeQty,  DeviceID, PartSizeOrderId, OperatorID, InventoryQty,
+                DistributionID, UserID, SizeQty, DeviceID, PartSizeOrderId, OperatorID, InventoryQty,
                 Status, CreatedAt, UpdatedAt, IsLeather, IsDelete, Note
               ) VALUES (
                 @DistributionID, @UserID, @SizeQty, @DeviceID, @PartSizeOrderId, @OperatorID, @InventoryQty,
@@ -910,7 +908,7 @@ async function getDistributionDataFromDb(ipAddress) {
 
       FROM 
           DistributionData AS dd
-      JOIN 
+      LEFT JOIN 
           DeviceList AS d ON dd.DeviceID = d.DeviceID 
       JOIN 
           PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
@@ -939,7 +937,7 @@ async function getDistributionDataFromDb(ipAddress) {
 
       WHERE 
           dd.IsDelete = 0  
-          AND d.IpAddress = @IpAddress
+          AND (d.IpAddress = @IpAddress OR dd.DeviceID IS NULL)
           AND ISNULL(sd.Status, dd.Status) IN ('Complete', 'Pending') 
           AND EXISTS (
               SELECT 1
@@ -1202,14 +1200,14 @@ async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID
         ps.PartSizeOrderId,
         se.SizeID
       FROM DistributionData dd
-      JOIN DeviceList d ON dd.DeviceID = d.DeviceID
+      LEFT JOIN DeviceList d ON dd.DeviceID = d.DeviceID
       JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
       JOIN Part pa ON pa.PartID = ps.PartID
       JOIN Size se ON se.SizeID = ps.SizeID
       JOIN ProductOrder pr ON pr.OrderId = ps.OrderID
       WHERE 
         dd.IsDelete = 0
-        AND d.IpAddress = @IpAddress
+        AND (d.IpAddress = @IpAddress OR dd.DeviceID IS NULL)
         AND dd.Status = 'Pending'
         AND ps.OrderId = @OrderId
         AND dd.IsLeather = @IsLeather
@@ -1369,15 +1367,15 @@ async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 1
           do.ActualSizeQty
       FROM 
           DistributionData dd
-      JOIN DeviceList d ON dd.DeviceID = d.DeviceID 
-      JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
-      JOIN Part pa ON pa.PartID = ps.PartID
-      JOIN Size se ON se.SizeID = ps.SizeID
-      JOIN Material m ON m.MaterialID = ps.MaterialID
-      JOIN Operator o ON dd.OperatorID = o.OperatorID
-      JOIN Users u ON dd.UserID = u.UserID
-      JOIN ProductOrder pr ON pr.OrderId = ps.OrderID
-      JOIN DeviceOutput do ON do.SizeID = ps.SizeId AND do.PartId = ps.PartId AND do.OrderID = ps.OrderId
+      LEFT JOIN DeviceList d ON dd.DeviceID = d.DeviceID 
+      LEFT JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+      LEFT JOIN Part pa ON pa.PartID = ps.PartID
+      LEFT JOIN Size se ON se.SizeID = ps.SizeID
+      LEFT JOIN Material m ON m.MaterialID = ps.MaterialID
+      LEFT JOIN Operator o ON dd.OperatorID = o.OperatorID
+      LEFT JOIN Users u ON dd.UserID = u.UserID
+      LEFT JOIN ProductOrder pr ON pr.OrderId = ps.OrderID
+      LEFT JOIN DeviceOutput do ON do.SizeID = ps.SizeId AND do.PartId = ps.PartId AND do.OrderID = ps.OrderId
       WHERE 
           dd.IsDelete = 0 AND 
           dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate

@@ -13,6 +13,7 @@ namespace DigitalProduction.Models
         public int DepartmentID { get; set; }
         public string GroupSO { get; set; }
         public string Factory { get; set; }
+        public int DeviceID { get; set; }
         public string SO { get; set; }
         public string PO { get; set; }
         public string MasterWorkOrder { get; set; }

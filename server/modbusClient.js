@@ -142,7 +142,7 @@ async function connectToDevice(ipAddress, retries = 0) {
   const modbusClient = modbusClients[ipAddress];
 
   const isReachable = await pingHost(ipAddress);
-  //if (ipAddress != '10.30.4.91') return;
+  if (ipAddress != '10.30.4.91') return;
   if (!isReachable && Object.keys(modbusClients[ipAddress]).length === 0) {
     console.error(`🔴 Device at ${ipAddress} is not reachable.`);
     logToFile(errorLogPath, `Device at ${ipAddress} is not reachable.`);

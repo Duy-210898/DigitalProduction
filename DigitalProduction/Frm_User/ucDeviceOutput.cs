@@ -226,7 +226,7 @@ namespace DigitalProduction
         private void BtnSyncData_Click(object sender, EventArgs e)
         {
             TranslateHeaders();
-           _viewModel.SyncData();
+            _ = _viewModel.SyncDataAsync();
         }
 
         private void LoadFilters()

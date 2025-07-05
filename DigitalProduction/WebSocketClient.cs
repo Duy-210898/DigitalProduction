@@ -330,10 +330,13 @@ namespace DigitalProduction
 
         public async Task<string> SendRealTimeAsync(string message)
         {
-            if (_webSocket == null || _webSocket.State != WebSocketState.Open)
+            if (_webSocket == null ||
+                    _webSocket.State == WebSocketState.Aborted ||
+                    _webSocket.State == WebSocketState.Closed)
             {
-                OnErrorOccurred?.Invoke("WebSocket is not connected.");
-                return null;
+                _webSocket?.Dispose();
+                _webSocket = new ClientWebSocket();
+                await _webSocket.ConnectAsync(new Uri(_url), _cts.Token);
             }
 
             try

@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using static DigitalProduction.ucProgress;
 using static DigitalProduction.ucReportOrder;
@@ -1707,9 +1708,9 @@ namespace DigitalProduction
                             list.Add(new Distribution
                             {
                                 DistributionID = Convert.ToInt32(reader["DistributionID"]),
-                                DeviceID = Convert.ToInt32(reader["DeviceID"]),
+                                DeviceID = SafeReader.GetNullableInt(reader, "DeviceID"),
                                 IpAddress = reader["IpAddress"]?.ToString(),
-                                MachineName = reader["MachineName"]?.ToString(),
+                                MachineName = SafeReader.GetString(reader, "MachineName"),
                                 Status = reader["Status"].ToString(),
                                 CreatedAt = Convert.ToDateTime(reader["CreatedAt"]),
                                 SO = reader["SO"].ToString(),
@@ -1718,7 +1719,7 @@ namespace DigitalProduction
                                 Unit = reader["Unit"]?.ToString(),
                                 SizeQty = reader["SizeQty"] != DBNull.Value ? Convert.ToInt32(reader["SizeQty"]) : 0,
                                 MaterialName = reader["MaterialName"]?.ToString(),
-                                OperatorName = reader["OperatorName"]?.ToString(),
+                                OperatorName = SafeReader.GetString(reader, "OperatorName"),
                                 EmployeeName = reader["Username"]?.ToString(),
                                 IsLeather = Convert.ToBoolean(reader["IsLeather"]),
                                 Note = reader["Note"] != DBNull.Value ? Convert.ToInt32(reader["Note"]) : (int?)null,
@@ -1770,13 +1771,25 @@ namespace DigitalProduction
 
                 foreach (int distId in distributionIds)
                 {
-                    int partId = 0, sizeId = 0, orderId = 0, operatorId = 0;
+                    int? partId = 0, sizeId = 0, orderId = 0, operatorId = 0;
 
                     // 1. Get full info from joined DistributionData + PartSizeOrder
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"
-                            SELECT pso.PartID, pso.SizeID, pso.OrderID, dd.OperatorID
+                            SELECT 
+                                pso.PartID, 
+                                pso.SizeID, 
+                                pso.OrderID, 
+                                ISNULL(
+                                    (
+                                        SELECT TOP 1 sd.OperatorID
+                                        FROM SubDistribution sd
+                                        WHERE sd.DistributionID = dd.DistributionID
+                                        ORDER BY sd.SubDistributionID DESC
+                                    ),
+                                    dd.OperatorID
+                                ) AS OperatorID
                             FROM DistributionData dd
                             JOIN PartSizeOrder pso ON dd.PartSizeOrderID = pso.PartSizeOrderID
                             WHERE dd.DistributionID = @DistID";
@@ -1789,16 +1802,16 @@ namespace DigitalProduction
                                 partId = Convert.ToInt32(reader["PartID"]);
                                 sizeId = Convert.ToInt32(reader["SizeID"]);
                                 orderId = Convert.ToInt32(reader["OrderID"]);
-                                operatorId = Convert.ToInt32(reader["OperatorID"]);
+                                operatorId = SafeReader.GetNullableInt(reader, "OperatorID");
                             }
                         }
                     }
 
                     // 2. Delete DeviceOutput if valid IDs
-                    if (partId != 0 && sizeId != 0 && orderId != 0 && operatorId != 0)
+                    if (partId != 0 && sizeId != 0 && orderId != 0 && operatorId != null)
                     {
                         // get ID of operator
-                        operatorId = GetEmployeeIdByOperatorId(conn, operatorId);
+                        operatorId = GetEmployeeIdByOperatorId(conn, (int)operatorId);
 
                         using (SqlCommand deleteOutput = conn.CreateCommand())
                         {
@@ -1831,6 +1844,7 @@ namespace DigitalProduction
                 }
             }
         }
+
         public static int GetEmployeeIdByOperatorId(SqlConnection conn, int operatorId)
         {
             int employeeId = 0;
@@ -1899,14 +1913,14 @@ namespace DigitalProduction
                             sd.Status,
                             sd.CreatedAt,
                             o.OperatorName,
-                            ps.SizeQty,
+                            sd.SizeQty,
                             ISNULL(sd.InventoryQty, dd.InventoryQty) AS InventoryQty,
                             dl.MachineName
                         FROM SubDistribution sd
                         JOIN PartSizeOrder ps ON sd.PartSizeOrderId = ps.PartSizeOrderId
                         JOIN DistributionData dd ON sd.DistributionID = dd.DistributionID
                         LEFT JOIN Operator o ON o.OperatorID = sd.OperatorID
-                        LEFT JOIN DeviceList dl ON dd.DeviceID = dl.DeviceID
+                        LEFT JOIN DeviceList dl ON sd.DeviceID = dl.DeviceID
                         WHERE sd.IsDelete = 0
                           AND sd.DistributionID = @DistributionID";
 
