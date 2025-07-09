@@ -192,6 +192,7 @@ CREATE TABLE PartSizeOrder (
     PartId INT,
     SizeId INT,
     OrderId INT,
+	MaterialID INT,
 	SizeQty INT,
 	Unit VARCHAR(50),
 	UnitUsage FLOAT
@@ -295,7 +296,7 @@ ALTER TABLE PartSizeOrder
     ADD CONSTRAINT FK_PartSizeOrder_Part FOREIGN KEY (PartId) REFERENCES Part(PartId),
 	CONSTRAINT FK_PartSizeOrder_Size FOREIGN KEY (SizeId) REFERENCES Size(SizeId),
 	CONSTRAINT FK_PartSizeOrder_ProductOrder FOREIGN KEY (OrderID) REFERENCES ProductOrder(OrderID),
-	CONSTRAINT FK_PartSizeOrder_Material FOREIGN KEY (MaterialId) REFERENCES Material(MaterialID);
+	CONSTRAINT FK_PartSizeOrder_Material FOREIGN KEY (MaterialID) REFERENCES Material(MaterialID);
 GO
 
 -- Strore Procuduce

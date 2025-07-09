@@ -264,7 +264,7 @@ namespace DigitalProduction
         {
             if (this.InvokeRequired)
             {
-                _ = this.Invoke(new Action(() => UpdateGridControlAsync(filteredData)));
+                _ = this.Invoke(new Action(async () => await UpdateGridControlAsync(filteredData)));
                 return;
             }
             _subDistributionCache.Clear();

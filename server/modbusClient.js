@@ -550,7 +550,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
                   );
                 }
               } else {
-                console.warn(`⚠️ No DistributionID found for OrderID=${completeOrder.OrderID}, SizeID=${completeOrder.SizeID}`);
+                //console.warn(`⚠️ No DistributionID found for OrderID=${completeOrder.OrderID}, SizeID=${completeOrder.SizeID}`);
               }
             }
           }
@@ -1005,7 +1005,7 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
       if (clientData.sizeDataInfo) {
         clientData.sizeDataInfo.sizeID = [];
       }
-    
+      await delay(3000);
     //  console.log(`[${ipAddress}] All SOs complete. Cleared Modbus memory.`);
     }  
 
@@ -1168,7 +1168,6 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
       return acc;
     }, {});
 
-
   if (!groupedBySizeExisted) return;
 
   const summedValues = Object.keys(groupedBySizeExisted).map(sizeID => {
@@ -1185,42 +1184,58 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
 
   const sizeInfo = modbusClients[ipAddress].sizeDataInfo;
   if (!sizeInfo) return;
-
-  const sizeAddress = sizeInfo.sizeID.slice(0, 6);
-  if (sizeAddress.length === 0) return;
-
+  
+  const fullSizeAddress = sizeInfo.sizeID;
+  if (!Array.isArray(fullSizeAddress) || fullSizeAddress.length === 0) return;
+  
   if (!modbusClients[ipAddress].previousSizeData) {
     modbusClients[ipAddress].previousSizeData = [];
   }
-
+  
+  const isLeatherMaterial = isLeather === 2;
+  const typeMaterial = isLeatherMaterial ? 1 : 0;
+  let baseActual = typeMaterial ? 922 : 794;
+  
   try {
-    await Promise.all(
-      sizeAddress.map(async (sizeAddressID, index) => {
-        if (sizeAddressID == null) return; // Skip null/undefined
+    let sizeGroups = [];
+  
+    if (isLeatherMaterial) {
+      // Split into 2 arrays of 3 items
+      sizeGroups = [
+        fullSizeAddress.slice(0, 3),
+        fullSizeAddress.slice(3, 6)
+      ];
+    } else {
+      // Just one group of up to 6 items
+      sizeGroups = [fullSizeAddress.slice(0, 6)];
+    }
+  
+    // Iterate each group
+    for (let g = 0; g < sizeGroups.length; g++) {
+      const group = sizeGroups[g];
+  
+      await Promise.all(
+        group.map(async (sizeAddressID, index) => {
+          if (!sizeAddressID) return;
+  
+          const sizeID = await safeRead(sizeAddressID, client);
+          if (!sizeID || sizeID === 0) {
+            console.warn(`⚠️ Skipping invalid sizeID at group ${g} index ${index}`);
+            return;
+          }
+  
+          const matched = summedValues.find(item => parseInt(item.sizeID) === sizeID);
+          if (!matched) return;
+  
+          let leatherSizeIDs = [45, 47, 49];
+          let isLeather = leatherSizeIDs.includes(sizeAddressID);
 
-        const sizeID = await safeRead(sizeAddressID, client);
-        if (sizeID == null || sizeID == 0) {
-          console.warn(`⚠️ Skipping null/undefined sizeID at index ${index}`);
-          return;
-        }
-
-        const matched = summedValues.find(item => parseInt(item.sizeID) === sizeID);
-        if (!matched) {
-       //   console.log(`⚠️ No match found in summedValues for sizeID ${sizeID}`);
-          return;
-        }
-
-        const typeMaterial = isLeather === 2 ? 1 : 0;
-        const baseActual = typeMaterial ? 922 : 794;
-        const actualAddress = baseActual + 16 * index;
-
-        const newData = {
-          sizeID,
-          actualCut: matched.totalCuts,
-          actualPieces: matched.totalPieces,
-          actualQtys: matched.totalQtys
-        };
-
+          // Determine spacing rule
+          if (isLeather) {
+            baseActual = 215;
+          }
+          let sizeSpace = isLeather ? 20 : 16;
+          const actualAddress = baseActual + sizeSpace * index;
         //const existing = modbusClients[ipAddress].previousSizeData.find(data => data.sizeID === sizeID);
 
         // const isSame =
@@ -1231,12 +1246,11 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
 
         // if (!isSame) {
 
-          //assign real data
-          await client.writeSingleRegister(actualAddress, newData.actualCut);
-          await client.writeSingleRegister(actualAddress + 4, newData.actualPieces);
-          await client.writeSingleRegister(actualAddress + 8, newData.actualQtys);
+          await client.writeSingleRegister(actualAddress, matched.totalCuts);
+          await client.writeSingleRegister(actualAddress + 4, matched.totalPieces);
+          await client.writeSingleRegister(actualAddress + 8, matched.totalQtys);
 
-         // console.log(`✅ Written values for sizeID ${sizeID} ${sizeAddressID} ${newData.actualQtys} ${actualAddress} at index ${index} IPAdress ${ipAddress}`);
+        // console.log(`✅ Written values for sizeID ${sizeID} ${sizeAddressID} ${newData.actualQtys} ${actualAddress} at index ${index} IPAdress ${ipAddress}`);
 
         //   if (existing) {
         //     Object.assign(existing, newData);
@@ -1246,12 +1260,14 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
         // } else {
         //   console.log(`⏭️ Skipped writing for sizeID ${sizeID}, no change in values.`);
         // }
-      })
-    );
 
- //   console.log("✅ All necessary registers written.");
-  } catch (error) {
-    console.error("❌ Error writing registers:", error.message);
+  
+          //console.log(`✅ Written sizeID ${sizeID} at group ${g}, index ${index}, address ${actualAddress}`);
+        })
+      );
+    }
+  } catch (err) {
+    console.error("❌ Error during write:", err);
   }
 }
 
@@ -1339,8 +1355,8 @@ async function readActualData(client, ipAddress) {
 
     let OrderID = orderIDData.response._body.values[0];
     const baseAddress = isLeather ? 966 : 886;
-    const baseActual = isLeather ? 922 : 794;
-    const baseSizeQtyAddress = isLeather ? 918 : 790;
+    let baseActual = isLeather ? 922 : 794;
+    let baseSizeQtyAddress = isLeather ? 918 : 790;
     let collectPartAndOrderID;
 
     let completeSizeCount = 0;
@@ -1366,10 +1382,26 @@ async function readActualData(client, ipAddress) {
     if (sizeInfo === undefined || sizeInfo.sizeID == undefined || sizeInfo.sizeID[index] == null) return;
 
     const sizeAddressID = sizeInfo.sizeID[index];
-
+    let sizeQtyAddress;
+    let actualAddress;
     try {
-      const sizeQtyAddress = baseSizeQtyAddress + 16 * index;
-      const actualAddress = baseActual + 16 * index;
+      const sizeIDValue = parseInt(sizeAddressID);
+      const leatherSizeIDs = [45, 47, 49];
+      const isLeatherSize = leatherSizeIDs.includes(sizeIDValue);
+
+      if (isLeatherSize) {
+        const customIndex = getLeatherIndex(sizeIDValue);
+
+        baseSizeQtyAddress = 211;
+        baseActual = 215;
+
+        sizeQtyAddress = baseSizeQtyAddress + 20 * customIndex;
+        actualAddress = baseActual + 20 * customIndex;
+      }
+      else {
+        sizeQtyAddress = baseSizeQtyAddress + 16 * index;
+        actualAddress = baseActual + 16 * index;
+      }
 
       let [
         sizeID,
@@ -1425,9 +1457,19 @@ async function readActualData(client, ipAddress) {
               ?.filter(item => item.SizeID === sizeID && item.Status === 'Pending')
               .map(item => ({
                 PartID: item.PartID,
-                OrderID: item.OrderID
+                OrderID: item.OrderID,
+                SizeID: item.SizeID,
+                OperatorID: item.OperatorID
               }))
-          ) || [];
+              .reduce((acc, curr) => {
+                const key = `${curr.PartID}-${curr.OrderID}-${curr.SizeID}-${curr.OperatorID}`;
+                if (!acc.map.has(key)) {
+                  acc.map.set(key, true);
+                  acc.result.push(curr);
+                }
+                return acc;
+              }, { map: new Map(), result: [] }).result
+          ) || [];              
         }
 
         if (checkPendingSize.length == 0) return;
@@ -1588,6 +1630,16 @@ async function readActualData(client, ipAddress) {
     }
     return parseInt(actualSizeQty);
   }
+}
+
+function getLeatherIndex(sizeIDValue) {
+  const leatherMap = {
+    45: 0,
+    47: 1,
+    49: 2
+  };
+
+  return leatherMap[sizeIDValue] ?? 0; // default to 0 if not found
 }
 
 function findSubDistribution(ip, sizeID, partID, orderID, operatorID) {
@@ -2089,22 +2141,17 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
   // Ensure sizeData is an array and limit its length based on isLeather
   if (!Array.isArray(sizeData)) return;
 
-  const maxSize = isLeather == 2 ? 3 : 6;
+  const chunkSize = 6;
   let processedSizeData = [];
   
   if (Array.isArray(sizeData)) {
-    if (isLeather == 2) {
       const index = parseInt(modbusClients[ipAddress]?.indexMultipleSOs, 10) || 0;
 
       // Define fixed slice ranges
-      const chunkSize = 3;
-      const startIndex = index * chunkSize;
-      const endIndex = startIndex + chunkSize;
+      //const startIndex = index * chunkSize;
+      //const endIndex = startIndex + chunkSize;
   
-      processedSizeData = sizeData.slice(startIndex, endIndex);
-    } else {
-      processedSizeData = sizeData.slice(0, maxSize);
-    }
+      processedSizeData = sizeData.slice(0, chunkSize);
   } else {
     console.warn('sizeData is not an array:', sizeData);
   }
@@ -2123,9 +2170,9 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
       { SizeID: 900, Size: 906, SizeQty: 918, InventoryQty: 79 },
       { SizeID: 902, Size: 910, SizeQty: 934, InventoryQty: 83 },
       { SizeID: 904, Size: 914, SizeQty: 950, InventoryQty: 87 },
-      { SizeID: 207, Size: 213, SizeQty: 217, InventoryQty: 306 },
-      { SizeID: 209, Size: 233, SizeQty: 237, InventoryQty: 310 },
-      { SizeID: 211, Size: 253, SizeQty: 257, InventoryQty: 314 },
+      { SizeID: 45, Size: 207, SizeQty: 211, InventoryQty: 302 },
+      { SizeID: 47, Size: 227, SizeQty: 231, InventoryQty: 306 },
+      { SizeID: 49, Size: 247, SizeQty: 251, InventoryQty: 310 },
     ];
   } else {
     // Raw sizes

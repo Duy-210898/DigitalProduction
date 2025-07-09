@@ -55,11 +55,11 @@ namespace DigitalProduction.Frm_Admin
             windowsUIButtonPanel1.AllowGlyphSkinning = true;
 
             // allow mutilple select
-            var view = gridDistribution.MainView as DevExpress.XtraGrid.Views.Grid.GridView;
+            var view = gridDistribution.MainView as GridView;
             if (view != null)
             {
                 view.OptionsSelection.MultiSelect = true;
-                view.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CheckBoxRowSelect;
+                view.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CheckBoxRowSelect;
             }
         }
 

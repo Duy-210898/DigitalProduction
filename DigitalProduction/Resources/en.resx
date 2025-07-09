@@ -615,4 +615,19 @@
   <data name="FindEmployeeCode" xml:space="preserve">
     <value>Find Employee Code</value>
   </data>
+  <data name="MaximumSize" xml:space="preserve">
+    <value>⚠ You can select up to 6 sizes only.</value>
+  </data>
+  <data name="MaximumSizeLeather" xml:space="preserve">
+    <value>⚠ You can select up to 1 sizes only.</value>
+  </data>
+  <data name="RequiredMaterialType" xml:space="preserve">
+    <value>Please select material type !!!</value>
+  </data>
+  <data name="SelectMaterialType" xml:space="preserve">
+    <value>Please select material type:</value>
+  </data>
+  <data name="SubDistributions" xml:space="preserve">
+    <value>Sub Distributions</value>
+  </data>
 </root>

@@ -152,19 +152,6 @@ async function handleGetActualData(ws, request, retryCount = 0) {
     let endDate = filter?.endDate ? new Date(filter.endDate) : new Date(formattedCurrentDate);
     endDate.setHours(23, 59, 59, 999); // End of day
 
-    // // Format date as YYYY-MM-DD HH:mm:ss.SSS for SQL
-    // const formatDateForSQL = (date) => {
-    //   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ` +
-    //          `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}.${String(date.getMilliseconds()).padStart(3, '0')}`;
-    // };
-
-    // const formattedStartDate = formatDateForSQL(startDate);
-    // const formattedEndDate = formatDateForSQL(endDate);
-
-    // console.log("Start Date:", formattedStartDate);
-    // console.log("End Date:", formattedEndDate);
-    // console.log("Page:", page, "| PageSize:", pageSize);
-
     // Fetch real-time paginated data
     const realTimeData = await getActualOutputData(startDate, endDate, page, pageSize);
 

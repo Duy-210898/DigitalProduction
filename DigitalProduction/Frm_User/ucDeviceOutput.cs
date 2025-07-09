@@ -226,7 +226,7 @@ namespace DigitalProduction
         private void BtnSyncData_Click(object sender, EventArgs e)
         {
             TranslateHeaders();
-            _ = _viewModel.SyncDataAsync();
+           _viewModel.SyncDataAsync();
         }
 
         private void LoadFilters()
@@ -345,12 +345,13 @@ namespace DigitalProduction
             gridView.Columns["IsGroupHeader"]?.SetVisible(false);
             gridView.Columns["IsRecentlyUpdated"]?.SetVisible(false);
 
-            StyleNumericColumn(gridView.Columns["ActualSizeQty"], 11);
-            StyleNumericColumn(gridView.Columns["TotalPiecesPerPair"], 14, Color.Blue, bold: true);
+            StyleNumericColumn(gridView.Columns["PartName"], 5, bold: true);
+            StyleNumericColumn(gridView.Columns["ActualSizeQty"], 7);
+            StyleNumericColumn(gridView.Columns["TotalPiecesPerPair"], 13, Color.Blue, bold: true);
             StyleNumericColumn(gridView.Columns["ActualCut"], 0, bold: true);
             StyleNumericColumn(gridView.Columns["ActualPieces"], 0, bold: true);
             StyleNumericColumn(gridView.Columns["InventoryQty"], 0, bold: true);
-            StyleNumericColumn(gridView.Columns["CuttingDieQty"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns["CuttingDieQty"], 9, bold: true);
             StyleNumericColumn(gridView.Columns["MaterialLayer"], 0, bold: true);
             StyleNumericColumn(gridView.Columns["SizeQty"], 6, bold: true);
             StyleNumericColumn(gridView.Columns["PiecesPerPair"], 0, bold: true);
@@ -361,13 +362,15 @@ namespace DigitalProduction
             gridView.OptionsCustomization.AllowSort = false;
             gridView.OptionsMenu.ShowAutoFilterRowItem = false;
             gridView.Columns["MachineName"].Width = 110;
+            gridView.Columns["ActualSizeQty"].Width = 100;
             gridView.Columns["OperatorName"].Width = 130;
+            gridView.Columns["Size"].Width = 60;
             gridView.Columns["PartName"].Width = 100;
             gridView.Columns["SO"].Width = 80;
             gridView.Columns["MaterialType"].Width = 100;
             gridView.Columns["SizeQty"].Width = 70;
             gridView.Columns["SO"].VisibleIndex = 0;
-            gridView.Columns["TotalPiecesPerPair"].VisibleIndex = 12;
+           // gridView.Columns["TotalPiecesPerPair"].VisibleIndex = 12;
             gridView.Columns["Timestamp"].Visible= false;
             gridView.Columns["UpdatedAt"].Visible = false;
 

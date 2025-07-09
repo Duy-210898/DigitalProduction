@@ -6,8 +6,12 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.Utils;
+using DevExpress.XtraBars.Customization;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraEditors.DXErrorProvider;
+using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
@@ -25,7 +29,10 @@ namespace DigitalProduction
         private Label lblTotalRecords;
         private SimpleButton btnSendData, btnDevideData;
         // Keep track of selected items
-        List<SalesOrder> selectedSalesOrders = new List<SalesOrder>();
+        public event EventHandler<RadioButton> RadioSelected;
+        private static bool isLeather = false;
+        private Timer flyoutAutoHideTimer;
+        private readonly List<SalesOrder> selectedSalesOrders = new List<SalesOrder>();
         private readonly string[] columnsToHide = { "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
         public ucSchedule()
@@ -34,6 +41,8 @@ namespace DigitalProduction
             SetupGridControl();
             InitializeTotalLabel();
             InitializeMonthFilter();
+            rdLeather.CheckedChanged += OnRadioCheckedChanged;
+            rdRawMaterial.CheckedChanged += OnRadioCheckedChanged;
 
             dateTimePickerSchedule.Format = DateTimePickerFormat.Custom;
             dateTimePickerSchedule.CustomFormat = "yyyy";
@@ -43,6 +52,9 @@ namespace DigitalProduction
             lblSelectSO.Text = LocalizationManager.GetString("SelectSO");
             lb_PartName.Text = LocalizationManager.GetString("SelectPart");
             lb_Size.Text = LocalizationManager.GetString("SelectSize");
+            rdLeather.Text = LocalizationManager.GetString("leatherMaterial");
+            rdRawMaterial.Text = LocalizationManager.GetString("rawMaterial");
+            lbSelectMaterialType.Text = LocalizationManager.GetString("SelectMaterialType");
 
             //  cboSO.EditValueChanged += cboSO_EditValueChanged;
             InitializeSyncButton();
@@ -104,7 +116,97 @@ namespace DigitalProduction
                     e.DisplayText = string.Join(", ", selectedSalesOrders.Select(so => so.SO));
                 }
             };
+
+            fpRequireSelectTypeMaterial.OwnerControl = this;
+            this.HandleCreated += (s, e) =>
+            {
+                this.BeginInvoke(new Action(() =>
+                {
+                    if (!IsSelectionValid())
+                    {
+                        ShowValidationBeak(rdLeather, LocalizationManager.GetString("RequiredMaterialType"));
+                    }
+                }));
+            };
+            gridViewSchedule.Appearance.FooterPanel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            gridViewSchedule.Appearance.FooterPanel.Options.UseFont = true;
+
+            gridViewSchedule.Appearance.FooterPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            gridViewSchedule.Appearance.FooterPanel.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
+
+            // check size limit
+            comboSize.EditValueChanged += ComboSize_EditValueChanged;
         }
+        private void ComboSize_EditValueChanged(object sender, EventArgs e)
+        {
+            var editor = sender as CheckedComboBoxEdit;
+            if (editor == null) return;
+
+            var selectedItems = editor.Properties.Items.Cast<CheckedListBoxItem>()
+                .Where(i => i.CheckState == CheckState.Checked)
+                .ToList();
+            InitializeFlyoutTimer();
+            if (selectedItems.Count > 6)
+            {
+                var lastChecked = selectedItems.Last();
+                lastChecked.CheckState = CheckState.Unchecked;
+
+                editor.RefreshEditValue();
+                ShowFlyoutAboveCombo(comboSize, LocalizationManager.GetString("MaximumSize"));
+            }
+        }
+        private void ShowFlyoutAboveCombo(CheckedComboBoxEdit combo, string message)
+        {
+            lblFlyoutMessage.Text = message;
+
+            // Get screen coordinates of combo
+            Point comboScreen = combo.PointToScreen(Point.Empty);
+
+            // Get screen coordinates of OwnerControl
+            Point ownerScreen = fpRequireSelectTypeMaterial.OwnerControl.PointToScreen(Point.Empty);
+
+            // Calculate position relative to OwnerControl
+            int x = comboScreen.X + 2;
+            int y = comboScreen.Y - 8;
+
+            fpRequireSelectTypeMaterial.ShowBeakForm(new Point(x, y));
+
+            flyoutAutoHideTimer.Stop(); // Reset if it's already running
+            flyoutAutoHideTimer.Start(); // Start countdown to auto-hide
+        }
+
+        private void InitializeFlyoutTimer()
+        {
+            flyoutAutoHideTimer = new Timer();
+            flyoutAutoHideTimer.Interval = 4000; // 4 seconds
+            flyoutAutoHideTimer.Tick += (s, e) =>
+            {
+                if (fpRequireSelectTypeMaterial != null && fpRequireSelectTypeMaterial.Visible)
+                {
+                    fpRequireSelectTypeMaterial.HideBeakForm();
+                }
+                flyoutAutoHideTimer.Stop();
+            };
+        }
+
+        private void ShowValidationBeak(RadioButton radioButton, string message)
+        {
+            lblFlyoutMessage.Text = message;
+
+            // Get screen coordinates of radioButton
+            Point rdScreen = radioButton.PointToScreen(Point.Empty);
+
+            // Get screen coordinates of OwnerControl
+            Point ownerScreen = fpRequireSelectTypeMaterial.OwnerControl.PointToScreen(Point.Empty);
+
+            // Calculate position relative to OwnerControl
+            int x = rdScreen.X + 2;
+            int y = rdScreen.Y - 8;
+
+            fpRequireSelectTypeMaterial.ShowBeakForm(new Point(x, y));
+        }
+
+
 
         //private void cboSO_EditValueChanged(object sender, EventArgs e)
         //{
@@ -149,6 +251,35 @@ namespace DigitalProduction
                 MessageBox.Show("No data available to send.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            var selectedItems = comboSize.Properties.Items.Cast<CheckedListBoxItem>()
+              .Where(i => i.CheckState == CheckState.Checked)
+              .ToList();
+            isLeather = rdLeather.Checked;
+            InitializeFlyoutTimer();
+            if (selectedItems.Count > 6)
+            {
+                var lastChecked = selectedItems.Last();
+                lastChecked.CheckState = CheckState.Unchecked;
+
+                comboSize.RefreshEditValue();
+                ShowFlyoutAboveCombo(comboSize, LocalizationManager.GetString("MaximumSize"));
+                return;
+            }
+            var items = comboSize.Properties.Items.Cast<CheckedListBoxItem>().ToList();
+            var checkedItems = items.Where(i => i.CheckState == CheckState.Checked).ToList();
+
+            if (isDeviceData && selectedItems.Count > 1)
+            {
+                // Keep only the first checked item, uncheck the rest
+                foreach (var item in items)
+                {
+                    item.CheckState = (item == checkedItems.First()) ? CheckState.Checked : CheckState.Unchecked;
+                }
+
+                comboSize.RefreshEditValue();
+                ShowFlyoutAboveCombo(comboSize, LocalizationManager.GetString("MaximumSizeLeather"));
+                return;
+            }
             bool allSame = filteredSchedules
                 .GroupBy(s => new { s.Model })
                 .Count() == 1;
@@ -182,7 +313,7 @@ namespace DigitalProduction
                 {
                     if (userControl is ucDistribution distributionControl)
                     {
-                        distributionControl.ReceiveFilteredData(filteredSchedules, isDeviceData);
+                        distributionControl.ReceiveFilteredData(filteredSchedules, isDeviceData, isLeather);
                     }
                 }
 
@@ -319,7 +450,6 @@ namespace DigitalProduction
                 Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
                 Text = $" {LocalizationManager.GetString("TotalRecords")} 0",
                 AutoSize = true,
-                BackColor = System.Drawing.Color.AntiqueWhite,
                 ForeColor = System.Drawing.Color.Green,
                 Padding = new Padding(5)
             };
@@ -327,10 +457,28 @@ namespace DigitalProduction
             btnSendData = new SimpleButton
             {
                 Text = LocalizationManager.GetString("SelectData"),
-                Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold),
-                BackColor = System.Drawing.Color.LightBlue,
-                AutoSize = true,
-                Margin = new Padding(10, 0, 0, 0) // Adds space between label and button
+                Font = new Font("Segoe UI", 12F, FontStyle.Bold), // Modern, clean font
+                Appearance =
+                {
+                    BackColor = Color.LightBlue,
+                    ForeColor = Color.White,
+                    Options = { UseBackColor = true, UseForeColor = true, UseFont = true },
+                },
+                LookAndFeel =
+                {
+                    Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat,
+                    UseDefaultLookAndFeel = false
+                },
+                Height = 40,
+                Width = 180,
+                Cursor = Cursors.Hand,
+                Margin = new Padding(10, 0, 0, 0),
+                ImageOptions =
+                {
+                    Image = Properties.Resources.send_data
+                    ,
+                    ImageToTextAlignment = ImageAlignToText.LeftCenter
+                }
             };
             btnSendData.Click += (s, e) => BtnSendData_Click(s, e, false);
 
@@ -339,12 +487,30 @@ namespace DigitalProduction
             bottomPanel.Controls.Add(btnSendData);
 
             btnDevideData = new SimpleButton
-            { 
+            {
                 Text = LocalizationManager.GetString("SelectDevideData"),
-                Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold),
-                BackColor = System.Drawing.Color.LightBlue,
-                AutoSize = true,
-                Margin = new Padding(10, 0, 0, 0) // Adds space between label and button
+                Font = new Font("Segoe UI", 12F, FontStyle.Bold), // Modern, clean font
+                Appearance =
+                {
+                    BackColor = Color.LightBlue,
+                    ForeColor = Color.White,
+                    Options = { UseBackColor = true, UseForeColor = true, UseFont = true },
+                },
+                            LookAndFeel =
+                {
+                    Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat,
+                    UseDefaultLookAndFeel = false
+                },
+                            Height = 40,
+                            Width = 180,
+                            Cursor = Cursors.Hand,
+                            Margin = new Padding(10, 0, 0, 0),
+                            ImageOptions =
+                {
+                    Image = Properties.Resources.send_data_device
+                    ,
+                    ImageToTextAlignment = ImageAlignToText.LeftCenter
+                }
             };
             btnDevideData.Click += (s, e) => BtnSendData_Click(s, e, true);
 
@@ -615,7 +781,6 @@ namespace DigitalProduction
 
             int totalCount = gridViewSchedule.DataRowCount; // Get only filtered rows
             lblTotalRecords.Text = $"{LocalizationManager.GetString("TotalRecords")} {totalCount}";
-            lblTotalRecords.BackColor = Color.AntiqueWhite;
             lblTotalRecords.ForeColor = Color.Green;
         }
 
@@ -792,6 +957,29 @@ namespace DigitalProduction
         {
             ApplyCombinedFilters();
         }
+        public bool IsSelectionValid()
+        {
+            // Check if any radio button is checked
+            return this.Controls
+                .OfType<RadioButton>()
+                .Any(rb => rb.Checked);
+        }
 
+        public string GetSelectedValue()
+        {
+            return this.Controls
+                .OfType<RadioButton>()
+                .FirstOrDefault(rb => rb.Checked)?.Text;
+        }
+        private void OnRadioCheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rd = sender as RadioButton;
+            if (rd.Checked)
+            {
+                flayoutTableSelectSO.Enabled = true;
+                fpRequireSelectTypeMaterial.HideBeakForm(); // Hide if already shown
+                RadioSelected?.Invoke(this, rd);
+            }
+        }
     }
 }

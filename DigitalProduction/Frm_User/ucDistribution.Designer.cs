@@ -42,7 +42,7 @@
             this.panel4 = new System.Windows.Forms.Panel();
             this.lblWorkCenter = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutMainDistribution = new System.Windows.Forms.TableLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.btnDeleteData = new DevExpress.XtraEditors.SimpleButton();
@@ -50,7 +50,6 @@
             this.gridLookUpOperator = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.btnSend = new DevExpress.XtraEditors.SimpleButton();
-            this.lblSelectMachine = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
@@ -66,16 +65,14 @@
             this.btnSaveInventory = new DevExpress.XtraEditors.SimpleButton();
             this.txtInventory = new System.Windows.Forms.TextBox();
             this.lblInventoryQty = new System.Windows.Forms.Label();
-            this.panelMaterialType = new System.Windows.Forms.Panel();
-            this.rdLeather = new System.Windows.Forms.RadioButton();
-            this.rdRawMaterial = new System.Windows.Forms.RadioButton();
-            this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
             this.gridViewOverview = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.lblSelectMachine = new System.Windows.Forms.Label();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel3.SuspendLayout();
+            this.tableLayoutMainDistribution.SuspendLayout();
             this.panel2.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpOperator.Properties)).BeginInit();
@@ -88,11 +85,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).BeginInit();
             this.tableLayoutPanel5.SuspendLayout();
-            this.panelMaterialType.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // lblFactory
@@ -240,7 +236,7 @@
             this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutMainDistribution, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.gridControlOverview, 0, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -255,38 +251,39 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(971, 736);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
-            // tableLayoutPanel3
+            // tableLayoutMainDistribution
             // 
-            this.tableLayoutPanel3.AutoSize = true;
-            this.tableLayoutPanel3.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.tableLayoutPanel3.ColumnCount = 2;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.52417F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.47583F));
-            this.tableLayoutPanel3.Controls.Add(this.panel2, 1, 2);
-            this.tableLayoutPanel3.Controls.Add(this.lblSelectMachine, 1, 0);
-            this.tableLayoutPanel3.Controls.Add(this.panel5, 0, 2);
-            this.tableLayoutPanel3.Controls.Add(this.panelMaterialType, 0, 0);
-            this.tableLayoutPanel3.Controls.Add(this.gridLookUpDevice, 1, 1);
-            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(20, 78);
-            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
-            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 3;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.66535F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.24216F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 73.09248F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(931, 287);
-            this.tableLayoutPanel3.TabIndex = 2;
+            this.tableLayoutMainDistribution.AutoSize = true;
+            this.tableLayoutMainDistribution.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.tableLayoutMainDistribution.ColumnCount = 2;
+            this.tableLayoutMainDistribution.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.52417F));
+            this.tableLayoutMainDistribution.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.47583F));
+            this.tableLayoutMainDistribution.Controls.Add(this.panel2, 1, 2);
+            this.tableLayoutMainDistribution.Controls.Add(this.tableLayoutPanel5, 0, 1);
+            this.tableLayoutMainDistribution.Controls.Add(this.lblSelectMachine, 1, 0);
+            this.tableLayoutMainDistribution.Controls.Add(this.panel5, 0, 2);
+            this.tableLayoutMainDistribution.Controls.Add(this.gridLookUpDevice, 1, 1);
+            this.tableLayoutMainDistribution.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutMainDistribution.Enabled = false;
+            this.tableLayoutMainDistribution.Location = new System.Drawing.Point(20, 78);
+            this.tableLayoutMainDistribution.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+            this.tableLayoutMainDistribution.Name = "tableLayoutMainDistribution";
+            this.tableLayoutMainDistribution.RowCount = 3;
+            this.tableLayoutMainDistribution.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.66535F));
+            this.tableLayoutMainDistribution.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.72474F));
+            this.tableLayoutMainDistribution.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.7317F));
+            this.tableLayoutMainDistribution.Size = new System.Drawing.Size(931, 287);
+            this.tableLayoutMainDistribution.TabIndex = 2;
             // 
             // panel2
             // 
             this.panel2.AutoSize = true;
             this.panel2.Controls.Add(this.tableLayoutPanel7);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(492, 79);
+            this.panel2.Location = new System.Drawing.Point(492, 86);
             this.panel2.Margin = new System.Windows.Forms.Padding(3, 3, 20, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(419, 205);
+            this.panel2.Size = new System.Drawing.Size(419, 198);
             this.panel2.TabIndex = 6;
             // 
             // tableLayoutPanel7
@@ -306,7 +303,7 @@
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.2439F));
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(419, 205);
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(419, 198);
             this.tableLayoutPanel7.TabIndex = 10;
             // 
             // btnDeleteData
@@ -320,12 +317,12 @@
             this.btnDeleteData.AutoSize = true;
             this.btnDeleteData.Dock = System.Windows.Forms.DockStyle.Left;
             this.btnDeleteData.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnDeleteData.ImageOptions.SvgImage")));
-            this.btnDeleteData.Location = new System.Drawing.Point(50, 156);
+            this.btnDeleteData.Location = new System.Drawing.Point(50, 150);
             this.btnDeleteData.LookAndFeel.SkinName = "Dark Side";
             this.btnDeleteData.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnDeleteData.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
             this.btnDeleteData.Name = "btnDeleteData";
-            this.btnDeleteData.Size = new System.Drawing.Size(86, 46);
+            this.btnDeleteData.Size = new System.Drawing.Size(86, 45);
             this.btnDeleteData.TabIndex = 9;
             this.btnDeleteData.Text = "Delete";
             this.btnDeleteData.Click += new System.EventHandler(this.btnDeleteData_Click);
@@ -341,7 +338,7 @@
             // 
             // gridLookUpOperator
             // 
-            this.gridLookUpOperator.Location = new System.Drawing.Point(3, 43);
+            this.gridLookUpOperator.Location = new System.Drawing.Point(3, 41);
             this.gridLookUpOperator.Name = "gridLookUpOperator";
             this.gridLookUpOperator.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
             this.gridLookUpOperator.Properties.Appearance.Options.UseBackColor = true;
@@ -368,35 +365,24 @@
             this.btnSend.AutoSize = true;
             this.btnSend.Dock = System.Windows.Forms.DockStyle.Left;
             this.btnSend.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnSend.ImageOptions.SvgImage")));
-            this.btnSend.Location = new System.Drawing.Point(253, 156);
+            this.btnSend.Location = new System.Drawing.Point(253, 150);
             this.btnSend.LookAndFeel.SkinName = "Dark Side";
             this.btnSend.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnSend.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
             this.btnSend.Name = "btnSend";
             this.btnSend.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.True;
-            this.btnSend.Size = new System.Drawing.Size(155, 46);
+            this.btnSend.Size = new System.Drawing.Size(155, 45);
             this.btnSend.TabIndex = 4;
             this.btnSend.Text = "Send Distribution";
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
-            // 
-            // lblSelectMachine
-            // 
-            this.lblSelectMachine.BackColor = System.Drawing.SystemColors.Window;
-            this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblSelectMachine.Location = new System.Drawing.Point(492, 0);
-            this.lblSelectMachine.Name = "lblSelectMachine";
-            this.lblSelectMachine.Size = new System.Drawing.Size(436, 36);
-            this.lblSelectMachine.TabIndex = 0;
-            this.lblSelectMachine.Text = "Select Machine";
-            this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panel5
             // 
             this.panel5.Controls.Add(this.tableLayoutPanel4);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel5.Location = new System.Drawing.Point(3, 79);
+            this.panel5.Location = new System.Drawing.Point(3, 86);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(483, 205);
+            this.panel5.Size = new System.Drawing.Size(483, 198);
             this.panel5.TabIndex = 7;
             // 
             // tableLayoutPanel4
@@ -404,16 +390,14 @@
             this.tableLayoutPanel4.BackColor = System.Drawing.Color.MistyRose;
             this.tableLayoutPanel4.ColumnCount = 1;
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel6, 0, 1);
-            this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel5, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel6, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 3;
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.58537F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 76.09756F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.829268F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(483, 205);
+            this.tableLayoutPanel4.RowCount = 1;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(483, 198);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // tableLayoutPanel6
@@ -432,31 +416,33 @@
             this.tableLayoutPanel6.Controls.Add(this.numMaterialLayer, 1, 2);
             this.tableLayoutPanel6.Controls.Add(this.numericTotalPeicesPerPair, 1, 3);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 37);
+            this.tableLayoutPanel6.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 4;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(477, 150);
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(477, 192);
             this.tableLayoutPanel6.TabIndex = 8;
             // 
             // numCuttingDieQty
             // 
             this.numCuttingDieQty.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numCuttingDieQty.Location = new System.Drawing.Point(241, 42);
+            this.numCuttingDieQty.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.numCuttingDieQty.Location = new System.Drawing.Point(241, 39);
             this.numCuttingDieQty.Name = "numCuttingDieQty";
-            this.numCuttingDieQty.Size = new System.Drawing.Size(233, 23);
+            this.numCuttingDieQty.Size = new System.Drawing.Size(233, 30);
             this.numCuttingDieQty.TabIndex = 0;
             // 
             // numPiecesPerPair
             // 
             this.numPiecesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
+            this.numPiecesPerPair.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.numPiecesPerPair.Location = new System.Drawing.Point(241, 3);
             this.numPiecesPerPair.Name = "numPiecesPerPair";
-            this.numPiecesPerPair.Size = new System.Drawing.Size(233, 23);
+            this.numPiecesPerPair.Size = new System.Drawing.Size(233, 30);
             this.numPiecesPerPair.TabIndex = 0;
             // 
             // lblTotalPeicesPerPair
@@ -464,7 +450,7 @@
             this.lblTotalPeicesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblTotalPeicesPerPair.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTotalPeicesPerPair.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblTotalPeicesPerPair.Location = new System.Drawing.Point(3, 111);
+            this.lblTotalPeicesPerPair.Location = new System.Drawing.Point(3, 108);
             this.lblTotalPeicesPerPair.Name = "lblTotalPeicesPerPair";
             this.lblTotalPeicesPerPair.Size = new System.Drawing.Size(232, 29);
             this.lblTotalPeicesPerPair.TabIndex = 7;
@@ -488,7 +474,7 @@
             this.lblCuttingDie.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblCuttingDie.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCuttingDie.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblCuttingDie.Location = new System.Drawing.Point(3, 39);
+            this.lblCuttingDie.Location = new System.Drawing.Point(3, 36);
             this.lblCuttingDie.Name = "lblCuttingDie";
             this.lblCuttingDie.Size = new System.Drawing.Size(232, 33);
             this.lblCuttingDie.TabIndex = 3;
@@ -500,7 +486,7 @@
             this.lblMaterialLayer.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblMaterialLayer.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMaterialLayer.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblMaterialLayer.Location = new System.Drawing.Point(3, 78);
+            this.lblMaterialLayer.Location = new System.Drawing.Point(3, 72);
             this.lblMaterialLayer.Name = "lblMaterialLayer";
             this.lblMaterialLayer.Size = new System.Drawing.Size(232, 33);
             this.lblMaterialLayer.TabIndex = 5;
@@ -510,17 +496,19 @@
             // numMaterialLayer
             // 
             this.numMaterialLayer.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numMaterialLayer.Location = new System.Drawing.Point(241, 81);
+            this.numMaterialLayer.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.numMaterialLayer.Location = new System.Drawing.Point(241, 75);
             this.numMaterialLayer.Name = "numMaterialLayer";
-            this.numMaterialLayer.Size = new System.Drawing.Size(233, 23);
+            this.numMaterialLayer.Size = new System.Drawing.Size(233, 30);
             this.numMaterialLayer.TabIndex = 0;
             // 
             // numericTotalPeicesPerPair
             // 
             this.numericTotalPeicesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
-            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(241, 114);
+            this.numericTotalPeicesPerPair.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(241, 111);
             this.numericTotalPeicesPerPair.Name = "numericTotalPeicesPerPair";
-            this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(233, 23);
+            this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(233, 30);
             this.numericTotalPeicesPerPair.TabIndex = 6;
             // 
             // tableLayoutPanel5
@@ -528,17 +516,17 @@
             this.tableLayoutPanel5.BackColor = System.Drawing.Color.MistyRose;
             this.tableLayoutPanel5.ColumnCount = 3;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 26.72414F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23.27586F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.36025F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 27.74327F));
             this.tableLayoutPanel5.Controls.Add(this.btnSaveInventory, 2, 0);
-            this.tableLayoutPanel5.Controls.Add(this.txtInventory, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.lblInventoryQty, 0, 0);
-            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel5.Controls.Add(this.txtInventory, 1, 0);
+            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 39);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(477, 28);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(483, 41);
             this.tableLayoutPanel5.TabIndex = 8;
             // 
             // btnSaveInventory
@@ -547,95 +535,38 @@
             this.btnSaveInventory.Appearance.Options.UseFont = true;
             this.btnSaveInventory.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnSaveInventory.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSaveInventory.ImageOptions.Image")));
-            this.btnSaveInventory.Location = new System.Drawing.Point(415, 3);
+            this.btnSaveInventory.Location = new System.Drawing.Point(398, 3);
             this.btnSaveInventory.LookAndFeel.SkinName = "Dark Side";
             this.btnSaveInventory.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnSaveInventory.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
             this.btnSaveInventory.Name = "btnSaveInventory";
-            this.btnSaveInventory.Size = new System.Drawing.Size(59, 22);
+            this.btnSaveInventory.Size = new System.Drawing.Size(82, 35);
             this.btnSaveInventory.TabIndex = 5;
             this.btnSaveInventory.Text = "Save";
             this.btnSaveInventory.Click += new System.EventHandler(this.btnSaveInventory_Click);
             // 
             // txtInventory
             // 
-            this.txtInventory.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtInventory.Location = new System.Drawing.Point(241, 3);
+            this.txtInventory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtInventory.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtInventory.Location = new System.Drawing.Point(244, 3);
             this.txtInventory.Name = "txtInventory";
-            this.txtInventory.Size = new System.Drawing.Size(121, 23);
+            this.txtInventory.Size = new System.Drawing.Size(101, 30);
             this.txtInventory.TabIndex = 1;
             // 
             // lblInventoryQty
             // 
             this.lblInventoryQty.AutoSize = true;
             this.lblInventoryQty.BackColor = System.Drawing.Color.MistyRose;
-            this.lblInventoryQty.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblInventoryQty.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblInventoryQty.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblInventoryQty.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblInventoryQty.Location = new System.Drawing.Point(3, 0);
             this.lblInventoryQty.Name = "lblInventoryQty";
-            this.lblInventoryQty.Size = new System.Drawing.Size(124, 28);
+            this.lblInventoryQty.Size = new System.Drawing.Size(235, 41);
             this.lblInventoryQty.TabIndex = 2;
             this.lblInventoryQty.Text = "Inventory Quanity:";
             this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // panelMaterialType
-            // 
-            this.panelMaterialType.Controls.Add(this.rdLeather);
-            this.panelMaterialType.Controls.Add(this.rdRawMaterial);
-            this.panelMaterialType.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelMaterialType.Location = new System.Drawing.Point(3, 3);
-            this.panelMaterialType.Name = "panelMaterialType";
-            this.panelMaterialType.Size = new System.Drawing.Size(483, 30);
-            this.panelMaterialType.TabIndex = 6;
-            // 
-            // rdLeather
-            // 
-            this.rdLeather.AutoSize = true;
-            this.rdLeather.Dock = System.Windows.Forms.DockStyle.Left;
-            this.rdLeather.Location = new System.Drawing.Point(97, 0);
-            this.rdLeather.Name = "rdLeather";
-            this.rdLeather.Size = new System.Drawing.Size(97, 30);
-            this.rdLeather.TabIndex = 5;
-            this.rdLeather.TabStop = true;
-            this.rdLeather.Text = "radioButton3";
-            this.rdLeather.UseVisualStyleBackColor = true;
-            this.rdLeather.CheckedChanged += new System.EventHandler(this.rdLeather_CheckedChanged);
-            // 
-            // rdRawMaterial
-            // 
-            this.rdRawMaterial.AutoSize = true;
-            this.rdRawMaterial.Dock = System.Windows.Forms.DockStyle.Left;
-            this.rdRawMaterial.Location = new System.Drawing.Point(0, 0);
-            this.rdRawMaterial.Name = "rdRawMaterial";
-            this.rdRawMaterial.Size = new System.Drawing.Size(97, 30);
-            this.rdRawMaterial.TabIndex = 3;
-            this.rdRawMaterial.TabStop = true;
-            this.rdRawMaterial.Text = "radioButton1";
-            this.rdRawMaterial.UseVisualStyleBackColor = true;
-            this.rdRawMaterial.CheckedChanged += new System.EventHandler(this.rdRawMaterial_CheckedChanged);
-            // 
-            // gridLookUpDevice
-            // 
-            this.gridLookUpDevice.Location = new System.Drawing.Point(492, 39);
-            this.gridLookUpDevice.Name = "gridLookUpDevice";
-            this.gridLookUpDevice.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.gridLookUpDevice.Properties.Appearance.Options.UseBackColor = true;
-            this.gridLookUpDevice.Properties.AutoHeight = false;
-            this.gridLookUpDevice.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.gridLookUpDevice.Properties.NullText = "";
-            this.gridLookUpDevice.Properties.PopupView = this.gridView1;
-            this.gridLookUpDevice.Size = new System.Drawing.Size(200, 25);
-            this.gridLookUpDevice.TabIndex = 9;
-            // 
-            // gridView1
-            // 
-            this.gridView1.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridView1.Name = "gridView1";
-            this.gridView1.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridView1.OptionsView.RowAutoHeight = true;
-            this.gridView1.OptionsView.ShowGroupPanel = false;
             // 
             // gridControlOverview
             // 
@@ -653,6 +584,39 @@
             this.gridViewOverview.GridControl = this.gridControlOverview;
             this.gridViewOverview.Name = "gridViewOverview";
             // 
+            // gridView1
+            // 
+            this.gridView1.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridView1.Name = "gridView1";
+            this.gridView1.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridView1.OptionsView.RowAutoHeight = true;
+            this.gridView1.OptionsView.ShowGroupPanel = false;
+            // 
+            // gridLookUpDevice
+            // 
+            this.gridLookUpDevice.Location = new System.Drawing.Point(492, 39);
+            this.gridLookUpDevice.Name = "gridLookUpDevice";
+            this.gridLookUpDevice.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.gridLookUpDevice.Properties.Appearance.Options.UseBackColor = true;
+            this.gridLookUpDevice.Properties.AutoHeight = false;
+            this.gridLookUpDevice.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpDevice.Properties.NullText = "";
+            this.gridLookUpDevice.Properties.PopupView = this.gridView1;
+            this.gridLookUpDevice.Size = new System.Drawing.Size(200, 25);
+            this.gridLookUpDevice.TabIndex = 9;
+            // 
+            // lblSelectMachine
+            // 
+            this.lblSelectMachine.BackColor = System.Drawing.SystemColors.Window;
+            this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblSelectMachine.Location = new System.Drawing.Point(492, 0);
+            this.lblSelectMachine.Name = "lblSelectMachine";
+            this.lblSelectMachine.Size = new System.Drawing.Size(436, 36);
+            this.lblSelectMachine.TabIndex = 0;
+            this.lblSelectMachine.Text = "Select Machine";
+            this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // ucDistribution
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -663,8 +627,8 @@
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
-            this.tableLayoutPanel3.ResumeLayout(false);
-            this.tableLayoutPanel3.PerformLayout();
+            this.tableLayoutMainDistribution.ResumeLayout(false);
+            this.tableLayoutMainDistribution.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.tableLayoutPanel7.ResumeLayout(false);
             this.tableLayoutPanel7.PerformLayout();
@@ -680,12 +644,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).EndInit();
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
-            this.panelMaterialType.ResumeLayout(false);
-            this.panelMaterialType.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -702,11 +664,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label lblWorkCenter;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
-        private System.Windows.Forms.RadioButton rdLeather;
-        private System.Windows.Forms.RadioButton rdRawMaterial;
-        private System.Windows.Forms.Panel panelMaterialType;
-        private System.Windows.Forms.Label lblSelectMachine;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutMainDistribution;
         private System.Windows.Forms.Label lblProductionDate;
         private System.Windows.Forms.Label lblCreatedDate;
         private System.Windows.Forms.Panel panel4;
@@ -732,9 +690,10 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
         private DevExpress.XtraGrid.GridControl gridControlOverview;
         private DevExpress.XtraGrid.Views.Grid.GridView gridViewOverview;
-        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpDevice;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         private DevExpress.XtraEditors.GridLookUpEdit gridLookUpOperator;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView2;
+        private System.Windows.Forms.Label lblSelectMachine;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpDevice;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
     }
 }

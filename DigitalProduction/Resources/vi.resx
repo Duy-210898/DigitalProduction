@@ -645,4 +645,19 @@
   <data name="FindEmployeeCode" xml:space="preserve">
     <value>Tìm mã nhân viên</value>
   </data>
+  <data name="MaximumSize" xml:space="preserve">
+    <value>⚠ Bạn chỉ có thể chọn tối đa 6 size.</value>
+  </data>
+  <data name="MaximumSizeLeather" xml:space="preserve">
+    <value>⚠ Bạn chỉ có thể chọn tối đa 1 size.</value>
+  </data>
+  <data name="RequiredMaterialType" xml:space="preserve">
+    <value>Vui lòng chọn loại liệu !!!</value>
+  </data>
+  <data name="SelectMaterialType" xml:space="preserve">
+    <value>Vui lòng chọn loại liệu:</value>
+  </data>
+  <data name="SubDistributions" xml:space="preserve">
+    <value>Chi tiết phân phối</value>
+  </data>
 </root>

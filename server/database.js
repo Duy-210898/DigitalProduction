@@ -20,6 +20,8 @@ const dbConfig = {
 
 let pool; // Global connection pool
 
+const errorLogPath = './error_log.txt';
+
 function logToFile(filePath, message) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${message}\n`;
