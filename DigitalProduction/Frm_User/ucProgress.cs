@@ -92,14 +92,14 @@ namespace DigitalProduction
 
         private void BtnApplyDevice_Click(object sender, EventArgs e)
         {
-            if (cbxDevice.SelectedValue == null || (int)cbxDevice.SelectedValue == 0)
+            if (gridLookUpDevice.EditValue == null || Convert.ToInt32(gridLookUpDevice.EditValue) == 0)
             {
                 MessageBox.Show("Please select a valid device.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            int selectedDeviceId = (int)cbxDevice.SelectedValue;
-            string selectedDeviceName = cbxDevice.Text;
+            int selectedDeviceId = Convert.ToInt32(gridLookUpDevice.EditValue);
+            string selectedDeviceName = gridLookUpDevice.Text;
 
             int appliedCount = 0;
 
@@ -132,13 +132,36 @@ namespace DigitalProduction
         private void loadDeviceDistribution()
         {
             List<Device> machines = DbHelper.getlistMachines();
-            machines.Insert(0, new Device { DeviceID = 0, MachineName = "" });
-            cbxDevice.DataSource = machines;
-            cbxDevice.DisplayMember = "MachineName";
-            cbxDevice.ValueMember = "DeviceID";
-            cbxDevice.SelectedIndex = 0;
-            cbxDevice.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            gridLookUpDevice.Properties.DataSource = machines;
+            gridLookUpDevice.Properties.DisplayMember = "MachineName";
+            gridLookUpDevice.Properties.ValueMember = "DeviceID";
+
+            // Optional: Disable typing if you want DropDownList style
+            gridLookUpDevice.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+
+            // Hide all columns except "MachineName"
+            gridLookUpDevice.Properties.View.Columns.Clear();
+            gridLookUpDevice.Properties.PopulateViewColumns();
+            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridLookUpDevice.Properties.View.Columns)
+            {
+                column.Visible = column.FieldName == "MachineName";
+            }
+            // Enable autocomplete & search
+            gridLookUpDevice.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            gridLookUpDevice.Properties.AutoComplete = true;
+
+            // Enable incremental search
+            gridLookUpDevice.Properties.ImmediatePopup = true;
+            gridLookUpDevice.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
+            gridLookUpDevice.Properties.AllowNullInput = DevExpress.Utils.DefaultBoolean.True;
+            gridLookUpDevice.Properties.NullText = "";
+
+            // Filter mode
+            gridLookUpDevice.Properties.View.OptionsView.ShowAutoFilterRow = true;
+            gridLookUpDevice.Properties.View.ActiveFilterEnabled = true;
         }
+
 
         private void ConfigureGridControl()
         {
@@ -474,6 +497,10 @@ namespace DigitalProduction
             gridViewProgressManagement.Columns["UpdatedAt"].Visible = false;
             gridViewProgressManagement.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
 
+            gridViewProgressManagement.Columns["SO"].Width = 130;
+            gridViewProgressManagement.Columns["MachineName"].Width = 110;
+            gridViewProgressManagement.Columns["OperatorName"].Width = 150;
+            gridViewProgressManagement.Columns["PartName"].Width = 130;
 
             gridViewProgressManagement.PopupMenuShowing += (s, e) =>
             {

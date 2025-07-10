@@ -910,8 +910,6 @@ async function getDistributionDataFromDb(ipAddress) {
 
       FROM 
           DistributionData AS dd
-      LEFT JOIN 
-          DeviceList AS d ON dd.DeviceID = d.DeviceID 
       JOIN 
           PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
       JOIN 
@@ -932,7 +930,8 @@ async function getDistributionDataFromDb(ipAddress) {
       -- SubDistribution join
       LEFT JOIN 
           SubDistribution AS sd ON sd.DistributionID = dd.DistributionID
-
+      LEFT JOIN 
+          DeviceList AS d ON d.DeviceID = ISNULL(sd.DeviceID, dd.DeviceID)
       -- Operator from sub or fallback
       LEFT JOIN 
           Operator AS o ON o.OperatorID = ISNULL(sd.OperatorID, dd.OperatorID)
@@ -949,7 +948,6 @@ async function getDistributionDataFromDb(ipAddress) {
           )
       ORDER BY 
           dd.CreatedAt ASC;
-
     `;
 
     const request = new sql.Request();

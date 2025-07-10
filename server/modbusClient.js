@@ -324,10 +324,6 @@ async function startReadingRegisters(ipAddress) {
         return;
       }
   
-      //if (!client || client === undefined) return;
-      // Read and store the Operator ID
-    //  await readOperatorID(client, ipAddress);
-  
       // Read/write distribution data
       await checkAndSaveDistribution(client, ipAddress);
   
@@ -357,9 +353,6 @@ async function checkAndSaveDistribution(client, ipAddress) {
     // check register 3000 status
     checkBitOnOffRegister3000(client, ipAddress, register3000Address);
 
-    const responseAddress3000 = await client.readHoldingRegisters(register3000Address, 1);
-    const registerValue = responseAddress3000.response._body.values[0];
-    const deleteIndex = 2;
     let register1000 = false;
     
     if (orderID === 0) {
@@ -367,12 +360,9 @@ async function checkAndSaveDistribution(client, ipAddress) {
 
       // Fetch distribution data from DB
       const distributionData = await getDistributionDataFromDb(ipAddress);
-      //await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
       processDistributionData(client, ipAddress, distributionData, register1000);
     }
     else {
-      //  console.log(`Register 1000 already has value ${orderID} for IP ${ipAddress}`);
-
       storeDistributionData[ipAddress] = {};
       //retry get storeDistributionData
       if (Object.keys(storeDistributionData[ipAddress]).length === 0) {
@@ -426,47 +416,9 @@ async function checkAndSaveDistribution(client, ipAddress) {
 
         // check complete size mutiple SO
         const sizeData = storeDistributionData[ipAddress]?.SizeData || [];
-
         const previousCompletedOrders = [];
-
         if (sizeData != null) {
 
-          // // Continue reading size
-          // const response = await client.readHoldingRegisters(sizeAddress, 1);
-          // const registerValue = response.response._body.values[0];
-
-          // // Convert the registerValue to a binary string (16-bit)
-          // let binaryValue = registerValue.toString(2).padStart(16, '0');
-          // console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
-          // console.log(`Binary representation: ${binaryValue}`);
-
-          // // Count '1' bits in the binary string
-          // let countCompleteSize = binaryValue.split('').filter(bit => bit === '1').length;
-          // console.log("[Size] Count size of '1' bits:", countCompleteSize);
-
-          // const sizeIDList = modbusClients[ipAddress]?.sizeDataInfo?.sizeID;
-
-          // if (Array.isArray(sizeIDList) && countCompleteSize === sizeIDList.length) {
-
-          //   const data = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data;
-          //   modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs].Data = data
-          //   .filter(item => item.Status !== 'Complete' && item.Status !== 'Stop');
-          //   const response = await client.readHoldingRegisters(3000, 1);
-          //   const registerValue = response.response._body.values[0];
-          //   const mask = 1 << 2;
-          //   const valueToWrite = registerValue | mask;
-
-          //   await client.writeSingleRegister(3000, valueToWrite);
-          //   storeDistributionData[ipAddress] = {};
-          //   modbusClients[ipAddress].previousSizeData = [];
-          //   modbusClients[ipAddress].previousData = {};
-          //   modbusClients[ipAddress].indexMultipleSOs = 0;
-          //   modbusClients[ipAddress].indexMultiplePartNames = 0;
-          //   modbusClients[ipAddress].sizeDataInfo.sizeID = [];
-          //   return;
-          // }
-
-          // Get OrderID and SizeID where status is 'Complete'
           // First, update status where ActualCut equals SizeQty
           sizeData.forEach(item => {
             if (item.ActualCut === item.SizeQty) {
@@ -555,83 +507,6 @@ async function checkAndSaveDistribution(client, ipAddress) {
             }
           }
         }
-        // Check choose size
-        // const responseChooseSize = await client.readHoldingRegisters(chooseSizeAddress, 1);
-        // const registerChooseSizeValue = responseChooseSize.response._body.values[0];
-
-        // let binaryChooseSizeValue = registerChooseSizeValue.toString(2).padStart(16, '0');
-        // console.log(`Output of size at register address ${chooseSizeAddress} = ${registerChooseSizeValue}`);
-        // console.log(`Binary representation: ${binaryChooseSizeValue}`);
-
-        // const index = findSetBitIndex(binaryChooseSizeValue);
-        // if (index !== -1) {
-        //   let distributionIDFromSize  =  await getDistributionIDFromSizeID(
-        //     ipAddress, orderID, isLeather === 1 ? 0 : 1, storeDistributionData[ipAddress].SizeData[index].SizeID);
-        //   if (distributionIDFromSize !== null && 
-        //       Array.isArray(modbusClients[ipAddress].sizeCompleteID) && 
-        //       modbusClients[ipAddress].sizeCompleteID.length > 0 &&
-        //       storeDistributionData[ipAddress].SizeData[index].SizeID !== 0 &&
-        //       modbusClients[ipAddress].sizeCompleteID.includes(storeDistributionData[ipAddress].SizeData[index].SizeID))
-        //     {
-        //       for (const item of distributionIDFromSize.DistributionID) {
-        //         try {
-        //             await setDistributionIsComplete(item.DistributionID, 'Complete');
-        //             console.log(`Complete DistributionID: ${item.DistributionID}`);
-        //         } catch (error) {
-        //             console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
-        //         }
-        //       }
-        //     }
-        //   } 
-
-        // let distributionComplete = await getDistributionCompleteFromDb(ipAddress, orderID, isLeather === 1 ? 0 : 1);
-        // if (storeDistributionData[ipAddress]?.SizeData) {
-        //     if (distributionComplete?.length && storeDistributionData[ipAddress].SizeData.length === distributionComplete.length) {
-        //         // Get the remaining SizeData values
-        //         console.log(`Complete due to reason: Size ${storeDistributionData[ipAddress].SizeData.length} and Completed ${distributionComplete.length}`);
-        //         modbusClients[ipAddress].isComplete = 0;
-        //         modbusClients[ipAddress].sizeDataInfo.sizeID = [];
-        //         previousData[ipAddress] = {};
-        //     } else {
-        //         try {
-        //             // Continue reading size
-        //             const response = await client.readHoldingRegisters(sizeAddress, 1);
-        //             const registerValue = response.response._body.values[0];
-
-        //             // Convert the registerValue to a binary string (16-bit)
-        //             let binaryValue = registerValue.toString(2).padStart(16, '0');
-        //             console.log(`Output of size at register address ${sizeAddress} = ${registerValue}`);
-        //             console.log(`Binary representation: ${binaryValue}`);
-
-        //             // Count '1' bits in the binary string
-        //             let countCompleteSize = binaryValue.split('').filter(bit => bit === '1').length;
-        //             console.log("[Size] Count size of '1' bits:", countCompleteSize);
-
-        //             // check size equal to complete
-        //             results.push({ address: sizeAddress, value: registerValue });
-        //             // If all sizes are complete, update DistributionIDs
-        //             if (countCompleteSize === storeDistributionData[ipAddress].SizeData.length && countCompleteSize === modbusClients[ipAddress].isComplete && Array.isArray(storeDistributionData[ipAddress].DistributionID)) {
-        //                 for (const item of storeDistributionData[ipAddress].DistributionID) {
-        //                     try {
-        //                         console.log(`Updated DistributionID: ${item.DistributionID}, countCompleteSize: ${countCompleteSize}, distribution.SizeData: ${storeDistributionData[ipAddress].SizeData.length}`);
-        //                         // Reset sizeID and delete from register
-        //                         modbusClients[ipAddress].isComplete = 0;
-        //                         modbusClients[ipAddress].sizeDataInfo.sizeID = []; 
-        //                         previousData[ipAddress] = {};
-        //                     } catch (error) {
-        //                         console.error(`Error updating DistributionID: ${item.DistributionID}`, error);
-        //                     }
-        //                 }
-        //             }
-
-        //             console.log("Register Values:", results);
-        //         } catch (error) {
-        //             console.error("Error reading size register:", error);
-        //         }
-        //     }
-        // } else {
-        //     console.log("No valid size data found.");
-        // }
       } catch (error) {
         console.error(`Error reading register ${modbusClients[ipAddress].sizeAddress}:`, error.message);
       }
@@ -682,14 +557,14 @@ async function processDistributionData(client, ipAddress, distributionData, retr
     modbusClients[ipAddress].hasMultipleSOs = true;
 
     // Reset SizeDataDB Status if it's an array
-    if (Array.isArray(distributionData.SizeDataDB)) {
-      distributionData.SizeDataDB = distributionData.SizeDataDB.map(sizeItem => ({
-        ...sizeItem,
-        Status: false,
-      }));
-    }
+    // if (Array.isArray(distributionData.SizeDataDB)) {
+    //   distributionData.SizeDataDB = distributionData.SizeDataDB.map(sizeItem => ({
+    //     ...sizeItem,
+    //     Status: false,
+    //   }));
+    // }
 
-    // Assign Sales Orders
+    // Assign to modbusClients
     modbusClients[ipAddress].SOs = distributionData.OrderIDWithSOs;
 
     const totalSOs = distributionData.OrderIDWithSOs.length;
@@ -700,6 +575,19 @@ async function processDistributionData(client, ipAddress, distributionData, retr
       await writeRegister(1020, modbusClients[ipAddress].indexMultipleSOs + 1);
     }
     await writeRegister(1021, totalSOs);
+    const soGroup = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
+
+    if (soGroup?.Data?.length > 0) {
+      const firstItem = soGroup.Data[0];
+
+      distributionData.Leather = firstItem.IsLeather ? 2 : 1;
+      distributionData.OperatorID = firstItem.OperatorID;
+      distributionData.OrderID = firstItem.OrderID;
+      distributionData.SO = firstItem.SO;
+      distributionData.MasterWorkOrder = firstItem.MasterWorkOrder;
+      distributionData.Model = firstItem.Model;
+      distributionData.ART = firstItem.ART;
+    }
    // console.log(`Successfully wrote TotalSOs ${totalSOs} to register 112`);
    // console.log(`Successfully wrote DefaultOrderIndex ${modbusClients[ipAddress].indexMultipleSOs} to register 111`);
 
@@ -799,7 +687,7 @@ async function processDistributionData(client, ipAddress, distributionData, retr
 
           // filter out partName index
           if (distributionData.Leather === 2) {
-            distributionData.SizeData = distributionData.SizeDataDB;
+           // distributionData.SizeData = distributionData.SizeDataDB;
             await client.writeSingleRegister(partDisplayStartRegister, uniquePartSOsMap.length);
           }
           else {
@@ -1599,8 +1487,7 @@ async function readActualData(client, ipAddress) {
             actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
             actualPieces = (checkPendingSize.MaterialLayer * checkPendingSize.CuttingDieQty) * actualCut;
           }
-          // actualPieces = actualSizeQty  * (checkPendingSize.MaterialLayer / checkPendingSize.PiecesPerPair);
-       //   console.log(`ActualCut [Address] ${ipAddress} actualSizeQty ${actualSizeQty}`);
+        // console.log(`ActualCut [Address] ${ipAddress} actualSizeQty ${actualSizeQty}`);
         }
       }
       if (collectPartAndOrderID !== undefined && collectPartAndOrderID.length > 0) {
@@ -1997,10 +1884,7 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
   }
 
   try {
-    // if (!modbusClient.socket || !modbusClient.socket.writable) {
-    //   console.log(`Reconnecting to device at ${ipAddress}`);
-    //   await connectToDevice(ipAddress);
-    // }
+
     // Ensure modbusClients structure exists
     modbusClients[ipAddress] ||= {};
     modbusClients[ipAddress].sizeDataInfo ||= {};
@@ -2061,46 +1945,6 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
     });
 
     await Promise.all(materialCodePromises);
-
-    //   // Write partID
-    //   const partIDRegisterAddress = data.Leather == 2 ? 730 : 300;
-    //   const partIDPromises = data.MaterialData.slice(0, 20).map(async (material) => {
-    //   try {
-    //     // Convert the material code to an array of 16-bit little-endian values
-    //     const partIDCodeArray = stringTo16BitArrayLittleEndian(material.PartID);
-
-    //     // Write each 16-bit value to consecutive Modbus registers
-    //     for (let i = 0; i < partIDCodeArray.length; i++) {
-    //       const registerAddress = partIDRegisterAddress + i; // Increment register address for each 16-bit value
-    //       await client.writeSingleRegister(registerAddress, partIDCodeArray[i]);
-    //       console.log(`Successfully wrote partID ${partIDCodeArray[i]} to register ${registerAddress}`);
-    //     }
-    //   } catch (error) {
-    //     console.error(`Error writing partID: ${error.message}`);
-    //   }
-    // });
-
-    // await Promise.all(partIDPromises);
-
-    // if (!modbusClients[ipAddress].hasMultipleSOs) {
-    // // Write Part Names
-    // const partNameStartRegister = data.Leather == 2 ? 115 : 270;
-    // const partNamePromises = data.MaterialData.slice(0, 20).map(async (material, i) => {
-    //   try {
-    //     const partName = material.PartName;
-    //     const startRegister = partNameStartRegister + (i * 20);
-    //     let registerData = stringTo16BitArrayLittleEndian(partName).slice(0, 10 * 2);
-    //     for (let j = 0; j < registerData.length; j++) {
-    //       await client.writeSingleRegister(startRegister + j, registerData[j]);
-    //       console.log(`Successfully wrote part name to register ${startRegister + j}`);
-    //     }
-    //   } catch (error) {
-    //     console.error(`Error writing part name: ${error.message}`);
-    //   }
-    // });
-
-    // await Promise.all(partNamePromises);
-    // }
 
     // Write defaultValue
     const defaultValue = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];

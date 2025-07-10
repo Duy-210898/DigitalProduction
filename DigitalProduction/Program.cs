@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
-using DigitalProduction.Frm_Admin;
 
 namespace DigitalProduction
 {
@@ -16,7 +15,7 @@ namespace DigitalProduction
         static void Main()
         {
 
-           UserLookAndFeel.Default.SetSkinStyle("DevExpress Style"); 
+           UserLookAndFeel.Default.SetSkinStyle("WXI"); 
            WindowsFormsSettings.DefaultFont = new System.Drawing.Font("Arial", 9);
             // Enable visual styles for the application
             Application.EnableVisualStyles();

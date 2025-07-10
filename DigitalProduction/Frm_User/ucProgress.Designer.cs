@@ -38,9 +38,10 @@
             this.dtpEndDate = new DevExpress.XtraEditors.DateEdit();
             this.lblFilterDate = new DevExpress.XtraEditors.LabelControl();
             this.stackPanel1 = new DevExpress.Utils.Layout.StackPanel();
-            this.cbxDevice = new System.Windows.Forms.ComboBox();
             this.btnApplyDevice = new DevExpress.XtraEditors.SimpleButton();
             this.syncButton = new DevExpress.XtraEditors.SimpleButton();
+            this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
             ((System.ComponentModel.ISupportInitialize)(this.gridProgressManagement)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewProgressManagement)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
@@ -53,6 +54,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.dtpEndDate.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.stackPanel1)).BeginInit();
             this.stackPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView2)).BeginInit();
             this.SuspendLayout();
             // 
             // gridProgressManagement
@@ -164,9 +167,9 @@
             // 
             // stackPanel1
             // 
-            this.stackPanel1.Appearance.BackColor = System.Drawing.Color.Silver;
+            this.stackPanel1.Appearance.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.stackPanel1.Appearance.Options.UseBackColor = true;
-            this.stackPanel1.Controls.Add(this.cbxDevice);
+            this.stackPanel1.Controls.Add(this.gridLookUpDevice);
             this.stackPanel1.Controls.Add(this.btnApplyDevice);
             this.stackPanel1.Controls.Add(this.syncButton);
             this.stackPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -176,19 +179,10 @@
             this.stackPanel1.TabIndex = 8;
             this.stackPanel1.UseSkinIndents = true;
             // 
-            // cbxDevice
-            // 
-            this.cbxDevice.Dock = System.Windows.Forms.DockStyle.Left;
-            this.cbxDevice.FormattingEnabled = true;
-            this.cbxDevice.Location = new System.Drawing.Point(13, 11);
-            this.cbxDevice.Name = "cbxDevice";
-            this.cbxDevice.Size = new System.Drawing.Size(118, 21);
-            this.cbxDevice.TabIndex = 4;
-            // 
             // btnApplyDevice
             // 
             this.btnApplyDevice.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnApplyDevice.Location = new System.Drawing.Point(135, 10);
+            this.btnApplyDevice.Location = new System.Drawing.Point(217, 10);
             this.btnApplyDevice.Name = "btnApplyDevice";
             this.btnApplyDevice.Size = new System.Drawing.Size(115, 23);
             this.btnApplyDevice.TabIndex = 8;
@@ -196,11 +190,33 @@
             // 
             // syncButton
             // 
-            this.syncButton.Location = new System.Drawing.Point(254, 5);
+            this.syncButton.Location = new System.Drawing.Point(336, 5);
             this.syncButton.Name = "syncButton";
             this.syncButton.Size = new System.Drawing.Size(124, 35);
             this.syncButton.TabIndex = 7;
             this.syncButton.Text = "syncButton";
+            // 
+            // gridLookUpDevice
+            // 
+            this.gridLookUpDevice.Location = new System.Drawing.Point(13, 10);
+            this.gridLookUpDevice.Name = "gridLookUpDevice";
+            this.gridLookUpDevice.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.gridLookUpDevice.Properties.Appearance.Options.UseBackColor = true;
+            this.gridLookUpDevice.Properties.AutoHeight = false;
+            this.gridLookUpDevice.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpDevice.Properties.NullText = "";
+            this.gridLookUpDevice.Properties.PopupView = this.gridView2;
+            this.gridLookUpDevice.Size = new System.Drawing.Size(200, 25);
+            this.gridLookUpDevice.TabIndex = 10;
+            // 
+            // gridView2
+            // 
+            this.gridView2.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridView2.Name = "gridView2";
+            this.gridView2.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridView2.OptionsView.RowAutoHeight = true;
+            this.gridView2.OptionsView.ShowGroupPanel = false;
             // 
             // ucProgress
             // 
@@ -222,6 +238,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.dtpEndDate.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.stackPanel1)).EndInit();
             this.stackPanel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView2)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -237,9 +255,10 @@
         private DevExpress.XtraEditors.DateEdit dtpStartDate;
         private DevExpress.XtraEditors.DateEdit dtpEndDate;
         private DevExpress.XtraEditors.LabelControl lblFilterDate;
-        private System.Windows.Forms.ComboBox cbxDevice;
         private DevExpress.XtraEditors.SimpleButton syncButton;
         private DevExpress.Utils.Layout.StackPanel stackPanel1;
         private DevExpress.XtraEditors.SimpleButton btnApplyDevice;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpDevice;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView2;
     }
 }

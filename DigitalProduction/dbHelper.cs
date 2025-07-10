@@ -1648,27 +1648,28 @@ namespace DigitalProduction
                 {
                     string query = @"
                        SELECT 
-                            d.*, 
-                            o.SO,
-                            p.PartName, 
-                            s.Size,
-                            op.OperatorName,
-                            u.Username,
-                            dl.IpAddress,
-                            dl.MachineName,
-                            m.MaterialName,
-                            pso.SizeQty,
-                            pso.Unit
-                        FROM DistributionData d
-                        INNER JOIN PartSizeOrder pso ON d.PartSizeOrderId = pso.PartSizeOrderId
-                        INNER JOIN ProductOrder o ON o.OrderID = pso.OrderId
-                        INNER JOIN Part p ON p.PartId = pso.PartId
-                        INNER JOIN Size s ON s.SizeID = pso.SizeId
-                        LEFT JOIN Operator op ON d.OperatorID = op.OperatorID
-                        LEFT JOIN Users u ON d.UserID = u.UserID
-                        LEFT JOIN DeviceList dl ON d.DeviceID = dl.DeviceID
-                        LEFT JOIN Material m ON m.MaterialID = pso.MaterialId
-                        WHERE d.CreatedAt >= @From AND d.CreatedAt < @To
+                             d.*, 
+                             o.SO,
+                             p.PartName, 
+                             s.Size,
+                             op.OperatorName,
+                             u.Username,
+                             dl.IpAddress,
+                             dl.MachineName,
+                             m.MaterialName,
+                             pso.SizeQty,
+                             pso.Unit
+                         FROM DistributionData d
+                         INNER JOIN PartSizeOrder pso ON d.PartSizeOrderId = pso.PartSizeOrderId
+                         INNER JOIN ProductOrder o ON o.OrderID = pso.OrderId
+                         INNER JOIN Part p ON p.PartId = pso.PartId
+                         INNER JOIN Size s ON s.SizeID = pso.SizeId
+                         LEFT JOIN SubDistribution sd ON d.DistributionID = sd.DistributionID
+                         LEFT JOIN  DeviceList AS dl ON d.DeviceID = ISNULL(sd.DeviceID, dl.DeviceID)
+                         LEFT JOIN Operator AS op ON op.OperatorID = ISNULL(sd.OperatorID, d.OperatorID)
+                         LEFT JOIN Users u ON d.UserID = u.UserID
+                         LEFT JOIN Material m ON m.MaterialID = pso.MaterialId
+                         WHERE d.CreatedAt >= @From AND d.CreatedAt < @To
                         ";
 
                     if (!string.IsNullOrEmpty(status))
@@ -1960,6 +1961,42 @@ namespace DigitalProduction
             }
 
             return result;
+        }
+        public static bool IsPendingNotSentForIp(string ipAddress)
+        {
+            string query = @"
+                SELECT 1
+                FROM DistributionData dd
+                LEFT JOIN SubDistribution sd ON sd.DistributionID = dd.DistributionID
+                LEFT JOIN DeviceList dl ON dl.DeviceID = ISNULL(sd.DeviceID, dd.DeviceID)
+                WHERE 
+                    dd.IsDelete = 0
+                    AND ISNULL(sd.Status, dd.Status) = 'Pending'
+                    AND dl.IpAddress = @IpAddress
+                    AND NOT EXISTS (
+                        SELECT 1 FROM DeviceOutput do
+                        WHERE do.OrderID = dd.PartSizeOrderId
+            )";
+
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@IpAddress", ipAddress);
+
+                try
+                {
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        return reader.HasRows;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"❌ Error checking pending for IP {ipAddress}: {ex.Message}");
+                    return false;
+                }
+            }
         }
     }
 }

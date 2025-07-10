@@ -50,6 +50,11 @@
             this.gridLookUpOperator = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.btnSend = new DevExpress.XtraEditors.SimpleButton();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnSaveInventory = new DevExpress.XtraEditors.SimpleButton();
+            this.lblInventoryQty = new System.Windows.Forms.Label();
+            this.txtInventory = new System.Windows.Forms.TextBox();
+            this.lblSelectMachine = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
@@ -61,15 +66,10 @@
             this.lblMaterialLayer = new System.Windows.Forms.Label();
             this.numMaterialLayer = new System.Windows.Forms.NumericUpDown();
             this.numericTotalPeicesPerPair = new System.Windows.Forms.NumericUpDown();
-            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnSaveInventory = new DevExpress.XtraEditors.SimpleButton();
-            this.txtInventory = new System.Windows.Forms.TextBox();
-            this.lblInventoryQty = new System.Windows.Forms.Label();
+            this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
             this.gridViewOverview = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.lblSelectMachine = new System.Windows.Forms.Label();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutMainDistribution.SuspendLayout();
@@ -77,6 +77,7 @@
             this.tableLayoutPanel7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpOperator.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView2)).BeginInit();
+            this.tableLayoutPanel5.SuspendLayout();
             this.panel5.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
@@ -84,11 +85,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.numPiecesPerPair)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).BeginInit();
-            this.tableLayoutPanel5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // lblFactory
@@ -376,6 +376,74 @@
             this.btnSend.Text = "Send Distribution";
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.BackColor = System.Drawing.Color.MistyRose;
+            this.tableLayoutPanel5.ColumnCount = 3;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.36025F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 27.74327F));
+            this.tableLayoutPanel5.Controls.Add(this.btnSaveInventory, 2, 0);
+            this.tableLayoutPanel5.Controls.Add(this.lblInventoryQty, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.txtInventory, 1, 0);
+            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 39);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 1;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(483, 41);
+            this.tableLayoutPanel5.TabIndex = 8;
+            // 
+            // btnSaveInventory
+            // 
+            this.btnSaveInventory.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveInventory.Appearance.Options.UseFont = true;
+            this.btnSaveInventory.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnSaveInventory.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSaveInventory.ImageOptions.Image")));
+            this.btnSaveInventory.Location = new System.Drawing.Point(398, 3);
+            this.btnSaveInventory.LookAndFeel.SkinName = "Dark Side";
+            this.btnSaveInventory.LookAndFeel.UseDefaultLookAndFeel = false;
+            this.btnSaveInventory.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
+            this.btnSaveInventory.Name = "btnSaveInventory";
+            this.btnSaveInventory.Size = new System.Drawing.Size(82, 35);
+            this.btnSaveInventory.TabIndex = 5;
+            this.btnSaveInventory.Text = "Save";
+            this.btnSaveInventory.Click += new System.EventHandler(this.btnSaveInventory_Click);
+            // 
+            // lblInventoryQty
+            // 
+            this.lblInventoryQty.AutoSize = true;
+            this.lblInventoryQty.BackColor = System.Drawing.Color.MistyRose;
+            this.lblInventoryQty.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblInventoryQty.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblInventoryQty.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblInventoryQty.Location = new System.Drawing.Point(3, 0);
+            this.lblInventoryQty.Name = "lblInventoryQty";
+            this.lblInventoryQty.Size = new System.Drawing.Size(235, 41);
+            this.lblInventoryQty.TabIndex = 2;
+            this.lblInventoryQty.Text = "Inventory Quanity:";
+            this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // txtInventory
+            // 
+            this.txtInventory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtInventory.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtInventory.Location = new System.Drawing.Point(244, 3);
+            this.txtInventory.Name = "txtInventory";
+            this.txtInventory.Size = new System.Drawing.Size(101, 30);
+            this.txtInventory.TabIndex = 1;
+            // 
+            // lblSelectMachine
+            // 
+            this.lblSelectMachine.BackColor = System.Drawing.SystemColors.Window;
+            this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblSelectMachine.Location = new System.Drawing.Point(492, 0);
+            this.lblSelectMachine.Name = "lblSelectMachine";
+            this.lblSelectMachine.Size = new System.Drawing.Size(436, 36);
+            this.lblSelectMachine.TabIndex = 0;
+            this.lblSelectMachine.Text = "Select Machine";
+            this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // panel5
             // 
             this.panel5.Controls.Add(this.tableLayoutPanel4);
@@ -396,7 +464,7 @@
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 198F));
             this.tableLayoutPanel4.Size = new System.Drawing.Size(483, 198);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
@@ -511,62 +579,27 @@
             this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(233, 30);
             this.numericTotalPeicesPerPair.TabIndex = 6;
             // 
-            // tableLayoutPanel5
+            // gridLookUpDevice
             // 
-            this.tableLayoutPanel5.BackColor = System.Drawing.Color.MistyRose;
-            this.tableLayoutPanel5.ColumnCount = 3;
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.36025F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 27.74327F));
-            this.tableLayoutPanel5.Controls.Add(this.btnSaveInventory, 2, 0);
-            this.tableLayoutPanel5.Controls.Add(this.lblInventoryQty, 0, 0);
-            this.tableLayoutPanel5.Controls.Add(this.txtInventory, 1, 0);
-            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 39);
-            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
-            this.tableLayoutPanel5.RowCount = 1;
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(483, 41);
-            this.tableLayoutPanel5.TabIndex = 8;
+            this.gridLookUpDevice.Location = new System.Drawing.Point(492, 39);
+            this.gridLookUpDevice.Name = "gridLookUpDevice";
+            this.gridLookUpDevice.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.gridLookUpDevice.Properties.Appearance.Options.UseBackColor = true;
+            this.gridLookUpDevice.Properties.AutoHeight = false;
+            this.gridLookUpDevice.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpDevice.Properties.NullText = "";
+            this.gridLookUpDevice.Properties.PopupView = this.gridView1;
+            this.gridLookUpDevice.Size = new System.Drawing.Size(200, 25);
+            this.gridLookUpDevice.TabIndex = 9;
             // 
-            // btnSaveInventory
+            // gridView1
             // 
-            this.btnSaveInventory.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSaveInventory.Appearance.Options.UseFont = true;
-            this.btnSaveInventory.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnSaveInventory.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSaveInventory.ImageOptions.Image")));
-            this.btnSaveInventory.Location = new System.Drawing.Point(398, 3);
-            this.btnSaveInventory.LookAndFeel.SkinName = "Dark Side";
-            this.btnSaveInventory.LookAndFeel.UseDefaultLookAndFeel = false;
-            this.btnSaveInventory.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
-            this.btnSaveInventory.Name = "btnSaveInventory";
-            this.btnSaveInventory.Size = new System.Drawing.Size(82, 35);
-            this.btnSaveInventory.TabIndex = 5;
-            this.btnSaveInventory.Text = "Save";
-            this.btnSaveInventory.Click += new System.EventHandler(this.btnSaveInventory_Click);
-            // 
-            // txtInventory
-            // 
-            this.txtInventory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtInventory.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtInventory.Location = new System.Drawing.Point(244, 3);
-            this.txtInventory.Name = "txtInventory";
-            this.txtInventory.Size = new System.Drawing.Size(101, 30);
-            this.txtInventory.TabIndex = 1;
-            // 
-            // lblInventoryQty
-            // 
-            this.lblInventoryQty.AutoSize = true;
-            this.lblInventoryQty.BackColor = System.Drawing.Color.MistyRose;
-            this.lblInventoryQty.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblInventoryQty.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblInventoryQty.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblInventoryQty.Location = new System.Drawing.Point(3, 0);
-            this.lblInventoryQty.Name = "lblInventoryQty";
-            this.lblInventoryQty.Size = new System.Drawing.Size(235, 41);
-            this.lblInventoryQty.TabIndex = 2;
-            this.lblInventoryQty.Text = "Inventory Quanity:";
-            this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.gridView1.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridView1.Name = "gridView1";
+            this.gridView1.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridView1.OptionsView.RowAutoHeight = true;
+            this.gridView1.OptionsView.ShowGroupPanel = false;
             // 
             // gridControlOverview
             // 
@@ -583,39 +616,6 @@
             // 
             this.gridViewOverview.GridControl = this.gridControlOverview;
             this.gridViewOverview.Name = "gridViewOverview";
-            // 
-            // gridView1
-            // 
-            this.gridView1.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridView1.Name = "gridView1";
-            this.gridView1.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridView1.OptionsView.RowAutoHeight = true;
-            this.gridView1.OptionsView.ShowGroupPanel = false;
-            // 
-            // gridLookUpDevice
-            // 
-            this.gridLookUpDevice.Location = new System.Drawing.Point(492, 39);
-            this.gridLookUpDevice.Name = "gridLookUpDevice";
-            this.gridLookUpDevice.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.gridLookUpDevice.Properties.Appearance.Options.UseBackColor = true;
-            this.gridLookUpDevice.Properties.AutoHeight = false;
-            this.gridLookUpDevice.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.gridLookUpDevice.Properties.NullText = "";
-            this.gridLookUpDevice.Properties.PopupView = this.gridView1;
-            this.gridLookUpDevice.Size = new System.Drawing.Size(200, 25);
-            this.gridLookUpDevice.TabIndex = 9;
-            // 
-            // lblSelectMachine
-            // 
-            this.lblSelectMachine.BackColor = System.Drawing.SystemColors.Window;
-            this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblSelectMachine.Location = new System.Drawing.Point(492, 0);
-            this.lblSelectMachine.Name = "lblSelectMachine";
-            this.lblSelectMachine.Size = new System.Drawing.Size(436, 36);
-            this.lblSelectMachine.TabIndex = 0;
-            this.lblSelectMachine.Text = "Select Machine";
-            this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // ucDistribution
             // 
@@ -634,6 +634,8 @@
             this.tableLayoutPanel7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpOperator.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView2)).EndInit();
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel5.PerformLayout();
             this.panel5.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
@@ -642,12 +644,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.numPiecesPerPair)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).EndInit();
-            this.tableLayoutPanel5.ResumeLayout(false);
-            this.tableLayoutPanel5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

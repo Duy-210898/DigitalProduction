@@ -1459,30 +1459,40 @@ namespace DigitalProduction
                 }
             }
             gridViewOverview.RefreshData();
-            btnSend.Enabled = AreAllRowsComplete(gridViewOverview, isDeviceData);
+            btnSend.Enabled = AreAllRowsComplete(gridViewOverview);
         }
-        private bool AreAllRowsComplete(GridView gridView, bool isDevived)
+        private bool AreAllRowsComplete(GridView gridView)
         {
             for (int i = 0; i < gridView.RowCount; i++)
             {
                 int rowHandle = gridView.GetVisibleRowHandle(i);
                 if (!gridView.IsDataRow(rowHandle)) continue;
 
-                if (!isDevived)
-                {
-                    int piecesPerPair = Convert.ToInt32(gridView.GetRowCellValue(rowHandle, "PeicesPerPair") ?? 0);
-                    int cuttingDieQty = Convert.ToInt32(gridView.GetRowCellValue(rowHandle, "CuttingDieQty") ?? 0);
-                    int materialLayer = Convert.ToInt32(gridView.GetRowCellValue(rowHandle, "MaterialLayer") ?? 0);
+                // ❗ Check each row and return false if any are incomplete
+                if (!CheckIsLeatherNullOrEmpty(gridView, rowHandle))
+                    return false;
+            }
+            return true;
+        }
 
-                    if (piecesPerPair == 0 || cuttingDieQty == 0 || materialLayer == 0)
-                        return false;
-                }
-                else
-                {
-                    int totalPiecesPerPair = Convert.ToInt32(gridView.GetRowCellValue(rowHandle, "TotalPiecesPerPair") ?? 0);
-                    if (totalPiecesPerPair == 0)
-                        return false;
-                }
+        private bool CheckIsLeatherNullOrEmpty(GridView gridView, int rowHandle)
+        {
+            if (isLeather)
+            {
+                int totalPiecesPerPair = Convert.ToInt32(gridView.GetRowCellValue(rowHandle, "TotalPiecesPerPair") ?? 0);
+                if (totalPiecesPerPair == 0)
+                    return false;
+            }
+            else
+            {
+                int piecesPerPair = Convert.ToInt32(gridView.GetRowCellValue(rowHandle, "PeicesPerPair") ?? 0);
+                int cuttingDieQty = Convert.ToInt32(gridView.GetRowCellValue(rowHandle, "CuttingDieQty") ?? 0);
+                int materialLayer = Convert.ToInt32(gridView.GetRowCellValue(rowHandle, "MaterialLayer") ?? 0);
+
+                if (piecesPerPair == 0 || cuttingDieQty == 0 || materialLayer == 0)
+                    return false;
+                if (gridLookUpDevice.EditValue == null || gridLookUpOperator.EditValue == null)
+                    return false;
             }
             return true;
         }

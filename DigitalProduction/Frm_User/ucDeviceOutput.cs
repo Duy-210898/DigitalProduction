@@ -19,8 +19,8 @@ namespace DigitalProduction
     public partial class ucDeviceOutput : UserControl
     {
         private DeviceOutputListViewModel _viewModel;
-        private DateTimePicker dateTimePickerStart;
-        private DateTimePicker dateTimePickerEnd;
+        private DateEdit dateTimePickerStart;
+        private DateEdit dateTimePickerEnd;
         private TextBox txtFilter;
         private GridControl gridControl_DeviceOutput;
         private GridView gridView_DeviceOutput;
@@ -109,12 +109,15 @@ namespace DigitalProduction
             gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
             this.Resize += UcDeviceOutput_Resize;
 
-            dateTimePickerStart.DataBindings.Add("Value", _viewModel, "FilterStartDate", true, DataSourceUpdateMode.OnPropertyChanged);
-            dateTimePickerEnd.DataBindings.Add("Value", _viewModel, "FilterEndDate", true, DataSourceUpdateMode.OnPropertyChanged);
+            // Bindings
+            dateTimePickerStart.DataBindings.Add("EditValue", _viewModel, "FilterStartDate", true, DataSourceUpdateMode.OnPropertyChanged);
+            dateTimePickerEnd.DataBindings.Add("EditValue", _viewModel, "FilterEndDate", true, DataSourceUpdateMode.OnPropertyChanged);
             txtFilter.DataBindings.Add("Text", _viewModel, "FilterKeyword", false, DataSourceUpdateMode.OnPropertyChanged);
 
-            dateTimePickerStart.ValueChanged += DateTimePickerStart_ValueChanged;
-            dateTimePickerEnd.ValueChanged += DateTimePickerEnd_ValueChanged;
+            // Events
+            dateTimePickerStart.EditValueChanged += dateEditStart_EditValueChanged;
+            dateTimePickerEnd.EditValueChanged += dateEditEnd_EditValueChanged;
+
 
             mainPanel.Controls.Add(gridControl_DeviceOutput);
             this.Controls.Add(mainPanel);
@@ -166,7 +169,7 @@ namespace DigitalProduction
             {
                 e.Appearance.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
                 e.Appearance.BackColor = Color.LightYellow;
-                e.Appearance.ForeColor = Color.DarkBlue;         
+                e.Appearance.ForeColor = Color.DarkBlue;
                 e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
             }
         }
@@ -226,31 +229,47 @@ namespace DigitalProduction
         private void BtnSyncData_Click(object sender, EventArgs e)
         {
             TranslateHeaders();
-           _viewModel.SyncDataAsync();
+            _ = _viewModel.SyncDataAsync();
         }
 
         private void LoadFilters()
         {
             txtFilter.Text = FilterService.Instance.FilterKeyword;
-            dateTimePickerStart.Value = FilterService.Instance.FilterStartDate ?? DateTime.Today;
-            dateTimePickerEnd.Value = FilterService.Instance.FilterEndDate ?? DateTime.Today;
+            dateTimePickerStart.EditValue = FilterService.Instance.FilterStartDate ?? DateTime.Today;
+            dateTimePickerEnd.EditValue = FilterService.Instance.FilterEndDate ?? DateTime.Today;
         }
 
-        private void DateTimePickerStart_ValueChanged(object sender, EventArgs e)
+        private void dateEditStart_EditValueChanged(object sender, EventArgs e)
         {
-            if (dateTimePickerStart.Value > dateTimePickerEnd.Value)
+            if (dateTimePickerStart.EditValue != null && dateTimePickerEnd.EditValue != null)
             {
-                dateTimePickerStart.Value = dateTimePickerEnd.Value;
-                MessageBox.Show("Start date cannot be after End date!", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DateTime startDate = (DateTime)dateTimePickerStart.EditValue;
+                DateTime endDate = (DateTime)dateTimePickerEnd.EditValue;
+
+                if (startDate > endDate)
+                {
+                    dateTimePickerStart.EditValue = endDate;
+                    MessageBox.Show("Start date cannot be after End date!", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                gridView_DeviceOutput.RefreshData();
             }
         }
 
-        private void DateTimePickerEnd_ValueChanged(object sender, EventArgs e)
+        private void dateEditEnd_EditValueChanged(object sender, EventArgs e)
         {
-            if (dateTimePickerEnd.Value < dateTimePickerStart.Value)
+            if (dateTimePickerStart.EditValue != null && dateTimePickerEnd.EditValue != null)
             {
-                dateTimePickerEnd.Value = dateTimePickerStart.Value;
-                MessageBox.Show("End date cannot be before Start date!", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DateTime startDate = (DateTime)dateTimePickerStart.EditValue;
+                DateTime endDate = (DateTime)dateTimePickerEnd.EditValue;
+
+                if (endDate < startDate)
+                {
+                    dateTimePickerEnd.EditValue = startDate;
+                    MessageBox.Show("End date cannot be before Start date!", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                gridView_DeviceOutput.RefreshData();
             }
         }
 
@@ -266,8 +285,29 @@ namespace DigitalProduction
                 AutoSize = true
             };
 
-            dateTimePickerStart = new DateTimePicker { Format = DateTimePickerFormat.Short, Margin = new Padding(5) };
-            dateTimePickerEnd = new DateTimePicker { Format = DateTimePickerFormat.Short, Margin = new Padding(5) };
+            dateTimePickerStart = new DateEdit
+            {
+                Properties =
+                {
+                    CalendarTimeProperties = { },
+                    DisplayFormat = { FormatType = FormatType.DateTime, FormatString = "d" },
+                    EditFormat = { FormatType = FormatType.DateTime, FormatString = "d" },
+                },
+                Margin = new Padding(5),
+                Width = 150
+            };
+
+            dateTimePickerEnd = new DateEdit {
+                Properties =
+                {
+                    CalendarTimeProperties = { },
+                    DisplayFormat = { FormatType = FormatType.DateTime, FormatString = "d" },
+                    EditFormat = { FormatType = FormatType.DateTime, FormatString = "d" },
+                },
+                Margin = new Padding(5),
+                Width = 150
+            };
+
             txtFilter = new TextBox { Width = 150, Margin = new Padding(5), ForeColor = Color.Gray, Text = LocalizationManager.GetString("Search") };
 
             txtFilter.GotFocus += (s, e) =>
@@ -452,7 +492,6 @@ namespace DigitalProduction
             }
         }
     }
-
     public static class GridColumnExtensions
     {
         public static void SetVisible(this GridColumn column, bool isVisible)
