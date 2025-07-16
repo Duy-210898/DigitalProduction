@@ -3,9 +3,9 @@ const { connectToDevice, isHostReachable, modbusClients } = require('./modbusCli
 const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList, getOperatorList, getAllProductionSchedule, getDistributions, getOperatorDistribution, getListOfSOsByYear} = require('./database');
 const { setClients } = require('./notifications'); 
 const { Time } = require('mssql');
-
+const knownCuttingDevices = new Set();
 let clients = [];
-//const modusClients = {};
+
 
 // Thiết lập WebSocket server
 function setupWebSocket(server) {
@@ -42,7 +42,6 @@ function setupWebSocket(server) {
     });
   });
 }
-
 async function handleClientMessage(ws, message) {
   try {
     const request = JSON.parse(message);
@@ -300,6 +299,7 @@ async function handleGetDistributionOfDevice(ws, request) {
     }));
   }
 }
+
 // Xử lý yêu cầu lấy danh sách thiết bị
 async function handleGetDevices(ws) {
   try {

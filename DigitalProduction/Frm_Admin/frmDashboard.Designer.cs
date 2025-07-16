@@ -33,6 +33,9 @@
             DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions windowsUIButtonImageOptions6 = new DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions();
             this.navigationPage3 = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.navigationPage2 = new DevExpress.XtraBars.Navigation.NavigationPage();
+            this.tableLayoutMainDevice = new System.Windows.Forms.TableLayoutPanel();
+            this.gridControlDeviceManagement = new DevExpress.XtraGrid.GridControl();
+            this.gridViewDeviceManagement = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.navigationPage1 = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -57,6 +60,9 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.navigationFrame1 = new DevExpress.XtraBars.Navigation.NavigationFrame();
             this.navigationPage2.SuspendLayout();
+            this.tableLayoutMainDevice.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControlDeviceManagement)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewDeviceManagement)).BeginInit();
             this.navigationPage1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
@@ -78,28 +84,67 @@
             // 
             this.navigationPage3.Caption = "navigationPage3";
             this.navigationPage3.Name = "navigationPage3";
-            this.navigationPage3.Size = new System.Drawing.Size(867, 502);
+            this.navigationPage3.Size = new System.Drawing.Size(970, 647);
             // 
             // navigationPage2
             // 
             this.navigationPage2.Caption = "navigationPage2";
-            this.navigationPage2.Controls.Add(this.labelControl2);
+            this.navigationPage2.Controls.Add(this.tableLayoutMainDevice);
             this.navigationPage2.Name = "navigationPage2";
-            this.navigationPage2.Size = new System.Drawing.Size(867, 502);
+            this.navigationPage2.Size = new System.Drawing.Size(970, 647);
+            // 
+            // tableLayoutMainDevice
+            // 
+            this.tableLayoutMainDevice.ColumnCount = 1;
+            this.tableLayoutMainDevice.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutMainDevice.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutMainDevice.Controls.Add(this.gridControlDeviceManagement, 0, 1);
+            this.tableLayoutMainDevice.Controls.Add(this.labelControl2, 0, 0);
+            this.tableLayoutMainDevice.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutMainDevice.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutMainDevice.Name = "tableLayoutMainDevice";
+            this.tableLayoutMainDevice.RowCount = 2;
+            this.tableLayoutMainDevice.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 13.94422F));
+            this.tableLayoutMainDevice.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 86.05578F));
+            this.tableLayoutMainDevice.Size = new System.Drawing.Size(970, 647);
+            this.tableLayoutMainDevice.TabIndex = 2;
+            // 
+            // gridControlDeviceManagement
+            // 
+            this.gridControlDeviceManagement.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridControlDeviceManagement.Location = new System.Drawing.Point(3, 93);
+            this.gridControlDeviceManagement.MainView = this.gridViewDeviceManagement;
+            this.gridControlDeviceManagement.Name = "gridControlDeviceManagement";
+            this.gridControlDeviceManagement.Size = new System.Drawing.Size(964, 551);
+            this.gridControlDeviceManagement.TabIndex = 0;
+            this.gridControlDeviceManagement.UseEmbeddedNavigator = true;
+            this.gridControlDeviceManagement.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gridViewDeviceManagement});
+            // 
+            // gridViewDeviceManagement
+            // 
+            this.gridViewDeviceManagement.GridControl = this.gridControlDeviceManagement;
+            this.gridViewDeviceManagement.Name = "gridViewDeviceManagement";
             // 
             // labelControl2
             // 
-            this.labelControl2.Location = new System.Drawing.Point(288, 216);
+            this.labelControl2.Appearance.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelControl2.Appearance.ForeColor = System.Drawing.Color.CornflowerBlue;
+            this.labelControl2.Appearance.Options.UseFont = true;
+            this.labelControl2.Appearance.Options.UseForeColor = true;
+            this.labelControl2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.labelControl2.Location = new System.Drawing.Point(3, 73);
             this.labelControl2.Name = "labelControl2";
-            this.labelControl2.Size = new System.Drawing.Size(63, 13);
+            this.labelControl2.Size = new System.Drawing.Size(123, 14);
             this.labelControl2.TabIndex = 1;
-            this.labelControl2.Text = "labelControl2";
+            this.labelControl2.Text = "Device Management";
             // 
             // navigationPage1
             // 
+            this.navigationPage1.Caption = "navigationPage1";
             this.navigationPage1.Controls.Add(this.tableLayoutPanel3);
             this.navigationPage1.Name = "navigationPage1";
-            this.navigationPage1.Size = new System.Drawing.Size(867, 502);
+            this.navigationPage1.Size = new System.Drawing.Size(970, 647);
             // 
             // tableLayoutPanel3
             // 
@@ -114,7 +159,7 @@
             this.tableLayoutPanel3.RowCount = 2;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 13.74502F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 86.25498F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(867, 502);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(970, 647);
             this.tableLayoutPanel3.TabIndex = 0;
             // 
             // tableLayoutPanel4
@@ -144,15 +189,15 @@
             this.tableLayoutPanel4.RowCount = 2;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(861, 63);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(964, 82);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // labelControl5
             // 
             this.labelControl5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelControl5.Location = new System.Drawing.Point(392, 3);
+            this.labelControl5.Location = new System.Drawing.Point(439, 3);
             this.labelControl5.Name = "labelControl5";
-            this.labelControl5.Size = new System.Drawing.Size(88, 25);
+            this.labelControl5.Size = new System.Drawing.Size(99, 35);
             this.labelControl5.TabIndex = 8;
             this.labelControl5.Text = "Select Device: ";
             // 
@@ -160,21 +205,21 @@
             // 
             this.dateTo.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.dateTo.EditValue = null;
-            this.dateTo.Location = new System.Drawing.Point(253, 8);
+            this.dateTo.Location = new System.Drawing.Point(283, 18);
             this.dateTo.Name = "dateTo";
             this.dateTo.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.dateTo.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.dateTo.Size = new System.Drawing.Size(133, 20);
+            this.dateTo.Size = new System.Drawing.Size(150, 20);
             this.dateTo.TabIndex = 3;
             // 
             // labelControl3
             // 
             this.labelControl3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelControl3.Location = new System.Drawing.Point(189, 3);
+            this.labelControl3.Location = new System.Drawing.Point(212, 3);
             this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(58, 25);
+            this.labelControl3.Size = new System.Drawing.Size(65, 35);
             this.labelControl3.TabIndex = 2;
             this.labelControl3.Text = "To: ";
             // 
@@ -183,7 +228,7 @@
             this.labelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelControl1.Location = new System.Drawing.Point(3, 3);
             this.labelControl1.Name = "labelControl1";
-            this.labelControl1.Size = new System.Drawing.Size(56, 25);
+            this.labelControl1.Size = new System.Drawing.Size(64, 35);
             this.labelControl1.TabIndex = 0;
             this.labelControl1.Text = "From: ";
             // 
@@ -191,38 +236,38 @@
             // 
             this.dateFrom.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.dateFrom.EditValue = null;
-            this.dateFrom.Location = new System.Drawing.Point(65, 8);
+            this.dateFrom.Location = new System.Drawing.Point(73, 18);
             this.dateFrom.Name = "dateFrom";
             this.dateFrom.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.dateFrom.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.dateFrom.Size = new System.Drawing.Size(118, 20);
+            this.dateFrom.Size = new System.Drawing.Size(133, 20);
             this.dateFrom.TabIndex = 1;
             // 
             // labelControl4
             // 
             this.labelControl4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelControl4.Location = new System.Drawing.Point(3, 34);
+            this.labelControl4.Location = new System.Drawing.Point(3, 44);
             this.labelControl4.Name = "labelControl4";
-            this.labelControl4.Size = new System.Drawing.Size(56, 26);
+            this.labelControl4.Size = new System.Drawing.Size(64, 35);
             this.labelControl4.TabIndex = 4;
             this.labelControl4.Text = "SO Input:";
             // 
             // txtSO
             // 
             this.txtSO.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.txtSO.Location = new System.Drawing.Point(65, 40);
+            this.txtSO.Location = new System.Drawing.Point(73, 59);
             this.txtSO.Name = "txtSO";
-            this.txtSO.Size = new System.Drawing.Size(118, 20);
+            this.txtSO.Size = new System.Drawing.Size(133, 20);
             this.txtSO.TabIndex = 5;
             // 
             // btnFilter
             // 
             this.btnFilter.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnFilter.Location = new System.Drawing.Point(189, 34);
+            this.btnFilter.Location = new System.Drawing.Point(212, 44);
             this.btnFilter.Name = "btnFilter";
-            this.btnFilter.Size = new System.Drawing.Size(58, 26);
+            this.btnFilter.Size = new System.Drawing.Size(65, 35);
             this.btnFilter.TabIndex = 6;
             this.btnFilter.Text = "Filter";
             this.btnFilter.Click += new System.EventHandler(this.btnFilter_Click);
@@ -231,9 +276,9 @@
             // 
             this.cbxDevice.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.cbxDevice.FormattingEnabled = true;
-            this.cbxDevice.Location = new System.Drawing.Point(486, 7);
+            this.cbxDevice.Location = new System.Drawing.Point(544, 17);
             this.cbxDevice.Name = "cbxDevice";
-            this.cbxDevice.Size = new System.Drawing.Size(190, 21);
+            this.cbxDevice.Size = new System.Drawing.Size(213, 21);
             this.cbxDevice.TabIndex = 7;
             // 
             // cbx_Status
@@ -243,27 +288,27 @@
             "Pending",
             "Complete",
             "Stop"});
-            this.cbx_Status.Location = new System.Drawing.Point(486, 39);
+            this.cbx_Status.Location = new System.Drawing.Point(544, 58);
             this.cbx_Status.Name = "cbx_Status";
-            this.cbx_Status.Size = new System.Drawing.Size(190, 21);
+            this.cbx_Status.Size = new System.Drawing.Size(213, 21);
             this.cbx_Status.TabIndex = 9;
             // 
             // labelControl6
             // 
             this.labelControl6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelControl6.Location = new System.Drawing.Point(392, 34);
+            this.labelControl6.Location = new System.Drawing.Point(439, 44);
             this.labelControl6.Name = "labelControl6";
-            this.labelControl6.Size = new System.Drawing.Size(88, 26);
+            this.labelControl6.Size = new System.Drawing.Size(99, 35);
             this.labelControl6.TabIndex = 10;
             this.labelControl6.Text = "Status: ";
             // 
             // gridDistribution
             // 
             this.gridDistribution.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridDistribution.Location = new System.Drawing.Point(3, 72);
+            this.gridDistribution.Location = new System.Drawing.Point(3, 91);
             this.gridDistribution.MainView = this.gridViewDítribution;
             this.gridDistribution.Name = "gridDistribution";
-            this.gridDistribution.Size = new System.Drawing.Size(861, 427);
+            this.gridDistribution.Size = new System.Drawing.Size(964, 553);
             this.gridDistribution.TabIndex = 1;
             this.gridDistribution.UseEmbeddedNavigator = true;
             this.gridDistribution.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
@@ -289,7 +334,7 @@
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23.07692F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 76.92308F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(163, 502);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(183, 647);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // pic_Admin
@@ -312,7 +357,7 @@
             this.pic_Admin.Properties.PictureAlignment = System.Drawing.ContentAlignment.MiddleLeft;
             this.pic_Admin.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
             this.pic_Admin.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Squeeze;
-            this.pic_Admin.Size = new System.Drawing.Size(157, 109);
+            this.pic_Admin.Size = new System.Drawing.Size(177, 143);
             this.pic_Admin.TabIndex = 1;
             // 
             // windowsUIButtonPanel1
@@ -325,16 +370,17 @@
             windowsUIButtonImageOptions5.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("windowsUIButtonImageOptions5.SvgImage")));
             windowsUIButtonImageOptions6.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("windowsUIButtonImageOptions6.SvgImage")));
             this.windowsUIButtonPanel1.Buttons.AddRange(new DevExpress.XtraEditors.ButtonPanel.IBaseButton[] {
-            new DevExpress.XtraBars.Docking2010.WindowsUIButton("Distribution Managment", true, windowsUIButtonImageOptions5, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, "", -1, true, null, true, false, true, "Ad1", -1, false),
-            new DevExpress.XtraBars.Docking2010.WindowsUIButton("User Managment", true, windowsUIButtonImageOptions6, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, "", -1, true, null, true, false, true, "Ad2", -1, false)});
+            new DevExpress.XtraBars.Docking2010.WindowsUIButton("Distribution Management", true, windowsUIButtonImageOptions5, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, "", -1, true, null, true, false, true, "Ad1", -1, false),
+            new DevExpress.XtraBars.Docking2010.WindowsUIButton("Device Management", true, windowsUIButtonImageOptions6, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, "", -1, true, null, true, false, true, "Ad2", -1, false)});
             this.windowsUIButtonPanel1.ContentAlignment = System.Drawing.ContentAlignment.TopCenter;
             this.windowsUIButtonPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.windowsUIButtonPanel1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
             this.windowsUIButtonPanel1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.windowsUIButtonPanel1.Location = new System.Drawing.Point(3, 118);
+            this.windowsUIButtonPanel1.Location = new System.Drawing.Point(3, 152);
             this.windowsUIButtonPanel1.Name = "windowsUIButtonPanel1";
             this.windowsUIButtonPanel1.Orientation = System.Windows.Forms.Orientation.Vertical;
-            this.windowsUIButtonPanel1.Size = new System.Drawing.Size(157, 381);
+            this.windowsUIButtonPanel1.Padding = new System.Windows.Forms.Padding(20);
+            this.windowsUIButtonPanel1.Size = new System.Drawing.Size(177, 492);
             this.windowsUIButtonPanel1.TabIndex = 0;
             this.windowsUIButtonPanel1.Tag = "";
             this.windowsUIButtonPanel1.Text = "windowsUIButtonPanel1";
@@ -359,7 +405,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1042, 508);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1165, 653);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // navigationFrame1
@@ -368,14 +414,14 @@
             this.navigationFrame1.Controls.Add(this.navigationPage2);
             this.navigationFrame1.Controls.Add(this.navigationPage3);
             this.navigationFrame1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.navigationFrame1.Location = new System.Drawing.Point(172, 3);
+            this.navigationFrame1.Location = new System.Drawing.Point(192, 3);
             this.navigationFrame1.Name = "navigationFrame1";
             this.navigationFrame1.Pages.AddRange(new DevExpress.XtraBars.Navigation.NavigationPageBase[] {
             this.navigationPage1,
             this.navigationPage2,
             this.navigationPage3});
             this.navigationFrame1.SelectedPage = this.navigationPage1;
-            this.navigationFrame1.Size = new System.Drawing.Size(867, 502);
+            this.navigationFrame1.Size = new System.Drawing.Size(970, 647);
             this.navigationFrame1.TabIndex = 3;
             this.navigationFrame1.Text = "navigationFrame1";
             // 
@@ -383,13 +429,15 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1042, 508);
+            this.ClientSize = new System.Drawing.Size(1165, 653);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "frmDashboard";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "frmDash";
             this.navigationPage2.ResumeLayout(false);
-            this.navigationPage2.PerformLayout();
+            this.tableLayoutMainDevice.ResumeLayout(false);
+            this.tableLayoutMainDevice.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridControlDeviceManagement)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewDeviceManagement)).EndInit();
             this.navigationPage1.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
@@ -414,7 +462,6 @@
 
         private DevExpress.XtraBars.Navigation.NavigationPage navigationPage3;
         private DevExpress.XtraBars.Navigation.NavigationPage navigationPage2;
-        private DevExpress.XtraEditors.LabelControl labelControl2;
         private DevExpress.XtraBars.Navigation.NavigationPage navigationPage1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
@@ -437,5 +484,9 @@
         private DevExpress.XtraGrid.Views.Grid.GridView gridViewDítribution;
         private System.Windows.Forms.ComboBox cbx_Status;
         private DevExpress.XtraEditors.LabelControl labelControl6;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutMainDevice;
+        private DevExpress.XtraGrid.GridControl gridControlDeviceManagement;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridViewDeviceManagement;
+        private DevExpress.XtraEditors.LabelControl labelControl2;
     }
 }

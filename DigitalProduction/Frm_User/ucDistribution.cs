@@ -1311,7 +1311,7 @@ namespace DigitalProduction
                     }
                 }
 
-                ShowMessage.ShowInfo("All rows updated successfully.");
+                //ShowMessage.ShowInfo("All rows updated successfully.");
             }
             if (selectedRows.Length > 0)
             {
@@ -1491,8 +1491,11 @@ namespace DigitalProduction
 
                 if (piecesPerPair == 0 || cuttingDieQty == 0 || materialLayer == 0)
                     return false;
-                if (gridLookUpDevice.EditValue == null || gridLookUpOperator.EditValue == null)
-                    return false;
+                if (!isDeviceData)
+                {
+                    if (gridLookUpDevice.EditValue == null || gridLookUpOperator.EditValue == null)
+                        return false;
+                }
             }
             return true;
         }

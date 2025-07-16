@@ -1,21 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking2010;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using DigitalProduction.Extensions;
 using DigitalProduction.Models;
+using Newtonsoft.Json;
 using static DigitalProduction.ucProgress;
 
 namespace DigitalProduction.Frm_Admin
 {
     public partial class frmDashboard : Form
     {
+        public BindingList<Device> Devices { get; set; } = new BindingList<Device>();
+        private WebSocketClient _webSocketClient;
+        private SynchronizationContext _syncContext;
+        // Add at the top of the class
+        private RealTimeCutMonitor _cutMonitor;
         public frmDashboard()
         {
             InitializeComponent();
-
+            _cutMonitor = new RealTimeCutMonitor();
+            _cutMonitor.OnNewActiveDevices += HandleCuttingUpdate;
+            _cutMonitor.Start();
             windowsUIButtonPanel1.AllowGlyphSkinning = true;
             windowsUIButtonPanel1.AppearanceButton.Pressed.BackColor = Color.DarkGray;
             windowsUIButtonPanel1.UseButtonBackgroundImages = false;
@@ -61,7 +74,31 @@ namespace DigitalProduction.Frm_Admin
                 view.OptionsSelection.MultiSelect = true;
                 view.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CheckBoxRowSelect;
             }
+            _syncContext = SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
+            SetWebSocketClient(null);
         }
+        private void HandleCuttingUpdate(List<CutActivityInfo> activities)
+        {
+            _syncContext.Post(_ =>
+            {
+                foreach (var activity in activities)
+                {
+                    var device = Devices.FirstOrDefault(d => d.DeviceID == activity.DeviceID);
+                    if (device != null)
+                    {
+                        device.LastCutTime = activity.UpdatedAt;
+                        device.LastSize = activity.Size;
+                        device.LastCutQty = activity.ActualCut;
+                        device.LastSizeQty = activity.SizeQty;
+                        device.RefreshCuttingStatus();
+                    }
+                }
+
+                gridViewDeviceManagement.RefreshData();
+
+            }, null);
+        }
+
 
         private void WindowsUIButtonPanel1_ButtonClick(object sender, ButtonEventArgs e)
         {
@@ -144,41 +181,9 @@ namespace DigitalProduction.Frm_Admin
         {
             LoadDistributionData();
         }
-
-        //private void btnDeleteSelected_Click(object sender, EventArgs e)
-        //{
-        //    var view = gridDistribution.MainView as DevExpress.XtraGrid.Views.Grid.GridView;
-        //    if (view == null) return;
-
-        //    var selectedRows = view.GetSelectedRows();
-        //    if (selectedRows.Length == 0)
-        //    {
-        //        MessageBox.Show("Please select at least one row to delete.");
-        //        return;
-        //    }
-
-        //    DialogResult result = MessageBox.Show("Are you sure you want to delete the selected records?",
-        //                                          "Confirm Delete",
-        //                                          MessageBoxButtons.YesNo,
-        //                                          MessageBoxIcon.Warning);
-
-        //    if (result == DialogResult.Yes)
-        //    {
-        //        foreach (var rowHandle in selectedRows)
-        //        {
-        //            if (view.GetRow(rowHandle) is DistributionData item)
-        //            {
-        //                // Delete from database
-        //                DbHelper.DeleteDistributionById(item.DistributionID);
-        //            }
-        //        }
-        //        // Refresh data
-        //        LoadDistributionData();
-        //    }
-        //}
         private void btnDeleteSelected_Click(object sender, EventArgs e)
         {
-            var view = gridDistribution.MainView as DevExpress.XtraGrid.Views.Grid.GridView;
+            var view = gridDistribution.MainView as GridView;
             if (view == null) return;
 
             var selectedRows = view.GetSelectedRows();
@@ -241,7 +246,7 @@ namespace DigitalProduction.Frm_Admin
 
         private void HideGridColumns(DevExpress.XtraGrid.GridControl grid, params string[] columnNames)
         {
-            var view = grid.MainView as DevExpress.XtraGrid.Views.Grid.GridView;
+            var view = grid.MainView as GridView;
             if (view == null) return;
 
             foreach (string name in columnNames)
@@ -292,6 +297,100 @@ namespace DigitalProduction.Frm_Admin
                 }
                 gridViewDítribution.Columns["NoteReason"].Caption = LocalizationManager.GetString("Reason");
                 gridView.LayoutChanged();
+            }
+        }
+
+
+        // Naviagtion device list
+        public void SetWebSocketClient(WebSocketClient webSocketClient)
+        {
+            if (_webSocketClient != null)
+            {
+                _webSocketClient.OnResponseReceived -= HandleWebSocketMessage; // Unsubscribe previous instance
+            }
+
+            _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
+            _webSocketClient.OnResponseReceived += HandleWebSocketMessage;
+            _ = GetDataAndLoadToGridAsync();
+        }
+
+        public async Task GetDataAndLoadToGridAsync()
+        {
+            var request = new { app = Global.App, action = "getDevices" };
+            string jsonRequest = JsonConvert.SerializeObject(request);
+            await _webSocketClient.SendAsync(jsonRequest);
+        }
+        private void HandleWebSocketMessage(string jsonData)
+        {
+            try
+            {
+                var item = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonData);
+                string action = item.ContainsKey("action") ? item["action"]?.ToString() : null;
+
+                if (action == "getDevices")
+                {
+                    var response = ResponseMessage<List<Device>>.FromJson(jsonData);
+                    if (response?.Devices != null)
+                    {
+                        Devices = new BindingList<Device>(response.Devices);
+
+                        _syncContext.Post(_ =>
+                        {
+                            gridControlDeviceManagement.DataSource = Devices;
+                            gridViewDeviceManagement.BestFitColumns();
+
+                            // Hide system columns
+                            var columnsToHide = new List<string> { "DeviceID", "DepartmentID", "CreatedAt", "PlantID" };
+                            SetGridColumnVisibility(gridViewDeviceManagement, columnsToHide, false);
+
+                            // add new column to overview cutting size
+                            var lastCutTimeCol = gridViewDeviceManagement.Columns.ColumnByFieldName("LastCutTime");
+                            if (lastCutTimeCol != null)
+                            {
+                                lastCutTimeCol.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+                                lastCutTimeCol.DisplayFormat.FormatString = "dd/MM/yyyy HH:mm:ss";
+                            }
+                            var lastSizeCol = gridViewDeviceManagement.Columns["LastSizeID"];
+                            if (lastSizeCol != null)
+                            {
+                                lastSizeCol.Caption = "Size ID";
+                            }
+
+                            var qtyCol = gridViewDeviceManagement.Columns["LastCutQty"];
+                            if (qtyCol != null)
+                            {
+                                qtyCol.Caption = "Cut Qty";
+                                qtyCol.AppearanceCell.BackColor = Color.LightYellow;
+                            }
+                            var sizeQtyCol = gridViewDeviceManagement.Columns["LastSizeQty"];
+                            if (sizeQtyCol != null)
+                            {
+                                sizeQtyCol.Caption = "Size Qty";
+                            }
+
+                        }, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"WebSocket message error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Sets the visibility of specified columns in the gridViewDeviceManagement.
+        /// </summary>
+        /// <param name="gridView">The GridView where columns exist.</param>
+        /// <param name="columnNames">List of column field names to show/hide.</param>
+        /// <param name="isVisible">Whether the columns should be visible or hidden.</param>
+        public void SetGridColumnVisibility(GridView gridView, IEnumerable<string> columnNames, bool isVisible)
+        {
+            foreach (var name in columnNames)
+            {
+                var column = gridView.Columns.ColumnByFieldName(name);
+                if (column != null)
+                    column.Visible = isVisible;
             }
         }
     }

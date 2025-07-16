@@ -10,6 +10,15 @@ const PING_INTERVAL = 10000;
 const app = express();
 const port = 8000;
 
+const fs = require('fs');
+const path = require('path');
+const perfLogPath = path.join(__dirname, 'performance-log.txt');
+
+function logPerformance(message) {
+  const timestamp = new Date().toISOString();
+  fs.appendFileSync(perfLogPath, `[${timestamp}] ${message}\n`);
+}
+
 app.use(express.json());
 
 initDatabase();
@@ -61,11 +70,45 @@ process.on('SIGINT', closeAllConnections);
 process.on('SIGTERM', closeAllConnections);
 
 async function handleDeviceConnection(ipAddresses) {
-  for (const ipAddress of ipAddresses) {
-    try {
-      await connectToDevice(ipAddress);
-    } catch (error) {
-      console.error(`Error connecting to device at ${ipAddress}: ${error.message}`);
-    }
+  const startTotal = Date.now();
+  const BATCH_SIZE = 20;
+
+  logPerformance(`🚀 Starting batched connection for ${ipAddresses.length} machines...`);
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (let i = 0; i < ipAddresses.length; i += BATCH_SIZE) {
+    const batch = ipAddresses.slice(i, i + BATCH_SIZE);
+
+    const batchStart = Date.now();
+
+      await Promise.allSettled(
+      batch.map(async ip => {
+        const start = Date.now();
+        try {
+          await connectToDevice(ip);
+          const duration = Date.now() - start;
+          logPerformance(`✅ Connected to ${ip} in ${duration} ms`);
+          successCount++;
+        } catch (error) {
+          const duration = Date.now() - start;
+          logPerformance(`❌ Failed to connect ${ip} in ${duration} ms: ${error.message}`);
+          failCount++;
+        }
+      })
+    );
+
+    const batchDuration = Date.now() - batchStart;
+    logPerformance(`📦 Batch ${i / BATCH_SIZE + 1}: ${batch.length} devices connected in ${batchDuration} ms`);
   }
+
+  const totalDuration = Date.now() - startTotal;
+  logPerformance(`📊 Final Summary:`);
+  logPerformance(`  🟢 Success: ${successCount}`);
+  logPerformance(`  🔴 Failed: ${failCount}`);
+  logPerformance(`  ⏱️ Total time for ${ipAddresses.length} machines: ${totalDuration} ms`);
+  logPerformance(`------------------------------------------------------------`);
 }
+
+

@@ -90,9 +90,10 @@
             this.accordionControl1.LookAndFeel.SkinMaskColor = System.Drawing.Color.DeepSkyBlue;
             this.accordionControl1.LookAndFeel.SkinName = "Office 2019 Colorful";
             this.accordionControl1.LookAndFeel.UseDefaultLookAndFeel = false;
+            this.accordionControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.accordionControl1.Name = "accordionControl1";
             this.accordionControl1.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Hidden;
-            this.accordionControl1.Size = new System.Drawing.Size(229, 736);
+            this.accordionControl1.Size = new System.Drawing.Size(267, 795);
             this.accordionControl1.TabIndex = 1;
             this.accordionControl1.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
@@ -249,11 +250,12 @@
             this.statusItem,
             this.SkinOption});
             this.fluentDesignFormControl1.Location = new System.Drawing.Point(0, 0);
+            this.fluentDesignFormControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.fluentDesignFormControl1.Name = "fluentDesignFormControl1";
             this.fluentDesignFormControl1.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
             this.repositoryItemTextEdit1,
             this.repositoryItemProgressBar1});
-            this.fluentDesignFormControl1.Size = new System.Drawing.Size(1200, 31);
+            this.fluentDesignFormControl1.Size = new System.Drawing.Size(1400, 31);
             this.fluentDesignFormControl1.TabIndex = 2;
             this.fluentDesignFormControl1.TabStop = false;
             this.fluentDesignFormControl1.TitleItemLinks.Add(this.barSubItem1);
@@ -278,14 +280,35 @@
             this.SkinOption.AllowSerializeChildren = DevExpress.Utils.DefaultBoolean.False;
             this.SkinOption.Caption = "Skin UI";
             this.SkinOption.Id = 0;
+            this.SkinOption.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("SkinOption.ImageOptions.Image")));
+            this.SkinOption.ItemAppearance.Normal.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SkinOption.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Green;
+            this.SkinOption.ItemAppearance.Normal.Options.UseFont = true;
+            this.SkinOption.ItemAppearance.Normal.Options.UseForeColor = true;
+            this.SkinOption.MenuAppearance.HeaderItemAppearance.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SkinOption.MenuAppearance.HeaderItemAppearance.Options.UseFont = true;
+            this.SkinOption.MenuAppearance.MenuBar.BackColor = System.Drawing.Color.White;
+            this.SkinOption.MenuAppearance.MenuBar.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SkinOption.MenuAppearance.MenuBar.Options.UseBackColor = true;
+            this.SkinOption.MenuAppearance.MenuBar.Options.UseFont = true;
+            this.SkinOption.MenuAppearance.MenuCaption.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SkinOption.MenuAppearance.MenuCaption.Options.UseFont = true;
+            this.SkinOption.MenuAppearance.SideStrip.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SkinOption.MenuAppearance.SideStrip.Options.UseFont = true;
+            this.SkinOption.MenuAppearance.SideStripNonRecent.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SkinOption.MenuAppearance.SideStripNonRecent.Options.UseFont = true;
             this.SkinOption.Name = "SkinOption";
+            this.SkinOption.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
             // 
             // pnlControl
             // 
+            this.pnlControl.BackColor = System.Drawing.Color.AliceBlue;
+            this.pnlControl.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.pnlControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlControl.Location = new System.Drawing.Point(229, 31);
+            this.pnlControl.Location = new System.Drawing.Point(267, 31);
+            this.pnlControl.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.pnlControl.Name = "pnlControl";
-            this.pnlControl.Size = new System.Drawing.Size(971, 736);
+            this.pnlControl.Size = new System.Drawing.Size(1133, 795);
             this.pnlControl.TabIndex = 3;
             // 
             // accordionControlElement2
@@ -316,14 +339,17 @@
             // 
             // frmMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.Appearance.Options.UseFont = true;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1200, 767);
+            this.ClientSize = new System.Drawing.Size(1400, 826);
             this.Controls.Add(this.pnlControl);
             this.Controls.Add(this.accordionControl1);
             this.Controls.Add(this.fluentDesignFormControl1);
             this.FluentDesignFormControl = this.fluentDesignFormControl1;
+            this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.IconOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("frmMain.IconOptions.SvgImage")));
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "frmMain";
             this.NavigationControl = this.accordionControl1;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

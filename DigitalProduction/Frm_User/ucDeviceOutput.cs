@@ -11,6 +11,7 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
+using DevExpress.XtraWaitForm;
 using DigitalProduction.Models;
 using DigitalProduction.ViewModels;
 
@@ -27,7 +28,7 @@ namespace DigitalProduction
         private Panel mainPanel;
         private FlowLayoutPanel filterPanel;
         private WebSocketClient _pendingWebSocketClient;
-
+        private BindingSource viewModelBindingSource = new BindingSource();
         public ucDeviceOutput()
         {
             InitializeComponent();
@@ -96,14 +97,79 @@ namespace DigitalProduction
                 OptionsBehavior = { Editable = false }
             };
 
+            // Ensure MainView is correctly set
             gridControl_DeviceOutput.MainView = gridView_DeviceOutput;
+
             if (_viewModel == null)
             {
                 MessageBox.Show("_viewModel is null before binding", "DEBUG");
                 return;
             }
 
+            // 1. Bind GridControl to ViewModel's list (e.g., BindingList<DeviceOutput>)
             gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
+
+            // 2. Setup splash screen actions
+            _viewModel.ShowLoadingAction = () =>
+            {
+                var form = this.FindForm() ?? Application.OpenForms.Cast<Form>().FirstOrDefault();
+                if (form != null && !SplashScreenManager.Default?.IsSplashFormVisible == true)
+                {
+                    SplashScreenManager.ShowForm(form, typeof(frmLoading), true, true, false);
+                }
+            };
+
+            _viewModel.HideLoadingAction = () =>
+            {
+                if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                {
+                    SplashScreenManager.CloseForm();
+                }
+            };
+
+            // 3. Setup viewModelBindingSource and bind to IsLoading (use Inverse for Enabled)
+            viewModelBindingSource.DataSource = _viewModel;
+
+            // Optional: avoid adding multiple bindings
+            gridControl_DeviceOutput.DataBindings.Clear();
+
+            // Enable or disable grid based on IsLoading
+            gridControl_DeviceOutput.DataBindings.Add("Enabled", viewModelBindingSource, "IsLoading", true, DataSourceUpdateMode.OnPropertyChanged);
+            // Create the opaque overlay panel
+            // Create the opaque overlay panel
+            Panel overlayPanel = new Panel
+            {
+                Name = "overlayPanel",
+                BackColor = Color.White, // Not transparent!
+                Visible = false,
+                Dock = DockStyle.Fill
+            };
+            this.Controls.Add(overlayPanel);
+            overlayPanel.BringToFront();
+
+            // Create DevExpress ProgressPanel
+            var progressPanelOverLay = new DevExpress.XtraWaitForm.ProgressPanel
+            {
+                AutoHeight = true,
+                AutoWidth = true,
+                Caption = "Please wait...",
+                Description = "Loading data...",
+                LookAndFeel = { UseDefaultLookAndFeel = true },
+                BackColor = Color.Transparent
+            };
+
+            // Center manually
+            progressPanelOverLay.Location = new Point(
+                (overlayPanel.Width - progressPanelOverLay.Width) / 2,
+                (overlayPanel.Height - progressPanelOverLay.Height) / 2
+            );
+            progressPanelOverLay.Anchor = AnchorStyles.None;
+
+            overlayPanel.Controls.Add(progressPanelOverLay);
+
+            // ✅ Bind visibility to ViewModel.IsLoading (NOT Enabled!)
+            overlayPanel.DataBindings.Add("Visible", viewModelBindingSource, "IsLoading", true, DataSourceUpdateMode.OnPropertyChanged);
+
             _viewModel.InitPagingFooter(gridControl_DeviceOutput);
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
             gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
@@ -161,6 +227,21 @@ namespace DigitalProduction
 
             gridView_DeviceOutput.CustomDrawFooterCell += GridView_DeviceOutput_CustomDrawFooterCell;
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
+
+
+            // hide text if child deviceoutput 
+            gridView_DeviceOutput.CustomDrawCell += (s, e) =>
+            {
+                var row = gridView_DeviceOutput.GetRow(e.RowHandle) as DeviceOutput;
+                if (row != null && !row.IsGroupHeader)
+                {
+                    if (e.Column.FieldName == "SO" || e.Column.FieldName == "OperatorName" ||
+                        e.Column.FieldName == "PartName" || e.Column.FieldName == "MachineName")
+                    {
+                        e.DisplayText = "";
+                    }
+                }
+            };
         }
 
         private void GridView_DeviceOutput_CustomDrawFooterCell(object sender, FooterCellCustomDrawEventArgs e)
@@ -178,7 +259,8 @@ namespace DigitalProduction
         {
             GridView view = sender as GridView;
 
-            if (e.RowHandle >= 0)
+            if (
+                e.RowHandle >= 0)
             {
                 // Focused row
                 if (view.FocusedRowHandle == e.RowHandle)
@@ -383,6 +465,7 @@ namespace DigitalProduction
 
             gridView.Columns["IsLeather"]?.SetVisible(false);
             gridView.Columns["IsGroupHeader"]?.SetVisible(false);
+            gridView.Columns["_isRecentlyUpdated"]?.SetVisible(false);
             gridView.Columns["IsRecentlyUpdated"]?.SetVisible(false);
 
             StyleNumericColumn(gridView.Columns["PartName"], 5, bold: true);
@@ -482,13 +565,16 @@ namespace DigitalProduction
             if (view == null || e.RowHandle < 0) return;
 
             var row = view.GetRow(e.RowHandle) as DeviceOutput;
-            if (row != null && row.IsRecentlyUpdated)
+            if (row.IsRecentlyUpdated
+                )
             {
                 e.Appearance.BackColor = Color.LightYellow;
+                e.Appearance.BackColor2 = Color.LightYellow;
             }
             else
             {
-                e.Appearance.BackColor = Color.Transparent;           
+                e.Appearance.BackColor = Color.Transparent;
+                e.Appearance.BackColor2 = Color.Transparent;
             }
         }
     }

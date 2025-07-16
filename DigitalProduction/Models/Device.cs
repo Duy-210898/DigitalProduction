@@ -1,8 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace DigitalProduction.Models
 {
-    public class Device
+    public class Device : INotifyPropertyChanged
     {
         public Device() { }
         private int deviceID;
@@ -34,5 +35,100 @@ namespace DigitalProduction.Models
         public int PlantID { get => plantID; set => plantID = value; }
         public int DepartmentID { get => departmentID; set => departmentID = value; }
         public string DepartmentName { get => departmentName; set => departmentName = value; }
+
+
+        // check cutting or not
+        // ⏱️ Cutting logic
+        private DateTime? lastCutTime;
+        public DateTime? LastCutTime
+        {
+            get => lastCutTime;
+            set
+            {
+                if (lastCutTime != value)
+                {
+                    lastCutTime = value;
+                    OnPropertyChanged(nameof(LastCutTime));
+                    UpdateIsCutting();
+                }
+            }
+        }
+
+        private bool isCutting;
+        public bool IsCutting
+        {
+            get => isCutting;
+            private set
+            {
+                if (isCutting != value)
+                {
+                    isCutting = value;
+                    OnPropertyChanged(nameof(IsCutting));
+                }
+            }
+        }
+
+        // New properties to track cutting size
+        private string _lastSize;
+        public string LastSize
+        {
+            get => _lastSize;
+            set
+            {
+                _lastSize = value;
+                OnPropertyChanged(nameof(LastSize));
+            }
+        }
+
+        private int? _lastCutQty;
+        public int? LastCutQty
+        {
+            get => _lastCutQty;
+            set
+            {
+                _lastCutQty = value;
+                OnPropertyChanged(nameof(LastCutQty));
+            }
+        }
+        private int? _lastSizeQty;
+        public int? LastSizeQty
+        {
+            get => _lastSizeQty;
+            set
+            {
+                _lastSizeQty = value;
+                OnPropertyChanged(nameof(LastSizeQty));
+            }
+        }
+
+        public void RefreshCuttingStatus()
+        {
+            if (LastCutTime.HasValue)
+            {
+                var elapsed = (DateTime.Now - LastCutTime.Value).TotalSeconds;
+                IsCutting = elapsed <= 3;
+            }
+            else
+            {
+                IsCutting = false;
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    
+        private void UpdateIsCutting()
+        {
+            if (LastCutTime.HasValue)
+            {
+                var secondsSinceLastCut = (DateTime.Now - LastCutTime.Value).TotalSeconds;
+                IsCutting = secondsSinceLastCut <= 3;
+            }
+            else
+            {
+                IsCutting = false;
+            }
+        }
     }
 }

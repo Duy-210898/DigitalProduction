@@ -111,6 +111,7 @@ namespace DigitalProduction
         {
             btnLogOut = new BarButtonItem();
             btnLogOut.Caption = LocalizationManager.GetString("LogOut");
+            btnLogOut.ImageOptions.Image = Properties.Resources.logout;
             btnLogOut.ItemClick += BtnLogOut_ItemClick;
 
             barSubItem1.AddItem(btnLogOut);
@@ -119,6 +120,7 @@ namespace DigitalProduction
         {
             btnDashboard = new BarButtonItem();
             btnDashboard.Caption = LocalizationManager.GetString("Dashboard");
+            btnDashboard.ImageOptions.Image = Properties.Resources.dashboard;
             btnDashboard.ItemClick += BtnDashboard_ItemClick;
 
             barSubItem1.AddItem(btnDashboard);

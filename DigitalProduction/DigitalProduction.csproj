@@ -25,7 +25,7 @@
     <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>102</ApplicationRevision>
+    <ApplicationRevision>113</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -195,6 +195,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\RealTimeCutMonitor.cs" />
     <Compile Include="Extensions\SafeReader.cs" />
     <Compile Include="Frm_User\ChangePassword.cs">
       <SubType>Form</SubType>
@@ -231,6 +232,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="PropertyUpdateHelper.cs" />
     <Compile Include="SqlDataImporter.cs" />
     <Compile Include="Frm_User\ucCuttingReport.cs">
       <SubType>UserControl</SubType>
@@ -490,8 +492,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon_digital.ico" />
+    <None Include="Resources\dashboard.png" />
     <Content Include="Resources\icon_Add.png" />
     <None Include="Resources\send-data-device.png" />
+    <None Include="Resources\logout.png" />
     <Content Include="Resources\send-data.png" />
     <None Include="Resources\save_icon.png" />
     <None Include="Resources\reset_icon.png" />

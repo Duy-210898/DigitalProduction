@@ -150,11 +150,11 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
     JOIN Part p ON pso.PartId = p.PartId
     JOIN Size s ON pso.SizeId = s.SizeID
     JOIN Material m ON pso.MaterialID = m.MaterialID
-    JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID AND do.PartID = p.PartID
     JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId
     LEFT JOIN SubDistribution sub ON sub.DistributionID = dd.DistributionID AND sub.PartSizeOrderId = dd.PartSizeOrderId
     LEFT JOIN Operator o ON o.OperatorID = ISNULL(sub.OperatorID, dd.OperatorID)
     LEFT JOIN DeviceList dl ON dl.DeviceID = ISNULL(sub.DeviceID, dd.DeviceID)
+    LEFT JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID AND do.PartID = p.PartID 
     WHERE do.UpdatedAt >= @startDate AND do.UpdatedAt < @endDate
     GROUP BY
       po.OrderID, do.IsLeather, do.TotalPiecesPerPair, 
@@ -374,10 +374,13 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
     await transaction.begin();
 
     // Check if Operator (EmployeeID) exists
-    const employeeCheck = await transaction.request()
+    const request = new sql.Request(transaction);
+
+    // Check if operator exists
+    const employeeCheck = await request
       .input("EmployeeID", sql.Int, EmployeeID)
       .query(`SELECT EmployeeID FROM Operator WHERE EmployeeID = @EmployeeID`);
-
+  
     if (employeeCheck.recordset.length === 0) {
       console.warn(`❌ EmployeeID ${EmployeeID} not found`);
       await transaction.rollback();
@@ -459,10 +462,11 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
 
     // Commit transaction
     await transaction.commit();
-    // console.log(`✅ CutHistory saved successfully for EmployeeID ${EmployeeID}`);
-    
+   // console.log(`✅ CutHistory saved successfully for EmployeeID ${EmployeeID}`);
   } catch (error) {
-    await transaction.rollback();
+    if (transaction.inTransaction) {
+      await transaction.rollback();
+    }
     console.error('❌ Error logging CutHistory with transaction:', error.message);
     throw error;
   }
@@ -1329,7 +1333,6 @@ async function getAllDeviceData() {
   }
 }
 
-
 // Fetch data from SQL Server
 async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 100) {
   try {
@@ -1344,43 +1347,76 @@ async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 1
 
     // 1. Get paginated data
     const dataQuery = `
-      SELECT 
-          dd.DistributionID,
-          dd.DeviceID,
-          pr.SO,
-          d.IpAddress,
-          d.MachineName,
-          o.OperatorName,
-          u.EmployeeName,
-          pa.PartName,
-          se.Size,
-          ps.Unit,
-          ps.SizeQty,
-          m.MaterialName,
-          dd.InventoryQty,
-          dd.Status,
-          dd.CreatedAt,
-          dd.UpdatedAt,
-          dd.IsLeather,
-          dd.IsDelete,
-          dd.Note,
-          do.ActualSizeQty
-      FROM 
-          DistributionData dd
-      LEFT JOIN DeviceList d ON dd.DeviceID = d.DeviceID 
-      LEFT JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
-      LEFT JOIN Part pa ON pa.PartID = ps.PartID
-      LEFT JOIN Size se ON se.SizeID = ps.SizeID
-      LEFT JOIN Material m ON m.MaterialID = ps.MaterialID
-      LEFT JOIN Operator o ON dd.OperatorID = o.OperatorID
-      LEFT JOIN Users u ON dd.UserID = u.UserID
-      LEFT JOIN ProductOrder pr ON pr.OrderId = ps.OrderID
-      LEFT JOIN DeviceOutput do ON do.SizeID = ps.SizeId AND do.PartId = ps.PartId AND do.OrderID = ps.OrderId
-      WHERE 
-          dd.IsDelete = 0 AND 
-          dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
-      ORDER BY dd.UpdatedAt ASC
-      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
+        SELECT 
+            dd.DistributionID,
+            dd.DeviceID,
+            pr.SO,
+            d.IpAddress,
+            d.MachineName,
+            o.OperatorName,
+            u.EmployeeName,
+            pa.PartName,
+            se.Size,
+            ps.Unit,
+            ps.SizeQty,
+            m.MaterialName,
+            dd.InventoryQty,
+            dd.Status,
+            dd.CreatedAt,
+            dd.UpdatedAt,
+            dd.IsLeather,
+            dd.IsDelete,
+            dd.Note,
+            do.ActualSizeQty
+        FROM 
+            DistributionData dd
+
+        LEFT JOIN SubDistribution sd 
+            ON sd.DistributionID = dd.DistributionID
+
+        LEFT JOIN DeviceList d 
+            ON dd.DeviceID = d.DeviceID 
+
+        LEFT JOIN PartSizeOrder ps 
+            ON dd.PartSizeOrderId = ps.PartSizeOrderId  
+
+        LEFT JOIN Part pa 
+            ON ps.PartID = pa.PartID
+
+        LEFT JOIN Size se 
+            ON ps.SizeID = se.SizeID
+
+        LEFT JOIN Material m 
+            ON ps.MaterialID = m.MaterialID
+
+        -- Use COALESCE to get operator from SubDistribution first
+        LEFT JOIN Operator o 
+            ON o.OperatorID = COALESCE(sd.OperatorID, dd.OperatorID)
+
+        LEFT JOIN Users u 
+            ON dd.UserID = u.UserID
+
+        LEFT JOIN ProductOrder pr 
+            ON ps.OrderID = pr.OrderID
+
+        -- JOIN DeviceOutput matching resolved OperatorID
+        LEFT JOIN DeviceOutput do 
+            ON do.SizeID = ps.SizeID 
+            AND do.PartID = ps.PartID 
+            AND do.OrderID = ps.OrderID
+            AND (
+                (COALESCE(sd.OperatorID, dd.OperatorID) IS NULL AND do.OperatorID IS NULL)
+                OR do.OperatorID = COALESCE(sd.OperatorID, dd.OperatorID)
+            )
+
+        WHERE 
+            dd.IsDelete = 0 
+            AND 
+            dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
+
+        ORDER BY 
+            dd.UpdatedAt ASC
+        OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
     `;
 
     // 2. Get total count
@@ -1444,7 +1480,7 @@ async function getDeviceList() {
     return result.recordset.map(record => record.IpAddress);
   } catch (error) {
     console.error('Error fetching device list from database:', error.message);
-    throw error;
+    return [];
   }
 }
 // Lấy danh sách trang từ Master Work Order

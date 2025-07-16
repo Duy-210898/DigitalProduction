@@ -5,7 +5,7 @@ namespace DigitalProduction.Models
 {
     public class DeviceOutput : INotifyPropertyChanged
     {
-        public bool IsRecentlyUpdated { get; set; } // Temporary flag
+        public bool _isRecentlyUpdated { get; set; } // Temporary flag
         private string _machineName;
         private string _so;
         private string _size;
@@ -16,10 +16,10 @@ namespace DigitalProduction.Models
         private int? _piecesPerPair;
         private int? _materialLayer;
         private int? _cuttingDieQty;
-        private int? _actualCut;
-        private int? _actualSizeQty;
-        private int? _actualPieces;
-        private int? _inventoryQty;
+        public int? _actualCut;
+        public int? _actualSizeQty;
+        public int? _actualPieces;
+        public int? _inventoryQty;
         private int? _totalPiecesPerPair;
         private bool _isGroupHeader;
         private string _materialType;
@@ -27,6 +27,11 @@ namespace DigitalProduction.Models
 
         public DateTime? UpdatedAt { get; set; }
 
+        public bool IsRecentlyUpdated
+        {
+            get => _isRecentlyUpdated;
+            set { _isRecentlyUpdated = value; OnPropertyChanged(nameof(IsRecentlyUpdated)); }
+        }
         public string MachineName
         {
             get => _machineName;
@@ -96,20 +101,41 @@ namespace DigitalProduction.Models
 
         public int? ActualCut
         {
-            get => _actualCut ?? 0;
-            set { _actualCut = value; OnPropertyChanged(nameof(ActualCut)); }
+            get => _actualCut;
+            set
+            {
+                if (_actualCut != value)
+                {
+                    _actualCut = value;
+                    OnPropertyChanged(nameof(ActualCut));
+                }
+            }
         }
 
         public int? ActualSizeQty
         {
-            get => _actualSizeQty ?? 0;
-            set { _actualSizeQty = value; OnPropertyChanged(nameof(ActualSizeQty)); }
+            get => _actualSizeQty;
+            set
+            {
+                if (_actualSizeQty != value)
+                {
+                    _actualSizeQty = value;
+                    OnPropertyChanged(nameof(ActualSizeQty));
+                }
+            }
         }
 
         public int? ActualPieces
         {
-            get => _actualPieces ?? 0;
-            set { _actualPieces = value; OnPropertyChanged(nameof(ActualPieces)); }
+            get => _actualPieces;
+            set
+            {
+                if (_actualPieces != value)
+                {
+                    _actualPieces = value;
+                    OnPropertyChanged(nameof(ActualPieces));
+                }
+            }
         }
 
         public bool IsGroupHeader
@@ -120,8 +146,15 @@ namespace DigitalProduction.Models
 
         public int? InventoryQty
         {
-            get => _inventoryQty ?? 0;
-            set { _inventoryQty = value; OnPropertyChanged(nameof(InventoryQty)); }
+            get => _inventoryQty;
+            set
+            {
+                if (_inventoryQty != value)
+                {
+                    _inventoryQty = value;
+                    OnPropertyChanged(nameof(InventoryQty));
+                }
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

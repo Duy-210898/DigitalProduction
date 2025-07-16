@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DigitalProduction.Extensions;
@@ -1998,6 +1999,68 @@ namespace DigitalProduction
                 }
             }
         }
+        public static List<CutActivityInfo> GetRecentDeviceCutActivity(int seconds)
+        {
+            var result = new List<CutActivityInfo>();
+            DateTime threshold = DateTime.Now.AddSeconds(-seconds);
+
+            string query = @"
+                WITH RankedCuts AS (
+                    SELECT 
+                        dd.DeviceID,
+                        se.Size,
+                        do.ActualCut,
+                        pso.SizeQty,
+                        do.UpdatedAt,
+                        ROW_NUMBER() OVER (PARTITION BY dd.DeviceID ORDER BY do.UpdatedAt DESC) AS RowNum
+                    FROM DeviceOutput do
+                    JOIN PartSizeOrder pso 
+                        ON do.OrderID = pso.OrderId 
+                        AND do.PartID = pso.PartId 
+                        AND do.SizeID = pso.SizeID
+                    JOIN DistributionData dd 
+                        ON dd.PartSizeOrderId = pso.PartSizeOrderId
+                    JOIN Size se 
+                        ON se.SizeID = pso.SizeID
+                    JOIN DeviceList dv 
+                        ON dv.DeviceID = dd.DeviceID
+                    WHERE  dd.DeviceID IS NOT NULL
+                      AND dv.ConnectionStatus = 1
+                )
+                SELECT 
+                    DeviceID,
+                    Size,
+                    ActualCut,
+                    SizeQty,
+                    UpdatedAt
+                FROM RankedCuts
+                WHERE RowNum = 1
+                ORDER BY UpdatedAt DESC;";
+
+            using (var conn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand(query, conn))
+            {
+                conn.Open();
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        result.Add(new CutActivityInfo
+                        {
+                            DeviceID = reader.GetInt32(0),
+                            Size = reader.IsDBNull(1) ? null : reader.GetString(1),
+                            ActualCut = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2),
+                            SizeQty = reader.IsDBNull(3) ? (int?)null : reader.GetInt32(3),
+                            UpdatedAt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4)
+                        });
+                    }
+                }
+            }
+
+            return result;
+        }
+
     }
 }
 

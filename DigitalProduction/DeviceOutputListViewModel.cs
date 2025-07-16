@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -26,21 +27,24 @@ namespace DigitalProduction.ViewModels
         private static SimpleButton btnPrev;
         private static SimpleButton btnNext;
         private static LabelControl lblPagingInfo;
-
-        private bool _isRecentlyUpdated;
-
-        public bool IsRecentlyUpdated
+     
+        public Action ShowLoadingAction { get; set; }
+        public Action HideLoadingAction { get; set; }
+        private bool _isLoading = true;
+        public bool IsLoading
         {
-            get => _isRecentlyUpdated;
+            get => _isLoading;
             set
             {
-                if (_isRecentlyUpdated != value)
+                if (_isLoading != value)
                 {
-                    _isRecentlyUpdated = value;
-                    OnPropertyChanged(nameof(IsRecentlyUpdated)); 
+                    _isLoading = value;
+                    OnPropertyChanged(nameof(IsLoading));
                 }
             }
         }
+
+
         // Filter properties for API
         private string _filterKeyword = LocalizationManager.GetString("Search");
         public string FilterKeyword
@@ -66,8 +70,9 @@ namespace DigitalProduction.ViewModels
                 if (FilterService.Instance.FilterStartDate != value)
                 {
                     FilterService.Instance.FilterStartDate = value ?? DateTime.Today;
-                    _ = SyncDataAsync();
                     OnPropertyChanged(nameof(FilterStartDate));
+                    _ = SyncDataAsync();
+                    ReapplyFilters();
                 }
             }
         }
@@ -80,8 +85,9 @@ namespace DigitalProduction.ViewModels
                 if (FilterService.Instance.FilterEndDate != value)
                 {
                     FilterService.Instance.FilterEndDate = value ?? DateTime.Today;
-                    _ = SyncDataAsync();
                     OnPropertyChanged(nameof(FilterEndDate));
+                    _ = SyncDataAsync();
+                    ReapplyFilters();
                 }
             }
         }
@@ -150,9 +156,27 @@ namespace DigitalProduction.ViewModels
 
         public async Task SyncDataAsync()
         {
-            // Re-fetch or refresh the BindingDeviceOutputs
-            await LoadCurrentPageAsync(); // Or however your logic pulls data
+            try
+            {
+                IsLoading = false;
+
+                // Optional: simulate delay
+                await Task.Delay(1000);
+
+                // Load real data here
+                await LoadCurrentPageAsync(); // your actual data fetch method
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sync WebSocket data: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = true;
+                ReapplyFilters();
+            }
         }
+
 
         public BindingList<DeviceOutput> BindingDeviceOutputs
         {
@@ -210,52 +234,6 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"Error checking SQL updates: {ex.Message}");
             }
         }
-
-
-
-        //public async void RequestData()
-        //{
-        //    if (_webSocketClient != null)
-        //    {
-        //        var request = new
-        //        {
-        //            app = Global.App,
-        //            action = "getActualData",
-        //            filter = new
-        //            {
-        //                startDate = FilterStartDate?.ToString("yyyy-MM-dd"),
-        //                endDate = FilterEndDate?.ToString("yyyy-MM-dd"),
-        //                partName = string.IsNullOrEmpty(FilterPartName) ? null : FilterPartName,
-        //                machineName = string.IsNullOrEmpty(FilterMachineName) ? null : FilterMachineName,
-        //                so = string.IsNullOrEmpty(FilterSO) ? null : FilterSO,
-        //                operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName,
-        //                page = currentPage,
-        //                pageSize = pageSize
-        //            }
-        //        };
-
-        //        string jsonRequest = JsonConvert.SerializeObject(request);
-        //        try
-        //        {
-        //            await _webSocketClient.SendRealTimeAsync(jsonRequest);
-        //        }
-        //        catch (System.Net.WebSockets.WebSocketException ex)
-        //        {
-        //            ConnectionManager.Instance.IsReconnecting = true;
-        //            Console.WriteLine("WebSocket exception in RequestData: " + ex.Message);
-        //        }
-        //        catch (InvalidOperationException ex)
-        //        {
-        //            ConnectionManager.Instance.IsReconnecting = true;
-        //            Console.WriteLine("Invalid operation in RequestData: " + ex.Message);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        ConnectionManager.Instance.IsReconnecting = true;
-        //        Console.WriteLine("WebSocket is not open or is null in RequestData.");
-        //    }
-        //}
         private void WebSocket_OnMessage(string jsonData)
         {
             _lastJsonData = jsonData; // cache last received data
@@ -334,35 +312,46 @@ namespace DigitalProduction.ViewModels
                 return;
             }
 
-            var headersDictionary = new Dictionary<string, DeviceOutput>();
-
-            var groupedData = realTimeData
-                .GroupBy(d => new { UpdatedAt = d.UpdatedAt != null ? d.UpdatedAt.Value.ToString("yyyyMMdd") :  string.Empty, d.PartName, d.MachineName, d.SO, d.OperatorName })
+            // This list will be bound to the grid
+            List<DeviceOutput> groupedData = realTimeData
+                .GroupBy(d => new
+                {
+                    UpdatedAt = d.UpdatedAt?.Date.ToString("yyyyMMdd") ?? "00000000",
+                    d.PartName,
+                    d.MachineName,
+                    d.SO,
+                    d.OperatorName
+                })
                 .SelectMany(group =>
                 {
-                    string groupKey = $"{group.Key.UpdatedAt:yyyyMMdd}-{group.Key.PartName}-{group.Key.MachineName}-{group.Key.SO}-{group.Key.OperatorName}";
+                    var groupKey = $"{group.Key.UpdatedAt}-{group.Key.PartName}-{group.Key.MachineName}-{group.Key.SO}-{group.Key.OperatorName}";
 
-                    if (!headersDictionary.TryGetValue(groupKey, out var header))
+                    var header = new DeviceOutput
                     {
-                        header = CreateHeader(group, groupKey);
-                        Console.WriteLine($"[HEADER CREATED] Group: {groupKey} | IsLeather: {group.Any(x => x.IsLeather)}");
-                        headersDictionary[groupKey] = header;
-                    }
+                        IsGroupHeader = true,
+                        MachineName = group.Key.MachineName,
+                        SO = group.Key.SO,
+                        PartName = group.Key.PartName,
+                        OperatorName = group.Key.OperatorName,
+                        UpdatedAt = group.FirstOrDefault()?.UpdatedAt,
+                        IsLeather = group.Any(x => x.IsLeather),
+                        //SizeQty = group.Sum(x => x.SizeQty),
+                        //ActualCut = group.Sum(x => x.ActualCut),
+                        //ActualPieces = group.Sum(x => x.ActualPieces),
+                        //InventoryQty = group.Sum(x => x.InventoryQty),
+                    };
 
-                    UpdateHeaderAggregates(header, group);
+                    var children = group
+                        .Select(child =>
+                        {
+                            child.IsGroupHeader = false;
+                            return child;
+                        })
+                        .OrderByDescending(c => c.UpdatedAt);
 
-                    var items = group.Select(item =>
-                    {
-                        PrepareChildItem(item, group.Count());
-                        return item;
-                    })
-                    .OrderByDescending(x => x.UpdatedAt)
-                    .ToList();
-
-                    return new[] { header }.Concat(items);
+                    return new[] { header }.Concat(children);
                 })
                 .ToList();
-
             Console.WriteLine($"Updating DeviceOutputs with {groupedData.Count} items.");
 
             try
@@ -391,43 +380,43 @@ namespace DigitalProduction.ViewModels
             };
         }
 
-        private void UpdateHeaderAggregates(DeviceOutput header, IGrouping<dynamic, DeviceOutput> group)
-        {
-            DateTime? createdAt = group.Min(x => x.Timestamp);
-            DateTime? updatedAt = group.Max(x => x.UpdatedAt);
+        //private void UpdateHeaderAggregates(DeviceOutput header, IGrouping<dynamic, DeviceOutput> group)
+        //{
+        //    DateTime? createdAt = group.Min(x => x.Timestamp);
+        //    DateTime? updatedAt = group.Max(x => x.UpdatedAt);
 
-            if (header.Timestamp != createdAt)
-            {
-                header.Timestamp = createdAt;
-                header.OnPropertyChanged(nameof(header.Timestamp));
-            }
+        //    if (header.Timestamp != createdAt)
+        //    {
+        //        header.Timestamp = createdAt;
+        //        header.OnPropertyChanged(nameof(header.Timestamp));
+        //    }
 
-            if (header.UpdatedAt != updatedAt)
-            {
-                header.UpdatedAt = updatedAt;
-                header.OnPropertyChanged(nameof(header.UpdatedAt));
-            }
+        //    if (header.UpdatedAt != updatedAt)
+        //    {
+        //        header.UpdatedAt = updatedAt;
+        //        header.OnPropertyChanged(nameof(header.UpdatedAt));
+        //    }
 
-            Console.WriteLine($"[HEADER UPDATE] Group: {header.PartName}-{header.MachineName}-{header.SO}-{header.OperatorName}");
-            Console.WriteLine($"  -> Timestamp: {createdAt}, UpdatedAt: {updatedAt}");
+        //    Console.WriteLine($"[HEADER UPDATE] Group: {header.PartName}-{header.MachineName}-{header.SO}-{header.OperatorName}");
+        //    Console.WriteLine($"  -> Timestamp: {createdAt}, UpdatedAt: {updatedAt}");
 
-        }
+        //}
 
-        private void PrepareChildItem(DeviceOutput item, int groupCount)
-        {
-            item.MaterialType = item.IsLeather
-                ? LocalizationManager.GetString("leatherMaterial")
-                : LocalizationManager.GetString("rawMaterial");
+        //private void PrepareChildItem(DeviceOutput item, int groupCount)
+        //{
+        //    item.MaterialType = item.IsLeather
+        //        ? LocalizationManager.GetString("leatherMaterial")
+        //        : LocalizationManager.GetString("rawMaterial");
 
-            // Clear repeated fields for grouped display
-            item.Timestamp = null;
-            item.UpdatedAt = null;
-            item.MachineName = string.Empty;
-            item.SO = string.Empty;
-            item.OperatorName = string.Empty;
-            item.PartName = string.Empty;
-            item.MaterialType = string.Empty;
-        }
+        //    // Clear repeated fields for grouped display
+        //    item.Timestamp = null;
+        //    item.UpdatedAt = null;
+        //    item.MachineName = string.Empty;
+        //    item.SO = string.Empty;
+        //    item.OperatorName = string.Empty;
+        //    item.PartName = string.Empty;
+        //    item.MaterialType = string.Empty;
+        //}
 
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
@@ -449,78 +438,32 @@ namespace DigitalProduction.ViewModels
         {
             try
             {
-                Console.WriteLine($"Performing UI update with {newData.Count} items.");
-
-                var existingGroups = BindingDeviceOutputs
-               .Where(d => d.IsGroupHeader)
-               .GroupBy(d => new { UpdatedAt = d.UpdatedAt != null ? d.UpdatedAt.Value.ToString("yyyyMMdd") : string.Empty, d.MachineName, d.SO, d.OperatorName, d.PartName })
-               .ToDictionary(g => g.Key, g => g.First());
-
-                int index = 0;
-
-                foreach (var newItem in newData)
+                if (newData.Count > 200)  // large batch
                 {
-                    if (newItem.IsGroupHeader)
+                    BindingDeviceOutputs.ReplaceWith(newData);
+                }
+                else  // small batch, use partial update
+                {
+                    for (int i = 0; i < newData.Count; i++)
                     {
-                        // If group header exists, update values
-                        var key = new { UpdatedAt = newItem.UpdatedAt?.ToString("yyyyMMdd") ?? string.Empty, newItem.MachineName, newItem.SO, newItem.OperatorName, newItem.PartName };
-                        if (existingGroups.TryGetValue(key, out var existingHeader))
+                        if (i >= BindingDeviceOutputs.Count)
                         {
-                            // Update group header values
-                            existingHeader.CuttingDieQty = newItem.CuttingDieQty;
-                            existingHeader.PiecesPerPair = newItem.PiecesPerPair;
-                            existingHeader.MaterialLayer = newItem.MaterialLayer;
-                            existingHeader.TotalPiecesPerPair = newItem.TotalPiecesPerPair;
-                            existingHeader.ActualCut = newItem.ActualCut;
-                            existingHeader.ActualPieces = newItem.ActualPieces;
-                            existingHeader.ActualSizeQty = newItem.ActualSizeQty;
+                            BindingDeviceOutputs.Add(newData[i]);
                         }
                         else
                         {
-                            // Add new group header if not found
-                            BindingDeviceOutputs.Insert(index, newItem);
+                            UpdateProperties(BindingDeviceOutputs[i], newData[i],
+                                nameof(DeviceOutput.ActualCut),
+                                nameof(DeviceOutput.ActualPieces),
+                                nameof(DeviceOutput.InventoryQty),
+                                nameof(DeviceOutput.ActualSizeQty));
                         }
                     }
-                    else
-                    {
-                        // Ensure correct row updates for individual items
-                        if (index < BindingDeviceOutputs.Count)
-                        {
-                            var existingItem = BindingDeviceOutputs[index];
-                            if (existingItem.IsGroupHeader == false)
-                            {
-                                UpdateProperties(existingItem, newItem,
-                                    nameof(existingItem.MachineName),
-                                    nameof(existingItem.SO),
-                                    nameof(existingItem.OperatorName),
-                                    nameof(existingItem.ActualCut),
-                                    nameof(existingItem.ActualPieces),
-                                    nameof(existingItem.Size),
-                                    nameof(existingItem.SizeQty),
-                                    nameof(existingItem.InventoryQty),
-                                    nameof(existingItem.ActualSizeQty),
-                                    nameof(existingItem.TotalPiecesPerPair));
-                            }
-                            else
-                            {
-                                BindingDeviceOutputs.Insert(index, newItem);
-                            }
-                        }
-                        else
-                        {
-                            BindingDeviceOutputs.Add(newItem);
-                        }
-                    }
-                    index++;
-                }
 
-                // Remove extra items if the new data is smaller
-                while (BindingDeviceOutputs.Count > newData.Count)
-                {
-                    BindingDeviceOutputs.RemoveAt(BindingDeviceOutputs.Count - 1);
+                    // Trim extra rows if any
+                    while (BindingDeviceOutputs.Count > newData.Count)
+                        BindingDeviceOutputs.RemoveAt(BindingDeviceOutputs.Count - 1);
                 }
-
-                OnPropertyChanged(nameof(BindingDeviceOutputs));
             }
             catch (Exception ex)
             {
@@ -530,12 +473,12 @@ namespace DigitalProduction.ViewModels
 
         public static void UpdateProperties<T>(T existing, T updated, params string[] propertyNames)
         {
-            bool hasChanged = false;
-
             if (existing == null || updated == null)
                 throw new ArgumentNullException("Neither the existing nor updated object can be null.");
 
             PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(T));
+            bool hasChanged = false;
+
             foreach (string propertyName in propertyNames)
             {
                 PropertyDescriptor prop = properties[propertyName];
@@ -559,34 +502,22 @@ namespace DigitalProduction.ViewModels
                 }
             }
 
-            // Mark as updated (for animation/highlight)
-            if (hasChanged && typeof(T).GetProperty("IsRecentlyUpdated") != null)
+            if (hasChanged && existing is DeviceOutput row)
             {
-                typeof(T).GetProperty("IsRecentlyUpdated")?.SetValue(existing, true);
-                // Reset after a short delay
-                Task.Delay(1000).ContinueWith(_ =>
+                row.IsRecentlyUpdated = true;
+
+                // Use SynchronizationContext to ensure safe UI-thread update
+                var syncContext = SynchronizationContext.Current;
+                Task.Run(async () =>
                 {
-                    typeof(T).GetProperty("IsRecentlyUpdated")?.SetValue(existing, false);
+                    await Task.Delay(3000);
+                    if (syncContext != null)
+                    {
+                        syncContext.Post(_ => row.IsRecentlyUpdated = false, null);
+                    }
                 });
             }
         }
-        //private void btnNext_Click(object sender, EventArgs e)
-        //{
-        //    if (PageNumber < TotalPages)
-        //    {
-        //        PageNumber++;
-        //        RequestData();
-        //    }
-        //}
-
-        //private void btnPrevious_Click(object sender, EventArgs e)
-        //{
-        //    if (PageNumber > 1)
-        //    {
-        //        PageNumber--;
-        //        RequestData();
-        //    }
-        //}
 
         public void InitPagingFooter(Control gridControl)
         {
@@ -718,9 +649,6 @@ namespace DigitalProduction.ViewModels
             Console.WriteLine("ViewModel disposed.");
         }
 
-        //public class RealTimeData
-        //{
-        //    public List<DeviceOutput> Data { get; set; }
 
         //}
 
@@ -739,4 +667,17 @@ namespace DigitalProduction.ViewModels
         public int TotalPages { get; set; }
         public int PageSize { get; set; } = 100;
     }
+    public static class BindingListExtensions
+    {
+        public static void ReplaceWith<T>(this BindingList<T> collection, IEnumerable<T> newItems)
+        {
+            collection.RaiseListChangedEvents = false;
+            collection.Clear();
+            foreach (var item in newItems)
+                collection.Add(item);
+            collection.RaiseListChangedEvents = true;
+            collection.ResetBindings();
+        }
+    }
+
 }
