@@ -14,6 +14,7 @@ using DevExpress.XtraWaitForm;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
+using static DevExpress.Utils.HashCodeHelper;
 
 namespace DigitalProduction
 {
@@ -374,6 +375,7 @@ namespace DigitalProduction
             {
                 ResponseMessage<List<Employee>> response = ResponseMessage<List<Employee>>.FromJson(jsonData);
 
+                if(response?.Action != "getUsers") return;
                 if (response?.Users != null && response.Users.Count > 0)
                 {
                     // Show SplashScreen
@@ -441,6 +443,9 @@ namespace DigitalProduction
 
         private void CreateButtonContainer()
         {
+            int marginTop = 10;
+            int spacing = 10;
+
             // Create a PanelControl to hold the button
             groupPanelButtonContainer = new PanelControl()
             {
@@ -452,22 +457,22 @@ namespace DigitalProduction
             button = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("RegisterUser"),
-                Size = new Size(100, 40)
+                Size = new Size(135, 35),
+                Location = new Point(spacing, marginTop)
             };
 
             groupPanelButtonContainer.Controls.Add(button);
             button.Click += Button_Click;
-            button.Location = new Point(10, 5);
             // Sync Data button
             SimpleButton syncButton = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(100, 40)
+                Size = new Size(100, 35),
+                Location = new Point(button.Right + spacing, marginTop)
             };
             syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
-            syncButton.Click += SyncButton_Click; // Event for syncing data
+            syncButton.Click += SyncButton_Click;
             groupPanelButtonContainer.Controls.Add(syncButton);
-            syncButton.Location = new Point(120, 5); // Adjust the location accordingly
         }
         private async void SyncButton_Click(object sender, EventArgs e)
         {

@@ -609,8 +609,8 @@
   <data name="Dashboard" xml:space="preserve">
     <value>Dashboard</value>
   </data>
-  <data name="SelectDevideData" xml:space="preserve">
-    <value>Select SO Devide</value>
+  <data name="SelectDivideData" xml:space="preserve">
+    <value>Select SO to divide</value>
   </data>
   <data name="FindEmployeeCode" xml:space="preserve">
     <value>Find Employee Code</value>

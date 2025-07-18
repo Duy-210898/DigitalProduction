@@ -139,7 +139,7 @@ namespace DigitalProduction
         }
         private void ComboSize_EditValueChanged(object sender, EventArgs e)
         {
-            var editor = sender as CheckedComboBoxEdit;
+            CheckedComboBoxEdit editor = sender as CheckedComboBoxEdit;
             if (editor == null) return;
 
             var selectedItems = editor.Properties.Items.Cast<CheckedListBoxItem>()
@@ -241,7 +241,7 @@ namespace DigitalProduction
             }
         }
 
-        private async void BtnSendData_Click(object sender, EventArgs e, bool isDeviceData)
+        private async void BtnSendData_Click(bool isDeviceData)
         {
             // avoid dupliacte
             List<ProductionSchedule> filteredSchedules = GetFilteredData().Distinct(new ProductionScheduleComparer()).ToList();
@@ -337,7 +337,7 @@ namespace DigitalProduction
             {
                 if (gridViewSchedule.IsDataRow(rowHandle))
                 {
-                    var row = gridViewSchedule.GetRow(rowHandle) as ProductionSchedule;
+                    ProductionSchedule row = gridViewSchedule.GetRow(rowHandle) as ProductionSchedule;
                     if (row != null)
                     {
                         filteredData.Add(row);
@@ -480,7 +480,7 @@ namespace DigitalProduction
                     ImageToTextAlignment = ImageAlignToText.LeftCenter
                 }
             };
-            btnSendData.Click += (s, e) => BtnSendData_Click(s, e, false);
+            btnSendData.Click += (s, e) => BtnSendData_Click(false);
 
             // Add components to FlowLayoutPanel
             bottomPanel.Controls.Add(lblTotalRecords);
@@ -512,7 +512,7 @@ namespace DigitalProduction
                     ImageToTextAlignment = ImageAlignToText.LeftCenter
                 }
             };
-            btnDevideData.Click += (s, e) => BtnSendData_Click(s, e, true);
+            btnDevideData.Click += (s, e) => BtnSendData_Click(true);
 
             // Add components to FlowLayoutPanel
             bottomPanel.Controls.Add(btnDevideData);
@@ -809,7 +809,7 @@ namespace DigitalProduction
             comboBoxSize.Properties.Items.Clear();
             comboBoxPart.Properties.Items.Clear();
 
-            var list = gridView.DataSource as IEnumerable<object>;
+            IEnumerable<object> list = gridView.DataSource as IEnumerable<object>;
             if (list == null)
             {
                 comboBoxSize.Properties.EndUpdate();

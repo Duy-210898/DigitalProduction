@@ -1647,6 +1647,8 @@ namespace DigitalProduction
             gridControlOverview.DataSource = null;
             sizeDataList = new List<SizeData>();
             tableLayoutMainDistribution.Enabled = false;
+            gridLookUpDevice.Clear();
+            gridLookUpOperator.Clear();
         }
         public class DistributionPayload
         {

@@ -117,53 +117,82 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
   const offset = (page - 1) * pageSize;
 
   const dataQuery = `
-      SELECT 
-      po.OrderID,
-      po.MasterWorkOrder,
-      po.SO,
-      pr.Model,
-      pr.ART,
-      do.IsLeather,
-      o.OperatorName,
-      p.PartName,
-      s.Size,
-      dl.MachineName,
-      pso.SizeID,
+        SELECT  
+          po.OrderID,
+          po.MasterWorkOrder,
+          po.SO,
+          pr.Model,
+          pr.ART,
+          latestDO.IsLeather,
+          o.OperatorName,
+          p.PartName,
+          s.Size,
+          dl.MachineName,
+          pso.SizeID,
 
-      -- Use Sub.SizeQty if exists, otherwise fallback to pso.SizeQty
-      ISNULL(SUM(sub.SizeQty), pso.SizeQty) AS SizeQty,
+          -- Use Sub.SizeQty if exists, otherwise fallback to pso.SizeQty
+          ISNULL(SUM(sub.SizeQty), pso.SizeQty) AS SizeQty,
 
-      do.PiecesPerPair,
-      do.MaterialLayer,
-      do.CuttingDieQty,
-      do.ActualCut,
-      do.ActualSizeQty,
-      do.ActualPieces,
-      do.TotalPiecesPerPair,
-      do.InventoryQty,
-      do.CreatedAt AS Timestamp,
-      do.UpdatedAt AS UpdatedAt
+          latestDO.PiecesPerPair,
+          latestDO.MaterialLayer,
+          latestDO.CuttingDieQty,
+          latestDO.ActualCut,
+          latestDO.ActualSizeQty,
+          latestDO.ActualPieces,
+          latestDO.TotalPiecesPerPair,
+          latestDO.InventoryQty,
+          latestDO.CreatedAt AS Timestamp,
+          latestDO.UpdatedAt AS UpdatedAt
+      FROM ProductOrder po
+      JOIN Product pr ON po.ProductId = pr.ProductId
+      JOIN PartSizeOrder pso ON po.OrderID = pso.OrderId
+      JOIN Part p ON pso.PartId = p.PartId
+      JOIN Size s ON pso.SizeId = s.SizeID
+      JOIN Material m ON pso.MaterialID = m.MaterialID
+      JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId
+      LEFT JOIN SubDistribution sub ON sub.DistributionID = dd.DistributionID AND sub.PartSizeOrderId = dd.PartSizeOrderId AND sub.IsDelete = 0
+      LEFT JOIN Operator o ON o.OperatorID = ISNULL(sub.OperatorID, dd.OperatorID)
+      LEFT JOIN DeviceList dl ON dl.DeviceID = ISNULL(sub.DeviceID, dd.DeviceID)
 
-    FROM ProductOrder po
-    JOIN Product pr ON po.ProductId = pr.ProductId
-    JOIN PartSizeOrder pso ON po.OrderID = pso.OrderId
-    JOIN Part p ON pso.PartId = p.PartId
-    JOIN Size s ON pso.SizeId = s.SizeID
-    JOIN Material m ON pso.MaterialID = m.MaterialID
-    JOIN DistributionData dd ON dd.PartSizeOrderId = pso.PartSizeOrderId
-    LEFT JOIN SubDistribution sub ON sub.DistributionID = dd.DistributionID AND sub.PartSizeOrderId = dd.PartSizeOrderId
-    LEFT JOIN Operator o ON o.OperatorID = ISNULL(sub.OperatorID, dd.OperatorID)
-    LEFT JOIN DeviceList dl ON dl.DeviceID = ISNULL(sub.DeviceID, dd.DeviceID)
-    LEFT JOIN DeviceOutput do ON do.SizeID = pso.SizeID AND do.OrderID = pso.OrderID AND do.PartID = p.PartID 
-    WHERE do.UpdatedAt >= @startDate AND do.UpdatedAt < @endDate
-    GROUP BY
-      po.OrderID, do.IsLeather, do.TotalPiecesPerPair, 
-      po.MasterWorkOrder, po.SO, pr.Model, pr.ART, 
-      o.OperatorName, s.Size, pso.SizeID, pso.SizeQty, dl.MachineName,
-      do.PiecesPerPair, do.MaterialLayer, do.CuttingDieQty, 
-      do.ActualCut, do.ActualSizeQty, do.ActualPieces, do.InventoryQty, do.CreatedAt, do.UpdatedAt, p.PartName
+      -- ✅ Get only latest DeviceOutput row per combination
+      OUTER APPLY (
+          SELECT TOP 1 *
+          FROM DeviceOutput do
+          WHERE do.SizeID = pso.SizeID 
+            AND do.OrderID = po.OrderID 
+            AND do.PartID = p.PartID
+            AND do.OperatorID = o.EmployeeID
+          ORDER BY do.UpdatedAt DESC
+      ) latestDO
 
-    ORDER BY do.UpdatedAt ASC
+      WHERE 
+          dd.IsDelete = 0 AND  latestDO.UpdatedAt >= @startDate AND latestDO.UpdatedAt < @endDate
+      GROUP BY
+          po.OrderID,
+          po.MasterWorkOrder,
+          po.SO,
+          pr.Model,
+          pr.ART,
+          latestDO.IsLeather,
+          o.OperatorName,
+          p.PartName,
+          s.Size,
+          dl.MachineName,
+          pso.SizeID,
+          pso.SizeQty,
+          latestDO.PiecesPerPair,
+          latestDO.MaterialLayer,
+          latestDO.CuttingDieQty,
+          latestDO.ActualCut,
+          latestDO.ActualSizeQty,
+          latestDO.ActualPieces,
+          latestDO.TotalPiecesPerPair,
+          latestDO.InventoryQty,
+          latestDO.CreatedAt,
+          latestDO.UpdatedAt
+      ORDER BY 
+          latestDO.UpdatedAt ASC
+
     OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
   `;
 
@@ -298,13 +327,16 @@ async function getSubDistributions(distributionID) {
   try {
     const query = `
       SELECT 
-        SubDistributionID,
-        DistributionID,
-        PartSizeOrderId,
-        SizeQty,
-        Status
-      FROM SubDistribution
-      WHERE DistributionID = @DistributionID AND IsDelete = 0
+        sd.SubDistributionID,
+        sd.DistributionID,
+        sd.PartSizeOrderId,
+        sd.SizeQty,
+        sd.Status,
+        dl.IpAddress
+      FROM SubDistribution sd
+      LEFT JOIN DeviceList dl ON sd.DeviceID = dl.DeviceID
+      WHERE sd.DistributionID = @DistributionID
+        AND sd.IsDelete = 0;
     `;
 
     const request = new sql.Request();
@@ -616,123 +648,6 @@ async function saveActualDataToDB(data) {
     throw error;
   }
 }
-// Function to save distribution data and default info
-// async function saveDistributionDataToDB(dataList) {
-//   let pool;
-//   let results = []; // Store status of each data entry
-
-//   try {
-//     pool = await sql.connect(dbConfig);
-
-//     for (const data of dataList) {
-//       let status = {
-//         PartID: data.PartID,
-//         Model: data.Model,
-//         DeviceID: data.DeviceID,
-//         ProductID: data.ProductID,
-//         DistributionInserted: false,
-//         DistributionDuplicate: false,
-//         Error: null,
-//       };
-    
-//       try {
-//         const distributionConditions = {
-//           PartSizeOrderID: { type: sql.Int, value: data.PartSizeOrderID }
-//         };
-    
-//         // 🚫 Check for duplicate DistributionData
-//         const distributionExists = await recordExists("DistributionData", distributionConditions, pool);
-    
-//         if (distributionExists) {
-//          // console.log(`⚠️ Skipped duplicate DistributionData for DeviceID ${data.DeviceID}`);
-//           status.DistributionDuplicate = true;
-//           results.push(status);
-//           continue; // ⛔️ Skip entire item, including DefaultInfo
-//         }
-    
-//         // ✅ Insert DistributionData
-//         const distributionQuery = `
-//           INSERT INTO DistributionData (
-//             DeviceID, PartSizeOrderID, OperatorID, InventoryQty, Status, CreatedAt , UpdatedAt, IsLeather, IsDelete, UserID
-//           ) VALUES (
-//             @DeviceID, @PartSizeOrderID, @OperatorID, @InventoryQty, @Status, @CreatedAt, @UpdatedAt, @IsLeather, @IsDelete, @UserID
-//           );
-//         `;
-    
-//         let request = pool.request();
-//         request.input('DeviceID', sql.Int, data.DeviceID);
-//         request.input('PartSizeOrderID', sql.Int, data.PartSizeOrderID);
-//         request.input('OperatorID', sql.Int, data.OperatorID);
-//         request.input('InventoryQty', sql.Int, data.InventoryQty);
-//         request.input('Status', sql.NVarChar, data.Status || 'Pending');
-//         request.input('CreatedAt', sql.DateTime, data.CreatedAt || new Date());
-//         request.input('UpdatedAt', sql.DateTime, data.UpdatedAt || new Date());
-//         request.input('IsLeather', sql.Bit, data.IsLeather);
-//         request.input('IsDelete', sql.Bit, data.IsDelete || 0);
-//         request.input('UserID', sql.Int, data.UserID);
-    
-//         const result = await request.query(distributionQuery);
-//         if (result.rowsAffected && result.rowsAffected[0] > 0) {
-//          // console.log(`✅ Inserted new DistributionData: DeviceID ${data.DeviceID}`);
-//           status.DistributionInserted = true;
-//         }
-    
-//         // 🧩 Only do DefaultInfo if DistributionData was inserted
-//         const defaultInfoConditions = {
-//           PartID: { type: sql.Int, value: data.PartID },
-//           Model: { type: sql.VarChar, value: data.Model },
-//           ProductID: { type: sql.Int, value: data.ProductID }
-//         };
-//         const defaultInfoExists = await recordExists("DefaultInfo", defaultInfoConditions, pool);
-    
-//         request = pool.request();
-//         request.input('ProductID', sql.Int, data.ProductID);
-//         request.input('PartID', sql.Int, data.PartID);
-//         request.input('Model', sql.VarChar, data.Model);
-//         request.input('PiecesPerPair', sql.Int, data.PiecesPerPair || 0);
-//         request.input('CuttingDieQty', sql.Int, data.CuttingDieQty || 0);
-//         request.input('MaterialLayer', sql.Int, data.MaterialLayer || 0);
-//         request.input('TotalPiecesPerPair', sql.Int, data.TotalPiecesPerPair || 0);
-    
-//         if (!defaultInfoExists) {
-//           const defaultInfoQuery = `
-//             INSERT INTO DefaultInfo (
-//               ProductID, PartID, Model, PiecesPerPair, CuttingDieQty, MaterialLayer, TotalPiecesPerPair
-//             ) VALUES (
-//               @ProductID, @PartID, @Model, @PiecesPerPair, @CuttingDieQty, @MaterialLayer, @TotalPiecesPerPair
-//             );
-//           `;
-//           await request.query(defaultInfoQuery);
-//          // console.log(`✅ Inserted new DefaultInfo: ProductID ${data.ProductID}`);
-//         } else {
-//           const updateInfoQuery = `
-//             UPDATE DefaultInfo 
-//             SET PiecesPerPair = @PiecesPerPair, 
-//                 CuttingDieQty = @CuttingDieQty, 
-//                 MaterialLayer = @MaterialLayer, 
-//                 TotalPiecesPerPair = @TotalPiecesPerPair
-//             WHERE ProductID = @ProductID AND PartID = @PartID AND Model = @Model;
-//           `;
-//           await request.query(updateInfoQuery);
-//         //  console.log(`🔄 Updated DefaultInfo: ProductID ${data.ProductID}`);
-//         }
-    
-//       } catch (err) {
-//         console.error(`❌ Error processing DeviceID ${data.DeviceID}: ${err.message}`);
-//         status.Error = err.message;
-//       }
-    
-//       results.push(status);
-//     }    
-
-//    // console.log('✅ All unique data processed successfully.');
-//     return results; // Return status for all entries
-
-//   } catch (error) {
-//     console.error('❌ Critical error saving data:', error.message);
-//     return { success: false, error: error.message };
-//   }
-// }
 
 async function saveDistributionDataToDB(distributionList) {
   let pool;
@@ -942,7 +857,7 @@ async function getDistributionDataFromDb(ipAddress) {
 
       WHERE 
           dd.IsDelete = 0  
-          AND (d.IpAddress = @IpAddress OR dd.DeviceID IS NULL)
+          AND (d.IpAddress = @IpAddress)
           AND ISNULL(sd.Status, dd.Status) IN ('Complete', 'Pending') 
           AND EXISTS (
               SELECT 1
@@ -1245,81 +1160,6 @@ async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID
   }
 }
 
-// async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID, partID) {
-//   try {
-//     const query = `
-//           SELECT  
-//           dd.DistributionID, 
-//           ps.PartSizeOrderId,
-//           se.SizeID
-//       FROM 
-//           DistributionData AS dd
-//       JOIN 
-//           DeviceList AS d ON dd.DeviceID = d.DeviceID
-//       JOIN 
-//           PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
-//       JOIN 
-//           Part AS pa ON pa.PartID = ps.PartID
-//       JOIN 
-//           Size AS se ON se.SizeID = ps.SizeID
-//       JOIN 
-//           ProductOrder AS pr ON pr.OrderId = ps.OrderID
-//       LEFT JOIN 
-//           SubDistribution AS sub ON sub.DistributionID = dd.DistributionID
-//                             AND sub.PartSizeOrderId = ps.PartSizeOrderId
-//                             AND sub.SizeQty > 0  -- Optional: to ensure meaningful subs
-//       WHERE 
-//           dd.IsDelete = 0  
-//           AND d.IpAddress = @IpAddress
-//           AND dd.Status = 'Pending'
-//           AND ps.OrderId = @OrderId
-//           AND dd.IsLeather = @IsLeather
-//           AND se.SizeID = @SizeID
-//           AND pa.PartID = @PartID
-//           AND EXISTS (
-//               SELECT 1 FROM SubDistribution s 
-//               WHERE s.DistributionID = dd.DistributionID 
-//                 AND s.PartSizeOrderId = ps.PartSizeOrderId
-//           )
-//       GROUP BY 
-//           dd.DistributionID, ps.PartSizeOrderId, se.SizeID;
-  
-//     `;
-    
-//     const request = new sql.Request();
-//     request.input('IpAddress', sql.VarChar, ipAddress);
-//     request.input('OrderId', sql.Int, orderId);
-//     request.input('IsLeather', sql.Int, isLeather);
-//     request.input('SizeID', sql.Int, sizeID);
-//     request.input('PartID', sql.Int, partID);
-    
-//     const result = await request.query(query);
-    
-//     if (result.recordset.length > 0) {
-//       const distributionIDData = result.recordset
-//         .map(item => ({
-//           DistributionID: item.DistributionID,
-//           SizeID: item.PartSizeID
-//         }))
-//         .filter((value, index, self) =>
-//           index === self.findIndex(
-//             t => t.DistributionID === value.DistributionID &&
-//                  t.SizeID === value.SizeID
-//           )
-//         );
-
-//       return {
-//         DistributionID: distributionIDData
-//       };
-//     } else {
-//       return null; 
-//     }
-//   } catch (error) {
-//     console.error(`Error fetching distribution data from DB: ${error.message}`);
-//     logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
-//     throw error;
-//   }
-// }
 async function getAllDeviceData() {
   try {
     const pool = await sql.connect(dbConfig);
@@ -1367,55 +1207,33 @@ async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 1
             dd.IsLeather,
             dd.IsDelete,
             dd.Note,
-            do.ActualSizeQty
-        FROM 
-            DistributionData dd
-
-        LEFT JOIN SubDistribution sd 
-            ON sd.DistributionID = dd.DistributionID
-
-        LEFT JOIN DeviceList d 
-            ON dd.DeviceID = d.DeviceID 
-
-        LEFT JOIN PartSizeOrder ps 
-            ON dd.PartSizeOrderId = ps.PartSizeOrderId  
-
-        LEFT JOIN Part pa 
-            ON ps.PartID = pa.PartID
-
-        LEFT JOIN Size se 
-            ON ps.SizeID = se.SizeID
-
-        LEFT JOIN Material m 
-            ON ps.MaterialID = m.MaterialID
-
-        -- Use COALESCE to get operator from SubDistribution first
-        LEFT JOIN Operator o 
-            ON o.OperatorID = COALESCE(sd.OperatorID, dd.OperatorID)
-
-        LEFT JOIN Users u 
-            ON dd.UserID = u.UserID
-
-        LEFT JOIN ProductOrder pr 
-            ON ps.OrderID = pr.OrderID
-
-        -- JOIN DeviceOutput matching resolved OperatorID
-        LEFT JOIN DeviceOutput do 
-            ON do.SizeID = ps.SizeID 
-            AND do.PartID = ps.PartID 
-            AND do.OrderID = ps.OrderID
-            AND (
-                (COALESCE(sd.OperatorID, dd.OperatorID) IS NULL AND do.OperatorID IS NULL)
-                OR do.OperatorID = COALESCE(sd.OperatorID, dd.OperatorID)
-            )
-
-        WHERE 
-            dd.IsDelete = 0 
-            AND 
-            dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
-
-        ORDER BY 
-            dd.UpdatedAt ASC
+            ISNULL(do.ActualSizeQty, 0) AS ActualSizeQty
+        FROM DistributionData dd
+        OUTER APPLY (
+            SELECT TOP 1 *
+            FROM SubDistribution sd
+            WHERE sd.DistributionID = dd.DistributionID
+            ORDER BY sd.UpdatedAt DESC
+        ) sd
+        LEFT JOIN DeviceList d ON dd.DeviceID = d.DeviceID
+        LEFT JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
+        LEFT JOIN Part pa ON ps.PartID = pa.PartID
+        LEFT JOIN Size se ON ps.SizeID = se.SizeID
+        LEFT JOIN Material m ON ps.MaterialID = m.MaterialID
+        LEFT JOIN Operator o ON o.OperatorID = dd.OperatorID
+        LEFT JOIN Users u ON dd.UserID = u.UserID
+        LEFT JOIN ProductOrder pr ON ps.OrderID = pr.OrderID
+        OUTER APPLY (
+            SELECT TOP 1 do.ActualSizeQty
+            FROM DeviceOutput do
+            WHERE do.SizeID = ps.SizeID
+              AND do.PartID = ps.PartID
+              AND do.OrderID = ps.OrderID
+            ORDER BY do.UpdatedAt DESC
+        ) do
+        WHERE dd.IsDelete = 0 AND 
+          dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
+        ORDER BY dd.UpdatedAt ASC
         OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
     `;
 

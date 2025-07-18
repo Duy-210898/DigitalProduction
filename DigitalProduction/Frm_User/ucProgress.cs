@@ -573,12 +573,12 @@ namespace DigitalProduction
                     if (gridViewProgressManagement.FocusedColumn.FieldName == LocalizationManager.GetString("Reason"))
                     {
                         int rowHandle = gridViewProgressManagement.FocusedRowHandle;
-                        var distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+                        Distribution distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
 
                         // Check if the distribution object exists and its status is not "Complete"
                         if (distribution != null && distribution.Status != "Complete")
                         {
-                            var editor = gridViewProgressManagement.ActiveEditor as ComboBoxEdit;
+                            ComboBoxEdit editor = gridViewProgressManagement.ActiveEditor as ComboBoxEdit;
                             if (editor != null)
                             {
                                 // Handle the SelectedIndexChanged event
@@ -611,7 +611,7 @@ namespace DigitalProduction
                     if (gridViewProgressManagement.FocusedColumn.FieldName == "InventoryQty")
                     {
                         int rowHandle = gridViewProgressManagement.FocusedRowHandle;
-                        var distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+                        Distribution distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
 
                         if (distribution != null)
                         {
@@ -636,7 +636,7 @@ namespace DigitalProduction
                     if (e.Column.FieldName == "InventoryQty")
                     {
                         int rowHandle = e.RowHandle;
-                        var distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+                        Distribution distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
 
                         if (distribution != null)
                         {
@@ -717,7 +717,7 @@ namespace DigitalProduction
             gridViewProgressManagement.MasterRowEmpty += (s, e) =>
             {
                 var view = s as GridView;
-                var masterRow = view.GetRow(e.RowHandle) as Distribution;
+                Distribution masterRow = view.GetRow(e.RowHandle) as Distribution;
 
                 if (masterRow == null || !_subDistributionCache.TryGetValue(masterRow.DistributionID, out var subList) || subList.Count == 0)
                 {
@@ -732,7 +732,7 @@ namespace DigitalProduction
             gridViewProgressManagement.MasterRowGetChildList += (s, e) =>
             {
                 var view = s as GridView;
-                var masterRow = view.GetRow(e.RowHandle) as Distribution;
+                Distribution masterRow = view.GetRow(e.RowHandle) as Distribution;
 
                 if (masterRow != null &&
                     _subDistributionCache.TryGetValue(masterRow.DistributionID, out var subList))
@@ -795,9 +795,10 @@ namespace DigitalProduction
                 return LocalizationManager.GetString(key); // Or your custom method
             }
 
-            GridView detailView = new GridView(gridProgressManagement);
-
-            detailView.ViewCaption = "Sub-Distributions";
+            GridView detailView = new GridView(gridProgressManagement)
+            {
+                ViewCaption = "Sub-Distributions"
+            };
             detailView.OptionsView.ShowGroupPanel = false;
             detailView.OptionsBehavior.Editable = true;
 
@@ -831,27 +832,6 @@ namespace DigitalProduction
             return detailView;
         }
 
-        private async void ShowSubDistributionDetails(int DistributionID)
-        {
-            try
-            {
-                var subList = await DbHelper.GetSubDistributions(DistributionID);
-
-                if (subList == null || subList.Count == 0)
-                {
-                    MessageBox.Show("No SubDistributions found for this entry.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                var detailForm = new SubDistributionDetailForm(subList);
-                detailForm.StartPosition = FormStartPosition.CenterParent;
-                detailForm.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to load sub-distributions: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
 
         private void GridViewProgressManagement_CustomDrawColumnHeader(object sender, ColumnHeaderCustomDrawEventArgs e)
         {

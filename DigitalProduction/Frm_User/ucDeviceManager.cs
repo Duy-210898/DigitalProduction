@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.DataAccess.Native.Web;
 using DevExpress.XtraEditors;
 using DevExpress.XtraSplashScreen;
 using DigitalProduction.Extensions;
@@ -416,6 +417,8 @@ namespace DigitalProduction
             {
                 var item = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonData);
                 string action = item.ContainsKey("action") ? item["action"].ToString() : null;
+
+                if (action != "getDevices") return;
 
                 if (action?.Equals("getDevices") == true)
                 {

@@ -156,6 +156,10 @@ namespace DigitalProduction.Models
                 }
             }
         }
+        public string UniqueKey()
+        {
+            return $"{SO}-{PartName}-{Size}-{MachineName}-{OperatorName}-{IsLeather}";
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged(string propertyName)

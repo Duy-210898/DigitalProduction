@@ -408,6 +408,7 @@ namespace DigitalProduction
             {
                 var response = ResponseMessage<List<Employee>>.FromJson(jsonData);
 
+                if (response?.Action != "getOperators") return;
                 if (response?.Users != null && response.Users.Count > 0)
                 {
                     // Show SplashScreen from parent Form
@@ -628,7 +629,7 @@ namespace DigitalProduction
             button = new SimpleButton
             {
                 Text = LocalizationManager.GetString("RegisterOperator"),
-                Size = new Size(120, 25),
+                Size = new Size(135, 30),
                 Location = new Point(btnFind.Right + spacing, marginTop)
             };
             button.Click += Button_Click;
@@ -638,7 +639,7 @@ namespace DigitalProduction
             SimpleButton syncButton = new SimpleButton
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(100, 25),
+                Size = new Size(100, 30),
                 Location = new Point(button.Right + spacing, marginTop),
                 ImageOptions = { Image = Properties.Resources.sync_icon }
             };

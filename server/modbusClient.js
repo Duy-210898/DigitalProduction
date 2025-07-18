@@ -304,6 +304,10 @@ async function checkAndSaveDistribution(client, ipAddress) {
       processDistributionData(client, ipAddress, distributionData);
     }
     else {
+       // get index SOs and Part if available
+       adjustModbusIndex(await safeRead(1020, client), ipAddress, true);
+       adjustModbusIndex(await safeRead(1022, client), ipAddress, false);
+
       storeDistributionData[ipAddress] = {};
       //retry get storeDistributionData
       if (Object.keys(storeDistributionData[ipAddress]).length === 0) {
@@ -334,10 +338,6 @@ async function checkAndSaveDistribution(client, ipAddress) {
           modbusClients[ipAddress].sizeDataInfo.sizeID = [];
           modbusClients[ipAddress].hasMultipleSOs = false;
         }
-
-        // get index SOs and Part if available
-        adjustModbusIndex(await safeRead(1020, client), ipAddress, true);
-        adjustModbusIndex(await safeRead(1022, client), ipAddress, false);
         processDistributionData(client, ipAddress, distributionData);
       }
       // Ensure checkDelete exists and is initialized to 0
@@ -402,9 +402,8 @@ async function checkAndSaveDistribution(client, ipAddress) {
                   else {
                     let subCompletedCount = 0;
                     
-                    for (const sub of subList) {
+                    for (const sub of subList.filter(s => s.IpAddress === ipAddress)) {
                       const status = sub.Status;
-                      
                       if (status !== 'Complete') {
                         await setSubDistributionComplete(sub.SubDistributionID, 'Complete');
                         console.log(`✅ SubDistribution ${sub.SubDistributionID} marked Complete`);
@@ -836,6 +835,7 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
       storeDistributionData[ipAddress] = {};
       modbusClients[ipAddress].previousSizeData = [];
       modbusClients[ipAddress].previousData = {};
+      modbusClients[ipAddress].sizeDataInfo.sizeID = [];
     }
 
     if (isBitOn(binaryValue3000, nextSOIndex)) {
@@ -851,6 +851,7 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
       storeDistributionData[ipAddress] = {};
       modbusClients[ipAddress].previousSizeData = [];
       modbusClients[ipAddress].previousData = {};
+      modbusClients[ipAddress].sizeDataInfo.sizeID = [];
     }
     if (modbusClients[ipAddress].lockPartNameAdvance) {
       console.warn(`Action ignored: still processing for ${ipAddress}`);
@@ -1570,28 +1571,36 @@ async function processSizeID(ipAddress) {
   }
 
   // Extract OrderID and SizeID pairs from SOs.Data array
-  const validPairs = modbusClients[ipAddress].SOs.flatMap(so =>
-    (so.Data || []).map(dataItem => ({
-      OrderID: dataItem.OrderID,
-      SizeID: dataItem.SizeID,
-      PartID: dataItem.PartID,
-      ActualCut: dataItem.ActualCut,
-      CuttingDieQty: dataItem.CuttingDieQty,
-      PiecesPerPair: dataItem.PiecesPerPair,
-      MaterialLayer: dataItem.MaterialLayer,
-      TotalPiecesPerPair: dataItem.TotalPiecesPerPair,
-      OperatorID : dataItem.OperatorID,
-      Leather: dataItem.IsLeather
-    }))
+  const validPairs = Array.from(
+    new Map(
+      modbusClients[ipAddress].SOs.flatMap(so =>
+        (so.Data || []).map(dataItem => {
+          const key = `${dataItem.OrderID}-${dataItem.SizeID}-${dataItem.PartID}`;
+          return [key, {
+            OrderID: dataItem.OrderID,
+            SizeID: dataItem.SizeID,
+            PartID: dataItem.PartID,
+            ActualCut: dataItem.ActualCut,
+            CuttingDieQty: dataItem.CuttingDieQty,
+            PiecesPerPair: dataItem.PiecesPerPair,
+            MaterialLayer: dataItem.MaterialLayer,
+            TotalPiecesPerPair: dataItem.TotalPiecesPerPair,
+            OperatorID: dataItem.OperatorID,
+            Leather: dataItem.IsLeather
+          }];
+        })
+      )
+    ).values()
   );
-
+  
   for (const { OrderID, SizeID, PartID, ActualCut, CuttingDieQty, PiecesPerPair, MaterialLayer, TotalPiecesPerPair, OperatorID, Leather } of validPairs) {
 
     for (const so of modbusClients[ipAddress]?.SOs || []) {
       const match = (so.Data || []).find(item =>
         item.OrderID === OrderID &&
         item.SizeID === SizeID &&
-        item.PartID === PartID
+        item.PartID === PartID && 
+        item.OperatorID === OperatorID
       );
       if (match) {
         match.ActualCut = typeof match.ActualCut === 'number' ? match.ActualCut : 0;
@@ -1615,7 +1624,7 @@ async function processSizeID(ipAddress) {
       ActualCut: 0,
       ActualPieces: 0,
       ActualSizeQty: 0,
-      TotalPiecesPerPair: TotalPiecesPerPair,
+      TotalPiecesPerPair: TotalPiecesPerPair
     };
 
     try {
@@ -1931,7 +1940,7 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
   let processedSizeData = [];
   
   if (Array.isArray(sizeData)) {
-      const index = parseInt(modbusClients[ipAddress]?.indexMultipleSOs, 10) || 0;
+      //const index = parseInt(modbusClients[ipAddress]?.indexMultipleSOs, 10) || 0;
 
       // Define fixed slice ranges
       //const startIndex = index * chunkSize;

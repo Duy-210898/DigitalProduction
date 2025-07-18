@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -43,7 +42,36 @@ namespace DigitalProduction.ViewModels
                 }
             }
         }
+        private bool _isLive = true;
+        public bool IsLive
+        {
+            get => _isLive;
+            set
+            {
+                if (_isLive != value)
+                {
+                    _isLive = value;
+                    OnPropertyChanged(nameof(IsLive));
 
+                    if (_isLive)
+                        StartLiveUpdates();
+                    else
+                        StopLiveUpdates();
+                }
+            }
+        }
+
+        private void StartLiveUpdates()
+        {
+            Console.WriteLine("Live updates started.");
+            // Start your timer/WebSocket listening here
+        }
+
+        private void StopLiveUpdates()
+        {
+            Console.WriteLine("Live updates stopped.");
+            // Stop your timer/WebSocket listening here
+        }
 
         // Filter properties for API
         private string _filterKeyword = LocalizationManager.GetString("Search");
@@ -72,7 +100,6 @@ namespace DigitalProduction.ViewModels
                     FilterService.Instance.FilterStartDate = value ?? DateTime.Today;
                     OnPropertyChanged(nameof(FilterStartDate));
                     _ = SyncDataAsync();
-                    ReapplyFilters();
                 }
             }
         }
@@ -87,7 +114,6 @@ namespace DigitalProduction.ViewModels
                     FilterService.Instance.FilterEndDate = value ?? DateTime.Today;
                     OnPropertyChanged(nameof(FilterEndDate));
                     _ = SyncDataAsync();
-                    ReapplyFilters();
                 }
             }
         }
@@ -101,7 +127,6 @@ namespace DigitalProduction.ViewModels
             else
                 ProcessWebSocketMessage(_lastJsonData);
         }
-
 
         public string FilterMachineName
         {
@@ -172,8 +197,8 @@ namespace DigitalProduction.ViewModels
             }
             finally
             {
-                IsLoading = true;
                 ReapplyFilters();
+                IsLoading = true;
             }
         }
 
@@ -202,7 +227,6 @@ namespace DigitalProduction.ViewModels
             _webSocketClient = webSocket ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseRealTime += WebSocket_OnMessage;
 
-          //  RequestData();
             // Bắt đầu polling kiểm tra thay đổi trong SQL Server
             StartPolling();
         }
@@ -211,6 +235,7 @@ namespace DigitalProduction.ViewModels
         {
             _pollingTimer = new System.Threading.Timer(async _ =>
             {
+                if (!IsLive) return; // ✅ Stop polling if live mode is off
                 await CheckForSqlUpdates();
             }, null, 0, 2000);
         }
@@ -304,7 +329,6 @@ namespace DigitalProduction.ViewModels
 
         private void UpdateData(List<DeviceOutput> realTimeData)
         {
-
             if (realTimeData == null || !realTimeData.Any())
             {
                 Console.WriteLine("No OutputData received from WebSocket.");
@@ -312,7 +336,7 @@ namespace DigitalProduction.ViewModels
                 return;
             }
 
-            // This list will be bound to the grid
+            // Group by core attributes including IsLeather
             List<DeviceOutput> groupedData = realTimeData
                 .GroupBy(d => new
                 {
@@ -320,12 +344,27 @@ namespace DigitalProduction.ViewModels
                     d.PartName,
                     d.MachineName,
                     d.SO,
-                    d.OperatorName
+                    d.OperatorName,
+                    d.IsLeather
                 })
                 .SelectMany(group =>
                 {
-                    var groupKey = $"{group.Key.UpdatedAt}-{group.Key.PartName}-{group.Key.MachineName}-{group.Key.SO}-{group.Key.OperatorName}";
+                    bool isLeather = group.Key.IsLeather;
+                    // Child rows
+                    var children = group
+                        .Select(child =>
+                        {
+                            child.IsGroupHeader = false;
+                            child.MaterialType = child.IsLeather
+                                ? LocalizationManager.GetString("leatherMaterial")
+                                : LocalizationManager.GetString("rawMaterial");
+                            return child;
+                        })
+                        .OrderByDescending(c => c.UpdatedAt);
 
+                    if (!children.Any())
+                        return Enumerable.Empty<DeviceOutput>();
+                    // Header row
                     var header = new DeviceOutput
                     {
                         IsGroupHeader = true,
@@ -334,24 +373,16 @@ namespace DigitalProduction.ViewModels
                         PartName = group.Key.PartName,
                         OperatorName = group.Key.OperatorName,
                         UpdatedAt = group.FirstOrDefault()?.UpdatedAt,
-                        IsLeather = group.Any(x => x.IsLeather),
-                        //SizeQty = group.Sum(x => x.SizeQty),
-                        //ActualCut = group.Sum(x => x.ActualCut),
-                        //ActualPieces = group.Sum(x => x.ActualPieces),
-                        //InventoryQty = group.Sum(x => x.InventoryQty),
+                        IsLeather = isLeather,
+                        MaterialType = isLeather
+                            ? LocalizationManager.GetString("leatherMaterial")
+                            : LocalizationManager.GetString("rawMaterial"),
                     };
-
-                    var children = group
-                        .Select(child =>
-                        {
-                            child.IsGroupHeader = false;
-                            return child;
-                        })
-                        .OrderByDescending(c => c.UpdatedAt);
 
                     return new[] { header }.Concat(children);
                 })
                 .ToList();
+
             Console.WriteLine($"Updating DeviceOutputs with {groupedData.Count} items.");
 
             try
@@ -364,59 +395,6 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-        private DeviceOutput CreateHeader(IGrouping<dynamic, DeviceOutput> group, string groupKey)
-        {
-            return new DeviceOutput
-            {
-                PartName = group.Key.PartName,
-                MachineName = group.Key.MachineName,
-                SO = group.Key.SO,
-                OperatorName = group.Key.OperatorName,
-                IsGroupHeader = true,
-                IsLeather = group.Any(x => x.IsLeather),
-                MaterialType = group.Any(x => x.IsLeather)
-                    ? LocalizationManager.GetString("leatherMaterial")
-                    : LocalizationManager.GetString("rawMaterial"),
-            };
-        }
-
-        //private void UpdateHeaderAggregates(DeviceOutput header, IGrouping<dynamic, DeviceOutput> group)
-        //{
-        //    DateTime? createdAt = group.Min(x => x.Timestamp);
-        //    DateTime? updatedAt = group.Max(x => x.UpdatedAt);
-
-        //    if (header.Timestamp != createdAt)
-        //    {
-        //        header.Timestamp = createdAt;
-        //        header.OnPropertyChanged(nameof(header.Timestamp));
-        //    }
-
-        //    if (header.UpdatedAt != updatedAt)
-        //    {
-        //        header.UpdatedAt = updatedAt;
-        //        header.OnPropertyChanged(nameof(header.UpdatedAt));
-        //    }
-
-        //    Console.WriteLine($"[HEADER UPDATE] Group: {header.PartName}-{header.MachineName}-{header.SO}-{header.OperatorName}");
-        //    Console.WriteLine($"  -> Timestamp: {createdAt}, UpdatedAt: {updatedAt}");
-
-        //}
-
-        //private void PrepareChildItem(DeviceOutput item, int groupCount)
-        //{
-        //    item.MaterialType = item.IsLeather
-        //        ? LocalizationManager.GetString("leatherMaterial")
-        //        : LocalizationManager.GetString("rawMaterial");
-
-        //    // Clear repeated fields for grouped display
-        //    item.Timestamp = null;
-        //    item.UpdatedAt = null;
-        //    item.MachineName = string.Empty;
-        //    item.SO = string.Empty;
-        //    item.OperatorName = string.Empty;
-        //    item.PartName = string.Empty;
-        //    item.MaterialType = string.Empty;
-        //}
 
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
@@ -438,21 +416,22 @@ namespace DigitalProduction.ViewModels
         {
             try
             {
-                if (newData.Count > 200)  // large batch
+                if (newData.Count > 200) // large batch
                 {
                     BindingDeviceOutputs.ReplaceWith(newData);
                 }
-                else  // small batch, use partial update
+                else
                 {
-                    for (int i = 0; i < newData.Count; i++)
+                    var newLookup = newData.ToDictionary(x => x.UniqueKey());
+                    var existingKeys = new HashSet<string>(BindingDeviceOutputs.Select(x => x.UniqueKey()));
+
+                    // Update existing rows
+                    for (int i = 0; i < BindingDeviceOutputs.Count; i++)
                     {
-                        if (i >= BindingDeviceOutputs.Count)
+                        var existing = BindingDeviceOutputs[i];
+                        if (newLookup.TryGetValue(existing.UniqueKey(), out var updated))
                         {
-                            BindingDeviceOutputs.Add(newData[i]);
-                        }
-                        else
-                        {
-                            UpdateProperties(BindingDeviceOutputs[i], newData[i],
+                            UpdateProperties(existing, updated,
                                 nameof(DeviceOutput.ActualCut),
                                 nameof(DeviceOutput.ActualPieces),
                                 nameof(DeviceOutput.InventoryQty),
@@ -460,9 +439,19 @@ namespace DigitalProduction.ViewModels
                         }
                     }
 
-                    // Trim extra rows if any
-                    while (BindingDeviceOutputs.Count > newData.Count)
-                        BindingDeviceOutputs.RemoveAt(BindingDeviceOutputs.Count - 1);
+                    // Add new rows
+                    foreach (var newRow in newData)
+                    {
+                        if (!existingKeys.Contains(newRow.UniqueKey()))
+                            BindingDeviceOutputs.Add(newRow);
+                    }
+
+                    // Remove extra rows
+                    for (int i = BindingDeviceOutputs.Count - 1; i >= 0; i--)
+                    {
+                        if (!newLookup.ContainsKey(BindingDeviceOutputs[i].UniqueKey()))
+                            BindingDeviceOutputs.RemoveAt(i);
+                    }
                 }
             }
             catch (Exception ex)
@@ -511,10 +500,11 @@ namespace DigitalProduction.ViewModels
                 Task.Run(async () =>
                 {
                     await Task.Delay(3000);
-                    if (syncContext != null)
+                    if (syncContext == null)
                     {
-                        syncContext.Post(_ => row.IsRecentlyUpdated = false, null);
+                        return;
                     }
+                    syncContext.Post(_ => row.IsRecentlyUpdated = false, null);
                 });
             }
         }
@@ -679,5 +669,4 @@ namespace DigitalProduction.ViewModels
             collection.ResetBindings();
         }
     }
-
 }

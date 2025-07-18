@@ -183,7 +183,7 @@ namespace DigitalProduction.Frm_Admin
         }
         private void btnDeleteSelected_Click(object sender, EventArgs e)
         {
-            var view = gridDistribution.MainView as GridView;
+            GridView view = gridDistribution.MainView as GridView;
             if (view == null) return;
 
             var selectedRows = view.GetSelectedRows();
@@ -246,7 +246,7 @@ namespace DigitalProduction.Frm_Admin
 
         private void HideGridColumns(DevExpress.XtraGrid.GridControl grid, params string[] columnNames)
         {
-            var view = grid.MainView as GridView;
+            GridView view = grid.MainView as GridView;
             if (view == null) return;
 
             foreach (string name in columnNames)
@@ -260,11 +260,11 @@ namespace DigitalProduction.Frm_Admin
         }
         private void GridViewProgressManagement_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
         {
-            var view = sender as GridView;
+            GridView view = sender as GridView;
             if (view != null)
             {
                 // Get the current row data
-                var rowData = view.GetRow(e.RowHandle) as Distribution;
+                Distribution rowData = view.GetRow(e.RowHandle) as Distribution;
 
                 if (rowData != null && e.Column.FieldName == "Status")
                 {

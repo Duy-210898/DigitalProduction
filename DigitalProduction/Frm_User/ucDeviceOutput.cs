@@ -11,7 +11,6 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
-using DevExpress.XtraWaitForm;
 using DigitalProduction.Models;
 using DigitalProduction.ViewModels;
 
@@ -33,16 +32,25 @@ namespace DigitalProduction
         {
             InitializeComponent();
             // Defer full loading until control is loaded
-            this.Load += async (s, e) => await LoadWithSplashAsync();
-        }
-        private async void ucDeviceOutput_Load(object sender, EventArgs e)
-        {
-            await LoadWithSplashAsync();
-        }
+            this.Load += async (s, e) =>
+            {
+                 await LoadWithSplashAsync();
+            };
 
-
+            this.VisibleChanged += (s, e) =>
+            {
+                if (this.Visible)
+                    _viewModel.IsLive = true;
+                else
+                    _viewModel.IsLive = false;
+            };
+        }
         private async Task LoadWithSplashAsync()
         {
+            // Now safe to initialize _viewModel
+            _viewModel = new DeviceOutputListViewModel();
+            // Proceed to ViewModel-dependent setup
+            InitializeViewModelUI();
             var parentForm = this.FindForm() ?? Application.OpenForms.Cast<Form>().FirstOrDefault();
 
             if (parentForm != null)
@@ -58,8 +66,6 @@ namespace DigitalProduction
                 await Task.Delay(10);
             }
 
-            // Now safe to initialize _viewModel
-            _viewModel = new DeviceOutputListViewModel();
 
             if (_pendingWebSocketClient != null)
             {
@@ -67,9 +73,6 @@ namespace DigitalProduction
                 _pendingWebSocketClient = null;
             }
             Console.WriteLine("Uc is loading");
-
-            // Proceed to ViewModel-dependent setup
-            InitializeViewModelUI();
 
             if (SplashScreenManager.Default?.IsSplashFormVisible == true)
                 SplashScreenManager.CloseForm(false);
@@ -136,7 +139,6 @@ namespace DigitalProduction
             // Enable or disable grid based on IsLoading
             gridControl_DeviceOutput.DataBindings.Add("Enabled", viewModelBindingSource, "IsLoading", true, DataSourceUpdateMode.OnPropertyChanged);
             // Create the opaque overlay panel
-            // Create the opaque overlay panel
             Panel overlayPanel = new Panel
             {
                 Name = "overlayPanel",
@@ -195,7 +197,7 @@ namespace DigitalProduction
             var syncButton = new SimpleButton
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(100, 40),
+                Size = new Size(150, 40),
                 ImageOptions = { Image = Properties.Resources.sync_icon }
             };
             syncButton.Click += BtnSyncData_Click;
@@ -212,18 +214,18 @@ namespace DigitalProduction
             gridView_DeviceOutput.SelectionChanged += gridView_DeviceOutput_SelectionChanged;
             gridView_DeviceOutput.CustomSummaryCalculate += gridView_DeviceOutput_CustomSummaryCalculate;
 
-            var sizeColumn = gridView_DeviceOutput.Columns.ColumnByFieldName("ActualSizeQty");
-            if (sizeColumn != null)
-            {
-                sizeColumn.Width = 120;
-                sizeColumn.OptionsColumn.FixedWidth = true;
-                sizeColumn.SummaryItem.SummaryType = SummaryItemType.Custom;
-                sizeColumn.SummaryItem.DisplayFormat = $"{LocalizationManager.GetString("TotalRecords")}: {{0:N2}}";
-            }
-            else
-            {
-                MessageBox.Show("Cột 'ActualCut' không tồn tại. Kiểm tra FieldName trong nguồn dữ liệu.");
-            }
+            //var sizeColumn = gridView_DeviceOutput.Columns.ColumnByFieldName("ActualSizeQty");
+            //if (sizeColumn != null)
+            //{
+            //    sizeColumn.Width = 120;
+            //    sizeColumn.OptionsColumn.FixedWidth = true;
+            //    sizeColumn.SummaryItem.SummaryType = SummaryItemType.Custom;
+            //    sizeColumn.SummaryItem.DisplayFormat = $"{LocalizationManager.GetString("TotalRecords")}: {{0:N2}}";
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Cột 'ActualCut' không tồn tại. Kiểm tra FieldName trong nguồn dữ liệu.");
+            //}
 
             gridView_DeviceOutput.CustomDrawFooterCell += GridView_DeviceOutput_CustomDrawFooterCell;
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
@@ -236,7 +238,8 @@ namespace DigitalProduction
                 if (row != null && !row.IsGroupHeader)
                 {
                     if (e.Column.FieldName == "SO" || e.Column.FieldName == "OperatorName" ||
-                        e.Column.FieldName == "PartName" || e.Column.FieldName == "MachineName")
+                        e.Column.FieldName == "PartName" || e.Column.FieldName == "MachineName" ||
+                        e.Column.FieldName == "MaterialType")
                     {
                         e.DisplayText = "";
                     }
@@ -376,7 +379,7 @@ namespace DigitalProduction
                     EditFormat = { FormatType = FormatType.DateTime, FormatString = "d" },
                 },
                 Margin = new Padding(5),
-                Width = 150
+                Width = 200
             };
 
             dateTimePickerEnd = new DateEdit {
@@ -387,7 +390,7 @@ namespace DigitalProduction
                     EditFormat = { FormatType = FormatType.DateTime, FormatString = "d" },
                 },
                 Margin = new Padding(5),
-                Width = 150
+                Width = 200
             };
 
             txtFilter = new TextBox { Width = 150, Margin = new Padding(5), ForeColor = Color.Gray, Text = LocalizationManager.GetString("Search") };
@@ -480,7 +483,7 @@ namespace DigitalProduction
             StyleNumericColumn(gridView.Columns["PiecesPerPair"], 0, bold: true);
 
 
-            gridView.OptionsView.ShowAutoFilterRow = false;
+            gridView.OptionsView.ShowAutoFilterRow = true;
             gridView.OptionsCustomization.AllowFilter = false;
             gridView.OptionsCustomization.AllowSort = false;
             gridView.OptionsMenu.ShowAutoFilterRowItem = false;

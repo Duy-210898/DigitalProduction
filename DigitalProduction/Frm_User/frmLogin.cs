@@ -77,7 +77,7 @@ namespace DigitalProduction
                 MessageBox.Show("Invalid input! Please correct the highlighted fields.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            bool checkLogin = DbHelper.loginUser(txt_username.Text, SecurityHelper.HashPassword(txt_pwd.Text));
+            bool checkLogin = DbHelper.LoginUser(txt_username.Text, SecurityHelper.HashPassword(txt_pwd.Text));
             if (checkLogin)
             {
                 // Save credentials if "Remember Me" is checked

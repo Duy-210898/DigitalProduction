@@ -16,7 +16,7 @@ namespace DigitalProduction
 {
     internal class DbHelper
     {
-        private static string connectionString;
+        private readonly static string connectionString;
         private static DateTime _lastCheckTime = DateTime.MinValue;
 
         static DbHelper()
@@ -44,7 +44,7 @@ namespace DigitalProduction
             }
         }
         // login
-        public static bool loginUser(string username, string hashedPassword)
+        public static bool LoginUser(string username, string hashedPassword)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace DigitalProduction
                                 string employeeName = reader.GetString(1);
                                 int positionID = reader.GetInt32(2);
                                 int departmentID = reader.GetInt32(3);
-                                string role = determineUserRole(positionID, departmentID);
+                                string role = determineUserRole(positionID);
                                 // Set the global user
                                 Global.SetUser(userID, employeeName, positionID, departmentID, role);
 
@@ -90,7 +90,7 @@ namespace DigitalProduction
             }
             return false;
         }
-        private static string determineUserRole(int positionID, int departmentID)
+        private static string determineUserRole(int positionID)
         {
             // the role based on position
             if (positionID == 3)
