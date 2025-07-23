@@ -146,8 +146,8 @@
             // tableLayoutPanel6
             // 
             this.tableLayoutPanel6.ColumnCount = 2;
-            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 32.78237F));
-            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 67.21763F));
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 41.19279F));
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 58.80721F));
             this.tableLayoutPanel6.Controls.Add(this.lb_PartName, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.comboxPartName, 0, 1);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -175,7 +175,7 @@
             this.comboxPartName.Name = "comboxPartName";
             this.comboxPartName.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboxPartName.Size = new System.Drawing.Size(155, 20);
+            this.comboxPartName.Size = new System.Drawing.Size(182, 20);
             this.comboxPartName.TabIndex = 0;
             this.comboxPartName.EditValueChanged += new System.EventHandler(this.comboPartName_EditValueChanged);
             // 
@@ -298,7 +298,7 @@
             this.comboSize.Name = "comboSize";
             this.comboSize.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboSize.Size = new System.Drawing.Size(155, 20);
+            this.comboSize.Size = new System.Drawing.Size(182, 20);
             this.comboSize.TabIndex = 0;
             this.comboSize.EditValueChanged += new System.EventHandler(this.comboSize_EditValueChanged);
             // 

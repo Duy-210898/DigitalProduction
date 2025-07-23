@@ -38,10 +38,10 @@
             this.dtpEndDate = new DevExpress.XtraEditors.DateEdit();
             this.lblFilterDate = new DevExpress.XtraEditors.LabelControl();
             this.stackPanel1 = new DevExpress.Utils.Layout.StackPanel();
-            this.btnApplyDevice = new DevExpress.XtraEditors.SimpleButton();
-            this.syncButton = new DevExpress.XtraEditors.SimpleButton();
             this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.btnApplyDevice = new DevExpress.XtraEditors.SimpleButton();
+            this.syncButton = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.gridProgressManagement)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewProgressManagement)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
@@ -179,23 +179,6 @@
             this.stackPanel1.TabIndex = 8;
             this.stackPanel1.UseSkinIndents = true;
             // 
-            // btnApplyDevice
-            // 
-            this.btnApplyDevice.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnApplyDevice.Location = new System.Drawing.Point(217, 10);
-            this.btnApplyDevice.Name = "btnApplyDevice";
-            this.btnApplyDevice.Size = new System.Drawing.Size(115, 23);
-            this.btnApplyDevice.TabIndex = 8;
-            this.btnApplyDevice.Text = "btnApplyDevice";
-            // 
-            // syncButton
-            // 
-            this.syncButton.Location = new System.Drawing.Point(336, 5);
-            this.syncButton.Name = "syncButton";
-            this.syncButton.Size = new System.Drawing.Size(124, 35);
-            this.syncButton.TabIndex = 7;
-            this.syncButton.Text = "syncButton";
-            // 
             // gridLookUpDevice
             // 
             this.gridLookUpDevice.Location = new System.Drawing.Point(13, 10);
@@ -217,6 +200,23 @@
             this.gridView2.OptionsSelection.EnableAppearanceFocusedCell = false;
             this.gridView2.OptionsView.RowAutoHeight = true;
             this.gridView2.OptionsView.ShowGroupPanel = false;
+            // 
+            // btnApplyDevice
+            // 
+            this.btnApplyDevice.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnApplyDevice.Location = new System.Drawing.Point(217, 10);
+            this.btnApplyDevice.Name = "btnApplyDevice";
+            this.btnApplyDevice.Size = new System.Drawing.Size(115, 23);
+            this.btnApplyDevice.TabIndex = 8;
+            this.btnApplyDevice.Text = "btnApplyDevice";
+            // 
+            // syncButton
+            // 
+            this.syncButton.Location = new System.Drawing.Point(336, 5);
+            this.syncButton.Name = "syncButton";
+            this.syncButton.Size = new System.Drawing.Size(124, 35);
+            this.syncButton.TabIndex = 7;
+            this.syncButton.Text = "syncButton";
             // 
             // ucProgress
             // 

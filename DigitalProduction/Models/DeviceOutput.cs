@@ -158,6 +158,7 @@ namespace DigitalProduction.Models
         }
         public string UniqueKey()
         {
+            Console.WriteLine($"KEY: {SO}-{PartName}-{Size}-{MachineName}-{OperatorName}-{IsLeather}");
             return $"{SO}-{PartName}-{Size}-{MachineName}-{OperatorName}-{IsLeather}";
         }
 

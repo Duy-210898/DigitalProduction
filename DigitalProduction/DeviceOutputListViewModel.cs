@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using DevExpress.XtraEditors;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
 
@@ -19,13 +16,6 @@ namespace DigitalProduction.ViewModels
         private System.Threading.Timer _pollingTimer; // Dùng Timer chạy nền thay vì WinForms Timer
         private SynchronizationContext _syncContext;  // To marshal updates to the UI thread
         private string _lastJsonData;
-        private static int currentPage = 1;
-        private static int pageSize = 100;
-        private int totalCount = 0;
-        private static ComboBoxEdit cmbPageSize;
-        private static SimpleButton btnPrev;
-        private static SimpleButton btnNext;
-        private static LabelControl lblPagingInfo;
      
         public Action ShowLoadingAction { get; set; }
         public Action HideLoadingAction { get; set; }
@@ -280,16 +270,6 @@ namespace DigitalProduction.ViewModels
                 var response = JsonConvert.DeserializeObject<WebSocketResponse>(jsonData);
                 if (response.Status.Equals("success") && response.Data.Count > 0)
                 {
-                    Console.WriteLine($"Status: {response.Status}, Total Items: {response.TotalCount}");
-                    // Paging metadata
-                    int currentPage = response.Page;
-                    int totalPages = response.TotalPages;
-                    totalCount = response.TotalCount;
-
-                    // Display or bind to UI
-                    PageNumber = currentPage;
-                    lblPagingInfo.Text = $"{LocalizationManager.GetString("Page")} {currentPage} / {totalPages} | {LocalizationManager.GetString("TotalRecords")} {totalCount}";
-
                     // Apply keyword filtering if needed
                     string keyword = FilterKeyword?.Trim().ToLower();
                     bool hasKeyword = !string.IsNullOrWhiteSpace(keyword) && FilterKeyword != LocalizationManager.GetString("Search");
@@ -335,7 +315,6 @@ namespace DigitalProduction.ViewModels
                 BindingDeviceOutputs.Clear();
                 return;
             }
-
             // Group by core attributes including IsLeather
             List<DeviceOutput> groupedData = realTimeData
                 .GroupBy(d => new
@@ -362,7 +341,8 @@ namespace DigitalProduction.ViewModels
                         })
                         .OrderByDescending(c => c.UpdatedAt);
 
-                    if (!children.Any())
+                    // ✅ Remove header if ALL children ActualCut == null OR 0
+                    if (children.All(c => c.ActualCut == null))
                         return Enumerable.Empty<DeviceOutput>();
                     // Header row
                     var header = new DeviceOutput
@@ -382,7 +362,6 @@ namespace DigitalProduction.ViewModels
                     return new[] { header }.Concat(children);
                 })
                 .ToList();
-
             Console.WriteLine($"Updating DeviceOutputs with {groupedData.Count} items.");
 
             try
@@ -394,8 +373,6 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"InvalidOperationException in UpdateBindingDeviceOutputs: {ex.Message}\n{ex.StackTrace}");
             }
         }
-
-
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
             if (_syncContext != null)
@@ -422,13 +399,16 @@ namespace DigitalProduction.ViewModels
                 }
                 else
                 {
-                    var newLookup = newData.ToDictionary(x => x.UniqueKey());
+                    // ✅ Use dictionary for unique keys
+                    var newLookup = newData
+                        .GroupBy(x => x.UniqueKey())
+                        .ToDictionary(g => g.Key, g => g.Last());
+
                     var existingKeys = new HashSet<string>(BindingDeviceOutputs.Select(x => x.UniqueKey()));
 
-                    // Update existing rows
-                    for (int i = 0; i < BindingDeviceOutputs.Count; i++)
+                    // ✅ Update existing rows
+                    foreach (var existing in BindingDeviceOutputs)
                     {
-                        var existing = BindingDeviceOutputs[i];
                         if (newLookup.TryGetValue(existing.UniqueKey(), out var updated))
                         {
                             UpdateProperties(existing, updated,
@@ -439,19 +419,22 @@ namespace DigitalProduction.ViewModels
                         }
                     }
 
-                    // Add new rows
-                    foreach (var newRow in newData)
-                    {
-                        if (!existingKeys.Contains(newRow.UniqueKey()))
-                            BindingDeviceOutputs.Add(newRow);
-                    }
-
-                    // Remove extra rows
+                    // ✅ Remove extra rows
                     for (int i = BindingDeviceOutputs.Count - 1; i >= 0; i--)
                     {
                         if (!newLookup.ContainsKey(BindingDeviceOutputs[i].UniqueKey()))
                             BindingDeviceOutputs.RemoveAt(i);
                     }
+
+                    // ✅ Add new rows (from unique dictionary)
+                    foreach (var kvp in newLookup)
+                    {
+                        if (!existingKeys.Contains(kvp.Key))
+                            BindingDeviceOutputs.Add(kvp.Value);
+                    }
+
+                    // ✅ (Optional) Reorder to match newData
+                    ReorderBindingList(BindingDeviceOutputs, newData);
                 }
             }
             catch (Exception ex)
@@ -459,6 +442,20 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"Error updating UI: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
+        private void ReorderBindingList(BindingList<DeviceOutput> list, IList<DeviceOutput> orderList)
+        {
+            for (int i = 0; i < orderList.Count; i++)
+            {
+                var item = list.FirstOrDefault(x => x.UniqueKey() == orderList[i].UniqueKey());
+                if (item != null && list.IndexOf(item) != i)
+                {
+                    list.Remove(item);
+                    list.Insert(i, item);
+                }
+            }
+        }
+
 
         public static void UpdateProperties<T>(T existing, T updated, params string[] propertyNames)
         {
@@ -509,87 +506,6 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-        public void InitPagingFooter(Control gridControl)
-        {
-            var padding = 10;
-
-            var pagingPanel = new DevExpress.XtraEditors.PanelControl
-            {
-                Dock = DockStyle.Bottom,
-                Height = 40,
-                BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder
-            };
-
-            // ComboBox for page size
-            cmbPageSize = new DevExpress.XtraEditors.ComboBoxEdit
-            {
-                Width = 80,
-                Location = new Point(padding, 8),
-                ToolTip = LocalizationManager.GetString("SelectPageSize")
-            };
-            cmbPageSize.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            cmbPageSize.Properties.Items.AddRange(new object[] { 50, 100, 200, 500 });
-            // Set initial value before assigning the event
-            cmbPageSize.SelectedItem = pageSize;
-            cmbPageSize.SelectedIndexChanged += async (s, e) =>
-            {
-                if (int.TryParse(cmbPageSize.SelectedItem?.ToString(), out int newSize))
-                {
-                    pageSize = newSize;
-                    currentPage = 1;
-                    await LoadCurrentPageAsync();
-                }
-            };
-            pagingPanel.Controls.Add(cmbPageSize);
-
-            // Next button
-            btnNext = new DevExpress.XtraEditors.SimpleButton
-            {
-                Text = LocalizationManager.GetString("Next") + " »",
-                Location = new Point(cmbPageSize.Right + padding, 6),
-                ToolTip = LocalizationManager.GetString("GoToNextPage")
-            };
-            btnNext.Click += async (s, e) =>
-            {
-                if (currentPage < GetTotalPages())
-                {
-                    currentPage++;
-                    await LoadCurrentPageAsync();
-                }
-            };
-            pagingPanel.Controls.Add(btnNext);
-
-            // Previous button
-            btnPrev = new DevExpress.XtraEditors.SimpleButton
-            {
-                Text = "« " + LocalizationManager.GetString("Previous"),
-                Location = new Point(btnNext.Right + padding, 6),
-                ToolTip = LocalizationManager.GetString("GoToPreviousPage")
-            };
-            btnPrev.Click += async (s, e) =>
-            {
-                if (currentPage > 1)
-                {
-                    currentPage--;
-                    await LoadCurrentPageAsync();
-                }
-            };
-            pagingPanel.Controls.Add(btnPrev);
-
-            // Paging info label
-            lblPagingInfo = new DevExpress.XtraEditors.LabelControl
-            {
-                Text = $"{LocalizationManager.GetString("Page")} {currentPage} / {GetTotalPages()}",
-                Location = new Point(btnPrev.Right + padding * 2, 10),
-                Width = 250,
-                AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.Vertical
-            };
-            pagingPanel.Controls.Add(lblPagingInfo);
-
-            // Add panel to grid control
-            gridControl.Controls.Add(pagingPanel);
-            pagingPanel.BringToFront();
-        }
         private async Task LoadCurrentPageAsync()
         {
             SetWebSocketClient(WebSocketClient.Instance);
@@ -612,8 +528,6 @@ namespace DigitalProduction.ViewModels
                         machineName = string.IsNullOrEmpty(FilterMachineName) ? null : FilterMachineName,
                         so = string.IsNullOrEmpty(FilterSO) ? null : FilterSO,
                         operatorName = string.IsNullOrEmpty(FilterOperatorName) ? null : FilterOperatorName,
-                        page = currentPage,
-                        pageSize = pageSize
                     }
                 };
 
@@ -625,10 +539,7 @@ namespace DigitalProduction.ViewModels
                 Console.WriteLine($"Error sending LoadCurrentPageAsync: {ex.Message}");
             }
         }
-        private int GetTotalPages()
-        {
-            return (int)Math.Ceiling((double)totalCount / pageSize);
-        }
+
         public void Dispose()
         {
             _pollingTimer?.Dispose();
@@ -639,23 +550,12 @@ namespace DigitalProduction.ViewModels
             Console.WriteLine("ViewModel disposed.");
         }
 
-
-        //}
-
         public class WebSocketResponse
         {
             public string Action { get; set; }
             public string Status { get; set; }
             public List<DeviceOutput> Data { get; set; }
-            // Pagination info
-            public int Page { get; set; }
-            public int PageSize { get; set; }
-            public int TotalCount { get; set; }
-            public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
         }
-        public int PageNumber { get; set; } = 1;
-        public int TotalPages { get; set; }
-        public int PageSize { get; set; } = 100;
     }
     public static class BindingListExtensions
     {

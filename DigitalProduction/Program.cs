@@ -16,13 +16,14 @@ namespace DigitalProduction
         {
 
            UserLookAndFeel.Default.SetSkinStyle("WXI"); 
-           WindowsFormsSettings.DefaultFont = new System.Drawing.Font("Arial", 9);
+           WindowsFormsSettings.DefaultFont = new System.Drawing.Font("Arial", 10);
             // Enable visual styles for the application
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
             // Start WebSocket connection with retry logic
             Task.Run(() => ConnectWithRetry());
+
 
             // Run the main application form
             WindowsFormsSettings.ScrollUIMode = ScrollUIMode.Fluent;

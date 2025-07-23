@@ -138,9 +138,9 @@ async function handleGetActualData(ws, request, retryCount = 0) {
   try {
     const { filter } = request;
 
-    // Default page and pageSize
-    const page = filter?.page ?? 1;
-    const pageSize = filter?.pageSize ?? 100;
+    // // Default page and pageSize
+    // const page = filter?.page ?? 1;
+    // const pageSize = filter?.pageSize ?? 100;
 
     // Get current local date
     const currentDate = new Date();
@@ -152,7 +152,7 @@ async function handleGetActualData(ws, request, retryCount = 0) {
     endDate.setHours(23, 59, 59, 999); // End of day
 
     // Fetch real-time paginated data
-    const realTimeData = await getActualOutputData(startDate, endDate, page, pageSize);
+    const realTimeData = await getActualOutputData(startDate, endDate);
 
     if (!realTimeData || realTimeData.Data.length === 0) {
       return ws.send(JSON.stringify({

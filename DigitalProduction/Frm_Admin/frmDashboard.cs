@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraBars.Docking2010;
+using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Extensions;
@@ -49,7 +50,7 @@ namespace DigitalProduction.Frm_Admin
 
             // Add the delete button to this topPanel
             Button btnDeleteSelected = new Button();
-            btnDeleteSelected.Text = "🗑 Delete Selected";
+            btnDeleteSelected.Text = LocalizedWithIcon("Delete", "🗑");
             btnDeleteSelected.AutoSize = true;
             btnDeleteSelected.BackColor = Color.LightCoral;
             btnDeleteSelected.ForeColor = Color.White;
@@ -64,7 +65,7 @@ namespace DigitalProduction.Frm_Admin
             topPanel.Controls.Add(btnDeleteSelected);
 
             // select default
-            SelectButtonByTag("Ad1");
+            SelectButtonByTag("DistributionManagement");
             windowsUIButtonPanel1.AllowGlyphSkinning = true;
 
             // allow mutilple select
@@ -76,7 +77,17 @@ namespace DigitalProduction.Frm_Admin
             }
             _syncContext = SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
             SetWebSocketClient(null);
+            gridViewDeviceManagement.OptionsBehavior.Editable = false;
+            gridViewDítribution.OptionsBehavior.Editable = false;
+            lblDateFrom.Text = LocalizationManager.GetString("StartDate");
+            lblDateTo.Text = LocalizationManager.GetString("EndDate");
+            lblInputSO.Text = LocalizationManager.GetString("InputSO");
+            lblStatus.Text = LocalizationManager.GetString("Status");
+            lblSelectDevice.Text = LocalizationManager.GetString("SelectMachine");
+            btnFilter.Text = LocalizationManager.GetString("Filter");
         }
+        private static string LocalizedWithIcon(string key, string icon) 
+                    => $"{icon} {LocalizationManager.GetString(key)}";
         private void HandleCuttingUpdate(List<CutActivityInfo> activities)
         {
             _syncContext.Post(_ =>
@@ -111,6 +122,8 @@ namespace DigitalProduction.Frm_Admin
             {
                 if (btn is WindowsUIButton button)
                 {
+                    // Use localization to set default caption
+                    string localizedCaption = LocalizationManager.GetString(button.Tag?.ToString() ?? "");
                     if (button.Tag != null && button.Tag.ToString() == tag)
                     {
                         button.Appearance.ForeColor = Color.SteelBlue;
@@ -127,15 +140,18 @@ namespace DigitalProduction.Frm_Admin
                         button.Appearance.ForeColor = Color.Black;
                         button.Appearance.Font = new Font(button.Appearance.Font, FontStyle.Regular);
                     }
+
+                    // Active caption (localized + marker)
+                    button.Caption = $"{localizedCaption}";
                 }
             }
             // Navigate to corresponding page
             switch (tag)
             {
-                case "Ad1":
+                case "DistributionManagement":
                     navigationFrame1.SelectedPage = navigationPage1;
                     break;
-                case "Ad2":
+                case "CuttingManagement":
                     navigationFrame1.SelectedPage = navigationPage2;
                     break;
                 case "Ad3":
@@ -173,8 +189,8 @@ namespace DigitalProduction.Frm_Admin
             gridViewDítribution.RowCellStyle += GridViewProgressManagement_RowCellStyle;
             gridViewDítribution.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
             // hide column specific
-            HideGridColumns(gridDistribution, "DistributionID", "UserID", "IsDelete", "IsLeather", "OperatorID", "PartSizeOrderID", "DeviceID", "PartID", "ProductID", "ActualSizeQty", "Note", "InventoryQty");
-            TranslateHeaders();
+            HideGridColumns(gridDistribution ,"DistributionID", "UserID", "IsDelete", "IsLeather", "OperatorID", "PartSizeOrderID", "DeviceID", "PartID", "ProductID", "ActualSizeQty", "Note", "InventoryQty");
+            TranslateHeaders(gridDistribution);
         }
 
         private void btnFilter_Click(object sender, EventArgs e)
@@ -283,21 +299,47 @@ namespace DigitalProduction.Frm_Admin
                 }
             }
         }
-        private void TranslateHeaders()
+        private void TranslateHeaders(GridControl gridControl)
         {
-            if (gridDistribution.MainView is GridView gridView && gridView.Columns.Count > 0)
+            var gridView = gridControl.MainView as GridView;
+            if (gridView == null || gridView.Columns.Count == 0)
+                return;
+
+            // 1. Translate columns by FieldName (default translation)
+            foreach (GridColumn col in gridView.Columns)
             {
-                foreach (GridColumn col in gridView.Columns)
+                string translatedText = LocalizationManager.GetString(col.FieldName);
+                if (!string.IsNullOrEmpty(translatedText))
                 {
-                    string translatedText = LocalizationManager.GetString(col.FieldName);
-                    if (!string.IsNullOrEmpty(translatedText))
+                    col.Caption = translatedText;
+                }
+            }
+
+            // 2. Special column translations
+            var specialColumns = new Dictionary<string, string>
+            {
+                { "NoteReason", "Reason" },
+                { "LastCutTime", "LastCutTime" },
+                { "LastSize", "LastSizeID" },
+                { "LastCutQty", "LastCutQty" },
+                { "LastSizeQty", "LastSizeQty" },
+                { "IsCutting", "IsCutting" }
+            };
+
+            foreach (var kvp in specialColumns)
+            {
+                var column = gridView.Columns.ColumnByFieldName(kvp.Key);
+                if (column != null)
+                {
+                    string localizedText = LocalizationManager.GetString(kvp.Value);
+                    if (!string.IsNullOrEmpty(localizedText))
                     {
-                        col.Caption = translatedText;
+                        column.Caption = localizedText;
                     }
                 }
-                gridViewDítribution.Columns["NoteReason"].Caption = LocalizationManager.GetString("Reason");
-                gridView.LayoutChanged();
             }
+
+            gridView.LayoutChanged();
         }
 
 
@@ -340,7 +382,7 @@ namespace DigitalProduction.Frm_Admin
                             gridViewDeviceManagement.BestFitColumns();
 
                             // Hide system columns
-                            var columnsToHide = new List<string> { "DeviceID", "DepartmentID", "CreatedAt", "PlantID" };
+                            var columnsToHide = new List<string> { "PlantName", "IpAddress","DeviceID", "DepartmentID", "CreatedAt", "PlantID" , "IsActive"};
                             SetGridColumnVisibility(gridViewDeviceManagement, columnsToHide, false);
 
                             // add new column to overview cutting size
@@ -350,24 +392,7 @@ namespace DigitalProduction.Frm_Admin
                                 lastCutTimeCol.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
                                 lastCutTimeCol.DisplayFormat.FormatString = "dd/MM/yyyy HH:mm:ss";
                             }
-                            var lastSizeCol = gridViewDeviceManagement.Columns["LastSizeID"];
-                            if (lastSizeCol != null)
-                            {
-                                lastSizeCol.Caption = "Size ID";
-                            }
-
-                            var qtyCol = gridViewDeviceManagement.Columns["LastCutQty"];
-                            if (qtyCol != null)
-                            {
-                                qtyCol.Caption = "Cut Qty";
-                                qtyCol.AppearanceCell.BackColor = Color.LightYellow;
-                            }
-                            var sizeQtyCol = gridViewDeviceManagement.Columns["LastSizeQty"];
-                            if (sizeQtyCol != null)
-                            {
-                                sizeQtyCol.Caption = "Size Qty";
-                            }
-
+                            TranslateHeaders(gridControlDeviceManagement);
                         }, null);
                     }
                 }

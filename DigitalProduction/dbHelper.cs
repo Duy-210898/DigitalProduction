@@ -2005,27 +2005,47 @@ namespace DigitalProduction
             DateTime threshold = DateTime.Now.AddSeconds(-seconds);
 
             string query = @"
-                WITH RankedCuts AS (
+                    WITH Combined AS (
+                    -- Data from DistributionData
                     SELECT 
-                        dd.DeviceID,
+                        dv.DeviceID,
                         se.Size,
                         do.ActualCut,
                         pso.SizeQty,
-                        do.UpdatedAt,
-                        ROW_NUMBER() OVER (PARTITION BY dd.DeviceID ORDER BY do.UpdatedAt DESC) AS RowNum
-                    FROM DeviceOutput do
-                    JOIN PartSizeOrder pso 
+                        do.UpdatedAt
+                    FROM DeviceList dv
+                    JOIN DistributionData dd ON dv.DeviceID = dd.DeviceID
+                    JOIN PartSizeOrder pso ON dd.PartSizeOrderId = pso.PartSizeOrderId
+                    JOIN DeviceOutput do
                         ON do.OrderID = pso.OrderId 
                         AND do.PartID = pso.PartId 
                         AND do.SizeID = pso.SizeID
-                    JOIN DistributionData dd 
-                        ON dd.PartSizeOrderId = pso.PartSizeOrderId
-                    JOIN Size se 
-                        ON se.SizeID = pso.SizeID
-                    JOIN DeviceList dv 
-                        ON dv.DeviceID = dd.DeviceID
-                    WHERE  dd.DeviceID IS NOT NULL
-                      AND dv.ConnectionStatus = 1
+                    JOIN Size se ON se.SizeID = pso.SizeID
+                    WHERE dv.ConnectionStatus = 1
+
+                    UNION ALL
+
+                    -- Data from SubDistribution
+                    SELECT 
+                        dv.DeviceID,
+                        se.Size,
+                        do.ActualCut,
+                        pso.SizeQty,
+                        do.UpdatedAt
+                    FROM DeviceList dv
+                    JOIN SubDistribution sd ON dv.DeviceID = sd.DeviceID
+                    JOIN PartSizeOrder pso ON sd.PartSizeOrderId = pso.PartSizeOrderId
+                    JOIN DeviceOutput do
+                        ON do.OrderID = pso.OrderId 
+                        AND do.PartID = pso.PartId 
+                        AND do.SizeID = pso.SizeID
+                    JOIN Size se ON se.SizeID = pso.SizeID
+                    WHERE dv.ConnectionStatus = 1
+                ),
+                RankedCuts AS (
+                    SELECT *,
+                           ROW_NUMBER() OVER (PARTITION BY DeviceID ORDER BY UpdatedAt DESC) AS RowNum
+                    FROM Combined
                 )
                 SELECT 
                     DeviceID,

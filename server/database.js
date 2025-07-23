@@ -42,7 +42,6 @@ async function initDatabase() {
   } catch (err) {
     console.error('❌ Lỗi kết nối cơ sở dữ liệu:', err.message);
     pool = null; // Reset pool to allow reconnection
-    throw err;
   }
 }
 
@@ -58,7 +57,9 @@ async function executeQuery(query, inputs = [], retries = 3, delay = 1000) {
       return result.recordset;
     } catch (err) {
       console.error(`❌ Query failed (attempt ${attempt}): ${err.message}`);
-      if (attempt === retries) throw err;
+      if (attempt === retries) {
+        logToFile(errorLogPath, `❌ Query failed after ${retries} attempts: ${attempt}`);
+      }
       await new Promise(res => setTimeout(res, delay));
       delay *= 2; // exponential backoff
     }
@@ -93,7 +94,7 @@ async function getSizeDataFromDB(ipAddress, orderID, partName) {
     
     // Đảm bảo OrderID là số nguyên hợp lệ trước khi truyền vào câu lệnh SQL
     if (isNaN(orderID) || orderID <= 0) {
-      throw new Error('Invalid OrderID. It must be a positive integer.');
+      console.warn('Invalid OrderID. It must be a positive integer.');
     }
 
     request.input('IpAddress', sql.NVarChar, ipAddress);
@@ -109,12 +110,11 @@ async function getSizeDataFromDB(ipAddress, orderID, partName) {
     }
   } catch (error) {
     console.error('Error fetching size data from database:', error.message);
-    throw error;
   }
 }
 
-async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100) {
-  const offset = (page - 1) * pageSize;
+async function getActualOutputData(startDate, endDate) {
+  // const offset = (page - 1) * pageSize;
 
   const dataQuery = `
         SELECT  
@@ -191,9 +191,7 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
           latestDO.CreatedAt,
           latestDO.UpdatedAt
       ORDER BY 
-          latestDO.UpdatedAt ASC
-
-    OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
+          latestDO.UpdatedAt ASC;
   `;
 
   const countQuery = `
@@ -205,20 +203,10 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
   try {
     const pool = await initDatabase();
 
-    // Run count query first
-    const countRequest = pool.request();
-    countRequest.input('startDate', sql.DateTime, startDate);
-    countRequest.input('endDate', sql.DateTime, endDate);
-    const countResult = await countRequest.query(countQuery);
-    const totalCount = countResult.recordset[0]?.TotalCount || 0;
-    const totalPages = Math.ceil(totalCount / pageSize);
-
     // Run data query next
     const dataRequest = pool.request();
     dataRequest.input('startDate', sql.DateTime, startDate);
     dataRequest.input('endDate', sql.DateTime, endDate);
-    dataRequest.input('offset', sql.Int, offset);
-    dataRequest.input('pageSize', sql.Int, pageSize);
     const dataResult = await dataRequest.query(dataQuery);
 
     const filteredOutputData = dataResult.recordset
@@ -244,15 +232,10 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
       }));
 
     return {
-      Page: page,
-      PageSize: pageSize,
-      TotalCount: totalCount,
-      TotalPages: totalPages,
       Data: filteredOutputData
     };
   } catch (error) {
     console.error('Error fetching actual output data from database:', error.message);
-    throw error;
   }
 }
 
@@ -260,7 +243,7 @@ async function getActualOutputData(startDate, endDate, page = 1, pageSize = 100)
 async function setOrderIsComplete(OrderID) {
   // Kiểm tra OrderID hợp lệ
   if (!OrderID || OrderID <= 0) {
-    throw new Error('OrderID không hợp lệ. Nó phải là số nguyên dương.');
+    console.warn('OrderID không hợp lệ. Nó phải là số nguyên dương.');
   }
 
   try {
@@ -286,13 +269,12 @@ async function setOrderIsComplete(OrderID) {
     return true; // Trả về true nếu cập nhật thành công
   } catch (error) {
     console.error('Lỗi khi cập nhật trạng thái Order thành Complete:', error.message);
-    throw error;
   }
 }
 
 async function setSubDistributionComplete(SubDistributionID, Status) {
   if (!Number.isInteger(SubDistributionID) || SubDistributionID <= 0) {
-    throw new Error('SubDistributionID không hợp lệ. Nó phải là số nguyên dương.');
+    console.warn('SubDistributionID không hợp lệ. Nó phải là số nguyên dương.');
   }
 
   try {
@@ -320,7 +302,6 @@ async function setSubDistributionComplete(SubDistributionID, Status) {
 
   } catch (err) {
     console.error('❌ Lỗi khi cập nhật trạng thái SubDistribution:', err.message);
-    throw err;
   }
 }
 async function getSubDistributions(distributionID) {
@@ -354,7 +335,7 @@ async function getSubDistributions(distributionID) {
 async function setDistributionIsComplete(DistributionID, Status) {
   // Kiểm tra DistributionID hợp lệ
   if (!DistributionID || DistributionID <= 0) {
-    throw new Error('DistributionID không hợp lệ. Nó phải là số nguyên dương.');
+    console.warn('DistributionID không hợp lệ. Nó phải là số nguyên dương.');
   }
 
   try {
@@ -381,7 +362,6 @@ async function setDistributionIsComplete(DistributionID, Status) {
     return true; // Trả về true nếu cập nhật thành công
   } catch (error) {
     console.error('Lỗi khi cập nhật trạng thái Distribution thành Complete:', error.message);
-    throw error;
   }
 }
 /**
@@ -500,7 +480,6 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
       await transaction.rollback();
     }
     console.error('❌ Error logging CutHistory with transaction:', error.message);
-    throw error;
   }
 }
 
@@ -510,13 +489,13 @@ async function saveActualDataToDB(data) {
 
   // Kiểm tra OrderID trước khi tiếp tục
   if (!OrderID || OrderID === 0) {
-    throw new Error('OrderID không hợp lệ');
+    console.warn('OrderID không hợp lệ');
   }
 
   try {
     for (const size of SizeData) {
       if (!size.SizeID || typeof size.SizeID !== 'number') {
-        throw new Error(`Kích thước không hợp lệ: ${size.SizeID}`);
+        console.warn(`Kích thước không hợp lệ: ${size.SizeID}`);
       }
 
       const inputs = [
@@ -645,7 +624,6 @@ async function saveActualDataToDB(data) {
     }
   } catch (error) {
     console.error('Lỗi khi cập nhật Actual data:', error.message);
-    throw error;
   }
 }
 
@@ -988,7 +966,6 @@ async function getDistributionDataFromDb(ipAddress) {
   } catch (error) {
     console.error(`Error fetching distribution data from DB: ${error.message}`);
     logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
-    throw error;
   }
 }
 
@@ -1061,7 +1038,6 @@ async function getSizeAndDistributionDataFromDb(ipAddress, orderId, isLeather) {
   } catch (error) {
     console.error(`Error fetching distribution data from DB: ${error.message}`);
     logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
-    throw error;
   }
 }
 
@@ -1107,7 +1083,6 @@ async function getDistributionCompleteFromDb(ipAddress, orderId, isLeather, note
   } catch (error) {
       console.error(`❌ Error fetching distribution data from DB: ${error.message}`);
       logToFile(errorLogPath, `❌ Error fetching distribution data from DB: ${error.message}`);
-      throw error;
   }
 }
 
@@ -1156,7 +1131,6 @@ async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID
   } catch (error) {
     console.error(`❌ Error fetching distribution data: ${error.message}`);
     logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
-    throw error;
   }
 }
 
@@ -1164,12 +1138,11 @@ async function getAllDeviceData() {
   try {
     const pool = await sql.connect(dbConfig);
     const result = await pool.request()
-      .query('SELECT a.DeviceID, a.IpAddress, a.MachineName, a.ConnectionStatus, a.IsActive, b.PlantName, d.DepartmentName FROM DeviceList a JOIN Plant b ON a.PlantID = b.PlantID JOIN Department d ON d.DepartmentID= a.DepartmentID');
+      .query('SELECT a.DeviceID, a.IpAddress, a.MachineName, a.ConnectionStatus, a.IsActive, b.PlantName, d.DepartmentName FROM DeviceList a JOIN Plant b ON a.PlantID = b.PlantID JOIN Department d ON d.DepartmentID= a.DepartmentID WHERE a.IsActive = 1');
 
     return result.recordset;  
   } catch (error) {
     console.error('Error fetching device data from database:', error.message);
-    throw error;
   }
 }
 
@@ -1259,7 +1232,7 @@ async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 1
     };
 
   } catch (err) {
-    throw new Error('Database query failed: ' + err.message);
+    console.error('Database query failed: ' + err.message);
   }
 }
 
@@ -1288,7 +1261,6 @@ async function getDistributionByDevice(ipAddress) {
     
   } catch (error) {
     console.error('Error fetching device data from database:', error.message);
-    throw error;
   }
 }// Lấy danh sách thiết bị
 async function getDeviceList() {
@@ -1322,7 +1294,7 @@ async function addDeviceToList({ ipAddress, machineName, plantName }) {
   try {
     // Kiểm tra các tham số
     if (!ipAddress || !machineName || !plantName) {
-      throw new Error('Missing required fields: ipAddress, machineName, or plantName');
+      console.warn('Missing required fields: ipAddress, machineName, or plantName');
     }
 
     // Câu truy vấn lấy PlantID dựa trên tên Plant
@@ -1613,7 +1585,6 @@ async function getUserList() {
     return result.recordset;
   } catch (error) {
     console.error('Error fetching user list from database:', error.message);
-    throw error;
   }
 }
 
@@ -1634,7 +1605,6 @@ async function getOperatorList(departmentID) {
     return result.recordset;
   } catch (error) {
     console.error('Error fetching user list from database:', error.message);
-    throw error;
   }
 }
 
@@ -1648,7 +1618,6 @@ async function getOperatorDistribution(employeeID) {
     return result.recordset;
   } catch (error) {
     console.error('Error fetching user list from database:', error.message);
-    throw error;
   }
 }
 

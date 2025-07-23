@@ -40,6 +40,7 @@ async function connectToDevicesImmediately() {
     console.log('Starting immediate connection process...');
     const ipAddresses = await getDeviceList(); 
     console.log('IP Addresses:', ipAddresses);
+    await handleDeviceConnection(ipAddresses);
     await setIpAddresses(ipAddresses);
   } catch (error) {
     console.error(`Error during immediate device connection: ${error.message}`);

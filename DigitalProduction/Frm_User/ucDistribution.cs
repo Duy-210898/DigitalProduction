@@ -5,7 +5,6 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DevExpress.DashboardCommon.DataProcessing;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
@@ -1089,6 +1088,7 @@ namespace DigitalProduction
             tableLayoutMainDistribution.Enabled = true;
             ApplyMaterialFilterAndMonth();
             HandleReceivedSchedule(filteredSchedules);
+            // show hide input cutting number here
             Action action = isLeather ? (Action)rdLeather_Checked : rdRawMaterial_Checked;
             action();
             Console.WriteLine($"Received {filteredSchedules.Count} schedules.");
@@ -1420,7 +1420,6 @@ namespace DigitalProduction
             }
 
             // Iterate through the selected rows
-
             bool hasGroupSelected = selectedRows.Any(r => gridViewOverview.IsGroupRow(r));
             if (!hasGroupSelected)
             {
@@ -1434,7 +1433,7 @@ namespace DigitalProduction
                 }
 
                 gridViewOverview.RefreshData();
-                ShowMessage.ShowInfo("All data rows updated successfully.");
+                ShowMessage.ShowInfo(LocalizationManager.GetString("RowUpdated"), LocalizationManager.GetString("Information"));
             }
             else
             {

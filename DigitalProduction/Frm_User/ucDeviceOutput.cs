@@ -77,6 +77,7 @@ namespace DigitalProduction
             if (SplashScreenManager.Default?.IsSplashFormVisible == true)
                 SplashScreenManager.CloseForm(false);
         }
+
         private void InitializeViewModelUI()
         {
             mainPanel = new Panel
@@ -111,6 +112,8 @@ namespace DigitalProduction
 
             // 1. Bind GridControl to ViewModel's list (e.g., BindingList<DeviceOutput>)
             gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
+            gridControl_DeviceOutput.LookAndFeel.UseDefaultLookAndFeel = false;
+            gridControl_DeviceOutput.UseEmbeddedNavigator = true;
 
             // 2. Setup splash screen actions
             _viewModel.ShowLoadingAction = () =>
@@ -172,7 +175,6 @@ namespace DigitalProduction
             // ✅ Bind visibility to ViewModel.IsLoading (NOT Enabled!)
             overlayPanel.DataBindings.Add("Visible", viewModelBindingSource, "IsLoading", true, DataSourceUpdateMode.OnPropertyChanged);
 
-            _viewModel.InitPagingFooter(gridControl_DeviceOutput);
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
             gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
             this.Resize += UcDeviceOutput_Resize;
@@ -245,6 +247,36 @@ namespace DigitalProduction
                     }
                 }
             };
+            // Đánh số thứ tự
+            gridView_DeviceOutput.IndicatorWidth = 40;
+            gridView_DeviceOutput.CustomDrawRowIndicator += (s, e) =>
+            {
+                if (!e.Info.IsRowIndicator) return;
+
+                var row = gridView_DeviceOutput.GetRow(e.RowHandle) as DeviceOutput;
+
+                // ✅ Skip group header rows
+                if (row != null && row.IsGroupHeader)
+                {
+                    e.Info.DisplayText = string.Empty;
+                    e.Handled = true;
+                    return;
+                }
+
+                // ✅ Show row numbers for normal rows
+                if (e.RowHandle >= 0)
+                {
+                    // Calculate index based on visible non-header rows
+                    int displayIndex = gridView_DeviceOutput.DataController.ListSource.Cast<DeviceOutput>()
+                                        .Where(r => !r.IsGroupHeader)
+                                        .ToList()
+                                        .IndexOf(row) + 1;
+
+                    e.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+                    e.Info.DisplayText = displayIndex.ToString();
+                }
+            };
+
         }
 
         private void GridView_DeviceOutput_CustomDrawFooterCell(object sender, FooterCellCustomDrawEventArgs e)
@@ -487,19 +519,23 @@ namespace DigitalProduction
             gridView.OptionsCustomization.AllowFilter = false;
             gridView.OptionsCustomization.AllowSort = false;
             gridView.OptionsMenu.ShowAutoFilterRowItem = false;
-            gridView.Columns["MachineName"].Width = 110;
+            gridView.OptionsView.ColumnAutoWidth = false;
+            gridView.Columns["MachineName"].Width = 120;
             gridView.Columns["ActualSizeQty"].Width = 100;
             gridView.Columns["OperatorName"].Width = 130;
             gridView.Columns["Size"].Width = 60;
             gridView.Columns["PartName"].Width = 100;
-            gridView.Columns["SO"].Width = 80;
+            gridView.Columns["SO"].Width = 90;
             gridView.Columns["MaterialType"].Width = 100;
             gridView.Columns["SizeQty"].Width = 70;
             gridView.Columns["SO"].VisibleIndex = 0;
            // gridView.Columns["TotalPiecesPerPair"].VisibleIndex = 12;
             gridView.Columns["Timestamp"].Visible= false;
             gridView.Columns["UpdatedAt"].Visible = false;
-
+            gridView.Columns["SO"].Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
+            gridView.Columns["PartName"].Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
+            gridView.Columns["MachineName"].Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
+            gridView.Columns["OperatorName"].Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
             gridView.Appearance.HeaderPanel.ForeColor = Color.Black;
             gridView.Appearance.HeaderPanel.Font = new Font(gridView.Appearance.Row.Font, FontStyle.Bold);
             gridView.Appearance.HeaderPanel.TextOptions.HAlignment = HorzAlignment.Center;

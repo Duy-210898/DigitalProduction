@@ -2,11 +2,11 @@ const fs = require('fs');
 const net = require('net');
 const Modbus = require('jsmodbus');
 const ping = require('ping');
+const ModbusPollingManager = require('./ModbusPollingManager');
+const manager = new ModbusPollingManager(1000);
 const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setDistributionIsComplete, setSubDistributionComplete , getSubDistributions, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb, logCutHistoryToDB } = require('./database');
 //const { notifyClientsToDeleteOrder } = require('./notifications');
 
-// globally in your main server file
-const deviceStatusMap = new Map(); 
 let countRemainSizeData = {};
 let storeDistributionData = {};
 // let previousData = {};  // Store previous data for comparison
@@ -58,33 +58,33 @@ async function handleDisconnection(ipAddress) {
 }
 
 async function connectToDevice(ipAddress, retries = 0) {
-  if (typeof ipAddress === 'object') {
-    delete modbusClients[ipAddress];
-    return;
+  if (!ipAddress || typeof ipAddress !== 'string') {
+    console.error(`❌ Invalid IP address: ${ipAddress}`);
+    return null;
   }
 
   const isValidIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(ipAddress);
   if (!isValidIP) {
-    console.error(`❌ Invalid IP address: ${ipAddress}`);
+    console.error(`❌ Invalid IP format: ${ipAddress}`);
     logToFile(errorLogPath, `Invalid IP address skipped: ${ipAddress}`);
-    return;
+    return null;
   }
 
-  if (ipAddress != '10.30.4.91') return; // hardcoded skip
+  // Hardcoded skip
+  if (ipAddress !== '10.30.4.144') return null;
 
-  // Don't reconnect if already connected
+  // Nếu đã kết nối
   if (modbusClients[ipAddress]?.isConnected) {
-    return modbusClients[ipAddress].client;
+    return { client: modbusClients[ipAddress].client, socket: modbusClients[ipAddress].socket };
   }
 
-  // Check ping
+  // Kiểm tra ping
   const isReachable = await pingHost(ipAddress);
   if (!isReachable) {
     console.error(`🔴 Device at ${ipAddress} is not reachable.`);
     logToFile(errorLogPath, `Device at ${ipAddress} is not reachable.`);
-    setDeviceStatus(ipAddress, false, new Error('Ping failed'));
     await updateDeviceConnectionStatus(ipAddress, false);
-    return;
+    return null;
   }
 
   console.log(`✅ ${ipAddress} is reachable.`);
@@ -106,10 +106,9 @@ async function connectToDevice(ipAddress, retries = 0) {
         indexMultipleSOs: 0,
         SOs: [],
         indexMultiplePartNames: 0,
-        readerLoopStarted: false
+        readerLoopStarted: false,
+        sizeDataInfo: {}
       };
-
-      setDeviceStatus(ipAddress, true);
 
       try {
         await updateDeviceConnectionStatus(ipAddress, true);
@@ -124,160 +123,130 @@ async function connectToDevice(ipAddress, retries = 0) {
         logToFile(errorLogPath, `Write error: ${err.message}`);
       });
 
-      resolve(client);
+      resolve({ client, socket });
     });
 
+    // Xử lý lỗi kết nối
     socket.once('error', async error => {
-      //console.error(`❌ Connection error to ${ipAddress}: ${error.message}`);
       logToFile(errorLogPath, `❌ Connection error to ${ipAddress}:\n${error.stack}`);
-
-      setDeviceStatus(ipAddress, false, error);
-
-      if (error.code === 'ECONNREFUSED') {
-       // console.warn(`🚫 Port 502 refused for ${ipAddress}. Skipping delete bit clear.`);
-        return;
-      } else {
-        try {
-          const resp = await client.readHoldingRegisters(register3000Address, 1);
-          const regVal = resp.response._body.values[0];
-          await clearDeleteBit(client, regVal, register3000Address, 2);
-          console.log(`🧹 Cleared delete bit for ${ipAddress}`);
-        } catch (e) {
-          console.warn(`⚠️ Could not clear delete bit: ${e.message}`);
-          logToFile(errorLogPath, `Delete bit clear failed: ${e.stack}`);
-        }
-      }
-
-      await handleDisconnection(ipAddress);
-
-      // Clean up
-      if (modbusClients[ipAddress]) {
-        modbusClients[ipAddress].isConnected = false;
-        modbusClients[ipAddress].isDisconnected = true;
-        delete modbusClients[ipAddress].client;
-        delete modbusClients[ipAddress].socket;
-      }
-
-      if (retries < 3) {
-        console.log(`🔄 Retrying connection to ${ipAddress} (${retries + 1}/3)`);
-        setTimeout(() => connectToDevice(ipAddress, retries + 1).then(resolve).catch(reject), 10000);
-      } else {
-        console.error(`❌ Max retries reached for ${ipAddress}`);
-        await updateDeviceConnectionStatus(ipAddress, false);
-        reject(new Error("Max retries reached"));
-      }
+      await handleConnectionFailure(ipAddress, error, resolve, reject, retries);
     });
 
-    socket.once('close', async error => {
-      //console.warn(`⚠️ Connection closed to ${ipAddress}`);
+    // Xử lý socket close
+    socket.once('close', async hadError => {
       logToFile(successLogPath, `Connection closed at ${ipAddress}`);
-      setDeviceStatus(ipAddress, false);
-      
-      try {
-        if (error) { return;}
-        const resp = await client.readHoldingRegisters(register3000Address, 1);
-        const regVal = resp.response._body.values[0];
-        await clearDeleteBit(client, regVal, register3000Address, 2);
-      } catch (e) {
-        console.warn(`⚠️ Could not clear delete bit on close: ${e.message}`);
-      }
-
-      if (modbusClients[ipAddress]) {
-        modbusClients[ipAddress].isConnected = false;
-        modbusClients[ipAddress].isDisconnected = true;
-        modbusClients[ipAddress].indexMultipleSOs = 0;
-        modbusClients[ipAddress].indexMultiplePartNames = 0;
-        delete modbusClients[ipAddress].client;
-        delete modbusClients[ipAddress].socket;
-      }
-
-      try {
-        await handleDisconnection(ipAddress);
-      } catch (e) {
-        console.error(`❌ Error in handleDisconnection: ${e.message}`);
-      }
-
-      if (retries < 3) {
-        console.warn(`🔄 Retrying connection to ${ipAddress} (${retries + 1}/3)`);
-        setTimeout(() => {
-          connectToDevice(ipAddress, retries + 1).then(resolve).catch(reject);
-        }, 10000);
-      } else {
-        console.error(`❌ Max retries reached for ${ipAddress}`);
-        await updateDeviceConnectionStatus(ipAddress, false);
-        reject(new Error("Max retries reached"));
-      }
+      await handleConnectionFailure(ipAddress, null, resolve, reject, retries);
     });
   });
 }
 
-// Device status tracking
-function setDeviceStatus(ipAddress, isConnected, error = null) {
-  const previous = deviceStatusMap.get(ipAddress);
-  const newStatus = {
-    isConnected,
-    lastSeen: new Date(),
-    lastError: error ? error.message : null,
-  };
-
-  if (!previous || previous.isConnected !== isConnected) {
-    const statusStr = isConnected ? '🟢 Connected' : '🔴 Disconnected';
-    console.log(`${statusStr} → ${ipAddress}`);
+async function handleConnectionFailure(ipAddress, error, resolve, reject, retries) {
+  try {
+    await handleDisconnection(ipAddress);
+  } catch (e) {
+    console.error(`❌ Error in handleDisconnection: ${e.message}`);
   }
 
-  deviceStatusMap.set(ipAddress, newStatus);
+  if (modbusClients[ipAddress]) {
+    modbusClients[ipAddress].isConnected = false;
+    modbusClients[ipAddress].isDisconnected = true;
+    delete modbusClients[ipAddress].client;
+    delete modbusClients[ipAddress].socket;
+  }
+
+  if (retries < 3) {
+    console.warn(`🔄 Retrying connection to ${ipAddress} (${retries + 1}/3)`);
+    setTimeout(() => {
+      connectToDevice(ipAddress, retries + 1).then(resolve).catch(reject);
+    }, 10000);
+  } else {
+    console.error(`❌ Max retries reached for ${ipAddress}`);
+    await updateDeviceConnectionStatus(ipAddress, false);
+    reject(new Error("Max retries reached"));
+  }
 }
 
 async function startReadingRegisters(ipAddress) {
-  if (typeof ipAddress === 'object') {
-    delete modbusClients[ipAddress];
+  if (!ipAddress || typeof ipAddress !== 'string') {
+    console.error(`Invalid IP address:`, ipAddress);
     return;
   }
-  if (!modbusClients[ipAddress]) {
-    console.warn(`modbusClients[${ipAddress}] is undefined`);
-    modbusClients[ipAddress] = { readerLoopStarted: false };
-    return;
-  }
-  if (modbusClients[ipAddress].readerLoopStarted) return;
-  modbusClients[ipAddress].readerLoopStarted = true;
 
-  setInterval(async () => {
-    try {
-      const entry = modbusClients[ipAddress];
-      if (!entry || !entry.client || !entry.isConnected) {
-        console.warn(`[${ipAddress}] Modbus client not connected — attempting initial connect...`);
-        try {
-          await connectToDevice(ipAddress);
-        } catch (connErr) {
-          console.error(`[${ipAddress}] Initial connect failed: ${connErr.message}`);
-        }
-        return;
-      }
-  
-      const client = entry.client;
-      const socket = entry.socket;
-      if (!socket || socket.destroyed || !socket.writable) {
-        console.warn(`[${ipAddress}] Socket closed; reconnecting...`);
-        try {
-          await connectToDevice(ipAddress);
-        } catch (reConnErr) {
-          console.error(`[${ipAddress}] Reconnect failed: ${reConnErr.message}`);
-        }
-        return;
-      }
-  
-      // Read/write distribution data
-      await checkAndSaveDistribution(client, ipAddress);
-  
-      // If we have sizeDataInfo, read actual data
-      if (entry.sizeDataInfo && Object.keys(entry.sizeDataInfo).length > 0) {
-        await readActualData(client, ipAddress);
-      }
-    } catch (err) {
-      console.error(`[${ipAddress}] Error in polling loop: ${err.message}`);
+  if (!modbusClients[ipAddress]) {
+    modbusClients[ipAddress] = { readerLoopStarted: false };
+  }
+
+  const entry = modbusClients[ipAddress];
+  if (entry.readerLoopStarted) {
+    console.log(`[${ipAddress}] Reader loop already started.`);
+    return;
+  }
+  entry.readerLoopStarted = true;
+
+  // Kết nối tới device
+  try {
+    const result = await connectToDevice(ipAddress);
+    if (!result) {
+      console.error(`[${ipAddress}] connectToDevice returned null`);
+      entry.isConnected = false;
+      entry.client = null;
+      entry.socket = null;
+      manager.registerClient(ipAddress, entry);
+      return;
     }
-  }, 1000);  
+
+    const { client, socket } = result;
+    entry.client = client;
+    entry.socket = socket;
+    entry.isConnected = true;
+    entry.sizeDataInfo = {};
+
+    manager.registerClient(ipAddress, entry);
+  } catch (err) {
+    console.error(`[${ipAddress}] Initial connect failed: ${err.message}`);
+    entry.isConnected = false;
+    entry.client = null;
+    entry.socket = null;
+    manager.registerClient(ipAddress, entry);
+  }
 }
+
+// Đăng ký event 1 lần
+manager.on('poll', async (client, ip) => {
+  try {
+    await checkAndSaveDistribution(client, ip);
+  } catch (err) {
+    console.error(`[${ip}] Error in poll: ${err.message}`);
+  }
+});
+
+manager.on('readActual', async (client, ip) => {
+  try {
+    await readActualData(client, ip);
+  } catch (err) {
+    console.error(`[${ip}] Error in readActual: ${err.message}`);
+  }
+});
+
+manager.on('reconnect', async (ip) => {
+  try {
+    const result = await connectToDevice(ip);
+    if (!result) {
+      console.error(`[${ip}] Reconnect failed: connectToDevice returned null`);
+      if (modbusClients[ip]) modbusClients[ip].isConnected = false;
+      return;
+    }
+
+    const { client, socket } = result;
+    if (!modbusClients[ip]) modbusClients[ip] = {};
+    modbusClients[ip].client = client;
+    modbusClients[ip].socket = socket;
+    modbusClients[ip].isConnected = true;
+  } catch (err) {
+    console.error(`[${ip}] Reconnect failed: ${err.message}`);
+    if (modbusClients[ip]) modbusClients[ip].isConnected = false;
+  }
+});
 
 async function checkAndSaveDistribution(client, ipAddress) {
   try {
@@ -323,7 +292,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
       if (modbusClients[ipAddress].SOs.length == 0) { 
         return
       }
-      if (ipAddress != '10.30.4.91') return;
+      if (ipAddress !== '10.30.4.144') return;
       // interrupt HMI set distributionData again
       if (!modbusClients[ipAddress].sizeDataInfo ||
         typeof modbusClients[ipAddress].sizeDataInfo !== 'object' ||
@@ -794,25 +763,40 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
     
     const distributionData = await getDistributionDataFromDb(ipAddress);
     
+    // Kiểm tra SO hiện tại
+    let currentSOComplete = false;
+    const currentSO = clientData.SOs[clientData.indexMultipleSOs];
+    if (currentSO) {
+      const data = currentSO.Data ?? [];
+      currentSOComplete = Array.isArray(data) && data.every(
+        item => item.Status === 'Complete' || item.Status === 'Stop'
+      );
+    }
+
+    // Nếu tất cả SOs complete hoặc distributionData null
+    if (currentSOComplete || !distributionData) {
+      await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
+      resetClientData(ipAddress, clientData);
+      await delay(3000);
+      return; // Nếu clear thì return luôn
+    }
+
     // Check if distribution data has more SOs than client memory
     let isPendingSize = false;
     if (distributionData?.OrderIDWithSOs?.length > clientData.SOs.length) {
       isPendingSize = true;
     }
-    
-    // ✅ Check ALL SOs' Data arrays are fully complete
-    let allSOsComplete = clientData.SOs.every(so => {
-      const data = so?.Data ?? [];
-      return Array.isArray(data) && data.every(
-        item => item.Status === 'Complete' || item.Status === 'Stop'
-      );
-    });
-    
-    if (allSOsComplete || !distributionData || isPendingSize) {
+
+    // Nếu isPendingSize = true => Clear và return ngay
+    if (isPendingSize) {
       await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
-    
-      // Reset memory for next batch
-      storeDistributionData[ipAddress] = {};
+      resetClientData(ipAddress, clientData);
+      return;
+    }
+
+    // Helper để reset dữ liệu client
+    function resetClientData(ip, clientData) {
+      storeDistributionData[ip] = {};
       clientData.previousSizeData = [];
       clientData.previousData = {};
       clientData.indexMultipleSOs = 0;
@@ -820,9 +804,9 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
       if (clientData.sizeDataInfo) {
         clientData.sizeDataInfo.sizeID = [];
       }
-      await delay(3000);
-    //  console.log(`[${ipAddress}] All SOs complete. Cleared Modbus memory.`);
-    }  
+    }
+
+
 
     if (isBitOn(binaryValue3000, previousSOIndex)) {
       await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
@@ -1101,28 +1085,6 @@ function isBitOn(binaryString, bitIndex) {
   return (value & bitmask) !== 0;
 }
 
-
-// Check bit at position `n` (1-based index from right)
-function isBitSetString(binaryStr, bitPosition) {
-  return binaryStr[binaryStr.length - bitPosition] === '1';
-}
-async function readOperatorID(client, ipAddress) {
-  try {
-    const data = await client.readHoldingRegisters(1018, 2);
-    if (!data) return;
-    const lowRegister = data.response._body.values[0];  // Low register (16 bits)
-    const highRegister = data.response._body.values[1]; // High register (16 bits)
-
-    // Combine the two 16-bit
-    const operatorID = (highRegister << 16) | lowRegister;
-    modbusClients[ipAddress].operatorID = operatorID;
-   // console.info(`OperatorID: ${operatorID} IP: ${ipAddress}`);
-  } catch (error) {
-    const errorMsg = `Error reading register 1018 for IP ${ipAddress}: ${error.message}`;
-    console.error(errorMsg);
-    logToFile(errorLogPath, errorMsg);
-  }
-}
 async function writeOperatorID(client, ipAddress, operatorID) {
   try {
     // Split 32-bit operatorID into two 16-bit values
@@ -1668,7 +1630,6 @@ async function writeToModbusRegister(ipAddress, registerAddress = 8000) {
           entry = modbusClients[ipAddress];
           if (!entry || !entry.client) {
             return;
-            //throw new Error('Client still undefined after reconnect');
           }
         } catch (connErr) {
           const reconnectErrMsg = `[${ipAddress}] Reconnect failed: ${connErr.message}`;
@@ -1831,7 +1792,7 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
   // const client = modbusClient.client;
 
   if (!client || !client.writeSingleRegister) {
-    throw new Error(`Modbus client not properly initialized for device at ${ipAddress}`);
+    console.warn(`Modbus client not properly initialized for device at ${ipAddress}`);
   }
 
   try {
@@ -1926,7 +1887,6 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
   //  console.log('Data successfully saved to Modbus');
   } catch (error) {
     console.error(`Error saving distribution data to Modbus: ${error.message}`);
-    throw new Error(`Failed to save distribution data: ${error.message}`);
   }
 }
 

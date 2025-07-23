@@ -1,6 +1,8 @@
-﻿using DevExpress.XtraEditors;
+﻿using System.Drawing;
+using System.Globalization;
+using System.Text;
+using DevExpress.XtraEditors;
 using DigitalProduction.Validation;
-using System.Drawing;
 
 public static class LookUpEditValidatorExtensions
 {
@@ -13,5 +15,24 @@ public static class LookUpEditValidatorExtensions
         lookUpEdit.BackColor = isValid ? Color.White : Color.LightCoral;
 
         return isValid;
+    }
+    /// <summary>
+    /// Bật tìm kiếm không dấu cho GridLookUpEdit.
+    /// </summary>
+    /// <param name="lookup">GridLookUpEdit cần enable.</param>
+    /// <param name="displayField">Tên cột hiển thị (VD: "OperatorName").</param>
+  
+    public static string RemoveVietnameseDiacritics(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+
+        text = text.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+        foreach (char c in text)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        }
+        return sb.ToString().Normalize(NormalizationForm.FormC);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -92,22 +93,27 @@ namespace DigitalProduction
             gridLookUpEditSO.Properties.ImmediatePopup = true;
             gridLookUpEditSO.Properties.PopupView.OptionsBehavior.Editable = false;
 
-            // Selection changed event
-            view.SelectionChanged += (s, e) =>
+            view.SelectionChanged += async (s, e) =>
             {
                 selectedSalesOrders.Clear();
-                var selectedRows = view.GetSelectedRows();
-                foreach (int rowHandle in selectedRows)
+                foreach (int rowHandle in view.GetSelectedRows())
                 {
                     if (view.GetRow(rowHandle) is SalesOrder so)
                         selectedSalesOrders.Add(so);
                 }
 
-                _ = GetDataAndLoadToGridAsync();
-                // Force update of display text
+                // Lưu layout
+                var layoutStream = new MemoryStream();
+                view.SaveLayoutToStream(layoutStream);
+                layoutStream.Position = 0;
+
+                await GetDataAndLoadToGridAsync(); // Load data mới
+
+                // Restore layout
+                layoutStream.Position = 0;
+                view.RestoreLayoutFromStream(layoutStream);
                 gridLookUpEditSO.RefreshEditValue();
             };
-
             // Custom display text event
             gridLookUpEditSO.CustomDisplayText += (s, e) =>
             {

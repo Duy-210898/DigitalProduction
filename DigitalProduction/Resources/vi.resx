@@ -660,4 +660,34 @@
   <data name="SubDistributions" xml:space="preserve">
     <value>Chi tiết phân phối</value>
   </data>
+  <data name="CuttingManagement" xml:space="preserve">
+    <value>Xem tình trạng hoạt động</value>
+  </data>
+  <data name="DistributionManagement" xml:space="preserve">
+    <value>Quản lý đơn</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Lọc</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="IsCutting" xml:space="preserve">
+    <value>Đang chặt</value>
+  </data>
+  <data name="LastCutQty" xml:space="preserve">
+    <value>Số lượng chặt mới nhất</value>
+  </data>
+  <data name="LastCutTime" xml:space="preserve">
+    <value>Thời gian chặt mới nhất</value>
+  </data>
+  <data name="LastSizeID" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="LastSizeQty" xml:space="preserve">
+    <value>Số lượng </value>
+  </data>
+  <data name="RowUpdated" xml:space="preserve">
+    <value>Dữ liệu đã được cập nhật.</value>
+  </data>
 </root>

@@ -630,4 +630,34 @@
   <data name="SubDistributions" xml:space="preserve">
     <value>Sub Distributions</value>
   </data>
+  <data name="CuttingManagement" xml:space="preserve">
+    <value>View status cutting</value>
+  </data>
+  <data name="DistributionManagement" xml:space="preserve">
+    <value>Distribution Management</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="IsCutting" xml:space="preserve">
+    <value>Cutting</value>
+  </data>
+  <data name="LastCutQty" xml:space="preserve">
+    <value>Last Cut Quantity</value>
+  </data>
+  <data name="LastCutTime" xml:space="preserve">
+    <value>Last Cut Time</value>
+  </data>
+  <data name="LastSizeID" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="LastSizeQty" xml:space="preserve">
+    <value>Last Size Quantity</value>
+  </data>
+  <data name="RowUpdated" xml:space="preserve">
+    <value>All data rows updated successfully.</value>
+  </data>
 </root>
