@@ -2010,7 +2010,7 @@ namespace DigitalProduction
                     SELECT 
                         dv.DeviceID,
                         se.Size,
-                        do.ActualCut,
+                        do.ActualSizeQty,
                         pso.SizeQty,
                         do.UpdatedAt
                     FROM DeviceList dv
@@ -2029,7 +2029,7 @@ namespace DigitalProduction
                     SELECT 
                         dv.DeviceID,
                         se.Size,
-                        do.ActualCut,
+                        do.ActualSizeQty,
                         pso.SizeQty,
                         do.UpdatedAt
                     FROM DeviceList dv
@@ -2050,7 +2050,7 @@ namespace DigitalProduction
                 SELECT 
                     DeviceID,
                     Size,
-                    ActualCut,
+                    ActualSizeQty,
                     SizeQty,
                     UpdatedAt
                 FROM RankedCuts
@@ -2070,7 +2070,7 @@ namespace DigitalProduction
                         {
                             DeviceID = reader.GetInt32(0),
                             Size = reader.IsDBNull(1) ? null : reader.GetString(1),
-                            ActualCut = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2),
+                            ActualSizeQty = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2),
                             SizeQty = reader.IsDBNull(3) ? (int?)null : reader.GetInt32(3),
                             UpdatedAt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4)
                         });

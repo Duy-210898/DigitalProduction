@@ -142,17 +142,26 @@ async function handleGetActualData(ws, request, retryCount = 0) {
     // const page = filter?.page ?? 1;
     // const pageSize = filter?.pageSize ?? 100;
 
-    // Get current local date
-    const currentDate = new Date();
-    const formattedCurrentDate = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const currentDate = new Date(); // Local time (assumed +07:00)
 
-    // Parse and normalize start/end dates
+    // Format YYYY-MM-DD
+    const formattedCurrentDate = currentDate.toISOString().split('T')[0];
+    
+    // Parse input or fallback to today
     const startDate = filter?.startDate ? new Date(filter.startDate) : new Date(formattedCurrentDate);
-    let endDate = filter?.endDate ? new Date(filter.endDate) : new Date(formattedCurrentDate);
-    endDate.setHours(23, 59, 59, 999); // End of day
-
+    const endDate = filter?.endDate ? new Date(filter.endDate) : new Date(formattedCurrentDate);
+    
+    // Normalize endDate to end of day local time
+    endDate.setHours(23, 59, 59, 999);
+    
+    // Convert to UTC string for SQL if needed (optional)
+    const sqlStartDate = startDate.toISOString();  // e.g., 2025-04-19T00:00:00.000Z
+    const sqlEndDate = endDate.toISOString();      // e.g., 2025-04-19T16:59:59.999Z (for +07:00)
+    
+    // Send to SQL query as parameters @startDate and @endDate
+    
     // Fetch real-time paginated data
-    const realTimeData = await getActualOutputData(startDate, endDate);
+    const realTimeData = await getActualOutputData(sqlStartDate, sqlEndDate);
 
     if (!realTimeData || realTimeData.Data.length === 0) {
       return ws.send(JSON.stringify({

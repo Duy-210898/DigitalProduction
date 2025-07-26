@@ -276,7 +276,6 @@ namespace DigitalProduction
                     e.Info.DisplayText = displayIndex.ToString();
                 }
             };
-
         }
 
         private void GridView_DeviceOutput_CustomDrawFooterCell(object sender, FooterCellCustomDrawEventArgs e)

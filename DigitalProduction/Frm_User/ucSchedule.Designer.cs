@@ -83,10 +83,10 @@
             // gridControlSchedule
             // 
             this.gridControlSchedule.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridControlSchedule.Location = new System.Drawing.Point(3, 203);
+            this.gridControlSchedule.Location = new System.Drawing.Point(3, 214);
             this.gridControlSchedule.MainView = this.gridViewSchedule;
             this.gridControlSchedule.Name = "gridControlSchedule";
-            this.gridControlSchedule.Size = new System.Drawing.Size(969, 315);
+            this.gridControlSchedule.Size = new System.Drawing.Size(969, 304);
             this.gridControlSchedule.TabIndex = 2;
             this.gridControlSchedule.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewSchedule,
@@ -118,7 +118,7 @@
             this.tableMainLayout.Name = "tableMainLayout";
             this.tableMainLayout.RowCount = 3;
             this.tableMainLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
-            this.tableMainLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 150F));
+            this.tableMainLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 161F));
             this.tableMainLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableMainLayout.Size = new System.Drawing.Size(975, 521);
             this.tableMainLayout.TabIndex = 4;
@@ -140,7 +140,7 @@
             this.flayoutTableSelectSO.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 54.62963F));
             this.flayoutTableSelectSO.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45.37037F));
             this.flayoutTableSelectSO.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.flayoutTableSelectSO.Size = new System.Drawing.Size(969, 144);
+            this.flayoutTableSelectSO.Size = new System.Drawing.Size(969, 155);
             this.flayoutTableSelectSO.TabIndex = 1;
             // 
             // tableLayoutPanel6
@@ -151,31 +151,34 @@
             this.tableLayoutPanel6.Controls.Add(this.lb_PartName, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.comboxPartName, 0, 1);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tableLayoutPanel6.Location = new System.Drawing.Point(245, 3);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 2;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 52F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 48F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(721, 72);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(721, 78);
             this.tableLayoutPanel6.TabIndex = 7;
             // 
             // lb_PartName
             // 
-            this.lb_PartName.Appearance.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lb_PartName.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lb_PartName.Appearance.Options.UseFont = true;
             this.lb_PartName.Location = new System.Drawing.Point(3, 3);
             this.lb_PartName.Name = "lb_PartName";
-            this.lb_PartName.Size = new System.Drawing.Size(135, 14);
+            this.lb_PartName.Size = new System.Drawing.Size(138, 15);
             this.lb_PartName.TabIndex = 1;
             this.lb_PartName.Text = "Please select Part Name:";
             // 
             // comboxPartName
             // 
-            this.comboxPartName.Location = new System.Drawing.Point(3, 40);
+            this.comboxPartName.Location = new System.Drawing.Point(3, 43);
             this.comboxPartName.Name = "comboxPartName";
+            this.comboxPartName.Properties.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.comboxPartName.Properties.Appearance.Options.UseFont = true;
             this.comboxPartName.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboxPartName.Size = new System.Drawing.Size(182, 20);
+            this.comboxPartName.Size = new System.Drawing.Size(182, 22);
             this.comboxPartName.TabIndex = 0;
             this.comboxPartName.EditValueChanged += new System.EventHandler(this.comboPartName_EditValueChanged);
             // 
@@ -187,12 +190,13 @@
             this.tableLayoutPanel2.Controls.Add(this.lblFilterDate, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.dateTimePickerSchedule, 0, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(236, 72);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(236, 78);
             this.tableLayoutPanel2.TabIndex = 3;
             // 
             // lblFilterDate
@@ -212,7 +216,7 @@
             this.dateTimePickerSchedule.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dateTimePickerSchedule.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.dateTimePickerSchedule.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePickerSchedule.Location = new System.Drawing.Point(3, 39);
+            this.dateTimePickerSchedule.Location = new System.Drawing.Point(3, 42);
             this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
             this.dateTimePickerSchedule.Size = new System.Drawing.Size(230, 29);
             this.dateTimePickerSchedule.TabIndex = 2;
@@ -225,35 +229,37 @@
             this.tableLayoutPanel3.Controls.Add(this.lblSelectSO, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.gridLookUpEditSO, 0, 1);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 81);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 87);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 2;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 36.61972F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 63.38028F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(236, 60);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(236, 65);
             this.tableLayoutPanel3.TabIndex = 4;
             // 
             // lblSelectSO
             // 
-            this.lblSelectSO.Appearance.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblSelectSO.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblSelectSO.Appearance.Options.UseFont = true;
             this.lblSelectSO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSelectSO.Location = new System.Drawing.Point(3, 3);
             this.lblSelectSO.Name = "lblSelectSO";
-            this.lblSelectSO.Size = new System.Drawing.Size(230, 15);
+            this.lblSelectSO.Size = new System.Drawing.Size(230, 17);
             this.lblSelectSO.TabIndex = 0;
             this.lblSelectSO.Text = "Please select SO:";
             // 
             // gridLookUpEditSO
             // 
             this.gridLookUpEditSO.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridLookUpEditSO.Location = new System.Drawing.Point(3, 24);
+            this.gridLookUpEditSO.Location = new System.Drawing.Point(3, 26);
             this.gridLookUpEditSO.Name = "gridLookUpEditSO";
+            this.gridLookUpEditSO.Properties.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gridLookUpEditSO.Properties.Appearance.Options.UseFont = true;
             this.gridLookUpEditSO.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.gridLookUpEditSO.Properties.NullText = "";
             this.gridLookUpEditSO.Properties.PopupView = this.gridLookUpEdit1View;
-            this.gridLookUpEditSO.Size = new System.Drawing.Size(230, 20);
+            this.gridLookUpEditSO.Size = new System.Drawing.Size(230, 22);
             this.gridLookUpEditSO.TabIndex = 1;
             // 
             // gridLookUpEdit1View
@@ -272,42 +278,46 @@
             this.tableLayoutPanel4.Controls.Add(this.comboSize, 0, 1);
             this.tableLayoutPanel4.Controls.Add(this.btnSync, 1, 1);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(245, 81);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(245, 87);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 2;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 36.76471F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 63.23529F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(721, 60);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(721, 65);
             this.tableLayoutPanel4.TabIndex = 6;
             // 
             // lb_Size
             // 
-            this.lb_Size.Appearance.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lb_Size.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lb_Size.Appearance.Options.UseFont = true;
             this.lb_Size.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lb_Size.Location = new System.Drawing.Point(3, 3);
             this.lb_Size.Name = "lb_Size";
-            this.lb_Size.Size = new System.Drawing.Size(229, 16);
+            this.lb_Size.Size = new System.Drawing.Size(229, 17);
             this.lb_Size.TabIndex = 6;
             this.lb_Size.Text = "Please select Size:";
             // 
             // comboSize
             // 
             this.comboSize.Dock = System.Windows.Forms.DockStyle.Left;
-            this.comboSize.Location = new System.Drawing.Point(3, 25);
+            this.comboSize.Location = new System.Drawing.Point(3, 26);
             this.comboSize.Name = "comboSize";
+            this.comboSize.Properties.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.comboSize.Properties.Appearance.Options.UseFont = true;
             this.comboSize.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboSize.Size = new System.Drawing.Size(182, 20);
+            this.comboSize.Size = new System.Drawing.Size(182, 22);
             this.comboSize.TabIndex = 0;
             this.comboSize.EditValueChanged += new System.EventHandler(this.comboSize_EditValueChanged);
             // 
             // btnSync
             // 
+            this.btnSync.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSync.Appearance.Options.UseFont = true;
             this.btnSync.ImageOptions.Image = global::DigitalProduction.Properties.Resources.sync_icon;
-            this.btnSync.Location = new System.Drawing.Point(238, 25);
+            this.btnSync.Location = new System.Drawing.Point(238, 26);
             this.btnSync.Name = "btnSync";
-            this.btnSync.Size = new System.Drawing.Size(109, 32);
+            this.btnSync.Size = new System.Drawing.Size(140, 36);
             this.btnSync.TabIndex = 5;
             this.btnSync.Text = "simpleButton1";
             // 
@@ -315,14 +325,15 @@
             // 
             this.tableLayoutPanel7.ColumnCount = 4;
             this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 200F));
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 138F));
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 102F));
             this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel7.Controls.Add(this.rdLeather, 2, 0);
             this.tableLayoutPanel7.Controls.Add(this.rdRawMaterial, 1, 0);
             this.tableLayoutPanel7.Controls.Add(this.lbSelectMaterialType, 0, 0);
             this.tableLayoutPanel7.Controls.Add(this.fpRequireSelectTypeMaterial, 3, 0);
             this.tableLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tableLayoutPanel7.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel7.Name = "tableLayoutPanel7";
             this.tableLayoutPanel7.RowCount = 1;
@@ -336,9 +347,9 @@
             this.rdLeather.BackColor = System.Drawing.Color.Transparent;
             this.rdLeather.Dock = System.Windows.Forms.DockStyle.Left;
             this.rdLeather.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rdLeather.Location = new System.Drawing.Point(323, 3);
+            this.rdLeather.Location = new System.Drawing.Point(341, 3);
             this.rdLeather.Name = "rdLeather";
-            this.rdLeather.Size = new System.Drawing.Size(107, 38);
+            this.rdLeather.Size = new System.Drawing.Size(96, 38);
             this.rdLeather.TabIndex = 5;
             this.rdLeather.TabStop = true;
             this.rdLeather.Text = "radioButton1";
@@ -379,7 +390,7 @@
             this.fpRequireSelectTypeMaterial.Location = new System.Drawing.Point(443, 3);
             this.fpRequireSelectTypeMaterial.Name = "fpRequireSelectTypeMaterial";
             this.fpRequireSelectTypeMaterial.OptionsBeakPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.fpRequireSelectTypeMaterial.Size = new System.Drawing.Size(461, 38);
+            this.fpRequireSelectTypeMaterial.Size = new System.Drawing.Size(400, 38);
             this.fpRequireSelectTypeMaterial.TabIndex = 6;
             // 
             // lblFlyoutMessage

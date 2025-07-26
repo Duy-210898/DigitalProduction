@@ -6,7 +6,7 @@ const { setupWebSocket } = require('./websocket');
 const schedule = require('node-schedule');
 const { setIpAddresses, closeAllConnections, connectToDevice } = require('./modbusClient');
 
-const PING_INTERVAL = 10000;
+const PING_INTERVAL = 1000;
 const app = express();
 const port = 8000;
 

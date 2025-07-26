@@ -70,6 +70,7 @@
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
             this.gridViewOverview = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.lblUnitUsagePerPair = new System.Windows.Forms.Label();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutMainDistribution.SuspendLayout();
@@ -295,6 +296,7 @@
             this.tableLayoutPanel7.Controls.Add(this.lbl_Name, 0, 0);
             this.tableLayoutPanel7.Controls.Add(this.gridLookUpOperator, 0, 1);
             this.tableLayoutPanel7.Controls.Add(this.btnSend, 1, 3);
+            this.tableLayoutPanel7.Controls.Add(this.lblUnitUsagePerPair, 0, 2);
             this.tableLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel7.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel7.Name = "tableLayoutPanel7";
@@ -617,6 +619,14 @@
             this.gridViewOverview.GridControl = this.gridControlOverview;
             this.gridViewOverview.Name = "gridViewOverview";
             // 
+            // lblUnitUsagePerPair
+            // 
+            this.lblUnitUsagePerPair.Location = new System.Drawing.Point(3, 98);
+            this.lblUnitUsagePerPair.Name = "lblUnitUsagePerPair";
+            this.lblUnitUsagePerPair.Size = new System.Drawing.Size(197, 33);
+            this.lblUnitUsagePerPair.TabIndex = 11;
+            this.lblUnitUsagePerPair.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // ucDistribution
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -695,5 +705,6 @@
         private System.Windows.Forms.Label lblSelectMachine;
         private DevExpress.XtraEditors.GridLookUpEdit gridLookUpDevice;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
+        private System.Windows.Forms.Label lblUnitUsagePerPair;
     }
 }

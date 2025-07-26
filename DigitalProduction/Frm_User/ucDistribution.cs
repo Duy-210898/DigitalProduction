@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
@@ -572,8 +574,10 @@ namespace DigitalProduction
             table.Columns.Add("PeicesPerPair", typeof(int));
             table.Columns.Add("CuttingDieQty", typeof(int));
             table.Columns.Add("MaterialLayer", typeof(int));
+            table.Columns.Add("UnitUsage", typeof(string));
             table.Columns.Add("TotalPiecesPerPair", typeof(int));
-            table.Columns.Add("InventoryQty", typeof(int));;
+            table.Columns.Add("InventoryQty", typeof(int));
+            table.Columns.Add("UnitUsagePerPair", typeof(double));
 
             // create sub table 
             subDistributionDataSource = new DataTable("SubDistributions");
@@ -597,7 +601,9 @@ namespace DigitalProduction
                 countSO++;
                 string groupSO = $"{countSO}";
 
-                var mergedData = new Dictionary<string, (List<string> SOs, int TotalSizeQty)>();
+                var mergedData = new Dictionary<string, (List<string> SOs, int TotalSizeQty, string UnitUsage)>();
+                var totalSizePerSize = new Dictionary<string, int>();
+                var totalUnitUsagePerSize = new Dictionary<string, float>();
 
                 foreach (var schedule in scheduleGroup)
                 {
@@ -606,6 +612,7 @@ namespace DigitalProduction
                     string key = $"{partName}|{size}";
 
                     schedule.GroupSO = groupSO;
+
                     if (isLeather)
                     {
                         schedule.TotalPiecesPerPair = (int)numericTotalPeicesPerPair.Value;
@@ -616,28 +623,96 @@ namespace DigitalProduction
                         schedule.PeicesPerPair = (int)numPiecesPerPair.Value;
                         schedule.MaterialLayer = (int)numMaterialLayer.Value;
                     }
-                    if (size.Equals(""))
-                    {
+
+                    if (string.IsNullOrWhiteSpace(size))
                         continue;
+
+                    // ✅ For per-partName+size grouping
+                    if (!mergedData.ContainsKey(key))
+                    {
+                        mergedData[key] = (new List<string>(), 0, schedule.UnitUsage.ToString());
                     }
 
-                    if (!mergedData.ContainsKey(key))
-                        mergedData[key] = (new List<string>(), 0);
-
                     if (!mergedData[key].SOs.Contains(schedule.SO))
+                    {
                         mergedData[key].SOs.Add(schedule.SO);
+                    }
 
-                    mergedData[key] = (mergedData[key].SOs, mergedData[key].TotalSizeQty + schedule.SizeQty);
+                    var current = mergedData[key];
+                    mergedData[key] = (current.SOs, current.TotalSizeQty + schedule.SizeQty, current.UnitUsage);
+
+                    // ✅ Accumulate total per-size for UnitUsagePerPair
+                    if (!totalSizePerSize.ContainsKey(size))
+                    {
+                        totalSizePerSize[size] = 0;
+                        totalUnitUsagePerSize[size] = 0;
+                    }
+
+                    totalSizePerSize[size] += schedule.SizeQty;
+                    totalUnitUsagePerSize[size] += schedule.UnitUsage;
                 }
 
+                // ✅ Add merged data to table
+                // Step 1: Compute unit usage per pair per size ONCE
+                var unitUsagePerPairPerSize = new Dictionary<string, float>();
+
+                foreach (var sizeKey in totalUnitUsagePerSize.Keys)
+                {
+                    if (totalSizePerSize.TryGetValue(sizeKey, out int totalSizeQty))
+                    {
+                        float usagePerPair = totalUnitUsagePerSize[sizeKey];
+                        unitUsagePerPairPerSize[sizeKey] = usagePerPair;
+                    }
+                }
+
+                // Step 2: Build string to show in label (also ONCE)
+                var sb = new StringBuilder();
+
+                float totalUnitUsagePerPair = unitUsagePerPairPerSize.Values.Sum();
+                sb.AppendLine($" {LocalizationManager.GetString("UnitUsagePerPair")}: {Math.Round(totalUnitUsagePerPair, 6)}");
+
+                // Step 3: Display in label
+                lblUnitUsagePerPair.Text = sb.ToString();
+
+                // Step 4: Loop through entries and build table
                 foreach (var entry in mergedData)
                 {
                     string[] splitKey = entry.Key.Split('|');
+                    string partName = splitKey[0];
+                    string entrySize = splitKey[1];
                     string mergedSO = string.Join(", ", entry.Value.SOs);
-                    table.Rows.Add(groupSO, mergedSO, splitKey[0], splitKey[1], entry.Value.TotalSizeQty, 0, 0, 0, 0, 0);
+                    string unitUsage = entry.Value.UnitUsage;
+
+                    // If total unit usage > 1, override unitUsage with rounded float
+                    if (totalUnitUsagePerSize.TryGetValue(entrySize, out var totalUsage) && totalUsage > 1)
+                    {
+                        unitUsage = Math.Round(totalUsage, 6).ToString(CultureInfo.InvariantCulture);
+                    }
+
+                    // Calculate per-row unitUsagePerPair for this specific size
+                    double unitUsagePerPair = 0;
+                    if (totalSizePerSize.TryGetValue(entrySize, out int totalQty) && totalQty > 0)
+                    {
+                        unitUsagePerPair = totalUnitUsagePerSize[entrySize] / totalQty;
+                    }
+
+                    // Add row to table
+                    table.Rows.Add(
+                         groupSO,
+                         mergedSO,
+                         partName,
+                         entrySize,
+                         entry.Value.TotalSizeQty,
+                         0, 0, 0,
+                         unitUsage,
+                         0,
+                         0,
+                         Math.Round(unitUsagePerPair, 6)
+                    );
                 }
             }
-            gridControlOverview.DataSource = table;
+
+                gridControlOverview.DataSource = table;
 
             TranslateGridControlOverviewHeaders(gridViewOverview);
             gridViewOverview.ClearSelection();

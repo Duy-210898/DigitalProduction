@@ -26,6 +26,7 @@ namespace DigitalProduction.Models
         public DateTime? Timestamp { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+        public string UniqueId { get; set; }
 
         public bool IsRecentlyUpdated
         {
@@ -158,7 +159,6 @@ namespace DigitalProduction.Models
         }
         public string UniqueKey()
         {
-            Console.WriteLine($"KEY: {SO}-{PartName}-{Size}-{MachineName}-{OperatorName}-{IsLeather}");
             return $"{SO}-{PartName}-{Size}-{MachineName}-{OperatorName}-{IsLeather}";
         }
 

@@ -690,4 +690,7 @@
   <data name="RowUpdated" xml:space="preserve">
     <value>Dữ liệu đã được cập nhật.</value>
   </data>
+  <data name="UnitUsagePerPair" xml:space="preserve">
+    <value>Dung lượng trên đôi</value>
+  </data>
 </root>

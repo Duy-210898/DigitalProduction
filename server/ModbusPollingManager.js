@@ -24,33 +24,46 @@ class ModbusPollingManager extends EventEmitter {
    */
   startPolling(ipAddress) {
     if (this.timers[ipAddress]) return; // tránh start trùng
-
+  
     this.timers[ipAddress] = setInterval(async () => {
       const entry = this.clients[ipAddress];
-      if (!entry) return;
-
+      if (!entry) {
+       // console.warn(`[${ipAddress}] No entry found in clients.`);
+        return;
+      }
+  
       if (entry.isProcessing) return;
       entry.isProcessing = true;
-
+  
       try {
-        if (!entry.client || !entry.isConnected) {
+        const { client, socket, isConnected } = entry;
+  
+        // Nếu client chưa khởi tạo hoặc chưa kết nối
+        if (!client || !isConnected) {
           console.warn(`[${ipAddress}] Modbus client not connected — attempting initial connect...`);
           await this.safeConnect(ipAddress);
           return;
         }
-
-        const { client, socket } = entry;
+  
+        // Kiểm tra socket
         if (!socket || socket.destroyed || !socket.writable) {
-          console.warn(`[${ipAddress}] Socket closed; reconnecting...`);
+          console.warn(`[${ipAddress}] Socket is closed or invalid — reconnecting...`);
+          delete this.clients[ipAddress];
           await this.safeConnect(ipAddress);
           return;
         }
-
-        // Emit event để bên ngoài xử lý đọc/ghi
+  
+        // Gửi sự kiện đọc/ghi để bên ngoài xử lý
         this.emit('poll', client, ipAddress);
-
-        // Nếu có sizeDataInfo
-        if (entry.sizeDataInfo && Object.keys(entry.sizeDataInfo || {}).length > 0) {
+  
+        // Đọc actual nếu có sizeDataInfo hợp lệ
+        const sizeInfo = entry.sizeDataInfo;
+        if (
+          sizeInfo &&
+          typeof sizeInfo === 'object' &&
+          !Array.isArray(sizeInfo) &&
+          Object.keys(sizeInfo).length > 0
+        ) {
           this.emit('readActual', client, ipAddress);
         }
       } catch (err) {
@@ -60,7 +73,7 @@ class ModbusPollingManager extends EventEmitter {
       }
     }, this.interval);
   }
-
+  
   /**
    * Dừng polling cho 1 IP
    */

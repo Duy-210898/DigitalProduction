@@ -315,11 +315,11 @@ namespace DigitalProduction.ViewModels
                 BindingDeviceOutputs.Clear();
                 return;
             }
-            // Group by core attributes including IsLeather
-            List<DeviceOutput> groupedData = realTimeData
+
+            // Grouping without date to allow same data with different dates to be grouped
+            var groupedData = realTimeData
                 .GroupBy(d => new
                 {
-                    UpdatedAt = d.UpdatedAt?.Date.ToString("yyyyMMdd") ?? "00000000",
                     d.PartName,
                     d.MachineName,
                     d.SO,
@@ -329,22 +329,25 @@ namespace DigitalProduction.ViewModels
                 .SelectMany(group =>
                 {
                     bool isLeather = group.Key.IsLeather;
-                    // Child rows
+
+                    // Filter children: only include rows with valid ActualCut
                     var children = group
+                        .Where(c => c.ActualCut != null)
                         .Select(child =>
                         {
                             child.IsGroupHeader = false;
-                            child.MaterialType = child.IsLeather
+                            child.MaterialType = isLeather
                                 ? LocalizationManager.GetString("leatherMaterial")
                                 : LocalizationManager.GetString("rawMaterial");
                             return child;
                         })
-                        .OrderByDescending(c => c.UpdatedAt);
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ToList();
 
-                    // ✅ Remove header if ALL children ActualCut == null OR 0
-                    if (children.All(c => c.ActualCut == null))
+                    if (!children.Any())
                         return Enumerable.Empty<DeviceOutput>();
-                    // Header row
+
+                    // Create distinct group header
                     var header = new DeviceOutput
                     {
                         IsGroupHeader = true,
@@ -352,27 +355,31 @@ namespace DigitalProduction.ViewModels
                         SO = group.Key.SO,
                         PartName = group.Key.PartName,
                         OperatorName = group.Key.OperatorName,
-                        UpdatedAt = group.FirstOrDefault()?.UpdatedAt,
                         IsLeather = isLeather,
                         MaterialType = isLeather
                             ? LocalizationManager.GetString("leatherMaterial")
                             : LocalizationManager.GetString("rawMaterial"),
+                        UpdatedAt = children.Max(c => c.UpdatedAt), // optional
+                        UniqueId = Guid.NewGuid().ToString()
                     };
 
                     return new[] { header }.Concat(children);
                 })
                 .ToList();
+
             Console.WriteLine($"Updating DeviceOutputs with {groupedData.Count} items.");
 
             try
             {
                 UpdateBindingDeviceOutputs(groupedData);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine($"InvalidOperationException in UpdateBindingDeviceOutputs: {ex.Message}\n{ex.StackTrace}");
+                Console.WriteLine($"❌ Error in UpdateBindingDeviceOutputs: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
+
         private void UpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
             if (_syncContext != null)
@@ -393,7 +400,7 @@ namespace DigitalProduction.ViewModels
         {
             try
             {
-                if (newData.Count > 200) // large batch
+                if (newData.Count > 500) // large batch
                 {
                     BindingDeviceOutputs.ReplaceWith(newData);
                 }

@@ -49,7 +49,7 @@ namespace DigitalProduction.Extensions
     {
         public int DeviceID { get; set; }
         public string Size { get; set; }
-        public int? ActualCut { get; set; }
+        public int? ActualSizeQty { get; set; }
         public int? SizeQty { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
