@@ -120,21 +120,21 @@
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="btnFilter.ImageOptions.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
-        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
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAACB0RVh0VGl0
+        bGUARmlsdGVyO0FyZ3VtZW50O0JhcjtTZXJpZXMeI7nUAAADAklEQVQ4T3WSe0zNYRjHf5RIhGU2/vOH
+        MUsujRJzWbHCUNZddc5Op3Ic6qhz0elyqpMQW+imWC2mRhdJMqY6pzO3cxRtZwlhKztnpdw6rdR8vc/P
+        ZTGe7bPnfd7n+X5/v73vy7GYwrCTJGQsTs4sSEvVFjenaIvNLEOdVQRVer5ZnpLXkqDKTReIFUtoljQA
+        OILCLlmTn5hfWjNmfPYcloFBfLbZYBsd5fk0bEOvpR+Gx504caZi7KAsO4k0kw2mSRNzhq3vh9BqMKH4
+        4jXsFx1FmFDJQ2vao16fdQDiQ5kfmMbhDwOxNONGWWUjut/0YWR07PfXiS8jI3jda4HBZMbpgisQxqgb
+        /jawixSrJMkZ+ai9pYd1YAhjX8fR9fIt2h51orSiHqfO1yDn3BXEK3IRHCGTMo39ZIMpq9w3uYilGuvZ
+        kmo8eGJG/+BHPOroQm1jK04XVvIGaccvQBiXanV185xPmskGFPaB4YcjJbJjyCuugulZN5qajSgsr8Ox
+        vEs4WXQNcfFa7A2KE7DZGTTP4G+DwQctHAKCJSKRRDOuzirExcsNSMspgTq7BNEHM8aZWMRmnExBPrqn
+        IdtAmdVkxHGCmBRKvMn2neF+0dIsPDX3oPqmHqFRSvj4huxgvemMGR1B3pjo7kB7oDf9P+1xXJQ4mQuO
+        SKQlmTjHHtbiRU8frjboXu0Ljc+jPYYDY+aTgC0YrSuDyX8zGTgyOC5CpOINfpo4H5DloOftO5RVNWrq
+        k7b2tKk34J7Sq4315hp3b8TI5bMw7vIiAycScOFC5WSDOVJ5Lizs0ZSUX1XoVOvxzdICnWI9CRY89PPA
+        l6JsPPRdS/UsEnChAgUXJpBzYVFyKmf5h0jvhkbKsScwTtmStA4T7cfRfIQXLLzv445PuUrc915N9WwS
+        /B10stSYx3C5m7AGE0YN7sTzgkWGLW4YSpfAsMmVamf+MfwPFo7XY1fobktXoi7Gla7NpclzmV7vtRxN
+        Hkv1rJ75T+EvWEzlh37cAuVpP/McBjtAzu47h5Hf249kEn0AAAAASUVORK5CYII=
 </value>
   </data>
   <data name="pic_Admin.EditValue" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
@@ -1920,7 +1920,7 @@
 </value>
   </data>
   <assembly alias="DevExpress.Data.v24.2" name="DevExpress.Data.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-  <data name="windowsUIButtonImageOptions13.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v24.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="windowsUIButtonImageOptions1.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v24.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFlEZXZFeHByZXNzLkRhdGEudjI0LjIsIFZlcnNpb249MjQuMi4z
         LjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjg4ZDE3NTRkNzAwZTQ5YQUBAAAAHURl
@@ -1944,7 +1944,7 @@
         L2c+DQo8L3N2Zz4L
 </value>
   </data>
-  <data name="windowsUIButtonImageOptions14.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v24.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="windowsUIButtonImageOptions2.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v24.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFlEZXZFeHByZXNzLkRhdGEudjI0LjIsIFZlcnNpb249MjQuMi4z
         LjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjg4ZDE3NTRkNzAwZTQ5YQUBAAAAHURl

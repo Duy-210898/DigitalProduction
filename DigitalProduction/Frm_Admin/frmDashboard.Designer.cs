@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmDashboard));
-            DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions windowsUIButtonImageOptions13 = new DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions();
-            DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions windowsUIButtonImageOptions14 = new DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions();
+            DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions windowsUIButtonImageOptions1 = new DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions();
+            DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions windowsUIButtonImageOptions2 = new DevExpress.XtraBars.Docking2010.WindowsUIButtonImageOptions();
             this.navigationPage3 = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.navigationPage2 = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.tableLayoutMainDevice = new System.Windows.Forms.TableLayoutPanel();
@@ -58,6 +58,7 @@
             this.navigationPage4 = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.navigationFrame1 = new DevExpress.XtraBars.Navigation.NavigationFrame();
+            this.btnDeleteSelected = new DevExpress.XtraEditors.SimpleButton();
             this.navigationPage2.SuspendLayout();
             this.tableLayoutMainDevice.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlDeviceManagement)).BeginInit();
@@ -168,6 +169,7 @@
             this.tableLayoutPanel4.Controls.Add(this.cbxDevice, 5, 0);
             this.tableLayoutPanel4.Controls.Add(this.cbx_Status, 5, 1);
             this.tableLayoutPanel4.Controls.Add(this.lblStatus, 4, 1);
+            this.tableLayoutPanel4.Controls.Add(this.btnDeleteSelected, 6, 1);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
@@ -180,7 +182,7 @@
             // lblSelectDevice
             // 
             this.lblSelectDevice.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblSelectDevice.Location = new System.Drawing.Point(488, 3);
+            this.lblSelectDevice.Location = new System.Drawing.Point(487, 3);
             this.lblSelectDevice.Name = "lblSelectDevice";
             this.lblSelectDevice.Size = new System.Drawing.Size(95, 35);
             this.lblSelectDevice.TabIndex = 8;
@@ -190,7 +192,7 @@
             // 
             this.dateTo.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.dateTo.EditValue = null;
-            this.dateTo.Location = new System.Drawing.Point(351, 18);
+            this.dateTo.Location = new System.Drawing.Point(350, 18);
             this.dateTo.Name = "dateTo";
             this.dateTo.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -202,7 +204,7 @@
             // lblDateTo
             // 
             this.lblDateTo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblDateTo.Location = new System.Drawing.Point(239, 3);
+            this.lblDateTo.Location = new System.Drawing.Point(238, 3);
             this.lblDateTo.Name = "lblDateTo";
             this.lblDateTo.Size = new System.Drawing.Size(106, 35);
             this.lblDateTo.TabIndex = 2;
@@ -227,7 +229,7 @@
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.dateFrom.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.dateFrom.Size = new System.Drawing.Size(132, 20);
+            this.dateFrom.Size = new System.Drawing.Size(131, 20);
             this.dateFrom.TabIndex = 1;
             // 
             // lblInputSO
@@ -244,7 +246,7 @@
             this.txtSO.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.txtSO.Location = new System.Drawing.Point(101, 59);
             this.txtSO.Name = "txtSO";
-            this.txtSO.Size = new System.Drawing.Size(132, 20);
+            this.txtSO.Size = new System.Drawing.Size(131, 20);
             this.txtSO.TabIndex = 5;
             // 
             // btnFilter
@@ -257,7 +259,7 @@
             this.btnFilter.Appearance.Options.UseForeColor = true;
             this.btnFilter.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFilter.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnFilter.ImageOptions.Image")));
-            this.btnFilter.Location = new System.Drawing.Point(239, 44);
+            this.btnFilter.Location = new System.Drawing.Point(238, 44);
             this.btnFilter.Name = "btnFilter";
             this.btnFilter.Size = new System.Drawing.Size(106, 35);
             this.btnFilter.TabIndex = 6;
@@ -268,9 +270,9 @@
             // 
             this.cbxDevice.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.cbxDevice.FormattingEnabled = true;
-            this.cbxDevice.Location = new System.Drawing.Point(589, 17);
+            this.cbxDevice.Location = new System.Drawing.Point(588, 17);
             this.cbxDevice.Name = "cbxDevice";
-            this.cbxDevice.Size = new System.Drawing.Size(191, 21);
+            this.cbxDevice.Size = new System.Drawing.Size(190, 21);
             this.cbxDevice.TabIndex = 7;
             // 
             // cbx_Status
@@ -280,15 +282,15 @@
             "Pending",
             "Complete",
             "Stop"});
-            this.cbx_Status.Location = new System.Drawing.Point(589, 58);
+            this.cbx_Status.Location = new System.Drawing.Point(588, 58);
             this.cbx_Status.Name = "cbx_Status";
-            this.cbx_Status.Size = new System.Drawing.Size(191, 21);
+            this.cbx_Status.Size = new System.Drawing.Size(190, 21);
             this.cbx_Status.TabIndex = 9;
             // 
             // lblStatus
             // 
             this.lblStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblStatus.Location = new System.Drawing.Point(488, 44);
+            this.lblStatus.Location = new System.Drawing.Point(487, 44);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(95, 35);
             this.lblStatus.TabIndex = 10;
@@ -359,11 +361,11 @@
             this.windowsUIButtonPanel1.AppearanceButton.Pressed.BackColor = System.Drawing.Color.White;
             this.windowsUIButtonPanel1.AppearanceButton.Pressed.Options.UseBackColor = true;
             this.windowsUIButtonPanel1.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            windowsUIButtonImageOptions13.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("windowsUIButtonImageOptions13.SvgImage")));
-            windowsUIButtonImageOptions14.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("windowsUIButtonImageOptions14.SvgImage")));
+            windowsUIButtonImageOptions1.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("windowsUIButtonImageOptions1.SvgImage")));
+            windowsUIButtonImageOptions2.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("windowsUIButtonImageOptions2.SvgImage")));
             this.windowsUIButtonPanel1.Buttons.AddRange(new DevExpress.XtraEditors.ButtonPanel.IBaseButton[] {
-            new DevExpress.XtraBars.Docking2010.WindowsUIButton("Distribution Management", true, windowsUIButtonImageOptions13, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, "", -1, true, null, true, false, true, "DistributionManagement", -1, false),
-            new DevExpress.XtraBars.Docking2010.WindowsUIButton("Device Management", true, windowsUIButtonImageOptions14, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, "", -1, true, null, true, false, true, "CuttingManagement", -1, false)});
+            new DevExpress.XtraBars.Docking2010.WindowsUIButton("Distribution Management", true, windowsUIButtonImageOptions1, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, "", -1, true, null, true, false, true, "DistributionManagement", -1, false),
+            new DevExpress.XtraBars.Docking2010.WindowsUIButton("Device Management", true, windowsUIButtonImageOptions2, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, "", -1, true, null, true, false, true, "CuttingManagement", -1, false)});
             this.windowsUIButtonPanel1.ContentAlignment = System.Drawing.ContentAlignment.TopCenter;
             this.windowsUIButtonPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.windowsUIButtonPanel1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
@@ -416,6 +418,14 @@
             this.navigationFrame1.Size = new System.Drawing.Size(970, 647);
             this.navigationFrame1.TabIndex = 3;
             this.navigationFrame1.Text = "navigationFrame1";
+            // 
+            // btnDeleteSelected
+            // 
+            this.btnDeleteSelected.Location = new System.Drawing.Point(784, 44);
+            this.btnDeleteSelected.Name = "btnDeleteSelected";
+            this.btnDeleteSelected.Size = new System.Drawing.Size(129, 35);
+            this.btnDeleteSelected.TabIndex = 11;
+            this.btnDeleteSelected.Text = "simpleButton1";
             // 
             // frmDashboard
             // 
@@ -478,5 +488,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutMainDevice;
         private DevExpress.XtraGrid.GridControl gridControlDeviceManagement;
         private DevExpress.XtraGrid.Views.Grid.GridView gridViewDeviceManagement;
+        private DevExpress.XtraEditors.SimpleButton btnDeleteSelected;
     }
 }

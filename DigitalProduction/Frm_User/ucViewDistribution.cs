@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
@@ -11,133 +12,200 @@ namespace DigitalProduction
     public partial class ucViewDistribution : UserControl
     {
 
-        private readonly string[] columnsToHide = {"DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO"};
-        private Label lblTotalRecords;
+        private readonly string[] columnsToHide = {"DeviceID", "OperatorID", "MaterialCode", "PartCode", "CreatedAt", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO", "InventoryQty", "PeicesPerPair", "CuttingDieQty", "MaterialLayer", "TotalPiecesPerPair", "VietnameseName" };
+        private static List<string> selectedSalesOrders = new List<string>();
 
         public ucViewDistribution()
         {
             InitializeComponent();
-            InitializeTotalLabel();
 
             lblFilterDate.Text = LocalizationManager.GetString("FilterDate");
             lblSelectSO.Text = LocalizationManager.GetString("SelectSO");
 
-            SetupSOCheckedComboBox(cboSO, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
-            cboSO.CloseUp += (s, e) =>
+            // Set default to the first day of the previous month
+            DateTime today = DateTime.Today;
+            DateTime firstDayLastMonth = new DateTime(today.Year, today.Month, 1).AddMonths(-1);
+
+            dateTimePickerViewSO.Value = firstDayLastMonth;
+            dateTimePickerViewSO.Format = DateTimePickerFormat.Custom;
+            dateTimePickerViewSO.CustomFormat = "MM/yyyy";
+            dateTimePickerViewSO.ShowUpDown = true;
+
+            // Load SOs for previous month
+            DevExpress.XtraSplashScreen.SplashScreenManager.ShowForm(this, typeof(frmLoading), true, true);
+
+            try
             {
-                LoadProductionSchedulesBySelectedSOs(cboSO, gridControlViewSO, gridViewSO);
+                SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
+            }
+            finally
+            {
+                DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
+            }
+
+
+            gridLookUpSOs.CloseUp += (s, e) =>
+            {
+                LoadProductionSchedulesBySelectedSOs(gridLookUpSOs, gridControlViewSO, gridViewSO);
                 HideGridColumns();
             };
 
-            cboSO.EditValueChanged += (s, e) =>
+            gridLookUpSOs.EditValueChanged += (s, e) =>
             {
-                LoadProductionSchedulesBySelectedSOs(cboSO, gridControlViewSO, gridViewSO);
+                LoadProductionSchedulesBySelectedSOs(gridLookUpSOs, gridControlViewSO, gridViewSO);
                 HideGridColumns();
             };
-            gridViewSO.ColumnFilterChanged += (s, e) => UpdateTotalLabel();
 
+            // Reload SOs when month changes
             dateTimePickerViewSO.ValueChanged += (s, e) =>
             {
-                // Reload the SO list for the selected month/year
-                SetupSOCheckedComboBox(cboSO, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
+                // Reload GridLookUpEdit with new SOs
+                SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
 
-                // Optionally reset selection and grid
-                cboSO.SetEditValue(string.Empty);
+                // Clear selected SO
+                gridLookUpSOs.EditValue = null;
+
+                // Clear data grid and reset label
                 gridControlViewSO.DataSource = null;
-                lblTotalRecords.Text = $"{LocalizationManager.GetString("TotalRecords")} 0";
+                gridLookUpEdit1View.Columns.Clear(); // optional: clear columns too
+            };
+            var view = gridLookUpSOs.Properties.View;
+
+            gridLookUpSOs.Properties.View.OptionsSelection.MultiSelect = true;
+            gridLookUpSOs.Properties.View.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CheckBoxRowSelect;
+
+            gridLookUpSOs.Properties.View.SelectionChanged += (s, e) =>
+            {
+                selectedSalesOrders.Clear();
+
+                foreach (int rowHandle in view.GetSelectedRows())
+                {
+                    var row = view.GetRow(rowHandle) as DataRowView;
+                    if (row != null)
+                    {
+                        selectedSalesOrders.Add(row["SO"].ToString());
+                    }
+                }
+
+                gridLookUpSOs.RefreshEditValue(); // Triggers CustomDisplayText
+            };
+
+            gridLookUpSOs.CustomDisplayText += (s, e) =>
+            {
+                if (selectedSalesOrders.Count > 0)
+                {
+                    e.DisplayText = string.Join(", ", selectedSalesOrders);
+                }
+                else
+                {
+                    e.DisplayText = string.Empty;
+                }
             };
 
             InitializeSyncButton();
-        }
-        private void UpdateTotalLabel()
-        {
-            if (gridViewSO != null)
+            gridViewSO.CustomDrawRowIndicator += (s, e) =>
             {
-                int totalCount = gridViewSO.DataRowCount;
-                lblTotalRecords.Text = $"{LocalizationManager.GetString("TotalRecords")} {totalCount}";
-            }
-        }
-
-        private void InitializeTotalLabel()
-        {
-            lblTotalRecords = new Label
-            {
-                AutoSize = true,
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                ForeColor = Color.Green,
-                BackColor = Color.AntiqueWhite,
-                Padding = new Padding(5),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Dock = DockStyle.Bottom,
-                Text = $"{LocalizationManager.GetString("TotalRecords")} 0"
+                if (e.Info.IsRowIndicator && e.RowHandle >= 0)
+                {
+                    e.Info.DisplayText = (e.RowHandle + 1).ToString();
+                }
             };
 
-            this.Controls.Add(lblTotalRecords);
-            this.Controls.SetChildIndex(lblTotalRecords, 0); // Ensure it appears on top
+            gridViewSO.IndicatorWidth = 50; // Optional: make room for STT
+            gridViewSO.OptionsBehavior.Editable = false;
         }
 
-        private void SetupSOCheckedComboBox(DevExpress.XtraEditors.CheckedComboBoxEdit cboSO, DateTime selectedDate, int departmentId)
-        {
-            var soList = DbHelper.GetDistinctSOListByMonthAndDepartment(selectedDate.Month, selectedDate.Year, departmentId);
 
-            cboSO.Properties.Items.Clear();
+        private void SetupSOGridLookUp(DevExpress.XtraEditors.GridLookUpEdit cboSO, DateTime selectedDate, int departmentId)
+        {
+            // 1. Get list of SOs
+            List<string> soList = DbHelper.GetDistinctSOListByMonthAndDepartment(
+                selectedDate.Month, selectedDate.Year, departmentId
+            );
+
+            // 2. Create a DataTable for binding
+            DataTable dt = new DataTable();
+            dt.Columns.Add("SO", typeof(string));
+
             foreach (var so in soList)
             {
-                cboSO.Properties.Items.Add(so, false);
+                if (!string.IsNullOrWhiteSpace(so))
+                    dt.Rows.Add(so);
             }
 
+            // 3. Bind to GridLookUpEdit
+            cboSO.Properties.DataSource = dt;
+            cboSO.Properties.DisplayMember = "SO";
+            cboSO.Properties.ValueMember = "SO";
+
+            // 4. Configure the view
+            var view = cboSO.Properties.View;
+            view.Columns.Clear();
+            view.Columns.AddVisible("SO", "Sales Order");
+            view.OptionsView.ShowAutoFilterRow = true;
+            view.OptionsView.ShowIndicator = false;
+            view.OptionsView.ShowGroupPanel = false;
+            view.OptionsBehavior.Editable = false;
+            view.BestFitColumns();
+
+            // 5. Configure popup
             cboSO.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
-            // Set popup height to fit items responsively
-            int itemCount = soList.Count;
-            int itemHeight = 100;
-            int verticalPadding = 10;
+            cboSO.Properties.ImmediatePopup = true;
+            cboSO.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
 
-            int maxVisibleItems = 10;
-            int calculatedHeight = Math.Min(itemCount, maxVisibleItems) * itemHeight + verticalPadding;
-
-            cboSO.Properties.PopupFormSize = new Size(cboSO.Width, calculatedHeight);
-            cboSO.Properties.DropDownRows = Math.Min(itemCount, maxVisibleItems);
-
-            if (itemCount > 0)
-            {
-                cboSO.Focus();
-                cboSO.ShowPopup();
-            }
+            int itemHeight = 24;
+            int maxItems = 10;
+            int popupHeight = Math.Min(soList.Count, maxItems) * itemHeight + 50;
+            cboSO.Properties.PopupFormSize = new Size(cboSO.Width + 100, popupHeight);
         }
 
-        private void LoadProductionSchedulesBySelectedSOs(DevExpress.XtraEditors.CheckedComboBoxEdit cboSO, GridControl gridControl, GridView gridView)
+
+        private void LoadProductionSchedulesBySelectedSOs(DevExpress.XtraEditors.GridLookUpEdit cboSO, GridControl gridControl, GridView gridView)
         {
-            var selectedSOs = cboSO.Properties.Items
-                .Cast<DevExpress.XtraEditors.Controls.CheckedListBoxItem>()
-                .Where(item => item.CheckState == CheckState.Checked)
-                .Select(item => item.Value.ToString())
-                .ToList();
-
-            //if (selectedSOs.Count == 0)
-            //{
-            //    MessageBox.Show("Please select at least one SO.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //    return;
-            //}
-
-            var allSchedules = DbHelper.GetSchedulesBySOList(selectedSOs);
-            gridControl.DataSource = allSchedules;
-
-            gridView.PopulateColumns();
-            // gridView.BestFitColumns();
-
-            // Group by SO
-            GridColumn soColumn = gridView.Columns["SO"];
-            if (soColumn != null)
+            if (selectedSalesOrders == null || selectedSalesOrders.Count == 0)
             {
-                soColumn.GroupIndex = 0;
-                soColumn.SortOrder = DevExpress.Data.ColumnSortOrder.Ascending;
-                gridView.ExpandAllGroups();
+                gridControl.DataSource = null;
+                return;
             }
 
-            // Refresh and update
-            gridView.RefreshData();
-            UpdateTotalLabel();
+            try
+            {
+                // Show loading/wait form
+                DevExpress.XtraSplashScreen.SplashScreenManager.ShowForm(this, typeof(frmLoading), true, true);
+                // 1. Query schedules
+                var allSchedules = DbHelper.GetSchedulesBySOList(selectedSalesOrders);
+
+                // 2. Bind to grid
+                gridControl.DataSource = allSchedules;
+
+                // 3. Rebuild grid view
+                gridView.PopulateColumns();
+
+                // 4. Group by SO
+                GridColumn soColumn = gridView.Columns["SO"];
+                if (soColumn != null)
+                {
+                    soColumn.GroupIndex = 0;
+                    soColumn.SortOrder = DevExpress.Data.ColumnSortOrder.Ascending;
+                    gridView.ExpandAllGroups();
+                }
+
+                // 5. Refresh and update
+                gridView.RefreshData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Close the loading form
+                if (DevExpress.XtraSplashScreen.SplashScreenManager.Default != null)
+                    DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
+            }
         }
+
+
         private void HideGridColumns()
         {
             foreach (var columnName in columnsToHide)
@@ -168,15 +236,15 @@ namespace DigitalProduction
                     // Customize only the "Status" column background color
                     if (rowData.Status == "Complete")
                     {
-                        e.Appearance.BackColor = Color.LightGreen; // Green for complete
+                        e.Appearance.BackColor = System.Drawing.Color.LightGreen; // Green for complete
                     }
                     else if (rowData.Status == "Pending")
                     {
-                        e.Appearance.BackColor = Color.LightYellow; // Yellow for pending
+                        e.Appearance.BackColor = System.Drawing.Color.LightYellow; // Yellow for pending
                     }
                     else
                     {
-                        e.Appearance.BackColor = Color.LightSteelBlue; // Red for other statuses
+                        e.Appearance.BackColor = System.Drawing.Color.LightSteelBlue; // Red for other statuses
                     }
                 }
             }
@@ -206,7 +274,7 @@ namespace DigitalProduction
         private void BtnSync_Click(object sender, EventArgs e)
         {
             // Reload SO list
-            SetupSOCheckedComboBox(cboSO, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
+            SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
         }
     }
 }

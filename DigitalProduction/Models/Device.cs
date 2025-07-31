@@ -58,7 +58,7 @@ namespace DigitalProduction.Models
         public bool IsCutting
         {
             get => isCutting;
-            private set
+            set
             {
                 if (isCutting != value)
                 {
@@ -103,14 +103,14 @@ namespace DigitalProduction.Models
 
         public void RefreshCuttingStatus()
         {
-            if (LastCutTime.HasValue)
+            if (LastCutTime.HasValue) // kiểm tra có thời điểm cắt gần nhất không
             {
                 var elapsed = (DateTime.Now - LastCutTime.Value).TotalSeconds;
-                IsCutting = elapsed <= 3;
+                IsCutting = elapsed <= 3; // nếu dưới hoặc bằng 3 giây, coi là đang cắt
             }
             else
             {
-                IsCutting = false;
+                IsCutting = false; // nếu chưa cắt lần nào
             }
         }
 

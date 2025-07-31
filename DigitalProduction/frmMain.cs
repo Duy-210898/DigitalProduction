@@ -362,8 +362,8 @@ namespace DigitalProduction
             btnLogOut.Caption = LocalizationManager.GetString("LogOut");
             this.Text = LocalizationManager.GetString("Home");
             accordionControlElement1.Text = LocalizationManager.GetString("ProductionSchedule");
-            accordionControlElement4.Text = LocalizationManager.GetString("CuttingManager");
-            accordionControlElement3.Text = LocalizationManager.GetString("SystemManagerment");
+            accordionControlElement4.Text = LocalizationManager.GetString("SystemManagerment");
+            accordionControlElement3.Text = LocalizationManager.GetString("CuttingManager");
             barSubItem1.Caption = LocalizationManager.GetString("Guest");
             accordionControlElement6.Text = LocalizationManager.GetString("Report");
 

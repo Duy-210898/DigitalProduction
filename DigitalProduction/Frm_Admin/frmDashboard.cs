@@ -49,20 +49,14 @@ namespace DigitalProduction.Frm_Admin
             gridDistribution.Dock = DockStyle.Fill;
 
             // Add the delete button to this topPanel
-            Button btnDeleteSelected = new Button();
             btnDeleteSelected.Text = LocalizedWithIcon("Delete", "🗑");
             btnDeleteSelected.AutoSize = true;
             btnDeleteSelected.BackColor = Color.LightCoral;
-            btnDeleteSelected.ForeColor = Color.White;
-            btnDeleteSelected.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnDeleteSelected.FlatStyle = FlatStyle.Flat;
-            btnDeleteSelected.FlatAppearance.BorderSize = 0;
+            btnDeleteSelected.ForeColor = Color.Red;
+            btnDeleteSelected.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnDeleteSelected.Cursor = Cursors.Hand;
             btnDeleteSelected.Anchor = AnchorStyles.Right;
             btnDeleteSelected.Click += btnDeleteSelected_Click;
-
-            btnDeleteSelected.Dock = DockStyle.Right;
-            topPanel.Controls.Add(btnDeleteSelected);
 
             // select default
             SelectButtonByTag("DistributionManagement");

@@ -501,6 +501,7 @@ namespace DigitalProduction
             gridView.Columns["IsGroupHeader"]?.SetVisible(false);
             gridView.Columns["_isRecentlyUpdated"]?.SetVisible(false);
             gridView.Columns["IsRecentlyUpdated"]?.SetVisible(false);
+            gridView.Columns["UniqueId"]?.SetVisible(false);
 
             StyleNumericColumn(gridView.Columns["PartName"], 5, bold: true);
             StyleNumericColumn(gridView.Columns["ActualSizeQty"], 7);

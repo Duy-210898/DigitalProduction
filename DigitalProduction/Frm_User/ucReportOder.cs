@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
@@ -91,30 +93,65 @@ namespace DigitalProduction
         {
             int selectedYear = dateTimePicker.Value.Year;
             int selectedMonth = dateTimePicker.Value.Month;
-            var data = await DbHelper.GetRealtimeTargetDataAsync(selectedMonth, selectedYear);
 
+            var rawData = await DbHelper.GetRealtimeTargetDataAsync(selectedMonth, selectedYear);
 
-            // Attach event to each item
-            foreach (var item in data)
+            var groupedData = GetGroupedData(rawData); // 👈 Apply grouping
+
+            foreach (var operatorSummary in groupedData)
             {
-                item.TargetQuantityChanged += async (changedItem) =>
+                operatorSummary.TargetQuantityChanged += async (changedSummary) =>
                 {
                     try
                     {
-                        await SaveTargetQuantityAsync(changedItem);
+                        await SaveTargetQuantityAsync(changedSummary);
+                        gridViewPeformance.RefreshData(); // refresh grid master
                     }
                     catch (Exception ex)
                     {
-                        // Optionally handle errors here
                         MessageBox.Show($"Error saving target: {ex.Message}");
                     }
                 };
             }
-            targetBindingSource.DataSource = data;
+            targetBindingSource.DataSource = groupedData;
             targetBindingSource.ResetBindings(false);
-            TranslateHeaders();
+            gridViewPeformance.RowCellStyle -= GridViewPeformance_RowCellStyle;
             gridViewPeformance.RowCellStyle += GridViewPeformance_RowCellStyle;
+            TranslateHeaders();
+            SetupMasterDetailView(); // 👈 Setup master-detail logic
         }
+
+
+        private void SetupMasterDetailView()
+        {
+            gridViewPeformance.BeginUpdate();
+            gridViewPeformance.Columns["TargetQuantity"].FieldName = "TargetQuantity";
+            gridViewPeformance.OptionsDetail.EnableMasterViewMode = true;
+            gridViewPeformance.OptionsDetail.ShowDetailTabs = false;
+            gridViewPeformance.OptionsDetail.SmartDetailExpand = true;
+            gridViewPeformance.OptionsBehavior.Editable = true;
+
+            gridViewPeformance.MasterRowGetRelationCount += (s, e) => e.RelationCount = 1;
+            gridViewPeformance.MasterRowGetRelationName += (s, e) => e.RelationName = "PartSizeDetails";
+            gridViewPeformance.MasterRowGetChildList += (s, e) =>
+            {
+                var row = (OperatorDailySummary)gridViewPeformance.GetRow(e.RowHandle);
+                e.ChildList = row?.Details;
+            };
+
+            gridViewPeformance.MasterRowExpanded += (s, e) =>
+            {
+                if (gridViewPeformance.GetDetailView(e.RowHandle, e.RelationIndex) is GridView detailView)
+                {
+                    detailView.PopulateColumns();
+                    TranslateAllDetailViews(gridControlPerformance);
+                    detailView.BestFitColumns();
+                }
+            };
+
+            gridViewPeformance.EndUpdate();
+        }
+
 
 
         private void TranslateHeaders()
@@ -132,6 +169,33 @@ namespace DigitalProduction
                 {
                     col.Visible = false;
                 }
+            }
+        }
+        private void TranslateAllDetailViews(GridControl grid)
+        {
+            var mainView = grid.MainView as GridView;
+            if (mainView == null) return;
+
+            // Duyệt từng dòng master
+            for (int rowHandle = 0; rowHandle < mainView.RowCount; rowHandle++)
+            {
+                // Kiểm tra có phải dòng master và đã mở detail
+                if (mainView.IsMasterRow(rowHandle) && mainView.GetVisibleDetailView(rowHandle) is GridView detailView)
+                {
+                    TranslateGridViewHeaders(detailView);
+                }
+            }
+        }
+        private void TranslateGridViewHeaders(GridView gridView)
+        {
+            foreach (GridColumn col in gridView.Columns)
+            {
+                var translatedText = LocalizationManager.GetString(col.FieldName);
+                col.Caption = !string.IsNullOrEmpty(translatedText) ? translatedText : col.FieldName;
+
+                // Ẩn một số cột
+                if (col.FieldName == "OperatorID" || col.FieldName == "DepartmentId" || col.FieldName == "TargetQuantity")
+                    col.Visible = false;
             }
         }
 
@@ -226,46 +290,13 @@ namespace DigitalProduction
                 }
             }
         }
-
-        public class TargetRealtimeInfo : INotifyPropertyChanged
+        public class OperatorDailySummary : INotifyPropertyChanged
         {
-
+            public string OperatorName { get; set; }
+            public DateTime Timestamp { get; set; }
             public int DepartmentId { get; set; }
             public int OperatorID { get; set; }
-
-            private string _operatorName;
-            private DateTime _timestamp;
             private int _targetQuantity;
-            private int _targetActualQuantity;
-
-            public event Func<TargetRealtimeInfo, Task> TargetQuantityChanged;
-
-            public string OperatorName
-            {
-                get => _operatorName;
-                set
-                {
-                    if (_operatorName != value)
-                    {
-                        _operatorName = value;
-                        NotifyPropertyChanged(nameof(OperatorName));
-                    }
-                }
-            }
-
-            public DateTime Timestamp
-            {
-                get => _timestamp;
-                set
-                {
-                    if (_timestamp != value)
-                    {
-                        _timestamp = value;
-                        NotifyPropertyChanged(nameof(Timestamp));
-                    }
-                }
-            }
-
             public int TargetQuantity
             {
                 get => _targetQuantity;
@@ -279,7 +310,7 @@ namespace DigitalProduction
                     }
                 }
             }
-
+            private int _targetActualQuantity;
             public int TargetActualQuantity
             {
                 get => _targetActualQuantity;
@@ -293,48 +324,122 @@ namespace DigitalProduction
                 }
             }
 
-            public string EfficiencyPercent
-            {
-                get
-                {
-                    // Check if TargetQuantity is 0 to avoid division by zero
-                    if (TargetQuantity == 0)
-                        return "0%";
+            public string EfficiencyPercent =>
+                TargetQuantity == 0 ? "0%" :
+                $"{Math.Round((decimal)TargetActualQuantity / TargetQuantity * 100, 2)}%";
 
-                    // Calculate efficiency and format it to 2 decimal places followed by '%'
-                    return $"{Math.Round((decimal)TargetActualQuantity / TargetQuantity * 100, 2)}%";
-                }
-            }
+            public List<TargetRealtimeInfo> Details { get; set; }
 
+            public event Func<OperatorDailySummary, Task> TargetQuantityChanged;
 
             private async Task InvokeTargetQuantityChangedAsync()
             {
                 if (TargetQuantityChanged != null)
                 {
-                    var invocationList = TargetQuantityChanged.GetInvocationList();
-                    foreach (Func<TargetRealtimeInfo, Task> handler in invocationList)
+                    foreach (Func<OperatorDailySummary, Task> handler in TargetQuantityChanged.GetInvocationList())
                     {
-                        try
-                        {
-                            await handler(this);
-                        }
+                        try { await handler(this); }
                         catch (Exception ex)
                         {
-                            // Handle or log exception here safely
                             Console.Error.WriteLine($"Error in TargetQuantityChanged event: {ex}");
                         }
                     }
                 }
             }
-
             public event PropertyChangedEventHandler PropertyChanged;
-
             private void NotifyPropertyChanged(string propertyName)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
+                => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        private static async Task SaveTargetQuantityAsync(TargetRealtimeInfo changedItem)
+
+
+        private List<OperatorDailySummary> GetGroupedData(List<TargetRealtimeInfo> data)
+        {
+            return data
+                .GroupBy(x => new { x.OperatorID, x.TargetQuantity, x.OperatorName, Date = x.Timestamp.Date })
+                .Select(g => new OperatorDailySummary
+                {
+                    OperatorID = g.Key.OperatorID,
+                    OperatorName = g.Key.OperatorName,
+                    Timestamp = g.Key.Date,
+                    TargetActualQuantity = g.Sum(x => x.TargetActualQuantity),
+                    TargetQuantity = g.Key.TargetQuantity,
+                    Details = g.ToList()
+                })
+                .ToList();
+        }
+
+        public class TargetRealtimeInfo : INotifyPropertyChanged
+        {
+            private string _operatorName;
+            private DateTime _timestamp;
+            private int _targetQuantity;
+            public int OperatorID { get; set; }
+
+            private string _size;
+            private string _partName;
+
+            public event Func<OperatorDailySummary, Task> TargetQuantityChanged;
+            public string OperatorName { get => _operatorName; set { _operatorName = value; NotifyPropertyChanged(nameof(OperatorName)); } }
+            public DateTime Timestamp { get => _timestamp; set { _timestamp = value; NotifyPropertyChanged(nameof(Timestamp)); } }
+            public int TargetQuantity
+            {
+                get => _targetQuantity;
+                set
+                {
+                    if (_targetQuantity != value)
+                    {
+                        _targetQuantity = value;
+                        NotifyPropertyChanged(nameof(TargetQuantity));
+                    }
+                }
+            }
+            private int _targetActualQuantity;
+            public int TargetActualQuantity
+            {
+                get => _targetActualQuantity;
+                set
+                {
+                    if (_targetActualQuantity != value)
+                    {
+                        _targetActualQuantity = value;
+                        NotifyPropertyChanged(nameof(TargetActualQuantity));
+                    }
+                }
+            }
+
+            public string Size
+            {
+                get => _size;
+                set { _size = value; NotifyPropertyChanged(nameof(Size)); }
+            }
+
+            public string PartName
+            {
+                get => _partName;
+                set { _partName = value; NotifyPropertyChanged(nameof(PartName)); }
+            }
+            public string EfficiencyPercent =>
+              TargetQuantity == 0 ? "0%" :
+              $"{Math.Round((decimal)TargetActualQuantity / TargetQuantity * 100, 2)}%";
+
+            //private async Task InvokeTargetQuantityChangedAsync()
+            //{
+            //    if (TargetQuantityChanged != null)
+            //    {
+            //        foreach (Func<TargetRealtimeInfo, Task> handler in TargetQuantityChanged.GetInvocationList())
+            //        {
+            //            try { await handler(this); }
+            //            catch (Exception ex)
+            //            {
+            //                Console.Error.WriteLine($"Error in TargetQuantityChanged event: {ex}");
+            //            }
+            //        }
+            //    }
+            //}
+            public event PropertyChangedEventHandler PropertyChanged;
+            private void NotifyPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        private static async Task SaveTargetQuantityAsync(OperatorDailySummary changedItem)
         {
             if (changedItem == null)
                 throw new ArgumentNullException(nameof(changedItem));

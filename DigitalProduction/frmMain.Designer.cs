@@ -39,14 +39,17 @@
             this.accordionControlElementWL = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnViewInfoDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnWatchedList = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlSeparator1 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnProgressDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceOutput = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlSeparator2 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.accordionControlElement4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnUserManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnOperator = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlSeparator3 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.accordionControlElement6 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnReportOder = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnCuttingReportQty = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -80,6 +83,8 @@
             // 
             // accordionControl1
             // 
+            this.accordionControl1.Appearance.AccordionControl.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.accordionControl1.Appearance.AccordionControl.Options.UseBackColor = true;
             this.accordionControl1.Dock = System.Windows.Forms.DockStyle.Left;
             this.accordionControl1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.accordionControlElement1,
@@ -87,27 +92,32 @@
             this.accordionControlElement4,
             this.accordionControlElement6});
             this.accordionControl1.Location = new System.Drawing.Point(0, 31);
-            this.accordionControl1.LookAndFeel.SkinMaskColor = System.Drawing.Color.DeepSkyBlue;
-            this.accordionControl1.LookAndFeel.SkinName = "Office 2019 Colorful";
+            this.accordionControl1.LookAndFeel.SkinName = "WXI";
             this.accordionControl1.LookAndFeel.UseDefaultLookAndFeel = false;
             this.accordionControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.accordionControl1.Name = "accordionControl1";
-            this.accordionControl1.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Hidden;
+            this.accordionControl1.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
+            this.accordionControl1.ShowFilterControl = DevExpress.XtraBars.Navigation.ShowFilterControl.Always;
             this.accordionControl1.Size = new System.Drawing.Size(267, 795);
             this.accordionControl1.TabIndex = 1;
-            this.accordionControl1.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
             // accordionControlElement1
             // 
+            this.accordionControlElement1.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElement1.Appearance.Default.Options.UseFont = true;
             this.accordionControlElement1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnMonthlyPlan,
-            this.accordionControlElementWL});
+            this.accordionControlElementWL,
+            this.accordionControlSeparator1});
             this.accordionControlElement1.Expanded = true;
+            this.accordionControlElement1.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElement1.ImageOptions.Image")));
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Text = "Production Schedule";
             // 
             // btnMonthlyPlan
             // 
+            this.btnMonthlyPlan.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnMonthlyPlan.Appearance.Default.Options.UseFont = true;
             this.btnMonthlyPlan.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
             new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
             new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
@@ -120,16 +130,25 @@
             // 
             // accordionControlElementWL
             // 
-            this.accordionControlElementWL.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElementWL.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.accordionControlElementWL.Appearance.Default.Options.UseFont = true;
             this.accordionControlElementWL.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnViewInfoDistribution,
             this.btnWatchedList});
+            this.accordionControlElementWL.Expanded = true;
+            this.accordionControlElementWL.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElementWL.ImageOptions.Image")));
             this.accordionControlElementWL.Name = "accordionControlElementWL";
             this.accordionControlElementWL.Text = "Watch List";
             // 
             // btnViewInfoDistribution
             // 
+            this.btnViewInfoDistribution.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnViewInfoDistribution.Appearance.Default.Options.UseFont = true;
+            this.btnViewInfoDistribution.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.btnViewInfoDistribution.Name = "btnViewInfoDistribution";
             this.btnViewInfoDistribution.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnViewInfoDistribution.Text = "Monthly Plan";
@@ -137,28 +156,40 @@
             // 
             // btnWatchedList
             // 
+            this.btnWatchedList.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnWatchedList.Appearance.Default.Options.UseFont = true;
+            this.btnWatchedList.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.btnWatchedList.Name = "btnWatchedList";
             this.btnWatchedList.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnWatchedList.Text = "Watched SO List";
             this.btnWatchedList.Click += new System.EventHandler(this.btnViewDistributionClick);
             // 
+            // accordionControlSeparator1
+            // 
+            this.accordionControlSeparator1.Name = "accordionControlSeparator1";
+            // 
             // accordionControlElement3
             // 
+            this.accordionControlElement3.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElement3.Appearance.Default.Options.UseFont = true;
             this.accordionControlElement3.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnDistribution,
             this.btnProgressDistribution,
-            this.btnDeviceOutput});
+            this.btnDeviceOutput,
+            this.accordionControlSeparator2});
             this.accordionControlElement3.Expanded = true;
-            this.accordionControlElement3.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
+            this.accordionControlElement3.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElement3.ImageOptions.Image")));
             this.accordionControlElement3.Name = "accordionControlElement3";
             this.accordionControlElement3.Text = "PO Distribution";
             // 
             // btnDistribution
             // 
+            this.btnDistribution.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDistribution.Appearance.Default.Options.UseFont = true;
             this.btnDistribution.Name = "btnDistribution";
             this.btnDistribution.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnDistribution.Text = "PO Distribution";
@@ -166,6 +197,13 @@
             // 
             // btnProgressDistribution
             // 
+            this.btnProgressDistribution.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProgressDistribution.Appearance.Default.Options.UseFont = true;
+            this.btnProgressDistribution.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons, DevExpress.XtraBars.Navigation.HeaderElementAlignment.Left),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl)});
             this.btnProgressDistribution.Name = "btnProgressDistribution";
             this.btnProgressDistribution.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnProgressDistribution.Text = "Progress";
@@ -173,23 +211,40 @@
             // 
             // btnDeviceOutput
             // 
+            this.btnDeviceOutput.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDeviceOutput.Appearance.Default.Options.UseFont = true;
+            this.btnDeviceOutput.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.btnDeviceOutput.Name = "btnDeviceOutput";
             this.btnDeviceOutput.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnDeviceOutput.Text = "Device Output";
             this.btnDeviceOutput.Click += new System.EventHandler(this.btnDeviceOutput_Click);
             // 
+            // accordionControlSeparator2
+            // 
+            this.accordionControlSeparator2.Name = "accordionControlSeparator2";
+            // 
             // accordionControlElement4
             // 
+            this.accordionControlElement4.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElement4.Appearance.Default.Options.UseFont = true;
             this.accordionControlElement4.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnDeviceManager,
             this.btnUserManager,
-            this.btnOperator});
+            this.btnOperator,
+            this.accordionControlSeparator3});
             this.accordionControlElement4.Expanded = true;
+            this.accordionControlElement4.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElement4.ImageOptions.Image")));
             this.accordionControlElement4.Name = "accordionControlElement4";
             this.accordionControlElement4.Text = "System Management";
             // 
             // btnDeviceManager
             // 
+            this.btnDeviceManager.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDeviceManager.Appearance.Default.Options.UseFont = true;
             this.btnDeviceManager.Name = "btnDeviceManager";
             this.btnDeviceManager.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnDeviceManager.Text = "Device Management";
@@ -197,6 +252,8 @@
             // 
             // btnUserManager
             // 
+            this.btnUserManager.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnUserManager.Appearance.Default.Options.UseFont = true;
             this.btnUserManager.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
             new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
             new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
@@ -209,27 +266,38 @@
             // 
             // btnOperator
             // 
+            this.btnOperator.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnOperator.Appearance.Default.Options.UseFont = true;
             this.btnOperator.Name = "btnOperator";
             this.btnOperator.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnOperator.Text = "Operator Managment";
             this.btnOperator.Click += new System.EventHandler(this.btnOperator_Click);
             // 
+            // accordionControlSeparator3
+            // 
+            this.accordionControlSeparator3.Name = "accordionControlSeparator3";
+            // 
             // accordionControlElement6
             // 
+            this.accordionControlElement6.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElement6.Appearance.Default.Options.UseFont = true;
             this.accordionControlElement6.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnReportOder,
             this.btnCuttingReportQty});
             this.accordionControlElement6.Expanded = true;
             this.accordionControlElement6.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
             new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
             new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text)});
+            this.accordionControlElement6.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElement6.ImageOptions.Image")));
             this.accordionControlElement6.Name = "accordionControlElement6";
             this.accordionControlElement6.Text = "Report";
             // 
             // btnReportOder
             // 
+            this.btnReportOder.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnReportOder.Appearance.Default.Options.UseFont = true;
             this.btnReportOder.Name = "btnReportOder";
             this.btnReportOder.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnReportOder.Text = "Operator Performance";
@@ -237,6 +305,8 @@
             // 
             // btnCuttingReportQty
             // 
+            this.btnCuttingReportQty.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCuttingReportQty.Appearance.Default.Options.UseFont = true;
             this.btnCuttingReportQty.Name = "btnCuttingReportQty";
             this.btnCuttingReportQty.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnCuttingReportQty.Text = "Cutting Report";
@@ -392,6 +462,9 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement7;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnViewInfoDistribution;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElementWL;
+        private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator1;
+        private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator2;
+        private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator3;
     }
 }
 

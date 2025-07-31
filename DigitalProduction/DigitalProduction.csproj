@@ -25,7 +25,7 @@
     <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>124</ApplicationRevision>
+    <ApplicationRevision>127</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -219,12 +219,19 @@
     <Compile Include="Frm_Admin\frmDashboard.Designer.cs">
       <DependentUpon>frmDashboard.cs</DependentUpon>
     </Compile>
+    <Compile Include="Frm_User\Schedule.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Frm_User\Schedule.Designer.cs">
+      <DependentUpon>Schedule.cs</DependentUpon>
+    </Compile>
     <Compile Include="Frm_User\SubDistributionDetailForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Frm_User\SubDistributionDetailForm.Designer.cs">
       <DependentUpon>SubDistributionDetailForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="LocalizedStrings.cs" />
     <Compile Include="Models\CuttingReportModel.cs" />
     <Compile Include="Models\PartItem.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -366,6 +373,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Frm_Admin\frmDashboard.resx">
       <DependentUpon>frmDashboard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Frm_User\Schedule.resx">
+      <DependentUpon>Schedule.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Frm_User\ucCuttingReport.resx">
       <DependentUpon>ucCuttingReport.cs</DependentUpon>

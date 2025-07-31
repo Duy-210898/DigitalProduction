@@ -1194,70 +1194,65 @@ namespace DigitalProduction
         {
             var list = new List<TargetRealtimeInfo>();
 
-            string sql = @"
-                SELECT 
-                    ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
-                    ch.CutDate AS Timestamp,
-                    o.OperatorID,
-                    CASE 
-                        WHEN CAST(t.TargetDate AS DATE) = ch.CutDate THEN ISNULL(t.TargetQuantity, 0)
-                        ELSE 0
-                    END AS TargetQuantity,
-                    SUM(ch.CutQuantity) AS TargetActualQuantity
-                FROM CutHistory ch
-                LEFT JOIN PartSizeOrder pso 
-                    ON ch.OrderID = pso.OrderId 
-                    AND ch.SizeID = pso.SizeId 
-                    AND ch.PartID = pso.PartId
-                LEFT JOIN DistributionData dd 
-                    ON pso.PartSizeOrderId = dd.PartSizeOrderId
-                LEFT JOIN Operator o
-                    ON o.OperatorID = dd.OperatorID
-
-                OUTER APPLY (
-                    SELECT TOP 1 *
-                    FROM TargetInDay tid
-                    WHERE 
-                        tid.EmployeeId = o.EmployeeID
-                        AND tid.TargetDate <= ch.CutDate
-                    ORDER BY tid.TargetDate DESC
-                ) t
-                WHERE 
-                    YEAR(ch.CutDate) = @Year
-                    AND MONTH(ch.CutDate) = @Month
-                    AND o.OperatorID IS NOT NULL
-
-                GROUP BY 
-                    ISNULL(o.OperatorName, 'Unknown'),
-                    ch.CutDate,
-                    t.TargetDate,
-                    o.OperatorID,
-                    t.TargetQuantity
-
-                ORDER BY ch.CutDate;
+            const string sql = @"
+            SELECT 
+                ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
+                ch.CutDate AS Timestamp,
+                o.OperatorID,
+                pa.PartName,
+                s.Size,
+                CASE 
+                    WHEN CAST(t.TargetDate AS DATE) = ch.CutDate THEN ISNULL(t.TargetQuantity, 0)
+                    ELSE 0
+                END AS TargetQuantity,
+                SUM(ch.CutQuantity) AS TargetActualQuantity
+            FROM CutHistory ch
+            LEFT JOIN PartSizeOrder pso 
+                ON ch.OrderID = pso.OrderId AND ch.SizeID = pso.SizeId AND ch.PartID = pso.PartId
+            LEFT JOIN DistributionData dd 
+                ON pso.PartSizeOrderId = dd.PartSizeOrderId
+            LEFT JOIN Operator o 
+                ON o.OperatorID = dd.OperatorID
+            LEFT JOIN Part pa 
+                ON ch.PartID = pa.PartID
+            LEFT JOIN Size s 
+                ON ch.SizeID = s.SizeID
+            OUTER APPLY (
+                SELECT TOP 1 *
+                FROM TargetInDay tid
+                WHERE tid.EmployeeId = o.EmployeeID AND tid.TargetDate <= ch.CutDate
+                ORDER BY tid.TargetDate DESC
+            ) t
+            WHERE 
+                YEAR(ch.CutDate) = @Year AND MONTH(ch.CutDate) = @Month
+                AND o.OperatorID IS NOT NULL
+            GROUP BY 
+                o.OperatorName, ch.CutDate, o.OperatorID,
+                pa.PartName, s.Size, t.TargetDate, t.TargetQuantity
+            ORDER BY pa.PartName, s.Size, ch.CutDate;
             ";
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            using (SqlCommand cmd = new SqlCommand(sql, conn))
-            {
-                cmd.Parameters.AddWithValue("@Month", month);
-                cmd.Parameters.AddWithValue("@Year", year);
+             var conn = new SqlConnection(connectionString);
+             var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Month", month);
+            cmd.Parameters.AddWithValue("@Year", year);
 
-                await conn.OpenAsync();
-                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+            await conn.OpenAsync();
+            var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                list.Add(new TargetRealtimeInfo
                 {
-                    while (await reader.ReadAsync())
-                    {
-                        list.Add(new TargetRealtimeInfo
-                        {
-                            OperatorID = Convert.ToInt32(reader["OperatorID"]),
-                            OperatorName = reader["OperatorName"].ToString(),
-                            Timestamp = Convert.ToDateTime(reader["Timestamp"]),
-                            TargetQuantity = Convert.ToInt32(reader["TargetQuantity"]),
-                            TargetActualQuantity = Convert.ToInt32(reader["TargetActualQuantity"]),
-                        });
-                    }
-                }
+                    OperatorID = reader["OperatorID"] != DBNull.Value ? Convert.ToInt32(reader["OperatorID"]) : 0,
+                    OperatorName = reader["OperatorName"]?.ToString() ?? "Unknown",
+                    Timestamp = reader["Timestamp"] != DBNull.Value ? Convert.ToDateTime(reader["Timestamp"]) : DateTime.MinValue,
+                    TargetQuantity = reader["TargetQuantity"] != DBNull.Value ? Convert.ToInt32(reader["TargetQuantity"]) : 0,
+                    TargetActualQuantity = reader["TargetActualQuantity"] != DBNull.Value ? Convert.ToInt32(reader["TargetActualQuantity"]) : 0,
+                    // Optionally add:
+                     PartName = reader["PartName"]?.ToString(),
+                     Size = reader["Size"]?.ToString(),
+                });
             }
 
             return list;
@@ -1387,7 +1382,7 @@ namespace DigitalProduction
         //}
 
 
-        public static async Task SaveTargetQuantityAsync(TargetRealtimeInfo item)
+        public static async Task SaveTargetQuantityAsync(OperatorDailySummary item)
         {
             using (var connection = new SqlConnection(connectionString))
             {
@@ -1508,13 +1503,57 @@ namespace DigitalProduction
         {
             var soList = new List<string>();
             string query = @"
-                SELECT DISTINCT SO 
-                FROM ProductionSchedule 
-                WHERE SO IS NOT NULL AND SO <> ''
-                AND MONTH(CreatedAt) = @Month 
-                AND YEAR(CreatedAt) = @Year
-                AND DepartmentID = @DepartmentID";
+              -- Combined SOs from ProductOrder and ProductionSchedule
+              SELECT DISTINCT po.SO
+                FROM Product p
+                JOIN ProductOrder po ON p.ProductId = po.ProductId
+                JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+                JOIN Part pa ON pso.PartId = pa.PartId
+                JOIN Material m ON pso.MaterialID = m.MaterialID
+                JOIN Size s ON pso.SizeId = s.SizeID
+                WHERE YEAR(po.CreatedAt) = @Year
+                  AND MONTH(po.CreatedAt) = @Month
+                  AND (
+                      EXISTS (
+                          SELECT 1
+                          FROM DistributionData d
+                          WHERE d.PartSizeOrderId = pso.PartSizeOrderId
+                      )
+                      OR EXISTS (
+                          SELECT 1
+                          FROM DeviceOutput do
+                          WHERE do.OrderID = po.OrderID
+                            AND do.PartId = pso.PartId
+                            AND do.SizeID = pso.SizeId
+                      )
+                  )
 
+                UNION
+
+                SELECT DISTINCT ps.SO
+                FROM ProductionSchedule ps
+                JOIN PartSizeOrder pso ON ps.OrderID = pso.OrderID
+                                     AND ps.PartID = pso.PartId
+                                     AND ps.SizeID = pso.SizeId
+                WHERE ps.SO IS NOT NULL AND ps.SO <> ''
+                  AND YEAR(ps.CreatedAt) = @Year
+                  AND MONTH(ps.CreatedAt) = @Month
+                  AND ps.DepartmentID = @DepartmentID
+                  AND (
+                      EXISTS (
+                          SELECT 1
+                          FROM DistributionData d2
+                          WHERE d2.PartSizeOrderId = pso.PartSizeOrderId
+                      )
+                      OR EXISTS (
+                          SELECT 1
+                          FROM DeviceOutput do2
+                          WHERE do2.OrderID = ps.OrderID
+                            AND do2.PartId = ps.PartID
+                            AND do2.SizeID = ps.SizeID
+                      )
+                  );"
+            ;
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -1544,48 +1583,102 @@ namespace DigitalProduction
                 return result;
 
             string inClause = string.Join(",", soList.Select((s, i) => $"@SO{i}"));
+
             string query = $@"
-            SELECT 
-                po.OrderID,
-                po.Factory,
-                po.SO,
-                po.PO,
-                po.MasterWorkOrder,
-                po.LastNo,
-                po.Process,
-                s.Size,
-                s.SizeID,
-                p.ART,
-                p.Model,
-                pso.SizeQty,
-                pso.Unit AS PartSizeUnit,
-                pso.UnitUsage,
-                m.MaterialID,
-                m.MaterialCode,
-                m.MaterialName,
-                m.Unit AS MaterialUnit,
-                pa.PartId,
-                pa.PartName,
-                pa.VietnameseName,
-                pa.PartCode,
-                ps.CreatedAt,
-                d.Status,
-                d.InventoryQty,
-                do.CuttingDieQty, 
-                do.PiecesPerPair, 
-                do.MaterialLayer, 
-                do.TotalPiecesPerPair
-            FROM Product p
-            JOIN ProductOrder po ON p.ProductId = po.ProductId
-            JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
-            JOIN Part pa ON pso.PartId = pa.PartId
-            JOIN Material m ON pso.MaterialID = m.MaterialID
-            JOIN Size s ON pso.SizeId = s.SizeID
-            JOIN ProductionSchedule ps ON ps.OrderID = po.OrderID AND ps.PartID = pa.PartId AND ps.SizeID = s.SizeID
-            LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
-            LEFT JOIN DeviceOutput do ON do.SizeID = s.SizeId AND do.PartId = pa.PartId AND do.OrderID = po.OrderId
-            WHERE po.SO IN ({inClause})
-            ORDER BY TRY_CAST(s.Size AS DECIMAL(4,1));";
+               SELECT *
+                FROM (
+                    -- First: With ProductionSchedule
+                    SELECT 
+                        po.OrderID,
+                        po.Factory,
+                        po.SO,
+                        po.PO,
+                        po.MasterWorkOrder,
+                        po.LastNo,
+                        po.Process,
+                        s.Size,
+                        s.SizeID,
+                        p.ART,
+                        p.Model,
+                        pso.SizeQty,
+                        pso.Unit AS PartSizeUnit,
+                        pso.UnitUsage,
+                        m.MaterialID,
+                        m.MaterialCode,
+                        m.MaterialName,
+                        m.Unit AS MaterialUnit,
+                        pa.PartId,
+                        pa.PartName,
+                        pa.VietnameseName,
+                        pa.PartCode,
+                        ps.CreatedAt,
+                        d.Status,
+                        d.InventoryQty,
+                        do.CuttingDieQty, 
+                        do.PiecesPerPair, 
+                        do.MaterialLayer, 
+                        do.TotalPiecesPerPair
+                    FROM Product p
+                    JOIN ProductOrder po ON p.ProductId = po.ProductId
+                    JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+                    JOIN Part pa ON pso.PartId = pa.PartId
+                    JOIN Material m ON pso.MaterialID = m.MaterialID
+                    JOIN Size s ON pso.SizeId = s.SizeID
+                    JOIN ProductionSchedule ps ON ps.OrderID = po.OrderID AND ps.PartID = pa.PartId AND ps.SizeID = s.SizeID
+                    LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
+                    LEFT JOIN DeviceOutput do ON do.SizeID = s.SizeID AND do.PartId = pa.PartId AND do.OrderID = po.OrderID
+                    WHERE po.SO IN ({inClause})
+
+                    UNION ALL
+
+                    -- Second: Only DistributionData / DeviceOutput (Not in ProductionSchedule)
+                    SELECT 
+                        po.OrderID,
+                        po.Factory,
+                        po.SO,
+                        po.PO,
+                        po.MasterWorkOrder,
+                        po.LastNo,
+                        po.Process,
+                        s.Size,
+                        s.SizeID,
+                        p.ART,
+                        p.Model,
+                        pso.SizeQty,
+                        pso.Unit AS PartSizeUnit,
+                        pso.UnitUsage,
+                        m.MaterialID,
+                        m.MaterialCode,
+                        m.MaterialName,
+                        m.Unit AS MaterialUnit,
+                        pa.PartId,
+                        pa.PartName,
+                        pa.VietnameseName,
+                        pa.PartCode,
+                        GETDATE() AS CreatedAt,  -- placeholder
+                        d.Status,
+                        d.InventoryQty,
+                        do.CuttingDieQty, 
+                        do.PiecesPerPair, 
+                        do.MaterialLayer, 
+                        do.TotalPiecesPerPair
+                    FROM Product p
+                    JOIN ProductOrder po ON p.ProductId = po.ProductId
+                    JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+                    JOIN Part pa ON pso.PartId = pa.PartId
+                    JOIN Material m ON pso.MaterialID = m.MaterialID
+                    JOIN Size s ON pso.SizeId = s.SizeID
+                    LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
+                    LEFT JOIN DeviceOutput do ON do.SizeID = s.SizeID AND do.PartId = pa.PartId AND do.OrderID = po.OrderID
+                    WHERE po.SO IN ({inClause})
+                    AND NOT EXISTS (
+                        SELECT 1 
+                        FROM ProductionSchedule ps2
+                        WHERE ps2.OrderID = po.OrderID AND ps2.PartID = pa.PartId AND ps2.SizeID = s.SizeID
+                    )
+                ) AS CombinedResults
+                ORDER BY TRY_CAST(Size AS DECIMAL(4,1));
+            ";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(query, conn))

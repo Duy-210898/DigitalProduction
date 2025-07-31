@@ -136,6 +136,7 @@ async function connectToDevice(ipAddress, retries = 0) {
       try {
         const reachable = await pingHost(ipAddress);
         if (reachable) {
+          modbusClients[ipAddress].isConnected = true;
           await startReadingRegisters(ipAddress);
           await writeToModbusRegister(ipAddress);
         }
@@ -157,7 +158,7 @@ async function startReadingRegisters(ipAddress) {
 
   const entry = modbusClients[ipAddress] ?? {};
   if (!entry || entry.isDisconnected || !entry.client || !entry.isConnected) {
-    console.warn(`⚠️ Skipping read: device at ${ip} is disconnected or unavailable`);
+    console.warn(`⚠️ Skipping read: device at ${ipAddress} is disconnected or unavailable`);
     return;
   }
   try {
@@ -217,10 +218,10 @@ async function handleConnectionFailure(ipAddress, retries = 0) {
         const isReachable = await pingHost(ipAddress);
         if (!isReachable) {
           console.warn(`🔴 Device ${ipAddress} still unreachable. Will not retry now.`);
-          return;
-        }
+        } else {
+          await connectToDevice(ipAddress, retries + 1);
+        } 
 
-        await connectToDevice(ipAddress, retries + 1);
       } catch (err) {
         console.error(`[${ipAddress}] ❌ Retry failed: ${err.message}`);
       }
@@ -254,11 +255,13 @@ manager.on('readActual', async (client, ip) => {
     console.warn(`[${ip}] ReadActual skipped: device is marked as disconnected`);
     return;
   }
-
-  try {
-    await readActualData(client, ip);
-  } catch (err) {
-    console.error(`[${ip}] Error in readActual: ${err.message}`);
+  const reachable = await pingHost(ip);
+  if (reachable) {
+    try {
+      await readActualData(client, ip);
+    } catch (err) {
+      console.error(`[${ip}] Error in readActual: ${err.message}`);
+    }
   }
 });
 
@@ -518,16 +521,15 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
         return;
       }
     
-      const orderIDData = await client.readHoldingRegisters(1000, 1);
-      if (!orderIDData?.response?._body?.values?.[0]) {
-       // console.log("Không thể đọc OrderID từ thanh ghi 1000");
-        return;
-      }
-  
       let orderID = soGroup.Data[0].OrderID;
       clientData.operatorID = soGroup.Data[0].OperatorID;
       distributionData.Leather = soGroup.Data[0].IsLeather ? 2 : 1;
       if(isExisted){
+        const orderIDData = await client.readHoldingRegisters(1000, 1);
+        if (!orderIDData?.response?._body?.values?.[0]) {
+         // console.log("Không thể đọc OrderID từ thanh ghi 1000");
+          return;
+        }  
         orderID = orderIDData.response._body.values[0];
       }
       try {
@@ -593,13 +595,11 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
       // // Write PartName to register addresses
       // const clientEntry = modbusClients[ipAddress];
 
-      if (
-        !clientData ||
+      if (!clientData ||
         !Array.isArray(clientData.SOs) ||
         clientData.SOs.length === 0 ||
         !clientData.SOs[clientData.indexMultipleSOs] ||
-        !Array.isArray(clientData.SOs[clientData.indexMultipleSOs].Data)
-      ) {
+        !Array.isArray(clientData.SOs[clientData.indexMultipleSOs].Data)) {
         console.warn(`[${ipAddress}] ❌ Missing or invalid SOs data`);
         return []; // or handle fallback logic
       }
@@ -1302,21 +1302,32 @@ async function readActualData(client, ipAddress) {
           checkPendingSize =
           modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
             ?.filter(item => item.SizeID === sizeID && item.PartID === partID) || [];
-          if (checkPendingSize) {
-            if(actualSizeQty < checkPendingSize[0].ActualSizeQty) {
-              checkPendingSize[0].Status = 'Pending';
-              checkPendingSize[0].ActualCut = actualCut;
-              checkPendingSize[0].ActualPieces = actualPieces;
-              checkPendingSize[0].ActualSizeQty = actualSizeQty;
+          if (checkPendingSize.length > 1) {
+            checkPendingSize = checkPendingSize.find(item => item.Status === 'Pending');
+            if(checkPendingSize) {
+              sizeID = checkPendingSize.SizeID;
+              partID = checkPendingSize.PartID;
+              checkPendingSize =
+              modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
+                ?.filter(item => item.SizeID === sizeID && item.Status === 'Pending' && item.PartID === partID) || [];
             }
+          } else {
+          // if (checkPendingSize) {
+          //   if(actualSizeQty < checkPendingSize[0].ActualSizeQty) {
+          //     checkPendingSize[0].Status = 'Pending';
+          //     checkPendingSize[0].ActualCut = actualCut;
+          //     checkPendingSize[0].ActualPieces = actualPieces;
+          //     checkPendingSize[0].ActualSizeQty = actualSizeQty;
+          //   }
+          // }
+            checkPendingSize =
+              modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
+                ?.filter(item => item.SizeID === sizeID  && item.Status === 'Pending' && item.PartID === partID) || [];
           }
-          checkPendingSize =
-            modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-              ?.filter(item => item.SizeID === sizeID  && item.OrderID === OrderID && item.Status === 'Pending' && item.PartID === partID) || [];
         } else {
           checkPendingSize =
             modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-              ?.filter(item => item.SizeID === sizeID && item.OrderID === OrderID && item.Status === 'Pending') || [];
+              ?.filter(item => item.SizeID === sizeID && item.Status === 'Pending') || [];
 
           collectPartAndOrderID = (
             checkPendingSize
@@ -1712,7 +1723,8 @@ async function writeToModbusRegister(ipAddress, registerAddress = 8000) {
       const entry = modbusClients[ipAddress] ?? {};
 
       // 🔌 If not connected, attempt reconnect after ping check
-      if (!entry.client || !entry.isConnected) {
+      const reachable = await pingHost(ipAddress); 
+      if (!reachable) {
         if (!reconnecting) {
           reconnecting = true;
           console.warn(`[${ipAddress}] 🔴 Ping failed. Will retry in ${retryDelay / 1000}s.`);
@@ -2044,8 +2056,13 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
       // Define fixed slice ranges
       //const startIndex = index * chunkSize;
       //const endIndex = startIndex + chunkSize;
-  
-      processedSizeData = sizeData.slice(0, chunkSize);
+      // ✅ Deduplicate by Size (works even if Size is undefined)
+    const uniqueSizeData = Array.from(
+      new Map(sizeData.map(item => [item.Size || Symbol(), item])).values()
+    );
+
+    // ✅ Slice after deduplication
+    processedSizeData = uniqueSizeData.slice(0, chunkSize);
   } else {
     console.warn('sizeData is not an array:', sizeData);
   }
@@ -2165,7 +2182,17 @@ async function closeAllConnections() {
 async function setIpAddresses(ipAddresses) {
   try {
     for (const ipAddress of ipAddresses) {
-      const reachable = await isHostReachable(ipAddress);
+      let reachable = false;
+
+      try {
+        reachable = await isHostReachable(ipAddress);
+      } catch (err) {
+        const msg = `❌ Error checking reachability for ${ipAddress}: ${err.message}`;
+        console.error(msg);
+        logToFile(errorLogPath, msg);
+        continue; // skip this IP
+      }
+
       if (!reachable) {
         const msg = `🚫 ${ipAddress} is not reachable on port 502. Skipping.`;
         console.warn(msg);

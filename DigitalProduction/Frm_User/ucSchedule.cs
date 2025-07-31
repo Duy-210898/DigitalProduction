@@ -23,8 +23,6 @@ namespace DigitalProduction
         private BindingList<ProductionSchedule> productionSchedules = new BindingList<ProductionSchedule>();
         private WebSocketClient _webSocketClient;
         private int? selectedYear = DateTime.Today.Year;
-        private Label lblTotalRecords;
-        private SimpleButton btnSendData, btnDevideData;
         // Keep track of selected items
         public event EventHandler<RadioButton> RadioSelected;
         private static bool isLeather = false;
@@ -36,27 +34,23 @@ namespace DigitalProduction
         {
             InitializeComponent();
             SetupGridControl();
-            InitializeTotalLabel();
             InitializeMonthFilter();
             rdLeather.CheckedChanged += OnRadioCheckedChanged;
             rdRawMaterial.CheckedChanged += OnRadioCheckedChanged;
 
-            dateTimePickerSchedule.Format = DateTimePickerFormat.Custom;
-            dateTimePickerSchedule.CustomFormat = "yyyy";
-            dateTimePickerSchedule.ShowUpDown = true;
+            btnSend.Click += (s, e) => btnSend_Click(false);
+            btnDevideData.Click += (s, e) => btnSend_Click(true);
 
-            lblFilterDate.Text = LocalizationManager.GetString("FilterDate");
-            lblSelectSO.Text = LocalizationManager.GetString("SelectSO");
-            lb_PartName.Text = LocalizationManager.GetString("SelectPart");
-            lb_Size.Text = LocalizationManager.GetString("SelectSize");
-            rdLeather.Text = LocalizationManager.GetString("leatherMaterial");
-            rdRawMaterial.Text = LocalizationManager.GetString("rawMaterial");
-            lbSelectMaterialType.Text = LocalizationManager.GetString("SelectMaterialType");
+            dateTimePickerSchedule.Properties.VistaCalendarViewStyle = DevExpress.XtraEditors.VistaCalendarViewStyle.YearsGroupView;
+            dateTimePickerSchedule.Properties.Mask.EditMask = "yyyy";
+            dateTimePickerSchedule.Properties.DisplayFormat.FormatString = "yyyy";
+            dateTimePickerSchedule.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+            dateTimePickerSchedule.Properties.EditFormat.FormatString = "yyyy";
+            dateTimePickerSchedule.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
 
-            //  cboSO.EditValueChanged += cboSO_EditValueChanged;
-            InitializeSyncButton();
+            TranslateLableText();
 
-            //cboSO.Properties.TextEditStyle = TextEditStyles.Standard;
+            InitializeLabelAndSyncButton();
 
             gridLookUpEditSO.Properties.View = new DevExpress.XtraGrid.Views.Grid.GridView();
             gridLookUpEditSO.Properties.PopupFormSize = new Size(400, 300);
@@ -81,6 +75,7 @@ namespace DigitalProduction
             view.OptionsView.ShowGroupPanel = false;
             view.OptionsSelection.MultiSelect = true;
             view.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CheckBoxRowSelect;
+            view.OptionsBehavior.Editable = false;
             view.OptionsSelection.ShowCheckBoxSelectorInColumnHeader = DevExpress.Utils.DefaultBoolean.True;
             view.OptionsSelection.ShowCheckBoxSelectorInGroupRow = DevExpress.Utils.DefaultBoolean.False;
             view.BestFitColumns();
@@ -89,37 +84,74 @@ namespace DigitalProduction
             gridLookUpEditSO.Properties.ImmediatePopup = true;
             gridLookUpEditSO.Properties.PopupView.OptionsBehavior.Editable = false;
 
+            // Step 3: Prevent popup from closing on checkbox selection
+            gridLookUpEditSO.Properties.QueryCloseUp += (s, e) =>
+            {
+                e.Cancel = true; // Prevents popup from closing when clicking checkboxes
+            };
+
+            // Step 4: Handle selection logic
             view.SelectionChanged += async (s, e) =>
             {
-                selectedSalesOrders.Clear();
-                foreach (int rowHandle in view.GetSelectedRows())
+                // Prevent reentry if multiple rapid clicks
+                if (view.IsLoading) return;
+
+                try
                 {
-                    if (view.GetRow(rowHandle) is SalesOrder so)
-                        selectedSalesOrders.Add(so);
+                    selectedSalesOrders.Clear();
+
+                    foreach (int rowHandle in view.GetSelectedRows())
+                    {
+                        var row = view.GetRow(rowHandle);
+                        if (row is SalesOrder so)
+                            selectedSalesOrders.Add(so);
+                    }
+
+                    // Save layout before data refresh
+                    var layoutStream = new MemoryStream();
+                    view.SaveLayoutToStream(layoutStream);
+                    layoutStream.Position = 0;
+
+                    // Fetch new data (grid update)
+                    await GetDataAndLoadToGridAsync();
+
+                    // Delay ensures popup is visible before restoring layout
+                    await Task.Delay(100);
+
+                    if (gridLookUpEditSO.IsPopupOpen)
+                    {
+                        layoutStream.Position = 0;
+                        view.RestoreLayoutFromStream(layoutStream);
+                    }
+
+                    gridLookUpEditSO.RefreshEditValue();
                 }
-
-                // Lưu layout
-                var layoutStream = new MemoryStream();
-                view.SaveLayoutToStream(layoutStream);
-                layoutStream.Position = 0;
-
-                await GetDataAndLoadToGridAsync(); // Load data mới
-
-                // Restore layout
-                layoutStream.Position = 0;
-                view.RestoreLayoutFromStream(layoutStream);
-                gridLookUpEditSO.RefreshEditValue();
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Selection error: " + ex.Message);
+                }
             };
-            // Custom display text event
+
+            // Step 5: Custom display
             gridLookUpEditSO.CustomDisplayText += (s, e) =>
             {
                 if (selectedSalesOrders.Count > 0)
                 {
                     e.DisplayText = string.Join(", ", selectedSalesOrders.Select(so => so.SO));
                 }
+                else
+                {
+                    e.DisplayText = string.Empty; // Clear text when nothing is selected
+                }
             };
 
-            fpRequireSelectTypeMaterial.OwnerControl = this;
+            view.ColumnFilterChanged += (s, e) =>
+            {
+                view.RefreshData();
+            };
+
+
+            flayoutTableSelectSO.OwnerControl = this;
             this.HandleCreated += (s, e) =>
             {
                 this.BeginInvoke(new Action(() =>
@@ -137,8 +169,25 @@ namespace DigitalProduction
             gridViewSchedule.Appearance.FooterPanel.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
 
             // check size limit
-            comboSize.EditValueChanged += ComboSize_EditValueChanged;
+            cbxSize.EditValueChanged += ComboSize_EditValueChanged;
         }
+
+        private void TranslateLableText()
+        {
+            lblFilterDate.Text = LocalizedStrings.FilterDate;
+            lblSelectSO.Text = LocalizedStrings.SelectSO;
+            lblPartName.Text = LocalizedStrings.SelectPart;
+            lblSize.Text = LocalizedStrings.SelectSize;
+            rdLeather.Text = LocalizedStrings.leatherMaterial;
+            rdRawMaterial.Text = LocalizedStrings.rawMaterial;
+            lbSelectMaterialType.Text = LocalizedStrings.SelectMaterialType;
+            lblTotalRecords.Text = LocalizedStrings.TotalRecords;
+            btnSend.Text = LocalizedStrings.SelectData;
+            btnDevideData.Text = LocalizedStrings.SelectDevideData;
+            lblSelectSORequired.Text = LocalizedStrings.SelectSO;
+
+        }
+
         private void ComboSize_EditValueChanged(object sender, EventArgs e)
         {
             CheckedComboBoxEdit editor = sender as CheckedComboBoxEdit;
@@ -154,28 +203,32 @@ namespace DigitalProduction
                 lastChecked.CheckState = CheckState.Unchecked;
 
                 editor.RefreshEditValue();
-                ShowFlyoutAboveCombo(comboSize, LocalizationManager.GetString("MaximumSize"));
+                ShowFlyoutAboveCombo(cbxSize, LocalizationManager.GetString("MaximumSize"));
             }
         }
         private void ShowFlyoutAboveCombo(CheckedComboBoxEdit combo, string message)
         {
+            lblFlyoutMessage.AutoSize = true;
             lblFlyoutMessage.Text = message;
+            lblFlyoutMessage.BringToFront();
 
-            // Get screen coordinates of combo
+            // Đảm bảo label cập nhật kích thước trước khi đo
+            lblFlyoutMessage.Refresh();
+
+            // Gán size của flyout = label
+            flayoutTableSelectSO.Size = lblFlyoutMessage.Size;
+
+            // Tính vị trí hiển thị
             Point comboScreen = combo.PointToScreen(Point.Empty);
-
-            // Get screen coordinates of OwnerControl
-            Point ownerScreen = fpRequireSelectTypeMaterial.OwnerControl.PointToScreen(Point.Empty);
-
-            // Calculate position relative to OwnerControl
             int x = comboScreen.X + 2;
             int y = comboScreen.Y - 8;
 
-            fpRequireSelectTypeMaterial.ShowBeakForm(new Point(x, y));
+            flayoutTableSelectSO.ShowBeakForm(new Point(x, y));
 
-            flyoutAutoHideTimer.Stop(); // Reset if it's already running
-            flyoutAutoHideTimer.Start(); // Start countdown to auto-hide
+            flyoutAutoHideTimer.Stop();
+            flyoutAutoHideTimer.Start();
         }
+
 
         private void InitializeFlyoutTimer()
         {
@@ -183,9 +236,9 @@ namespace DigitalProduction
             flyoutAutoHideTimer.Interval = 4000; // 4 seconds
             flyoutAutoHideTimer.Tick += (s, e) =>
             {
-                if (fpRequireSelectTypeMaterial != null && fpRequireSelectTypeMaterial.Visible)
+                if (flayoutTableSelectSO != null && flayoutTableSelectSO.Visible)
                 {
-                    fpRequireSelectTypeMaterial.HideBeakForm();
+                    flayoutTableSelectSO.HideBeakForm();
                 }
                 flyoutAutoHideTimer.Stop();
             };
@@ -195,39 +248,30 @@ namespace DigitalProduction
         {
             lblFlyoutMessage.Text = message;
 
-            // Get screen coordinates of radioButton
+            // Đặt max width để auto wrap
+            lblFlyoutMessage.MaximumSize = new Size(250, 0);
+            lblFlyoutMessage.AutoSize = true;
+
+            // Force layout cập nhật lại kích thước
+            lblFlyoutMessage.PerformLayout();
+            lblFlyoutMessage.Refresh();
+
+            // Cập nhật lại panel chứa nếu cần
+            flayoutTableSelectSO.PerformLayout();
+            flayoutTableSelectSO.Refresh();
+
+            // Set lại size cho Panel nếu muốn
+            flayoutTableSelectSO.Width = lblFlyoutMessage.PreferredSize.Width + 20;
+            flayoutTableSelectSO.Height = lblFlyoutMessage.PreferredSize.Height + 20;
+
+            // Vị trí beak
             Point rdScreen = radioButton.PointToScreen(Point.Empty);
-
-            // Get screen coordinates of OwnerControl
-            Point ownerScreen = fpRequireSelectTypeMaterial.OwnerControl.PointToScreen(Point.Empty);
-
-            // Calculate position relative to OwnerControl
             int x = rdScreen.X + 2;
             int y = rdScreen.Y - 8;
 
-            fpRequireSelectTypeMaterial.ShowBeakForm(new Point(x, y));
+            // Hiển thị
+            flayoutTableSelectSO.ShowBeakForm(new Point(x, y));
         }
-
-
-
-        //private void cboSO_EditValueChanged(object sender, EventArgs e)
-        //{
-        //    selectedSOs = cboSO.Properties.Items
-        //                        .GetCheckedValues()
-        //                        .Cast<string>()
-        //                        .ToList();
-
-        //    // Do something with selectedSOs
-        //    Console.WriteLine("Selected SOs: " + string.Join(", ", selectedSOs));
-
-        //    if (selectedSOs != null && selectedSOs.Count > 0)
-        //    {
-        //        _ = GetDataAndLoadToGridAsync();
-        //    }
-        //    else {
-        //        gridControlSchedule.DataSource = null;
-        //    }
-        //}
 
 
         public class ProductionScheduleComparer : IEqualityComparer<ProductionSchedule>
@@ -242,8 +286,7 @@ namespace DigitalProduction
                 return obj.GetHashCode();
             }
         }
-
-        private async void BtnSendData_Click(bool isDeviceData)
+        private async void btnSend_Click(bool isDeviceData)
         {
             // avoid dupliacte
             List<ProductionSchedule> filteredSchedules = GetFilteredData().Distinct(new ProductionScheduleComparer()).ToList();
@@ -253,7 +296,7 @@ namespace DigitalProduction
                 MessageBox.Show("No data available to send.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            var selectedItems = comboSize.Properties.Items.Cast<CheckedListBoxItem>()
+            var selectedItems = cbxSize.Properties.Items.Cast<CheckedListBoxItem>()
               .Where(i => i.CheckState == CheckState.Checked)
               .ToList();
             isLeather = rdLeather.Checked;
@@ -263,11 +306,11 @@ namespace DigitalProduction
                 var lastChecked = selectedItems.Last();
                 lastChecked.CheckState = CheckState.Unchecked;
 
-                comboSize.RefreshEditValue();
-                ShowFlyoutAboveCombo(comboSize, LocalizationManager.GetString("MaximumSize"));
+                cbxSize.RefreshEditValue();
+                ShowFlyoutAboveCombo(cbxSize, LocalizationManager.GetString("MaximumSize"));
                 return;
             }
-            var items = comboSize.Properties.Items.Cast<CheckedListBoxItem>().ToList();
+            var items = cbxSize.Properties.Items.Cast<CheckedListBoxItem>().ToList();
             var checkedItems = items.Where(i => i.CheckState == CheckState.Checked).ToList();
 
             if (isDeviceData && selectedItems.Count > 1)
@@ -278,8 +321,8 @@ namespace DigitalProduction
                     item.CheckState = (item == checkedItems.First()) ? CheckState.Checked : CheckState.Unchecked;
                 }
 
-                comboSize.RefreshEditValue();
-                ShowFlyoutAboveCombo(comboSize, LocalizationManager.GetString("MaximumSizeLeather"));
+                cbxSize.RefreshEditValue();
+                ShowFlyoutAboveCombo(cbxSize, LocalizationManager.GetString("MaximumSizeLeather"));
                 return;
             }
             bool allSame = filteredSchedules
@@ -323,7 +366,9 @@ namespace DigitalProduction
                 mainForm.HighlightSelectedItem(mainForm.btnDistribution);
                 MessageBox.Show($"Sent {filteredSchedules.Count} records to Distribution!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+
         }
+
         private List<ProductionSchedule> GetFilteredData()
         {
             var filteredData = new List<ProductionSchedule>();
@@ -445,90 +490,12 @@ namespace DigitalProduction
             gridViewSchedule.ExpandAllGroups(); // Expand all groups after setting
         }
 
-        private void InitializeTotalLabel()
-        {
-            lblTotalRecords = new Label
-            {
-                Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold),
-                Text = $" {LocalizationManager.GetString("TotalRecords")} 0",
-                AutoSize = true,
-                ForeColor = System.Drawing.Color.Green,
-                Padding = new Padding(5)
-            };
-
-            btnSendData = new SimpleButton
-            {
-                Text = LocalizationManager.GetString("SelectData"),
-                Font = new Font("Segoe UI", 12F, FontStyle.Bold), // Modern, clean font
-                Appearance =
-                {
-                    BackColor = Color.LightBlue,
-                    ForeColor = Color.White,
-                    Options = { UseBackColor = true, UseForeColor = true, UseFont = true },
-                },
-                LookAndFeel =
-                {
-                    Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat,
-                    UseDefaultLookAndFeel = false
-                },
-                Height = 40,
-                Width = 180,
-                Cursor = Cursors.Hand,
-                Margin = new Padding(10, 0, 0, 0),
-                ImageOptions =
-                {
-                    Image = Properties.Resources.send_data
-                    ,
-                    ImageToTextAlignment = ImageAlignToText.LeftCenter
-                }
-            };
-            btnSendData.Click += (s, e) => BtnSendData_Click(false);
-
-            // Add components to FlowLayoutPanel
-            bottomPanel.Controls.Add(lblTotalRecords);
-            bottomPanel.Controls.Add(btnSendData);
-
-            btnDevideData = new SimpleButton
-            {
-                Text = LocalizationManager.GetString("SelectDevideData"),
-                Font = new Font("Segoe UI", 12F, FontStyle.Bold), // Modern, clean font
-                Appearance =
-                {
-                    BackColor = Color.LightBlue,
-                    ForeColor = Color.White,
-                    Options = { UseBackColor = true, UseForeColor = true, UseFont = true },
-                },
-                            LookAndFeel =
-                {
-                    Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat,
-                    UseDefaultLookAndFeel = false
-                },
-                            Height = 40,
-                            Width = 180,
-                            Cursor = Cursors.Hand,
-                            Margin = new Padding(10, 0, 0, 0),
-                            ImageOptions =
-                {
-                    Image = Properties.Resources.send_data_device
-                    ,
-                    ImageToTextAlignment = ImageAlignToText.LeftCenter
-                }
-            };
-            btnDevideData.Click += (s, e) => BtnSendData_Click(true);
-
-            // Add components to FlowLayoutPanel
-            bottomPanel.Controls.Add(btnDevideData);
-
-            // Add to UserControl
-            Controls.Add(bottomPanel);
-        }
-
 
         private void InitializeMonthFilter()
         {
-            dateTimePickerSchedule.ValueChanged += async (sender, e) =>
+            dateTimePickerSchedule.EditValueChanged += async (sender, e) =>
             {
-                selectedYear = dateTimePickerSchedule.Value.Year;
+                selectedYear = dateTimePickerSchedule.DateTime.Year;
 
                 await GetListOfSOsByYearAsync();
             };
@@ -719,7 +686,7 @@ namespace DigitalProduction
                     e.CheckedComboBox.BorderStyle = BorderStyles.Office2003;
                 }
             };
-            LoadSizeItemsToCheckedComboBox(comboSize, comboxPartName, gridViewSchedule);
+            LoadSizeItemsToCheckedComboBox(cbxSize, cbxPartName, gridViewSchedule);
         }
 
         private void HideGridColumns()
@@ -786,11 +753,54 @@ namespace DigitalProduction
             lblTotalRecords.ForeColor = Color.Green;
         }
 
-        private void InitializeSyncButton()
+        private void InitializeLabelAndSyncButton()
         {
             btnSync.Text = LocalizationManager.GetString("Sync");
             btnSync.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSync.Click += BtnSync_Click;
+
+            // ---------- [UI Lable Total] ----------
+            lblTotalRecords.Font = new System.Drawing.Font("Arial", 12, System.Drawing.FontStyle.Bold);
+            lblTotalRecords.Text = $" {LocalizationManager.GetString("TotalRecords")} 0";
+            lblTotalRecords.AutoSize = true;
+            lblTotalRecords.ForeColor = System.Drawing.Color.Green;
+            lblTotalRecords.Padding = new Padding(5);
+
+            // ---------- [UI BUTTON SEND] ----------
+
+            // Look and Feel
+            btnSend.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
+            btnSend.LookAndFeel.UseDefaultLookAndFeel = false;
+
+            // Con trỏ chuột
+            btnSend.Cursor = Cursors.Hand;
+
+            // Lề
+            btnSend.Margin = new Padding(10, 0, 0, 0);
+
+            // Hình ảnh
+            btnSend.ImageOptions.Image = Properties.Resources.send_data;
+            btnSend.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
+
+
+            // ---------- [UI BUTTON DEVIED] ----------
+            // Font hiện đại, đậm
+            btnDevideData.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+
+            // Look and Feel
+            btnDevideData.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
+            btnDevideData.LookAndFeel.UseDefaultLookAndFeel = false;
+
+            // Con trỏ chuột
+            btnDevideData.Cursor = Cursors.Hand;
+
+            // Lề
+            btnDevideData.Margin = new Padding(10, 0, 0, 0);
+
+            // Ảnh và vị trí ảnh
+            btnDevideData.ImageOptions.Image = Properties.Resources.send_data_device;
+            btnDevideData.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
+
         }
         private void BtnSync_Click(object sender, EventArgs e)
         {
@@ -874,52 +884,10 @@ namespace DigitalProduction
                 comboBoxPart.ShowPopup();
         }
 
-
-
-        //private void ApplyFilterFromCheckedComboBox(CheckedComboBoxEdit comboBox, GridView gridView, string fieldName, bool isNumeric = true)
-        //{
-        //    var checkedItems = comboBox.Properties.Items
-        //        .Cast<CheckedListBoxItem>()
-        //        .Where(item => item.CheckState == CheckState.Checked)
-        //        .ToList();
-
-        //    if (checkedItems.Count == 0)
-        //    {
-        //        gridView.ActiveFilter.Clear();
-        //        return;
-        //    }
-
-        //    // Use CultureInvariant parsing
-        //    IEnumerable<string> values;
-
-        //    if (isNumeric && gridView.Columns[fieldName].ColumnType != typeof(string))
-        //    {
-        //        // Unquoted numbers
-        //        values = checkedItems
-        //            .Where(item => double.TryParse(item.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out _))
-        //            .OrderBy(item =>
-        //            {
-        //                double.TryParse(item.Value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out double number);
-        //                return number;
-        //            })
-        //            .Select(item => item.Value.ToString());
-        //    }
-        //    else
-        //    {
-        //        // Quote values for string-based filters
-        //        values = checkedItems
-        //            .Select(item => $"'{item.Value?.ToString().Replace("'", "''")}'")
-        //            .OrderBy(v => v);
-        //    }
-
-        //    string filter = $"[{fieldName}] IN ({string.Join(", ", values)})";
-        //    gridView.ActiveFilterString = filter;
-        //}
-
         private void ApplyCombinedFilters()
         {
-            var sizeValues = GetCheckedValues(comboSize, gridViewSchedule, "Size");
-            var partValues = GetCheckedValues(comboxPartName, gridViewSchedule, "PartName");
+            var sizeValues = GetCheckedValues(cbxSize, gridViewSchedule, "Size");
+            var partValues = GetCheckedValues(cbxPartName, gridViewSchedule, "PartName");
 
             List<string> filters = new List<string>();
 
@@ -973,13 +941,16 @@ namespace DigitalProduction
                 .OfType<RadioButton>()
                 .FirstOrDefault(rb => rb.Checked)?.Text;
         }
+
+
         private void OnRadioCheckedChanged(object sender, EventArgs e)
         {
             RadioButton rd = sender as RadioButton;
             if (rd.Checked)
             {
+                lblSelectSORequired.Enabled = true;
                 flayoutTableSelectSO.Enabled = true;
-                fpRequireSelectTypeMaterial.HideBeakForm(); // Hide if already shown
+                flayoutTableSelectSO.HideBeakForm(); // Hide if already shown
                 RadioSelected?.Invoke(this, rd);
             }
         }

@@ -669,7 +669,7 @@ namespace DigitalProduction
                 var sb = new StringBuilder();
 
                 float totalUnitUsagePerPair = unitUsagePerPairPerSize.Values.Sum();
-                sb.AppendLine($" {LocalizationManager.GetString("UnitUsagePerPair")}: {Math.Round(totalUnitUsagePerPair, 6)}");
+                sb.AppendLine($" {LocalizationManager.GetString("UnitUsagePerPair")}: {Math.Round(totalUnitUsagePerPair, 6).ToString("N3",new CultureInfo("de-DE"))}");
 
                 // Step 3: Display in label
                 lblUnitUsagePerPair.Text = sb.ToString();
@@ -686,7 +686,7 @@ namespace DigitalProduction
                     // If total unit usage > 1, override unitUsage with rounded float
                     if (totalUnitUsagePerSize.TryGetValue(entrySize, out var totalUsage) && totalUsage > 1)
                     {
-                        unitUsage = Math.Round(totalUsage, 6).ToString(CultureInfo.InvariantCulture);
+                        unitUsage = Math.Round(totalUsage, 3).ToString("N3", new CultureInfo("de-DE"));
                     }
 
                     // Calculate per-row unitUsagePerPair for this specific size
@@ -707,7 +707,7 @@ namespace DigitalProduction
                          unitUsage,
                          0,
                          0,
-                         Math.Round(unitUsagePerPair, 6)
+                         Math.Round(unitUsagePerPair, 6).ToString(CultureInfo.InvariantCulture)
                     );
                 }
             }

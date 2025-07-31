@@ -50,6 +50,7 @@
             this.gridLookUpOperator = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.btnSend = new DevExpress.XtraEditors.SimpleButton();
+            this.lblUnitUsagePerPair = new System.Windows.Forms.Label();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.btnSaveInventory = new DevExpress.XtraEditors.SimpleButton();
             this.lblInventoryQty = new System.Windows.Forms.Label();
@@ -70,7 +71,6 @@
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
             this.gridViewOverview = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.lblUnitUsagePerPair = new System.Windows.Forms.Label();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutMainDistribution.SuspendLayout();
@@ -378,6 +378,14 @@
             this.btnSend.Text = "Send Distribution";
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             // 
+            // lblUnitUsagePerPair
+            // 
+            this.lblUnitUsagePerPair.Location = new System.Drawing.Point(3, 98);
+            this.lblUnitUsagePerPair.Name = "lblUnitUsagePerPair";
+            this.lblUnitUsagePerPair.Size = new System.Drawing.Size(197, 33);
+            this.lblUnitUsagePerPair.TabIndex = 11;
+            this.lblUnitUsagePerPair.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // tableLayoutPanel5
             // 
             this.tableLayoutPanel5.BackColor = System.Drawing.Color.MistyRose;
@@ -618,14 +626,6 @@
             // 
             this.gridViewOverview.GridControl = this.gridControlOverview;
             this.gridViewOverview.Name = "gridViewOverview";
-            // 
-            // lblUnitUsagePerPair
-            // 
-            this.lblUnitUsagePerPair.Location = new System.Drawing.Point(3, 98);
-            this.lblUnitUsagePerPair.Name = "lblUnitUsagePerPair";
-            this.lblUnitUsagePerPair.Size = new System.Drawing.Size(197, 33);
-            this.lblUnitUsagePerPair.TabIndex = 11;
-            this.lblUnitUsagePerPair.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // ucDistribution
             // 
