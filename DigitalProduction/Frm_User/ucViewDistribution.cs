@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
+using DevExpress.Utils;
+using DevExpress.XtraExport.Helpers;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -47,13 +50,11 @@ namespace DigitalProduction
             gridLookUpSOs.CloseUp += (s, e) =>
             {
                 LoadProductionSchedulesBySelectedSOs(gridLookUpSOs, gridControlViewSO, gridViewSO);
-                HideGridColumns();
             };
 
             gridLookUpSOs.EditValueChanged += (s, e) =>
             {
                 LoadProductionSchedulesBySelectedSOs(gridLookUpSOs, gridControlViewSO, gridViewSO);
-                HideGridColumns();
             };
 
             // Reload SOs when month changes
@@ -67,7 +68,7 @@ namespace DigitalProduction
 
                 // Clear data grid and reset label
                 gridControlViewSO.DataSource = null;
-                gridLookUpEdit1View.Columns.Clear(); // optional: clear columns too
+                gridLookUpEdit1View.Columns.Clear();
             };
             var view = gridLookUpSOs.Properties.View;
 
@@ -159,7 +160,6 @@ namespace DigitalProduction
             cboSO.Properties.PopupFormSize = new Size(cboSO.Width + 100, popupHeight);
         }
 
-
         private void LoadProductionSchedulesBySelectedSOs(DevExpress.XtraEditors.GridLookUpEdit cboSO, GridControl gridControl, GridView gridView)
         {
             if (selectedSalesOrders == null || selectedSalesOrders.Count == 0)
@@ -167,30 +167,131 @@ namespace DigitalProduction
                 gridControl.DataSource = null;
                 return;
             }
-
             try
             {
-                // Show loading/wait form
                 DevExpress.XtraSplashScreen.SplashScreenManager.ShowForm(this, typeof(frmLoading), true, true);
-                // 1. Query schedules
-                var allSchedules = DbHelper.GetSchedulesBySOList(selectedSalesOrders);
 
-                // 2. Bind to grid
-                gridControl.DataSource = allSchedules;
+                // Step 1: Load flat list
+                var flatSchedules = DbHelper.GetSchedulesBySOList(selectedSalesOrders);
 
-                // 3. Rebuild grid view
+                // Step 2: Convert to nested structure: SO ➝ Size ➝ Details
+                var groupedSchedules = flatSchedules
+                    .GroupBy(s => s.SO)
+                    .Select(soGroup => new ScheduleGroup
+                    {
+                        SO = soGroup.Key,
+                        Sizes = soGroup
+                            .GroupBy(s => s.Size)
+                            .Select(sizeGroup => new SizeGroup
+                            {
+                                Size = sizeGroup.Key,
+                                Details = sizeGroup.ToList()
+                            }).ToList()
+                    }).ToList();
+
+                // Step 3: Bind to grid
+                gridControl.DataSource = groupedSchedules;
                 gridView.PopulateColumns();
 
-                // 4. Group by SO
-                GridColumn soColumn = gridView.Columns["SO"];
-                if (soColumn != null)
-                {
-                    soColumn.GroupIndex = 0;
-                    soColumn.SortOrder = DevExpress.Data.ColumnSortOrder.Ascending;
-                    gridView.ExpandAllGroups();
-                }
+                // Optional: Hide virtual property if any
+                var detailsColumn = gridView.Columns["Details"];
+                if (detailsColumn != null)
+                    detailsColumn.Visible = false;
 
-                // 5. Refresh and update
+                // Step 4: Setup master-detail: SO ➝ Size
+                gridView.OptionsDetail.EnableMasterViewMode = true;
+                gridView.OptionsDetail.ShowDetailTabs = false;
+                gridView.OptionsDetail.SmartDetailExpand = true;
+
+                gridView.OptionsDetail.EnableMasterViewMode = true;
+                // Level 0 → SO → Sizes
+                gridView.MasterRowGetRelationCount += (s, e) => { e.RelationCount = 1; };
+                gridView.MasterRowGetRelationName += (s, e) => { e.RelationName = "Sizes"; };
+                gridView.MasterRowGetChildList += (s, e) =>
+                {
+                    var soGroup = gridView.GetRow(e.RowHandle) as ScheduleGroup;
+                    e.ChildList = soGroup?.Sizes;
+                };
+
+                // Level 1 → Sizes → Details
+                gridView.MasterRowGetLevelDefaultView += (s, e) =>
+                {
+                    if (e.RelationIndex == 0)
+                    {
+                        var sizeView = new GridView(gridControl);
+                        gridControl.ViewCollection.Add(sizeView);
+
+                        sizeView.OptionsDetail.EnableMasterViewMode = true;
+                        sizeView.OptionsBehavior.Editable = false;
+                        sizeView.OptionsView.ShowGroupPanel = false;
+
+                        // Provide relation count (1 for next level)
+                        sizeView.MasterRowGetRelationCount += (sender, args) =>
+                        {
+                            args.RelationCount = 1;
+                        };
+
+                        // Provide relation name
+                        sizeView.MasterRowGetRelationName += (sender, args) =>
+                        {
+                            args.RelationName = "Details";
+                        };
+
+                        // Provide child list for the detail level (SizeDetail list)
+                        sizeView.MasterRowGetChildList += (sender, args) =>
+                        {
+                            var sizeGroup = sizeView.GetRow(args.RowHandle) as SizeGroup;
+                            args.ChildList = sizeGroup?.Details; // List<SizeDetail>
+                        };
+
+                        // Define the final detail view
+                        sizeView.MasterRowGetLevelDefaultView += (sender2, args2) =>
+                        {
+                            var detailView = new GridView(gridControl);
+                            gridControl.ViewCollection.Add(detailView);
+
+                            detailView.OptionsView.ShowGroupPanel = false;
+                            detailView.OptionsBehavior.Editable = false;
+
+                            // Manually call PopulateColumns after setting dummy DataSource to generate columns
+                            var dummyList = new List<ProductionSchedule>();
+                            detailView.PopulateColumns(dummyList); // avoids null columns
+
+                            args2.DefaultView = detailView;
+
+                            // Call your custom logic after columns are created
+                            HideGridColumns(detailView);
+                        };
+
+                        e.DefaultView = sizeView;
+                    }
+                };
+                gridView.MasterRowExpanded += (s, e) =>
+                {
+                    gridView.BestFitColumns();
+                };
+
+
+                gridView.CustomColumnDisplayText += (s, e) =>
+                {
+                    if (e.Column.FieldName == "SO")
+                    {
+                        if (e.ListSourceRowIndex < 0)
+                            return;
+
+                        var row = gridView.GetRow(e.ListSourceRowIndex) as ScheduleGroup;
+                        if (row == null || row.Sizes == null)
+                            return;
+
+                        bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.Status == "Pending");
+                        bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.Status == "Complete");
+
+                        string statusText = hasPending ? "Pending" : (allComplete ? "Complete" : "Pending");
+                        e.DisplayText = $"{row.SO} || {statusText}";
+                    }
+                };
+
+                gridView.ExpandAllGroups();
                 gridView.RefreshData();
             }
             catch (Exception ex)
@@ -199,27 +300,25 @@ namespace DigitalProduction
             }
             finally
             {
-                // Close the loading form
                 if (DevExpress.XtraSplashScreen.SplashScreenManager.Default != null)
                     DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
             }
         }
 
-
-        private void HideGridColumns()
+        private void HideGridColumns(GridView gridView)
         {
             foreach (var columnName in columnsToHide)
             {
-                var column = gridViewSO.Columns[columnName];
+                var column = gridView.Columns[columnName];
                 if (column != null)
                 {
                     column.Visible = false;
                 }
             }
 
-            TranslateHeaders();
+            TranslateHeaders(gridView);
             // Subscribe to the RowStyle event
-            gridViewSO.RowCellStyle += gridViewSO_RowCellStyle;
+            gridView.RowCellStyle += gridViewSO_RowCellStyle;
         }
 
         private void gridViewSO_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
@@ -249,10 +348,10 @@ namespace DigitalProduction
                 }
             }
         }
-        private void TranslateHeaders()
+        private void TranslateHeaders(GridView gridView)
         {
 
-            if (gridControlViewSO.MainView is GridView gridView && gridView.Columns.Count > 0)
+            if (gridView.Columns.Count > 0)
             {
                 foreach (GridColumn col in gridView.Columns)
                 {

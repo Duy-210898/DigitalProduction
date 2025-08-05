@@ -119,22 +119,22 @@
             // 
             // btnDevideData
             // 
-            this.btnDevideData.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDevideData.Appearance.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnDevideData.Appearance.Options.UseFont = true;
             this.btnDevideData.Location = new System.Drawing.Point(434, 12);
             this.btnDevideData.Name = "btnDevideData";
-            this.btnDevideData.Size = new System.Drawing.Size(188, 24);
+            this.btnDevideData.Size = new System.Drawing.Size(205, 28);
             this.btnDevideData.StyleController = this.layoutControl1;
             this.btnDevideData.TabIndex = 6;
             this.btnDevideData.Text = "simpleButton2";
             // 
             // btnSend
             // 
-            this.btnSend.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSend.Appearance.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSend.Appearance.Options.UseFont = true;
             this.btnSend.Location = new System.Drawing.Point(236, 12);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(194, 24);
+            this.btnSend.Size = new System.Drawing.Size(194, 28);
             this.btnSend.StyleController = this.layoutControl1;
             this.btnSend.TabIndex = 5;
             this.btnSend.Text = "simpleButton1";
@@ -188,14 +188,14 @@
             this.layoutControlItem11.Control = this.btnDevideData;
             this.layoutControlItem11.Location = new System.Drawing.Point(422, 0);
             this.layoutControlItem11.Name = "layoutControlItem11";
-            this.layoutControlItem11.Size = new System.Drawing.Size(192, 45);
+            this.layoutControlItem11.Size = new System.Drawing.Size(209, 45);
             this.layoutControlItem11.TextVisible = false;
             // 
             // emptySpaceItem5
             // 
-            this.emptySpaceItem5.Location = new System.Drawing.Point(614, 0);
+            this.emptySpaceItem5.Location = new System.Drawing.Point(631, 0);
             this.emptySpaceItem5.Name = "emptySpaceItem5";
-            this.emptySpaceItem5.Size = new System.Drawing.Size(395, 45);
+            this.emptySpaceItem5.Size = new System.Drawing.Size(378, 45);
             // 
             // splitContainerControl1
             // 
@@ -290,6 +290,7 @@
             // 
             // rdLeather
             // 
+            this.rdLeather.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.rdLeather.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rdLeather.Location = new System.Drawing.Point(24, 45);
             this.rdLeather.Name = "rdLeather";
@@ -297,10 +298,11 @@
             this.rdLeather.TabIndex = 13;
             this.rdLeather.TabStop = true;
             this.rdLeather.Text = "radioButton1";
-            this.rdLeather.UseVisualStyleBackColor = true;
+            this.rdLeather.UseVisualStyleBackColor = false;
             // 
             // rdRawMaterial
             // 
+            this.rdRawMaterial.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.rdRawMaterial.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rdRawMaterial.Location = new System.Drawing.Point(352, 45);
             this.rdRawMaterial.Name = "rdRawMaterial";
@@ -308,7 +310,7 @@
             this.rdRawMaterial.TabIndex = 14;
             this.rdRawMaterial.TabStop = true;
             this.rdRawMaterial.Text = "radioButton2";
-            this.rdRawMaterial.UseVisualStyleBackColor = true;
+            this.rdRawMaterial.UseVisualStyleBackColor = false;
             // 
             // gridLookUpEditSO
             // 
@@ -373,6 +375,8 @@
             // 
             // lblSelectSORequired
             // 
+            this.lblSelectSORequired.AppearanceGroup.BorderColor = System.Drawing.Color.White;
+            this.lblSelectSORequired.AppearanceGroup.Options.UseBorderColor = true;
             this.lblSelectSORequired.Enabled = false;
             this.lblSelectSORequired.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
             this.lblFilterDate,
@@ -429,12 +433,20 @@
             // 
             // lbSelectMaterialType
             // 
+            this.lbSelectMaterialType.AppearanceGroup.BorderColor = System.Drawing.Color.White;
+            this.lbSelectMaterialType.AppearanceGroup.Options.UseBorderColor = true;
+            this.lbSelectMaterialType.AppearanceItemCaption.BackColor = System.Drawing.Color.White;
+            this.lbSelectMaterialType.AppearanceItemCaption.Options.UseBackColor = true;
+            this.lbSelectMaterialType.AppearanceTabPage.Header.BackColor = System.Drawing.Color.White;
+            this.lbSelectMaterialType.AppearanceTabPage.Header.Options.UseBackColor = true;
             this.lbSelectMaterialType.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
             this.layoutControlItem1,
             this.emptySpaceItem3,
             this.layoutControlItem7});
             this.lbSelectMaterialType.Location = new System.Drawing.Point(0, 0);
             this.lbSelectMaterialType.Name = "lbSelectMaterialType";
+            this.lbSelectMaterialType.OptionsPrint.AppearanceGroupCaption.BackColor = System.Drawing.Color.White;
+            this.lbSelectMaterialType.OptionsPrint.AppearanceGroupCaption.Options.UseBackColor = true;
             this.lbSelectMaterialType.Size = new System.Drawing.Size(1009, 74);
             // 
             // layoutControlItem7
@@ -453,6 +465,8 @@
             // 
             // layoutControlItem1
             // 
+            this.layoutControlItem1.AppearanceItemCaption.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.layoutControlItem1.AppearanceItemCaption.Options.UseBackColor = true;
             this.layoutControlItem1.Control = this.rdLeather;
             this.layoutControlItem1.Location = new System.Drawing.Point(0, 0);
             this.layoutControlItem1.Name = "layoutControlItem1";
@@ -471,6 +485,7 @@
             this.layoutControl2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.layoutControl2.Location = new System.Drawing.Point(0, 0);
             this.layoutControl2.Name = "layoutControl2";
+            this.layoutControl2.OptionsCustomizationForm.DesignTimeCustomizationFormPositionAndSize = new System.Drawing.Rectangle(1270, 0, 650, 400);
             this.layoutControl2.Root = this.layoutControlGroup1;
             this.layoutControl2.Size = new System.Drawing.Size(1029, 235);
             this.layoutControl2.TabIndex = 0;

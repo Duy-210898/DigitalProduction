@@ -15258,3 +15258,117 @@
 [2025-07-31T00:31:59.997Z]   🔴 Failed: 0
 [2025-07-31T00:31:59.997Z]   ⏱️ Total time for 0 machines: 2 ms
 [2025-07-31T00:31:59.998Z] ------------------------------------------------------------
+[2025-07-31T07:04:10.067Z] 🚀 Starting batched connection for 11 machines...
+[2025-07-31T07:04:10.071Z] ✅ Connected to 10.30.2.149 in 2 ms
+[2025-07-31T07:04:10.071Z] ✅ Connected to 10.30.0.162 in 0 ms
+[2025-07-31T07:04:10.071Z] ✅ Connected to 10.30.0.164 in 0 ms
+[2025-07-31T07:04:10.072Z] ✅ Connected to 10.30.0.165 in 1 ms
+[2025-07-31T07:04:10.072Z] ✅ Connected to 10.30.0.177 in 1 ms
+[2025-07-31T07:04:10.072Z] ✅ Connected to 10.30.1.42 in 1 ms
+[2025-07-31T07:04:10.072Z] ✅ Connected to 10.30.1.41 in 1 ms
+[2025-07-31T07:04:10.073Z] ✅ Connected to 10.30.0.48 in 2 ms
+[2025-07-31T07:04:10.073Z] ✅ Connected to 10.30.1.122 in 2 ms
+[2025-07-31T07:04:10.073Z] ✅ Connected to 10.30.3.142 in 2 ms
+[2025-07-31T07:04:10.533Z] ✅ Connected to 10.30.4.144 in 463 ms
+[2025-07-31T07:04:10.534Z] 📦 Batch 1: 11 devices connected in 465 ms
+[2025-07-31T07:04:10.534Z] 📊 Final Summary:
+[2025-07-31T07:04:10.534Z]   🟢 Success: 11
+[2025-07-31T07:04:10.534Z]   🔴 Failed: 0
+[2025-07-31T07:04:10.534Z]   ⏱️ Total time for 11 machines: 467 ms
+[2025-07-31T07:04:10.535Z] ------------------------------------------------------------
+[2025-08-01T00:30:31.707Z] 🚀 Starting batched connection for 0 machines...
+[2025-08-01T00:30:31.717Z] 📊 Final Summary:
+[2025-08-01T00:30:31.720Z]   🟢 Success: 0
+[2025-08-01T00:30:31.720Z]   🔴 Failed: 0
+[2025-08-01T00:30:31.721Z]   ⏱️ Total time for 0 machines: 10 ms
+[2025-08-01T00:30:31.722Z] ------------------------------------------------------------
+[2025-08-01T07:05:31.874Z] 🚀 Starting batched connection for 11 machines...
+[2025-08-01T07:05:31.880Z] ✅ Connected to 10.30.2.149 in 3 ms
+[2025-08-01T07:05:31.880Z] ✅ Connected to 10.30.4.144 in 2 ms
+[2025-08-01T07:05:31.881Z] ✅ Connected to 10.30.0.162 in 3 ms
+[2025-08-01T07:05:31.881Z] ✅ Connected to 10.30.0.164 in 3 ms
+[2025-08-01T07:05:31.881Z] ✅ Connected to 10.30.0.165 in 3 ms
+[2025-08-01T07:05:31.881Z] ✅ Connected to 10.30.0.177 in 3 ms
+[2025-08-01T07:05:31.881Z] ✅ Connected to 10.30.1.42 in 3 ms
+[2025-08-01T07:05:31.882Z] ✅ Connected to 10.30.0.48 in 3 ms
+[2025-08-01T07:05:31.882Z] ✅ Connected to 10.30.1.122 in 3 ms
+[2025-08-01T07:05:31.882Z] ✅ Connected to 10.30.3.142 in 3 ms
+[2025-08-01T07:05:32.389Z] ✅ Connected to 10.30.1.41 in 511 ms
+[2025-08-01T07:05:32.389Z] 📦 Batch 1: 11 devices connected in 512 ms
+[2025-08-01T07:05:32.390Z] 📊 Final Summary:
+[2025-08-01T07:05:32.390Z]   🟢 Success: 11
+[2025-08-01T07:05:32.390Z]   🔴 Failed: 0
+[2025-08-01T07:05:32.390Z]   ⏱️ Total time for 11 machines: 516 ms
+[2025-08-01T07:05:32.391Z] ------------------------------------------------------------
+[2025-08-01T07:26:04.035Z] 🚀 Starting batched connection for 11 machines...
+[2025-08-01T07:26:04.037Z] ✅ Connected to 10.30.2.149 in 1 ms
+[2025-08-01T07:26:04.037Z] ✅ Connected to 10.30.0.162 in 0 ms
+[2025-08-01T07:26:04.037Z] ✅ Connected to 10.30.0.164 in 0 ms
+[2025-08-01T07:26:04.038Z] ✅ Connected to 10.30.0.165 in 1 ms
+[2025-08-01T07:26:04.038Z] ✅ Connected to 10.30.0.177 in 1 ms
+[2025-08-01T07:26:04.038Z] ✅ Connected to 10.30.1.42 in 1 ms
+[2025-08-01T07:26:04.038Z] ✅ Connected to 10.30.1.41 in 1 ms
+[2025-08-01T07:26:04.038Z] ✅ Connected to 10.30.0.48 in 1 ms
+[2025-08-01T07:26:04.038Z] ✅ Connected to 10.30.1.122 in 1 ms
+[2025-08-01T07:26:04.038Z] ✅ Connected to 10.30.3.142 in 1 ms
+[2025-08-01T07:26:04.433Z] ✅ Connected to 10.30.4.144 in 397 ms
+[2025-08-01T07:26:04.434Z] 📦 Batch 1: 11 devices connected in 398 ms
+[2025-08-01T07:26:04.434Z] 📊 Final Summary:
+[2025-08-01T07:26:04.435Z]   🟢 Success: 11
+[2025-08-01T07:26:04.435Z]   🔴 Failed: 0
+[2025-08-01T07:26:04.435Z]   ⏱️ Total time for 11 machines: 399 ms
+[2025-08-01T07:26:04.435Z] ------------------------------------------------------------
+[2025-08-01T07:30:52.661Z] 🚀 Starting batched connection for 11 machines...
+[2025-08-01T07:30:52.662Z] ✅ Connected to 10.30.2.149 in 1 ms
+[2025-08-01T07:30:52.663Z] ✅ Connected to 10.30.0.162 in 1 ms
+[2025-08-01T07:30:52.663Z] ✅ Connected to 10.30.0.164 in 1 ms
+[2025-08-01T07:30:52.663Z] ✅ Connected to 10.30.0.165 in 1 ms
+[2025-08-01T07:30:52.664Z] ✅ Connected to 10.30.0.177 in 2 ms
+[2025-08-01T07:30:52.664Z] ✅ Connected to 10.30.1.42 in 2 ms
+[2025-08-01T07:30:52.664Z] ✅ Connected to 10.30.1.41 in 2 ms
+[2025-08-01T07:30:52.664Z] ✅ Connected to 10.30.0.48 in 2 ms
+[2025-08-01T07:30:52.664Z] ✅ Connected to 10.30.1.122 in 2 ms
+[2025-08-01T07:30:52.665Z] ✅ Connected to 10.30.3.142 in 3 ms
+[2025-08-01T07:30:53.011Z] ✅ Connected to 10.30.4.144 in 350 ms
+[2025-08-01T07:30:53.011Z] 📦 Batch 1: 11 devices connected in 350 ms
+[2025-08-01T07:30:53.012Z] 📊 Final Summary:
+[2025-08-01T07:30:53.012Z]   🟢 Success: 11
+[2025-08-01T07:30:53.012Z]   🔴 Failed: 0
+[2025-08-01T07:30:53.012Z]   ⏱️ Total time for 11 machines: 351 ms
+[2025-08-01T07:30:53.012Z] ------------------------------------------------------------
+[2025-08-01T07:32:21.932Z] 🚀 Starting batched connection for 11 machines...
+[2025-08-01T07:32:21.933Z] ✅ Connected to 10.30.2.149 in 0 ms
+[2025-08-01T07:32:21.934Z] ✅ Connected to 10.30.0.162 in 1 ms
+[2025-08-01T07:32:21.934Z] ✅ Connected to 10.30.0.164 in 1 ms
+[2025-08-01T07:32:21.934Z] ✅ Connected to 10.30.0.165 in 1 ms
+[2025-08-01T07:32:21.934Z] ✅ Connected to 10.30.0.177 in 1 ms
+[2025-08-01T07:32:21.934Z] ✅ Connected to 10.30.1.42 in 1 ms
+[2025-08-01T07:32:21.935Z] ✅ Connected to 10.30.1.41 in 2 ms
+[2025-08-01T07:32:21.935Z] ✅ Connected to 10.30.0.48 in 2 ms
+[2025-08-01T07:32:21.935Z] ✅ Connected to 10.30.1.122 in 2 ms
+[2025-08-01T07:32:21.935Z] ✅ Connected to 10.30.3.142 in 2 ms
+[2025-08-01T07:32:22.373Z] ✅ Connected to 10.30.4.144 in 440 ms
+[2025-08-01T07:32:22.374Z] 📦 Batch 1: 11 devices connected in 442 ms
+[2025-08-01T07:32:22.374Z] 📊 Final Summary:
+[2025-08-01T07:32:22.374Z]   🟢 Success: 11
+[2025-08-01T07:32:22.375Z]   🔴 Failed: 0
+[2025-08-01T07:32:22.375Z]   ⏱️ Total time for 11 machines: 442 ms
+[2025-08-01T07:32:22.375Z] ------------------------------------------------------------
+[2025-08-01T07:58:32.796Z] 🚀 Starting batched connection for 11 machines...
+[2025-08-01T07:58:32.798Z] ✅ Connected to 10.30.2.149 in 2 ms
+[2025-08-01T07:58:32.798Z] ✅ Connected to 10.30.0.162 in 1 ms
+[2025-08-01T07:58:32.798Z] ✅ Connected to 10.30.0.164 in 1 ms
+[2025-08-01T07:58:32.798Z] ✅ Connected to 10.30.0.165 in 1 ms
+[2025-08-01T07:58:32.799Z] ✅ Connected to 10.30.0.177 in 2 ms
+[2025-08-01T07:58:32.799Z] ✅ Connected to 10.30.1.42 in 2 ms
+[2025-08-01T07:58:32.799Z] ✅ Connected to 10.30.1.41 in 2 ms
+[2025-08-01T07:58:32.799Z] ✅ Connected to 10.30.0.48 in 2 ms
+[2025-08-01T07:58:32.800Z] ✅ Connected to 10.30.1.122 in 3 ms
+[2025-08-01T07:58:32.800Z] ✅ Connected to 10.30.3.142 in 3 ms
+[2025-08-01T07:58:33.141Z] ✅ Connected to 10.30.4.144 in 343 ms
+[2025-08-01T07:58:33.141Z] 📦 Batch 1: 11 devices connected in 345 ms
+[2025-08-01T07:58:33.141Z] 📊 Final Summary:
+[2025-08-01T07:58:33.141Z]   🟢 Success: 11
+[2025-08-01T07:58:33.141Z]   🔴 Failed: 0
+[2025-08-01T07:58:33.141Z]   ⏱️ Total time for 11 machines: 345 ms
+[2025-08-01T07:58:33.142Z] ------------------------------------------------------------

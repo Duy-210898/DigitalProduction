@@ -54,7 +54,7 @@ class ModbusPollingManager extends EventEmitter {
         }
   
         // Gửi sự kiện đọc/ghi để bên ngoài xử lý
-        this.emit('poll', client, ipAddress);
+        this.emit('poll', client , entry, ipAddress);
   
         // Đọc actual nếu có sizeDataInfo hợp lệ
         const sizeInfo = entry.sizeDataInfo;
@@ -64,7 +64,7 @@ class ModbusPollingManager extends EventEmitter {
           !Array.isArray(sizeInfo) &&
           Object.keys(sizeInfo).length > 0
         ) {
-          this.emit('readActual', client, ipAddress);
+          this.emit('readActual', client, entry, ipAddress);
         }
       } catch (err) {
         console.error(`[${ipAddress}] Error in polling loop: ${err.message}`);

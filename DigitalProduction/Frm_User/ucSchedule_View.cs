@@ -36,9 +36,12 @@ namespace DigitalProduction
             InitializeTotalLabel();
             InitializeMonthFilter();
 
-            dateTimePickerSchedule.Format = DateTimePickerFormat.Custom;
-            dateTimePickerSchedule.CustomFormat = "yyyy";
-            dateTimePickerSchedule.ShowUpDown = true;
+            dateTimePickerSchedule.Properties.VistaCalendarViewStyle = VistaCalendarViewStyle.YearsGroupView;
+            dateTimePickerSchedule.Properties.Mask.EditMask = "yyyy";
+            dateTimePickerSchedule.Properties.DisplayFormat.FormatString = "yyyy";
+            dateTimePickerSchedule.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+            dateTimePickerSchedule.Properties.EditFormat.FormatString = "yyyy";
+            dateTimePickerSchedule.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
 
             lblFilterDate.Text = LocalizationManager.GetString("FilterDate");
             lblSelectSO.Text = LocalizationManager.GetString("SelectSO");
@@ -50,9 +53,9 @@ namespace DigitalProduction
 
             //cboSO.Properties.TextEditStyle = TextEditStyles.Standard;
 
-            gridLookUpEditSO.Properties.View = new DevExpress.XtraGrid.Views.Grid.GridView();
+            gridLookUpEditSO.Properties.View = new GridView();
             gridLookUpEditSO.Properties.PopupFormSize = new Size(400, 300);
-            gridLookUpEditSO.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            gridLookUpEditSO.Properties.TextEditStyle = TextEditStyles.Standard;
 
             GridView view = gridLookUpEditSO.Properties.View as GridView;
             view.Columns.Clear();
@@ -106,26 +109,6 @@ namespace DigitalProduction
                 }
             };
         }
-
-        //private void cboSO_EditValueChanged(object sender, EventArgs e)
-        //{
-        //    selectedSOs = cboSO.Properties.Items
-        //                        .GetCheckedValues()
-        //                        .Cast<string>()
-        //                        .ToList();
-
-        //    // Do something with selectedSOs
-        //    Console.WriteLine("Selected SOs: " + string.Join(", ", selectedSOs));
-
-        //    if (selectedSOs != null && selectedSOs.Count > 0)
-        //    {
-        //        _ = GetDataAndLoadToGridAsync();
-        //    }
-        //    else {
-        //        gridControlSchedule.DataSource = null;
-        //    }
-        //}
-
 
         public class ProductionScheduleComparer : IEqualityComparer<ProductionSchedule>
         {
@@ -181,13 +164,11 @@ namespace DigitalProduction
             gridViewSchedule.OptionsBehavior.Editable = true;
 
             // Appearance settings
-            gridViewSchedule.Appearance.FilterPanel.Font = new Font("Segoe UI", 10F);
             gridViewSchedule.Appearance.HeaderPanel.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             gridViewSchedule.Appearance.HeaderPanel.ForeColor = Color.Black;
             gridViewSchedule.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
 
             // Optional row font and height
-            // gridViewSchedule.Appearance.Row.Font = new Font("Segoe UI", 12F);
             gridViewSchedule.RowHeight = 30;
 
             // View options
@@ -297,9 +278,9 @@ namespace DigitalProduction
 
         private void InitializeMonthFilter()
         {
-            dateTimePickerSchedule.ValueChanged += async (sender, e) =>
+            dateTimePickerSchedule.EditValueChanged += async (sender, e) =>
             {
-                selectedYear = dateTimePickerSchedule.Value.Year;
+                selectedYear = dateTimePickerSchedule.DateTime.Year;
 
                 await GetListOfSOsByYearAsync();
             };
@@ -411,29 +392,6 @@ namespace DigitalProduction
                 MessageBox.Show($"Error processing WebSocket data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        //private void SafeUpdateSOList(List<string> soList)
-        //{
-        //    if (InvokeRequired)
-        //    {
-        //        Invoke(new Action(() => SafeUpdateSOList(soList)));
-        //        return;
-        //    }
-
-        //    cboSO.Properties.Items.BeginUpdate();
-        //    try
-        //    {
-        //        cboSO.Properties.Items.Clear();
-        //        foreach (var so in soList)
-        //        {
-        //            cboSO.Properties.Items.Add(so, CheckState.Unchecked, true);
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        cboSO.Properties.Items.EndUpdate();
-        //    }
-        //}
 
         // Helper method to safely update schedule grid on UI thread
         private void SafeUpdateGrid(List<ProductionSchedule> schedules)

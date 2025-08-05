@@ -84,7 +84,13 @@
             // accordionControl1
             // 
             this.accordionControl1.Appearance.AccordionControl.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.accordionControl1.Appearance.AccordionControl.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.accordionControl1.Appearance.AccordionControl.Options.UseBackColor = true;
+            this.accordionControl1.Appearance.AccordionControl.Options.UseFont = true;
+            this.accordionControl1.Appearance.Group.Normal.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControl1.Appearance.Group.Normal.Options.UseFont = true;
+            this.accordionControl1.Appearance.Item.Normal.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControl1.Appearance.Item.Normal.Options.UseFont = true;
             this.accordionControl1.Dock = System.Windows.Forms.DockStyle.Left;
             this.accordionControl1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.accordionControlElement1,
@@ -98,7 +104,7 @@
             this.accordionControl1.Name = "accordionControl1";
             this.accordionControl1.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
             this.accordionControl1.ShowFilterControl = DevExpress.XtraBars.Navigation.ShowFilterControl.Always;
-            this.accordionControl1.Size = new System.Drawing.Size(267, 795);
+            this.accordionControl1.Size = new System.Drawing.Size(267, 913);
             this.accordionControl1.TabIndex = 1;
             // 
             // accordionControlElement1
@@ -343,6 +349,8 @@
             // 
             this.statusItem.Caption = "State Connect";
             this.statusItem.Id = 1;
+            this.statusItem.ItemAppearance.Normal.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.statusItem.ItemAppearance.Normal.Options.UseFont = true;
             this.statusItem.Name = "statusItem";
             // 
             // SkinOption
@@ -351,7 +359,7 @@
             this.SkinOption.Caption = "Skin UI";
             this.SkinOption.Id = 0;
             this.SkinOption.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("SkinOption.ImageOptions.Image")));
-            this.SkinOption.ItemAppearance.Normal.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SkinOption.ItemAppearance.Normal.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SkinOption.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Green;
             this.SkinOption.ItemAppearance.Normal.Options.UseFont = true;
             this.SkinOption.ItemAppearance.Normal.Options.UseForeColor = true;
@@ -378,7 +386,7 @@
             this.pnlControl.Location = new System.Drawing.Point(267, 31);
             this.pnlControl.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.pnlControl.Name = "pnlControl";
-            this.pnlControl.Size = new System.Drawing.Size(1133, 795);
+            this.pnlControl.Size = new System.Drawing.Size(1133, 913);
             this.pnlControl.TabIndex = 3;
             // 
             // accordionControlElement2
@@ -410,14 +418,14 @@
             // frmMain
             // 
             this.Appearance.Options.UseFont = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1400, 826);
+            this.ClientSize = new System.Drawing.Size(1400, 944);
             this.Controls.Add(this.pnlControl);
             this.Controls.Add(this.accordionControl1);
             this.Controls.Add(this.fluentDesignFormControl1);
             this.FluentDesignFormControl = this.fluentDesignFormControl1;
-            this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.IconOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("frmMain.IconOptions.SvgImage")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "frmMain";

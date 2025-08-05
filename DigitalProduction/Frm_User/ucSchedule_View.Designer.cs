@@ -40,8 +40,8 @@
             this.gridLookUpEditSO = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.dateTimePickerSchedule = new DevExpress.XtraEditors.DateEdit();
             this.lblFilterDate = new DevExpress.XtraEditors.LabelControl();
-            this.dateTimePickerSchedule = new System.Windows.Forms.DateTimePicker();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.lb_Size = new DevExpress.XtraEditors.LabelControl();
             this.btnSync = new DevExpress.XtraEditors.SimpleButton();
@@ -59,6 +59,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties.CalendarTimeProperties)).BeginInit();
             this.tableLayoutPanel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.comboSize.Properties)).BeginInit();
             this.tableLayoutPanel6.SuspendLayout();
@@ -188,8 +190,8 @@
             this.tableLayoutPanel2.ColumnCount = 1;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel2.Controls.Add(this.lblFilterDate, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.dateTimePickerSchedule, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.lblFilterDate, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
@@ -199,6 +201,20 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(237, 82);
             this.tableLayoutPanel2.TabIndex = 9;
+            // 
+            // dateTimePickerSchedule
+            // 
+            this.dateTimePickerSchedule.EditValue = new System.DateTime(2025, 7, 30, 13, 44, 1, 398);
+            this.dateTimePickerSchedule.Location = new System.Drawing.Point(3, 44);
+            this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
+            this.dateTimePickerSchedule.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dateTimePickerSchedule.Properties.Appearance.Options.UseFont = true;
+            this.dateTimePickerSchedule.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.dateTimePickerSchedule.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.dateTimePickerSchedule.Size = new System.Drawing.Size(231, 24);
+            this.dateTimePickerSchedule.TabIndex = 6;
             // 
             // lblFilterDate
             // 
@@ -210,17 +226,6 @@
             this.lblFilterDate.Size = new System.Drawing.Size(68, 18);
             this.lblFilterDate.TabIndex = 1;
             this.lblFilterDate.Text = "Filter date:";
-            // 
-            // dateTimePickerSchedule
-            // 
-            this.dateTimePickerSchedule.CustomFormat = "yyyy";
-            this.dateTimePickerSchedule.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dateTimePickerSchedule.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dateTimePickerSchedule.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePickerSchedule.Location = new System.Drawing.Point(3, 44);
-            this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
-            this.dateTimePickerSchedule.Size = new System.Drawing.Size(231, 24);
-            this.dateTimePickerSchedule.TabIndex = 2;
             // 
             // tableLayoutPanel4
             // 
@@ -269,7 +274,7 @@
             this.comboSize.Properties.Appearance.Options.UseFont = true;
             this.comboSize.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboSize.Size = new System.Drawing.Size(155, 24);
+            this.comboSize.Size = new System.Drawing.Size(186, 24);
             this.comboSize.TabIndex = 0;
             this.comboSize.EditValueChanged += new System.EventHandler(this.comboSize_EditValueChanged);
             // 
@@ -307,7 +312,7 @@
             this.comboxPartName.Properties.Appearance.Options.UseFont = true;
             this.comboxPartName.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboxPartName.Size = new System.Drawing.Size(155, 24);
+            this.comboxPartName.Size = new System.Drawing.Size(186, 24);
             this.comboxPartName.TabIndex = 0;
             this.comboxPartName.EditValueChanged += new System.EventHandler(this.comboPartName_EditValueChanged);
             // 
@@ -330,6 +335,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties.CalendarTimeProperties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties)).EndInit();
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.comboSize.Properties)).EndInit();
@@ -357,10 +364,10 @@
         private DevExpress.XtraEditors.CheckedComboBoxEdit comboxPartName;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private DevExpress.XtraEditors.LabelControl lblFilterDate;
-        private System.Windows.Forms.DateTimePicker dateTimePickerSchedule;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private DevExpress.XtraEditors.LabelControl lblSelectSO;
         private DevExpress.XtraEditors.GridLookUpEdit gridLookUpEditSO;
         private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View;
+        private DevExpress.XtraEditors.DateEdit dateTimePickerSchedule;
     }
 }

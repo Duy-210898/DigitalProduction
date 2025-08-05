@@ -524,13 +524,11 @@ namespace DigitalProduction
             }
             SendDistributionDataToServer();
         }
-
         private void rdLeather_Checked()
         {
             setControlVisibility(false, numCuttingDieQty, numMaterialLayer, numPiecesPerPair, lblCuttingDie, lblMaterialLayer, lblPeicesPerPair);
             setControlVisibility(true, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
         }
-
         private void rdRawMaterial_Checked()
         {
             setControlVisibility(false, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
@@ -543,10 +541,8 @@ namespace DigitalProduction
                 control.Visible = isVisible;
             }
         }
-
         private void UpdateUIGridViewOverview(List<List<ProductionSchedule>> filteredSchedulesGroups, bool isDeviceData)
         {
-            
             gridControlOverview.Dock = DockStyle.Fill;
             gridViewOverview.OptionsView.ColumnAutoWidth = true;
             gridViewOverview.OptionsView.RowAutoHeight = true;
@@ -558,12 +554,9 @@ namespace DigitalProduction
             gridViewOverview.Appearance.Row.Font = new Font("Segoe UI", 10);
 
             // ✅ Clear the child table before the parent table to prevent constraint errors
-            if (subDistributionDataSource != null)
-                subDistributionDataSource.Clear();
+            subDistributionDataSource?.Clear();
 
-            if (table != null)
-                table.Clear();
-
+            table?.Clear();
 
             table = new DataTable("DistributionData");
             table.Columns.Add("GroupSO", typeof(string));
@@ -1548,7 +1541,6 @@ namespace DigitalProduction
             }
             return true;
         }
-
         private bool CheckIsLeatherNullOrEmpty(GridView gridView, int rowHandle)
         {
             if (isLeather)
@@ -1573,7 +1565,6 @@ namespace DigitalProduction
             }
             return true;
         }
-
         private void UpdateRow(int rowHandle)
         {
             string partName = gridViewOverview.GetRowCellValue(rowHandle, "PartName")?.ToString();
@@ -1626,13 +1617,6 @@ namespace DigitalProduction
         {
             ResetSendDistribution();
         }
-
-
-        //private void MaterialFilterChanged(object sender, EventArgs e)
-        //{
-        //    ApplyMaterialFilterAndMonth(); // Combine with your existing month filter
-        //}
-
         private void ApplyMaterialFilterAndMonth()
         {
             gridViewOverview.RefreshData();
@@ -1701,7 +1685,6 @@ namespace DigitalProduction
             }
 
             gridViewOverview.RefreshData();
-         //   ShowMessage.ShowInfo("All rows updated successfully.");
         }
         private void ResetSendDistribution()
         {

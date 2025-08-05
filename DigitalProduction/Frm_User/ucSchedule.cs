@@ -608,28 +608,6 @@ namespace DigitalProduction
             }
         }
 
-        //private void SafeUpdateSOList(List<string> soList)
-        //{
-        //    if (InvokeRequired)
-        //    {
-        //        Invoke(new Action(() => SafeUpdateSOList(soList)));
-        //        return;
-        //    }
-
-        //    cboSO.Properties.Items.BeginUpdate();
-        //    try
-        //    {
-        //        cboSO.Properties.Items.Clear();
-        //        foreach (var so in soList)
-        //        {
-        //            cboSO.Properties.Items.Add(so, CheckState.Unchecked, true);
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        cboSO.Properties.Items.EndUpdate();
-        //    }
-        //}
 
         // Helper method to safely update schedule grid on UI thread
         private void SafeUpdateGrid(List<ProductionSchedule> schedules)
@@ -735,11 +713,6 @@ namespace DigitalProduction
             gridViewSchedule.ExpandAllGroups();
             gridViewSchedule.RefreshData();
 
-            //if (!filteredData.Any())
-            //{
-            //    ShowMessage.ShowInfo(LocalizationManager.GetString("NoRecords"));
-            //}
-
             UpdateTotalLabel();
         }
 
@@ -784,8 +757,6 @@ namespace DigitalProduction
 
 
             // ---------- [UI BUTTON DEVIED] ----------
-            // Font hiện đại, đậm
-            btnDevideData.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
 
             // Look and Feel
             btnDevideData.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;

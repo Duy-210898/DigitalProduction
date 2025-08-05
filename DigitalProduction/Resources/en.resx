@@ -660,6 +660,12 @@
   <data name="RowUpdated" xml:space="preserve">
     <value>All data rows updated successfully.</value>
   </data>
+  <data name="CutQuantity" xml:space="preserve">
+    <value>Cut Quantity</value>
+  </data>
+  <data name="TargetCut" xml:space="preserve">
+    <value>Target Cut</value>
+  </data>
   <data name="UnitUsagePerPair" xml:space="preserve">
     <value>Usage Per Pair</value>
   </data>

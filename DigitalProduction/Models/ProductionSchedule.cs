@@ -1,6 +1,7 @@
 ﻿using System;
 using static DigitalProduction.ucDistribution;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DigitalProduction.Models
 {
@@ -24,6 +25,7 @@ namespace DigitalProduction.Models
         public string ART { get; set; }
         public string Model { get; set; }
         public int SizeQty { get; set; }
+        public int TargetCut { get; set; }
         public string PartSizeUnit { get; set; }
         public float UnitUsage { get; set; }
         public int MaterialID { get; set; }
@@ -40,8 +42,20 @@ namespace DigitalProduction.Models
         public int? CuttingDieQty { get; set; } = 0;
         public int? MaterialLayer { get; set; } = 0;
         public int? TotalPiecesPerPair { get; set; } = 0;
+        public int? CutQuantity { get; set; } = 0;
         public string Status { get; set; }
         public List<OperatorInfo> AssignedOperators { get; set; } = new List<OperatorInfo>();
+    }
+    public class ScheduleGroup
+    {
+        public string SO { get; set; }
+        public List<SizeGroup> Sizes { get; set; }
+    }
+
+    public class SizeGroup
+    {
+        public string Size { get; set; }
+        public List<ProductionSchedule> Details { get; set; }
     }
 
 }

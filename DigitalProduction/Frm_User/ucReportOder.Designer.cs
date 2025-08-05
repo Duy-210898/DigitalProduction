@@ -23,7 +23,7 @@
         #region Component Designer generated code
 
         /// <summary> 
-        /// Required method for Designer support - do not modify 
+        /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
@@ -31,13 +31,15 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ucReportOrder));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.dateTimePicker = new System.Windows.Forms.DateTimePicker();
+            this.dateTimePickerSchedule = new DevExpress.XtraEditors.DateEdit();
             this.btnSync = new DevExpress.XtraEditors.SimpleButton();
             this.btnExport = new DevExpress.XtraEditors.SimpleButton();
             this.gridControlPerformance = new DevExpress.XtraGrid.GridControl();
             this.gridViewPeformance = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlPerformance)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewPeformance)).BeginInit();
             this.SuspendLayout();
@@ -53,8 +55,8 @@
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.76787F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85.23212F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 19.26229F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 80.7377F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(859, 488);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -65,27 +67,31 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 553F));
-            this.tableLayoutPanel2.Controls.Add(this.dateTimePicker, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.dateTimePickerSchedule, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnSync, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnExport, 0, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 2;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(853, 66);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 42.04546F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 57.95454F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(853, 87);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
-            // dateTimePicker
+            // dateTimePickerSchedule
             // 
-            this.dateTimePicker.CustomFormat = "MM/yyyy";
-            this.dateTimePicker.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePicker.Location = new System.Drawing.Point(3, 3);
-            this.dateTimePicker.Name = "dateTimePicker";
-            this.dateTimePicker.Size = new System.Drawing.Size(121, 26);
-            this.dateTimePicker.TabIndex = 0;
+            this.dateTimePickerSchedule.EditValue = new System.DateTime(2025, 8, 1, 0, 0, 0, 0);
+            this.dateTimePickerSchedule.Location = new System.Drawing.Point(3, 3);
+            this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
+            this.dateTimePickerSchedule.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dateTimePickerSchedule.Properties.Appearance.Options.UseFont = true;
+            this.dateTimePickerSchedule.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.dateTimePickerSchedule.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.dateTimePickerSchedule.Size = new System.Drawing.Size(144, 24);
+            this.dateTimePickerSchedule.TabIndex = 7;
             // 
             // btnSync
             // 
@@ -97,32 +103,36 @@
             this.btnSync.ImageOptions.Image = global::DigitalProduction.Properties.Resources.sync_icon;
             this.btnSync.Location = new System.Drawing.Point(153, 3);
             this.btnSync.Name = "btnSync";
-            this.btnSync.Size = new System.Drawing.Size(109, 27);
+            this.btnSync.Size = new System.Drawing.Size(135, 30);
             this.btnSync.TabIndex = 2;
             this.btnSync.Text = "Sync";
             // 
             // btnExport
             // 
+            this.btnExport.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
+            this.btnExport.Appearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
             this.btnExport.Appearance.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExport.Appearance.ForeColor = System.Drawing.Color.LimeGreen;
+            this.btnExport.Appearance.ForeColor = System.Drawing.Color.SeaGreen;
+            this.btnExport.Appearance.Options.UseBackColor = true;
+            this.btnExport.Appearance.Options.UseBorderColor = true;
             this.btnExport.Appearance.Options.UseFont = true;
             this.btnExport.Appearance.Options.UseForeColor = true;
             this.btnExport.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnExport.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnExport.ImageOptions.SvgImage")));
-            this.btnExport.Location = new System.Drawing.Point(3, 36);
+            this.btnExport.Location = new System.Drawing.Point(3, 39);
             this.btnExport.Name = "btnExport";
             this.btnExport.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnExport.Size = new System.Drawing.Size(144, 22);
+            this.btnExport.Size = new System.Drawing.Size(144, 39);
             this.btnExport.TabIndex = 1;
             this.btnExport.Text = "Export to Excel";
             // 
             // gridControlPerformance
             // 
             this.gridControlPerformance.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridControlPerformance.Location = new System.Drawing.Point(3, 75);
+            this.gridControlPerformance.Location = new System.Drawing.Point(3, 96);
             this.gridControlPerformance.MainView = this.gridViewPeformance;
             this.gridControlPerformance.Name = "gridControlPerformance";
-            this.gridControlPerformance.Size = new System.Drawing.Size(853, 410);
+            this.gridControlPerformance.Size = new System.Drawing.Size(853, 389);
             this.gridControlPerformance.TabIndex = 1;
             this.gridControlPerformance.UseEmbeddedNavigator = true;
             this.gridControlPerformance.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
@@ -144,6 +154,8 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties.CalendarTimeProperties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlPerformance)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewPeformance)).EndInit();
             this.ResumeLayout(false);
@@ -154,10 +166,10 @@
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-        private System.Windows.Forms.DateTimePicker dateTimePicker;
         private DevExpress.XtraGrid.GridControl gridControlPerformance;
         private DevExpress.XtraGrid.Views.Grid.GridView gridViewPeformance;
         private DevExpress.XtraEditors.SimpleButton btnExport;
         private DevExpress.XtraEditors.SimpleButton btnSync;
+        private DevExpress.XtraEditors.DateEdit dateTimePickerSchedule;
     }
 }

@@ -1195,41 +1195,68 @@ namespace DigitalProduction
             var list = new List<TargetRealtimeInfo>();
 
             const string sql = @"
-            SELECT 
-                ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
-                ch.CutDate AS Timestamp,
-                o.OperatorID,
-                pa.PartName,
-                s.Size,
-                CASE 
-                    WHEN CAST(t.TargetDate AS DATE) = ch.CutDate THEN ISNULL(t.TargetQuantity, 0)
-                    ELSE 0
-                END AS TargetQuantity,
-                SUM(ch.CutQuantity) AS TargetActualQuantity
-            FROM CutHistory ch
-            LEFT JOIN PartSizeOrder pso 
-                ON ch.OrderID = pso.OrderId AND ch.SizeID = pso.SizeId AND ch.PartID = pso.PartId
-            LEFT JOIN DistributionData dd 
-                ON pso.PartSizeOrderId = dd.PartSizeOrderId
-            LEFT JOIN Operator o 
-                ON o.OperatorID = dd.OperatorID
-            LEFT JOIN Part pa 
-                ON ch.PartID = pa.PartID
-            LEFT JOIN Size s 
-                ON ch.SizeID = s.SizeID
-            OUTER APPLY (
-                SELECT TOP 1 *
-                FROM TargetInDay tid
-                WHERE tid.EmployeeId = o.EmployeeID AND tid.TargetDate <= ch.CutDate
-                ORDER BY tid.TargetDate DESC
-            ) t
-            WHERE 
-                YEAR(ch.CutDate) = @Year AND MONTH(ch.CutDate) = @Month
-                AND o.OperatorID IS NOT NULL
-            GROUP BY 
-                o.OperatorName, ch.CutDate, o.OperatorID,
-                pa.PartName, s.Size, t.TargetDate, t.TargetQuantity
-            ORDER BY pa.PartName, s.Size, ch.CutDate;
+                SELECT 
+                    ISNULL(o.OperatorName, 'Unknown') AS OperatorName,
+                    ch.CutDate AS Timestamp,
+                    o.OperatorID,
+                    pa.PartName,
+                    s.Size,
+                    pr.Model, -- ✅ Model lấy từ Product
+                    CASE 
+                        WHEN CAST(t.TargetDate AS DATE) = ch.CutDate THEN ISNULL(t.TargetQuantity, 0)
+                        ELSE 0
+                    END AS TargetQuantity,
+                    SUM(ch.CutQuantity) AS TargetActualQuantity
+                FROM CutHistory ch
+                LEFT JOIN PartSizeOrder pso 
+                    ON ch.OrderID = pso.OrderId 
+                    AND ch.SizeID = pso.SizeId 
+                    AND ch.PartID = pso.PartId
+
+                OUTER APPLY (
+                    SELECT TOP 1 * 
+                    FROM DistributionData d 
+                    WHERE d.PartSizeOrderId = pso.PartSizeOrderId
+                    ORDER BY d.DistributionID DESC
+                ) dd
+
+                LEFT JOIN Operator o 
+                    ON o.OperatorID = dd.OperatorID
+
+                LEFT JOIN Part pa 
+                    ON ch.PartID = pa.PartID
+
+                LEFT JOIN Size s 
+                    ON ch.SizeID = s.SizeID
+
+                -- ✅ Join ProductOrder để lấy ProductID
+                LEFT JOIN ProductOrder po 
+                    ON ch.OrderID = po.OrderID
+
+                -- ✅ Join Product để lấy Model từ ProductID
+                LEFT JOIN Product pr 
+                    ON po.ProductID = pr.ProductID
+
+                OUTER APPLY (
+                    SELECT TOP 1 *
+                    FROM TargetInDay tid
+                    WHERE tid.EmployeeId = o.EmployeeID 
+                      AND tid.TargetDate <= ch.CutDate
+                    ORDER BY tid.TargetDate DESC
+                ) t
+
+                WHERE 
+                    YEAR(ch.CutDate) = @YEAR 
+                    AND MONTH(ch.CutDate) = @MONTH
+                    AND o.OperatorID IS NOT NULL
+
+                GROUP BY 
+                    o.OperatorName, ch.CutDate, o.OperatorID,
+                    pa.PartName, s.Size, pr.Model,
+                    t.TargetDate, t.TargetQuantity
+
+                ORDER BY 
+                    pa.PartName, s.Size, ch.CutDate;
             ";
 
              var conn = new SqlConnection(connectionString);
@@ -1252,6 +1279,7 @@ namespace DigitalProduction
                     // Optionally add:
                      PartName = reader["PartName"]?.ToString(),
                      Size = reader["Size"]?.ToString(),
+                     Model = reader["Model"]?.ToString() ?? "Unknown",
                 });
             }
 
@@ -1601,8 +1629,8 @@ namespace DigitalProduction
                         p.ART,
                         p.Model,
                         pso.SizeQty,
+                        pso.TargetCut,
                         pso.Unit AS PartSizeUnit,
-                        pso.UnitUsage,
                         m.MaterialID,
                         m.MaterialCode,
                         m.MaterialName,
@@ -1617,7 +1645,8 @@ namespace DigitalProduction
                         do.CuttingDieQty, 
                         do.PiecesPerPair, 
                         do.MaterialLayer, 
-                        do.TotalPiecesPerPair
+                        do.TotalPiecesPerPair,
+                        ISNULL(do.ActualSizeQty, 0) + ISNULL(d.InventoryQty, 0) AS CutQuantity
                     FROM Product p
                     JOIN ProductOrder po ON p.ProductId = po.ProductId
                     JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
@@ -1645,8 +1674,8 @@ namespace DigitalProduction
                         p.ART,
                         p.Model,
                         pso.SizeQty,
+                        pso.TargetCut,
                         pso.Unit AS PartSizeUnit,
-                        pso.UnitUsage,
                         m.MaterialID,
                         m.MaterialCode,
                         m.MaterialName,
@@ -1661,7 +1690,8 @@ namespace DigitalProduction
                         do.CuttingDieQty, 
                         do.PiecesPerPair, 
                         do.MaterialLayer, 
-                        do.TotalPiecesPerPair
+                        do.TotalPiecesPerPair,
+                        ISNULL(do.ActualSizeQty, 0) + ISNULL(d.InventoryQty, 0) AS CutQuantity
                     FROM Product p
                     JOIN ProductOrder po ON p.ProductId = po.ProductId
                     JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
@@ -1722,7 +1752,9 @@ namespace DigitalProduction
                             CuttingDieQty = reader["CuttingDieQty"] is int die ? die : 0,
                             PeicesPerPair = reader["PiecesPerPair"] is int ppp ? ppp : 0,
                             MaterialLayer = reader["MaterialLayer"] is int ml ? ml : 0,
-                            TotalPiecesPerPair = reader["TotalPiecesPerPair"] is int tpp ? tpp : 0
+                            TargetCut = reader["TargetCut"] is int tgc ? tgc : 0,
+                            TotalPiecesPerPair = reader["TotalPiecesPerPair"] is int tpp ? tpp : 0,
+                            CutQuantity = reader["CutQuantity"] is int cqt ? cqt : 0
                         });
                     }
                 }

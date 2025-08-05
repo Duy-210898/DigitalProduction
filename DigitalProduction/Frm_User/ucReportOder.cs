@@ -67,7 +67,21 @@ namespace DigitalProduction
                 gridControlPerformance.DataSource = targetBindingSource;
 
                 // Handle date change - async event handler
-                dateTimePicker.ValueChanged += async (s, e) => await ReloadDataAsync();
+                dateTimePickerSchedule.EditValueChanged += async (s, e) => await ReloadDataAsync();
+
+                dateTimePickerSchedule.Properties.VistaCalendarViewStyle = DevExpress.XtraEditors.VistaCalendarViewStyle.YearView;
+                dateTimePickerSchedule.Properties.CalendarView = DevExpress.XtraEditors.Repository.CalendarView.Vista;
+                dateTimePickerSchedule.Properties.VistaDisplayMode = DevExpress.Utils.DefaultBoolean.True;
+
+                dateTimePickerSchedule.Properties.Mask.EditMask = "yyyy/MM";
+                dateTimePickerSchedule.Properties.Mask.UseMaskAsDisplayFormat = true;
+
+                dateTimePickerSchedule.Properties.DisplayFormat.FormatString = "yyyy/MM";
+                dateTimePickerSchedule.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+                dateTimePickerSchedule.Properties.EditFormat.FormatString = "yyyy/MM";
+                dateTimePickerSchedule.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+
+                dateTimePickerSchedule.EditValue = DateTime.Now;
 
                 // Initial data fetch
                 await ReloadDataAsync();
@@ -91,8 +105,8 @@ namespace DigitalProduction
 
         private async Task ReloadDataAsync()
         {
-            int selectedYear = dateTimePicker.Value.Year;
-            int selectedMonth = dateTimePicker.Value.Month;
+            int selectedYear = dateTimePickerSchedule.DateTime.Year;
+            int selectedMonth = dateTimePickerSchedule.DateTime.Month;
 
             var rawData = await DbHelper.GetRealtimeTargetDataAsync(selectedMonth, selectedYear);
 
@@ -152,8 +166,6 @@ namespace DigitalProduction
             gridViewPeformance.EndUpdate();
         }
 
-
-
         private void TranslateHeaders()
         {
             var gridView = gridControlPerformance.MainView as GridView;
@@ -194,7 +206,7 @@ namespace DigitalProduction
                 col.Caption = !string.IsNullOrEmpty(translatedText) ? translatedText : col.FieldName;
 
                 // Ẩn một số cột
-                if (col.FieldName == "OperatorID" || col.FieldName == "DepartmentId" || col.FieldName == "TargetQuantity")
+                if (col.FieldName == "OperatorID"  || col.FieldName == "OperatorName" || col.FieldName == "DepartmentId" || col.FieldName == "TargetQuantity" || col.FieldName == "EfficiencyPercent" || col.FieldName == "Timestamp")
                     col.Visible = false;
             }
         }
@@ -246,44 +258,62 @@ namespace DigitalProduction
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    // Set EPPlus license context
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     using (var package = new ExcelPackage())
                     {
                         ExcelWorksheet sheet = package.Workbook.Worksheets.Add("AllRows");
 
-                        // Add headers (adjust if your column headers are different)
+                        // Header for master row
                         sheet.Cells[1, 1].Value = LocalizationManager.GetString("OperatorName");
                         sheet.Cells[1, 2].Value = LocalizationManager.GetString("Timestamp");
                         sheet.Cells[1, 3].Value = LocalizationManager.GetString("TargetQuantity");
                         sheet.Cells[1, 4].Value = LocalizationManager.GetString("TargetActualQuantity");
                         sheet.Cells[1, 5].Value = LocalizationManager.GetString("EfficiencyPercent");
 
-                        int rowIndex = 2; // Start from second row for data
-                        for (int handle = 0; handle < rowCount; handle++)
+                        // Header for detail row (optional, shown if detail rows exist)
+                        sheet.Cells[1, 6].Value = LocalizationManager.GetString("PartName");
+                        sheet.Cells[1, 7].Value = LocalizationManager.GetString("SizeName");
+                        sheet.Cells[1, 8].Value = LocalizationManager.GetString("ActualQuantity");
+
+                        int rowIndex = 2;
+
+                        for (int handle = 0; handle < view.RowCount; handle++)
                         {
-                            var rowData = view.GetRow(handle) as TargetRealtimeInfo;
+                            var rowData = view.GetRow(handle) as OperatorDailySummary;
                             if (rowData != null)
                             {
+                                // Export master row
                                 sheet.Cells[rowIndex, 1].Value = rowData.OperatorName;
                                 sheet.Cells[rowIndex, 2].Value = rowData.Timestamp.ToString("g");
                                 sheet.Cells[rowIndex, 3].Value = rowData.TargetQuantity;
                                 sheet.Cells[rowIndex, 4].Value = rowData.TargetActualQuantity;
                                 sheet.Cells[rowIndex, 5].Value = rowData.EfficiencyPercent;
+
                                 rowIndex++;
+
+                                // Export detail rows (assuming a property List<PartDetail> Details)
+                                if (rowData.Details != null && rowData.Details.Any())
+                                {
+                                    foreach (var detail in rowData.Details)
+                                    {
+                                        sheet.Cells[rowIndex, 6].Value = detail.PartName;
+                                        sheet.Cells[rowIndex, 7].Value = detail.Size;
+                                        sheet.Cells[rowIndex, 8].Value = detail.TargetActualQuantity;
+                                        rowIndex++;
+                                    }
+                                }
                             }
                         }
 
-                        // Auto-fit columns and wrap text
+                        // Format and save
                         sheet.Cells.AutoFitColumns();
                         sheet.Cells.Style.WrapText = true;
 
-                        // Set row height for data rows
                         for (int i = 2; i < rowIndex; i++)
                         {
                             sheet.Row(i).Height = 45;
                         }
-                        // Save the file
+
                         File.WriteAllBytes(sfd.FileName, package.GetAsByteArray());
                         MessageBox.Show("Export complete!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -371,6 +401,7 @@ namespace DigitalProduction
         public class TargetRealtimeInfo : INotifyPropertyChanged
         {
             private string _operatorName;
+            private string _modelName;
             private DateTime _timestamp;
             private int _targetQuantity;
             public int OperatorID { get; set; }
@@ -379,6 +410,7 @@ namespace DigitalProduction
             private string _partName;
 
             public event Func<OperatorDailySummary, Task> TargetQuantityChanged;
+            public string Model { get => _modelName; set { _modelName = value; NotifyPropertyChanged(nameof(Model)); } }
             public string OperatorName { get => _operatorName; set { _operatorName = value; NotifyPropertyChanged(nameof(OperatorName)); } }
             public DateTime Timestamp { get => _timestamp; set { _timestamp = value; NotifyPropertyChanged(nameof(Timestamp)); } }
             public int TargetQuantity
@@ -459,6 +491,5 @@ namespace DigitalProduction
                 throw new Exception("Failed to save target quantity.", ex);
             }
         }
-
     }
 }

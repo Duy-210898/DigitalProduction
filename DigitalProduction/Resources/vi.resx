@@ -553,7 +553,7 @@
     <value>Vui lòng nhập dữ liệu số đôi cắt, số miếng, số lớp hoặc tổng số miếng!!!</value>
   </data>
   <data name="TotalPiecesPerPair" xml:space="preserve">
-    <value>Tổng số miếng trên đôi</value>
+    <value>Số lần chặt trên đôi</value>
   </data>
   <data name="NoRecords" xml:space="preserve">
     <value>Không có dữ liệu trong tháng này!!!!</value>
@@ -692,5 +692,11 @@
   </data>
   <data name="UnitUsagePerPair" xml:space="preserve">
     <value>Dung lượng trên đôi</value>
+  </data>
+  <data name="CutQuantity" xml:space="preserve">
+    <value>Sản lượng đã chặt</value>
+  </data>
+  <data name="TargetCut" xml:space="preserve">
+    <value>Mục tiêu chặt</value>
   </data>
 </root>

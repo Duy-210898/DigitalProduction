@@ -124,7 +124,6 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucViewDi
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucSchedule.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucUserManagement.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.csproj.GenerateResource.cache
-D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.csproj.CoreCompileInputs.cache
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DigitalProduction.exe.config
 D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DigitalProduction.exe.manifest
@@ -231,3 +230,4 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.applicat
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalP.A2EA8899.Up2Date
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.pdb
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses

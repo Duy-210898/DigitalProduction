@@ -194,11 +194,11 @@ CREATE TABLE PartSizeOrder (
     OrderId INT,
 	MaterialID INT,
 	SizeQty INT,
+	TargetCut INT,
 	Unit VARCHAR(50),
 	UnitUsage FLOAT
 );
 GO
-
 -- Table: DefaultInfo
 CREATE TABLE DefaultInfo (
     DefaultID INT PRIMARY KEY IDENTITY(1,1),
