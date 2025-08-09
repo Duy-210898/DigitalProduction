@@ -38,32 +38,32 @@
             this.layoutControlItem11 = new DevExpress.XtraLayout.LayoutControlItem();
             this.emptySpaceItem5 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.splitContainerControl1 = new DevExpress.XtraEditors.SplitContainerControl();
+            this.layoutControl2 = new DevExpress.XtraLayout.LayoutControl();
+            this.cbxSize = new DevExpress.XtraEditors.CheckedComboBoxEdit();
+            this.cbxPartName = new DevExpress.XtraEditors.CheckedComboBoxEdit();
+            this.gridLookUpEditSO = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.rdRawMaterial = new System.Windows.Forms.RadioButton();
+            this.rdLeather = new System.Windows.Forms.RadioButton();
+            this.btnSync = new DevExpress.XtraEditors.SimpleButton();
+            this.dateTimePickerSchedule = new DevExpress.XtraEditors.DateEdit();
+            this.layoutControlGroup1 = new DevExpress.XtraLayout.LayoutControlGroup();
+            this.lbSelectMaterialType = new DevExpress.XtraLayout.LayoutControlGroup();
+            this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.emptySpaceItem3 = new DevExpress.XtraLayout.EmptySpaceItem();
+            this.layoutControlItem7 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.lblSelectSORequired = new DevExpress.XtraLayout.LayoutControlGroup();
+            this.lblFilterDate = new DevExpress.XtraLayout.LayoutControlItem();
+            this.lblPartName = new DevExpress.XtraLayout.LayoutControlItem();
+            this.lblSelectSO = new DevExpress.XtraLayout.LayoutControlItem();
+            this.lblSize = new DevExpress.XtraLayout.LayoutControlItem();
+            this.emptySpaceItem1 = new DevExpress.XtraLayout.EmptySpaceItem();
+            this.layoutControlItem5 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.flayoutTableSelectSO = new DevExpress.Utils.FlyoutPanel();
+            this.lblFlyoutMessage = new DevExpress.XtraEditors.LabelControl();
             this.gridControlSchedule = new DevExpress.XtraGrid.GridControl();
             this.gridViewSchedule = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.flayoutTableSelectSO = new DevExpress.Utils.FlyoutPanel();
-            this.dateTimePickerSchedule = new DevExpress.XtraEditors.DateEdit();
-            this.btnSync = new DevExpress.XtraEditors.SimpleButton();
-            this.rdLeather = new System.Windows.Forms.RadioButton();
-            this.rdRawMaterial = new System.Windows.Forms.RadioButton();
-            this.gridLookUpEditSO = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.cbxPartName = new DevExpress.XtraEditors.CheckedComboBoxEdit();
-            this.cbxSize = new DevExpress.XtraEditors.CheckedComboBoxEdit();
-            this.layoutControlGroup1 = new DevExpress.XtraLayout.LayoutControlGroup();
-            this.lblSelectSORequired = new DevExpress.XtraLayout.LayoutControlGroup();
-            this.layoutControlItem5 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.emptySpaceItem1 = new DevExpress.XtraLayout.EmptySpaceItem();
-            this.lblSize = new DevExpress.XtraLayout.LayoutControlItem();
-            this.lblSelectSO = new DevExpress.XtraLayout.LayoutControlItem();
-            this.lblPartName = new DevExpress.XtraLayout.LayoutControlItem();
-            this.lblFilterDate = new DevExpress.XtraLayout.LayoutControlItem();
-            this.lbSelectMaterialType = new DevExpress.XtraLayout.LayoutControlGroup();
-            this.layoutControlItem7 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.emptySpaceItem3 = new DevExpress.XtraLayout.EmptySpaceItem();
-            this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.layoutControl2 = new DevExpress.XtraLayout.LayoutControl();
-            this.lblFlyoutMessage = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Root)).BeginInit();
@@ -77,31 +77,31 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1.Panel2)).BeginInit();
             this.splitContainerControl1.Panel2.SuspendLayout();
             this.splitContainerControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControl2)).BeginInit();
+            this.layoutControl2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxPartName.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties.CalendarTimeProperties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lbSelectMaterialType)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem7)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblSelectSORequired)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblFilterDate)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblPartName)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblSelectSO)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblSize)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.flayoutTableSelectSO)).BeginInit();
+            this.flayoutTableSelectSO.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlSchedule)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewSchedule)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.flayoutTableSelectSO)).BeginInit();
-            this.flayoutTableSelectSO.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties.CalendarTimeProperties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cbxPartName.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblSelectSORequired)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblSize)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblSelectSO)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblPartName)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblFilterDate)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lbSelectMaterialType)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem7)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControl2)).BeginInit();
-            this.layoutControl2.SuspendLayout();
             this.SuspendLayout();
             // 
             // layoutControl1
@@ -220,6 +220,267 @@
             this.splitContainerControl1.SplitterPosition = 235;
             this.splitContainerControl1.TabIndex = 5;
             // 
+            // layoutControl2
+            // 
+            this.layoutControl2.Controls.Add(this.cbxSize);
+            this.layoutControl2.Controls.Add(this.cbxPartName);
+            this.layoutControl2.Controls.Add(this.gridLookUpEditSO);
+            this.layoutControl2.Controls.Add(this.rdRawMaterial);
+            this.layoutControl2.Controls.Add(this.rdLeather);
+            this.layoutControl2.Controls.Add(this.btnSync);
+            this.layoutControl2.Controls.Add(this.dateTimePickerSchedule);
+            this.layoutControl2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.layoutControl2.Location = new System.Drawing.Point(0, 0);
+            this.layoutControl2.Name = "layoutControl2";
+            this.layoutControl2.OptionsCustomizationForm.DesignTimeCustomizationFormPositionAndSize = new System.Drawing.Rectangle(1270, 0, 650, 400);
+            this.layoutControl2.Root = this.layoutControlGroup1;
+            this.layoutControl2.Size = new System.Drawing.Size(1029, 235);
+            this.layoutControl2.TabIndex = 0;
+            this.layoutControl2.Text = "layoutControl2";
+            // 
+            // cbxSize
+            // 
+            this.cbxSize.Location = new System.Drawing.Point(441, 147);
+            this.cbxSize.Name = "cbxSize";
+            this.cbxSize.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxSize.Properties.Appearance.Options.UseFont = true;
+            this.cbxSize.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cbxSize.Size = new System.Drawing.Size(238, 24);
+            this.cbxSize.StyleController = this.layoutControl2;
+            this.cbxSize.TabIndex = 17;
+            this.cbxSize.EditValueChanged += new System.EventHandler(this.comboSize_EditValueChanged);
+            // 
+            // cbxPartName
+            // 
+            this.cbxPartName.Location = new System.Drawing.Point(441, 119);
+            this.cbxPartName.Name = "cbxPartName";
+            this.cbxPartName.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxPartName.Properties.Appearance.Options.UseFont = true;
+            this.cbxPartName.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cbxPartName.Size = new System.Drawing.Size(238, 24);
+            this.cbxPartName.StyleController = this.layoutControl2;
+            this.cbxPartName.TabIndex = 16;
+            this.cbxPartName.EditValueChanged += new System.EventHandler(this.comboPartName_EditValueChanged);
+            // 
+            // gridLookUpEditSO
+            // 
+            this.gridLookUpEditSO.Location = new System.Drawing.Point(113, 147);
+            this.gridLookUpEditSO.Name = "gridLookUpEditSO";
+            this.gridLookUpEditSO.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gridLookUpEditSO.Properties.Appearance.Options.UseFont = true;
+            this.gridLookUpEditSO.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpEditSO.Properties.PopupView = this.gridLookUpEdit1View;
+            this.gridLookUpEditSO.Size = new System.Drawing.Size(235, 24);
+            this.gridLookUpEditSO.StyleController = this.layoutControl2;
+            this.gridLookUpEditSO.TabIndex = 15;
+            // 
+            // gridLookUpEdit1View
+            // 
+            this.gridLookUpEdit1View.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridLookUpEdit1View.Name = "gridLookUpEdit1View";
+            this.gridLookUpEdit1View.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridLookUpEdit1View.OptionsView.ShowGroupPanel = false;
+            // 
+            // rdRawMaterial
+            // 
+            this.rdRawMaterial.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.rdRawMaterial.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rdRawMaterial.Location = new System.Drawing.Point(352, 45);
+            this.rdRawMaterial.Name = "rdRawMaterial";
+            this.rdRawMaterial.Size = new System.Drawing.Size(324, 25);
+            this.rdRawMaterial.TabIndex = 14;
+            this.rdRawMaterial.TabStop = true;
+            this.rdRawMaterial.Text = "radioButton2";
+            this.rdRawMaterial.UseVisualStyleBackColor = false;
+            // 
+            // rdLeather
+            // 
+            this.rdLeather.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.rdLeather.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rdLeather.Location = new System.Drawing.Point(24, 45);
+            this.rdLeather.Name = "rdLeather";
+            this.rdLeather.Size = new System.Drawing.Size(324, 25);
+            this.rdLeather.TabIndex = 13;
+            this.rdLeather.TabStop = true;
+            this.rdLeather.Text = "radioButton1";
+            this.rdLeather.UseVisualStyleBackColor = false;
+            // 
+            // btnSync
+            // 
+            this.btnSync.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSync.Appearance.Options.UseFont = true;
+            this.btnSync.Location = new System.Drawing.Point(683, 147);
+            this.btnSync.Name = "btnSync";
+            this.btnSync.Size = new System.Drawing.Size(322, 23);
+            this.btnSync.StyleController = this.layoutControl2;
+            this.btnSync.TabIndex = 8;
+            this.btnSync.Text = "simpleButton1";
+            // 
+            // dateTimePickerSchedule
+            // 
+            this.dateTimePickerSchedule.EditValue = new System.DateTime(2025, 7, 30, 13, 44, 1, 398);
+            this.dateTimePickerSchedule.Location = new System.Drawing.Point(113, 119);
+            this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
+            this.dateTimePickerSchedule.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dateTimePickerSchedule.Properties.Appearance.Options.UseFont = true;
+            this.dateTimePickerSchedule.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.dateTimePickerSchedule.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.dateTimePickerSchedule.Size = new System.Drawing.Size(235, 24);
+            this.dateTimePickerSchedule.StyleController = this.layoutControl2;
+            this.dateTimePickerSchedule.TabIndex = 5;
+            // 
+            // layoutControlGroup1
+            // 
+            this.layoutControlGroup1.AppearanceGroup.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.layoutControlGroup1.AppearanceGroup.Options.UseFont = true;
+            this.layoutControlGroup1.AppearanceItemCaption.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.layoutControlGroup1.AppearanceItemCaption.Options.UseFont = true;
+            this.layoutControlGroup1.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
+            this.layoutControlGroup1.GroupBordersVisible = false;
+            this.layoutControlGroup1.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
+            this.lbSelectMaterialType,
+            this.lblSelectSORequired});
+            this.layoutControlGroup1.Name = "Root";
+            this.layoutControlGroup1.Size = new System.Drawing.Size(1029, 235);
+            this.layoutControlGroup1.TextVisible = false;
+            // 
+            // lbSelectMaterialType
+            // 
+            this.lbSelectMaterialType.AppearanceGroup.BorderColor = System.Drawing.Color.White;
+            this.lbSelectMaterialType.AppearanceGroup.Options.UseBorderColor = true;
+            this.lbSelectMaterialType.AppearanceItemCaption.BackColor = System.Drawing.Color.White;
+            this.lbSelectMaterialType.AppearanceItemCaption.Options.UseBackColor = true;
+            this.lbSelectMaterialType.AppearanceTabPage.Header.BackColor = System.Drawing.Color.White;
+            this.lbSelectMaterialType.AppearanceTabPage.Header.Options.UseBackColor = true;
+            this.lbSelectMaterialType.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
+            this.layoutControlItem1,
+            this.emptySpaceItem3,
+            this.layoutControlItem7});
+            this.lbSelectMaterialType.Location = new System.Drawing.Point(0, 0);
+            this.lbSelectMaterialType.Name = "lbSelectMaterialType";
+            this.lbSelectMaterialType.OptionsPrint.AppearanceGroupCaption.BackColor = System.Drawing.Color.White;
+            this.lbSelectMaterialType.OptionsPrint.AppearanceGroupCaption.Options.UseBackColor = true;
+            this.lbSelectMaterialType.Size = new System.Drawing.Size(1009, 74);
+            // 
+            // layoutControlItem1
+            // 
+            this.layoutControlItem1.AppearanceItemCaption.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.layoutControlItem1.AppearanceItemCaption.Options.UseBackColor = true;
+            this.layoutControlItem1.Control = this.rdLeather;
+            this.layoutControlItem1.Location = new System.Drawing.Point(0, 0);
+            this.layoutControlItem1.Name = "layoutControlItem1";
+            this.layoutControlItem1.Size = new System.Drawing.Size(328, 29);
+            this.layoutControlItem1.TextVisible = false;
+            // 
+            // emptySpaceItem3
+            // 
+            this.emptySpaceItem3.Location = new System.Drawing.Point(656, 0);
+            this.emptySpaceItem3.Name = "emptySpaceItem3";
+            this.emptySpaceItem3.Size = new System.Drawing.Size(329, 29);
+            // 
+            // layoutControlItem7
+            // 
+            this.layoutControlItem7.Control = this.rdRawMaterial;
+            this.layoutControlItem7.Location = new System.Drawing.Point(328, 0);
+            this.layoutControlItem7.Name = "layoutControlItem7";
+            this.layoutControlItem7.Size = new System.Drawing.Size(328, 29);
+            this.layoutControlItem7.TextVisible = false;
+            // 
+            // lblSelectSORequired
+            // 
+            this.lblSelectSORequired.AppearanceGroup.BorderColor = System.Drawing.Color.White;
+            this.lblSelectSORequired.AppearanceGroup.Options.UseBorderColor = true;
+            this.lblSelectSORequired.Enabled = false;
+            this.lblSelectSORequired.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
+            this.lblFilterDate,
+            this.lblPartName,
+            this.lblSelectSO,
+            this.lblSize,
+            this.emptySpaceItem1,
+            this.layoutControlItem5});
+            this.lblSelectSORequired.Location = new System.Drawing.Point(0, 74);
+            this.lblSelectSORequired.Name = "lblSelectSORequired";
+            this.lblSelectSORequired.Size = new System.Drawing.Size(1009, 141);
+            // 
+            // lblFilterDate
+            // 
+            this.lblFilterDate.Control = this.dateTimePickerSchedule;
+            this.lblFilterDate.Location = new System.Drawing.Point(0, 0);
+            this.lblFilterDate.Name = "lblFilterDate";
+            this.lblFilterDate.Size = new System.Drawing.Size(328, 28);
+            // 
+            // lblPartName
+            // 
+            this.lblPartName.Control = this.cbxPartName;
+            this.lblPartName.Location = new System.Drawing.Point(328, 0);
+            this.lblPartName.Name = "lblPartName";
+            this.lblPartName.Size = new System.Drawing.Size(331, 28);
+            // 
+            // lblSelectSO
+            // 
+            this.lblSelectSO.Control = this.gridLookUpEditSO;
+            this.lblSelectSO.Location = new System.Drawing.Point(0, 28);
+            this.lblSelectSO.Name = "lblSelectSO";
+            this.lblSelectSO.Size = new System.Drawing.Size(328, 68);
+            // 
+            // lblSize
+            // 
+            this.lblSize.Control = this.cbxSize;
+            this.lblSize.Location = new System.Drawing.Point(328, 28);
+            this.lblSize.Name = "lblSize";
+            this.lblSize.Size = new System.Drawing.Size(331, 68);
+            // 
+            // emptySpaceItem1
+            // 
+            this.emptySpaceItem1.Location = new System.Drawing.Point(659, 0);
+            this.emptySpaceItem1.Name = "emptySpaceItem1";
+            this.emptySpaceItem1.Size = new System.Drawing.Size(326, 28);
+            // 
+            // layoutControlItem5
+            // 
+            this.layoutControlItem5.Control = this.btnSync;
+            this.layoutControlItem5.Location = new System.Drawing.Point(659, 28);
+            this.layoutControlItem5.Name = "layoutControlItem5";
+            this.layoutControlItem5.Size = new System.Drawing.Size(326, 68);
+            this.layoutControlItem5.TextVisible = false;
+            // 
+            // flayoutTableSelectSO
+            // 
+            this.flayoutTableSelectSO.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.flayoutTableSelectSO.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.flayoutTableSelectSO.Appearance.Options.UseBackColor = true;
+            this.flayoutTableSelectSO.Appearance.Options.UseFont = true;
+            this.flayoutTableSelectSO.Controls.Add(this.lblFlyoutMessage);
+            this.flayoutTableSelectSO.Location = new System.Drawing.Point(130, 7);
+            this.flayoutTableSelectSO.Name = "flayoutTableSelectSO";
+            this.flayoutTableSelectSO.OptionsBeakPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.flayoutTableSelectSO.OptionsButtonPanel.ButtonPanelContentAlignment = System.Drawing.ContentAlignment.MiddleLeft;
+            this.flayoutTableSelectSO.OptionsButtonPanel.ButtonPanelHeight = 50;
+            this.flayoutTableSelectSO.OwnerControl = this;
+            this.flayoutTableSelectSO.Size = new System.Drawing.Size(292, 29);
+            this.flayoutTableSelectSO.TabIndex = 12;
+            // 
+            // lblFlyoutMessage
+            // 
+            this.lblFlyoutMessage.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblFlyoutMessage.Appearance.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.lblFlyoutMessage.Appearance.Options.UseFont = true;
+            this.lblFlyoutMessage.Appearance.Options.UseForeColor = true;
+            this.lblFlyoutMessage.Appearance.Options.UseTextOptions = true;
+            this.lblFlyoutMessage.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.lblFlyoutMessage.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
+            this.lblFlyoutMessage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblFlyoutMessage.Location = new System.Drawing.Point(0, 0);
+            this.lblFlyoutMessage.Name = "lblFlyoutMessage";
+            this.lblFlyoutMessage.Size = new System.Drawing.Size(75, 16);
+            this.lblFlyoutMessage.TabIndex = 0;
+            this.lblFlyoutMessage.Text = "labelControl1";
+            // 
             // gridControlSchedule
             // 
             this.gridControlSchedule.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -246,267 +507,6 @@
             this.gridView1.GridControl = this.gridControlSchedule;
             this.gridView1.Name = "gridView1";
             // 
-            // flayoutTableSelectSO
-            // 
-            this.flayoutTableSelectSO.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.flayoutTableSelectSO.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.flayoutTableSelectSO.Appearance.Options.UseBackColor = true;
-            this.flayoutTableSelectSO.Appearance.Options.UseFont = true;
-            this.flayoutTableSelectSO.Controls.Add(this.lblFlyoutMessage);
-            this.flayoutTableSelectSO.Location = new System.Drawing.Point(130, 7);
-            this.flayoutTableSelectSO.Name = "flayoutTableSelectSO";
-            this.flayoutTableSelectSO.OptionsBeakPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.flayoutTableSelectSO.OptionsButtonPanel.ButtonPanelContentAlignment = System.Drawing.ContentAlignment.MiddleLeft;
-            this.flayoutTableSelectSO.OptionsButtonPanel.ButtonPanelHeight = 50;
-            this.flayoutTableSelectSO.OwnerControl = this;
-            this.flayoutTableSelectSO.Size = new System.Drawing.Size(292, 29);
-            this.flayoutTableSelectSO.TabIndex = 12;
-            // 
-            // dateTimePickerSchedule
-            // 
-            this.dateTimePickerSchedule.EditValue = new System.DateTime(2025, 7, 30, 13, 44, 1, 398);
-            this.dateTimePickerSchedule.Location = new System.Drawing.Point(113, 119);
-            this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
-            this.dateTimePickerSchedule.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dateTimePickerSchedule.Properties.Appearance.Options.UseFont = true;
-            this.dateTimePickerSchedule.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.dateTimePickerSchedule.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.dateTimePickerSchedule.Size = new System.Drawing.Size(235, 24);
-            this.dateTimePickerSchedule.StyleController = this.layoutControl2;
-            this.dateTimePickerSchedule.TabIndex = 5;
-            // 
-            // btnSync
-            // 
-            this.btnSync.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSync.Appearance.Options.UseFont = true;
-            this.btnSync.Location = new System.Drawing.Point(683, 147);
-            this.btnSync.Name = "btnSync";
-            this.btnSync.Size = new System.Drawing.Size(322, 23);
-            this.btnSync.StyleController = this.layoutControl2;
-            this.btnSync.TabIndex = 8;
-            this.btnSync.Text = "simpleButton1";
-            // 
-            // rdLeather
-            // 
-            this.rdLeather.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.rdLeather.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rdLeather.Location = new System.Drawing.Point(24, 45);
-            this.rdLeather.Name = "rdLeather";
-            this.rdLeather.Size = new System.Drawing.Size(324, 25);
-            this.rdLeather.TabIndex = 13;
-            this.rdLeather.TabStop = true;
-            this.rdLeather.Text = "radioButton1";
-            this.rdLeather.UseVisualStyleBackColor = false;
-            // 
-            // rdRawMaterial
-            // 
-            this.rdRawMaterial.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.rdRawMaterial.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rdRawMaterial.Location = new System.Drawing.Point(352, 45);
-            this.rdRawMaterial.Name = "rdRawMaterial";
-            this.rdRawMaterial.Size = new System.Drawing.Size(324, 25);
-            this.rdRawMaterial.TabIndex = 14;
-            this.rdRawMaterial.TabStop = true;
-            this.rdRawMaterial.Text = "radioButton2";
-            this.rdRawMaterial.UseVisualStyleBackColor = false;
-            // 
-            // gridLookUpEditSO
-            // 
-            this.gridLookUpEditSO.Location = new System.Drawing.Point(113, 147);
-            this.gridLookUpEditSO.Name = "gridLookUpEditSO";
-            this.gridLookUpEditSO.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gridLookUpEditSO.Properties.Appearance.Options.UseFont = true;
-            this.gridLookUpEditSO.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.gridLookUpEditSO.Properties.PopupView = this.gridLookUpEdit1View;
-            this.gridLookUpEditSO.Size = new System.Drawing.Size(235, 24);
-            this.gridLookUpEditSO.StyleController = this.layoutControl2;
-            this.gridLookUpEditSO.TabIndex = 15;
-            // 
-            // gridLookUpEdit1View
-            // 
-            this.gridLookUpEdit1View.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridLookUpEdit1View.Name = "gridLookUpEdit1View";
-            this.gridLookUpEdit1View.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridLookUpEdit1View.OptionsView.ShowGroupPanel = false;
-            // 
-            // cbxPartName
-            // 
-            this.cbxPartName.Location = new System.Drawing.Point(441, 119);
-            this.cbxPartName.Name = "cbxPartName";
-            this.cbxPartName.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxPartName.Properties.Appearance.Options.UseFont = true;
-            this.cbxPartName.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.cbxPartName.Size = new System.Drawing.Size(238, 24);
-            this.cbxPartName.StyleController = this.layoutControl2;
-            this.cbxPartName.TabIndex = 16;
-            this.cbxPartName.EditValueChanged += new System.EventHandler(this.comboPartName_EditValueChanged);
-            // 
-            // cbxSize
-            // 
-            this.cbxSize.Location = new System.Drawing.Point(441, 147);
-            this.cbxSize.Name = "cbxSize";
-            this.cbxSize.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxSize.Properties.Appearance.Options.UseFont = true;
-            this.cbxSize.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.cbxSize.Size = new System.Drawing.Size(238, 24);
-            this.cbxSize.StyleController = this.layoutControl2;
-            this.cbxSize.TabIndex = 17;
-            this.cbxSize.EditValueChanged += new System.EventHandler(this.comboSize_EditValueChanged);
-            // 
-            // layoutControlGroup1
-            // 
-            this.layoutControlGroup1.AppearanceGroup.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.layoutControlGroup1.AppearanceGroup.Options.UseFont = true;
-            this.layoutControlGroup1.AppearanceItemCaption.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.layoutControlGroup1.AppearanceItemCaption.Options.UseFont = true;
-            this.layoutControlGroup1.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
-            this.layoutControlGroup1.GroupBordersVisible = false;
-            this.layoutControlGroup1.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
-            this.lbSelectMaterialType,
-            this.lblSelectSORequired});
-            this.layoutControlGroup1.Name = "Root";
-            this.layoutControlGroup1.Size = new System.Drawing.Size(1029, 235);
-            this.layoutControlGroup1.TextVisible = false;
-            // 
-            // lblSelectSORequired
-            // 
-            this.lblSelectSORequired.AppearanceGroup.BorderColor = System.Drawing.Color.White;
-            this.lblSelectSORequired.AppearanceGroup.Options.UseBorderColor = true;
-            this.lblSelectSORequired.Enabled = false;
-            this.lblSelectSORequired.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
-            this.lblFilterDate,
-            this.lblPartName,
-            this.lblSelectSO,
-            this.lblSize,
-            this.emptySpaceItem1,
-            this.layoutControlItem5});
-            this.lblSelectSORequired.Location = new System.Drawing.Point(0, 74);
-            this.lblSelectSORequired.Name = "lblSelectSORequired";
-            this.lblSelectSORequired.Size = new System.Drawing.Size(1009, 141);
-            // 
-            // layoutControlItem5
-            // 
-            this.layoutControlItem5.Control = this.btnSync;
-            this.layoutControlItem5.Location = new System.Drawing.Point(659, 28);
-            this.layoutControlItem5.Name = "layoutControlItem5";
-            this.layoutControlItem5.Size = new System.Drawing.Size(326, 68);
-            this.layoutControlItem5.TextVisible = false;
-            // 
-            // emptySpaceItem1
-            // 
-            this.emptySpaceItem1.Location = new System.Drawing.Point(659, 0);
-            this.emptySpaceItem1.Name = "emptySpaceItem1";
-            this.emptySpaceItem1.Size = new System.Drawing.Size(326, 28);
-            // 
-            // lblSize
-            // 
-            this.lblSize.Control = this.cbxSize;
-            this.lblSize.Location = new System.Drawing.Point(328, 28);
-            this.lblSize.Name = "lblSize";
-            this.lblSize.Size = new System.Drawing.Size(331, 68);
-            // 
-            // lblSelectSO
-            // 
-            this.lblSelectSO.Control = this.gridLookUpEditSO;
-            this.lblSelectSO.Location = new System.Drawing.Point(0, 28);
-            this.lblSelectSO.Name = "lblSelectSO";
-            this.lblSelectSO.Size = new System.Drawing.Size(328, 68);
-            // 
-            // lblPartName
-            // 
-            this.lblPartName.Control = this.cbxPartName;
-            this.lblPartName.Location = new System.Drawing.Point(328, 0);
-            this.lblPartName.Name = "lblPartName";
-            this.lblPartName.Size = new System.Drawing.Size(331, 28);
-            // 
-            // lblFilterDate
-            // 
-            this.lblFilterDate.Control = this.dateTimePickerSchedule;
-            this.lblFilterDate.Location = new System.Drawing.Point(0, 0);
-            this.lblFilterDate.Name = "lblFilterDate";
-            this.lblFilterDate.Size = new System.Drawing.Size(328, 28);
-            // 
-            // lbSelectMaterialType
-            // 
-            this.lbSelectMaterialType.AppearanceGroup.BorderColor = System.Drawing.Color.White;
-            this.lbSelectMaterialType.AppearanceGroup.Options.UseBorderColor = true;
-            this.lbSelectMaterialType.AppearanceItemCaption.BackColor = System.Drawing.Color.White;
-            this.lbSelectMaterialType.AppearanceItemCaption.Options.UseBackColor = true;
-            this.lbSelectMaterialType.AppearanceTabPage.Header.BackColor = System.Drawing.Color.White;
-            this.lbSelectMaterialType.AppearanceTabPage.Header.Options.UseBackColor = true;
-            this.lbSelectMaterialType.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
-            this.layoutControlItem1,
-            this.emptySpaceItem3,
-            this.layoutControlItem7});
-            this.lbSelectMaterialType.Location = new System.Drawing.Point(0, 0);
-            this.lbSelectMaterialType.Name = "lbSelectMaterialType";
-            this.lbSelectMaterialType.OptionsPrint.AppearanceGroupCaption.BackColor = System.Drawing.Color.White;
-            this.lbSelectMaterialType.OptionsPrint.AppearanceGroupCaption.Options.UseBackColor = true;
-            this.lbSelectMaterialType.Size = new System.Drawing.Size(1009, 74);
-            // 
-            // layoutControlItem7
-            // 
-            this.layoutControlItem7.Control = this.rdRawMaterial;
-            this.layoutControlItem7.Location = new System.Drawing.Point(328, 0);
-            this.layoutControlItem7.Name = "layoutControlItem7";
-            this.layoutControlItem7.Size = new System.Drawing.Size(328, 29);
-            this.layoutControlItem7.TextVisible = false;
-            // 
-            // emptySpaceItem3
-            // 
-            this.emptySpaceItem3.Location = new System.Drawing.Point(656, 0);
-            this.emptySpaceItem3.Name = "emptySpaceItem3";
-            this.emptySpaceItem3.Size = new System.Drawing.Size(329, 29);
-            // 
-            // layoutControlItem1
-            // 
-            this.layoutControlItem1.AppearanceItemCaption.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.layoutControlItem1.AppearanceItemCaption.Options.UseBackColor = true;
-            this.layoutControlItem1.Control = this.rdLeather;
-            this.layoutControlItem1.Location = new System.Drawing.Point(0, 0);
-            this.layoutControlItem1.Name = "layoutControlItem1";
-            this.layoutControlItem1.Size = new System.Drawing.Size(328, 29);
-            this.layoutControlItem1.TextVisible = false;
-            // 
-            // layoutControl2
-            // 
-            this.layoutControl2.Controls.Add(this.cbxSize);
-            this.layoutControl2.Controls.Add(this.cbxPartName);
-            this.layoutControl2.Controls.Add(this.gridLookUpEditSO);
-            this.layoutControl2.Controls.Add(this.rdRawMaterial);
-            this.layoutControl2.Controls.Add(this.rdLeather);
-            this.layoutControl2.Controls.Add(this.btnSync);
-            this.layoutControl2.Controls.Add(this.dateTimePickerSchedule);
-            this.layoutControl2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.layoutControl2.Location = new System.Drawing.Point(0, 0);
-            this.layoutControl2.Name = "layoutControl2";
-            this.layoutControl2.OptionsCustomizationForm.DesignTimeCustomizationFormPositionAndSize = new System.Drawing.Rectangle(1270, 0, 650, 400);
-            this.layoutControl2.Root = this.layoutControlGroup1;
-            this.layoutControl2.Size = new System.Drawing.Size(1029, 235);
-            this.layoutControl2.TabIndex = 0;
-            this.layoutControl2.Text = "layoutControl2";
-            // 
-            // lblFlyoutMessage
-            // 
-            this.lblFlyoutMessage.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFlyoutMessage.Appearance.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.lblFlyoutMessage.Appearance.Options.UseFont = true;
-            this.lblFlyoutMessage.Appearance.Options.UseForeColor = true;
-            this.lblFlyoutMessage.Appearance.Options.UseTextOptions = true;
-            this.lblFlyoutMessage.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.lblFlyoutMessage.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
-            this.lblFlyoutMessage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblFlyoutMessage.Location = new System.Drawing.Point(0, 0);
-            this.lblFlyoutMessage.Name = "lblFlyoutMessage";
-            this.lblFlyoutMessage.Size = new System.Drawing.Size(75, 16);
-            this.lblFlyoutMessage.TabIndex = 0;
-            this.lblFlyoutMessage.Text = "labelControl1";
-            // 
             // ucSchedule
             // 
             this.BackColor = System.Drawing.SystemColors.ButtonHighlight;
@@ -527,32 +527,32 @@
             this.splitContainerControl1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1)).EndInit();
             this.splitContainerControl1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridControlSchedule)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridViewSchedule)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControl2)).EndInit();
+            this.layoutControl2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxPartName.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties.CalendarTimeProperties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lbSelectMaterialType)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem7)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblSelectSORequired)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblFilterDate)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblPartName)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblSelectSO)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblSize)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.flayoutTableSelectSO)).EndInit();
             this.flayoutTableSelectSO.ResumeLayout(false);
             this.flayoutTableSelectSO.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties.CalendarTimeProperties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerSchedule.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cbxPartName.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblSelectSORequired)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblSize)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblSelectSO)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblPartName)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblFilterDate)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lbSelectMaterialType)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem7)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControl2)).EndInit();
-            this.layoutControl2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridControlSchedule)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewSchedule)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             this.ResumeLayout(false);
 
         }

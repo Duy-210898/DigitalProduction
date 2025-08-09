@@ -21,7 +21,7 @@ namespace DigitalProduction
         private DeviceOutputListViewModel _viewModel;
         private DateEdit dateTimePickerStart;
         private DateEdit dateTimePickerEnd;
-        private TextBox txtFilter;
+        private TextEdit txtFilter;
         private GridControl gridControl_DeviceOutput;
         private GridView gridView_DeviceOutput;
         private Panel mainPanel;
@@ -272,7 +272,7 @@ namespace DigitalProduction
                                         .ToList()
                                         .IndexOf(row) + 1;
 
-                    e.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+                    e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
                     e.Info.DisplayText = displayIndex.ToString();
                 }
             };
@@ -424,7 +424,7 @@ namespace DigitalProduction
                 Width = 200
             };
 
-            txtFilter = new TextBox { Width = 150, Margin = new Padding(5), ForeColor = Color.Gray, Text = LocalizationManager.GetString("Search") };
+            txtFilter = new TextEdit { Width = 150, Margin = new Padding(5), ForeColor = Color.Gray, Text = LocalizationManager.GetString("Search") };
 
             txtFilter.GotFocus += (s, e) =>
             {
@@ -503,16 +503,18 @@ namespace DigitalProduction
             gridView.Columns["IsRecentlyUpdated"]?.SetVisible(false);
             gridView.Columns["UniqueId"]?.SetVisible(false);
 
-            StyleNumericColumn(gridView.Columns["PartName"], 5, bold: true);
-            StyleNumericColumn(gridView.Columns["ActualSizeQty"], 7);
-            StyleNumericColumn(gridView.Columns["TotalPiecesPerPair"], 13, Color.Blue, bold: true);
-            StyleNumericColumn(gridView.Columns["ActualCut"], 0, bold: true);
-            StyleNumericColumn(gridView.Columns["ActualPieces"], 0, bold: true);
-            StyleNumericColumn(gridView.Columns["InventoryQty"], 0, bold: true);
-            StyleNumericColumn(gridView.Columns["CuttingDieQty"], 9, bold: true);
-            StyleNumericColumn(gridView.Columns["MaterialLayer"], 0, bold: true);
-            StyleNumericColumn(gridView.Columns["SizeQty"], 6, bold: true);
-            StyleNumericColumn(gridView.Columns["PiecesPerPair"], 0, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.PartName], 5, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.ActualSizeQty], 7);
+            StyleNumericColumn(gridView.Columns[Constants.TotalPiecesPerPair], 13, Color.Blue, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.ActualCut], 0, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.ActualPieces], 0, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.InventoryQty], 0, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.CuttingDieQty], 9, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.MaterialLayer], 0, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.Size], 5, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.SizeQty], 6, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.PiecesPerPair], 0, bold: true);
+            StyleNumericColumn(gridView.Columns[Constants.MaterialType], 4, bold: true);
 
 
             gridView.OptionsView.ShowAutoFilterRow = true;
@@ -520,22 +522,22 @@ namespace DigitalProduction
             gridView.OptionsCustomization.AllowSort = false;
             gridView.OptionsMenu.ShowAutoFilterRowItem = false;
             gridView.OptionsView.ColumnAutoWidth = false;
-            gridView.Columns["MachineName"].Width = 120;
-            gridView.Columns["ActualSizeQty"].Width = 100;
-            gridView.Columns["OperatorName"].Width = 130;
-            gridView.Columns["Size"].Width = 60;
-            gridView.Columns["PartName"].Width = 100;
-            gridView.Columns["SO"].Width = 90;
-            gridView.Columns["MaterialType"].Width = 100;
-            gridView.Columns["SizeQty"].Width = 70;
-            gridView.Columns["SO"].VisibleIndex = 0;
+            gridView.Columns[Constants.MachineName].Width = 120;
+            gridView.Columns[Constants.ActualSizeQty].Width = 100;
+            gridView.Columns[Constants.OperatorName].Width = 130;
+            gridView.Columns[Constants.Size].Width = 60;
+            gridView.Columns[Constants.PartName].Width = 100;
+            gridView.Columns[Constants.SO].Width = 90;
+            gridView.Columns[Constants.MaterialType].Width = 120;
+            gridView.Columns[Constants.SizeQty].Width = 70;
+            gridView.Columns[Constants.SO].VisibleIndex = 0;
            // gridView.Columns["TotalPiecesPerPair"].VisibleIndex = 12;
-            gridView.Columns["Timestamp"].Visible= false;
-            gridView.Columns["UpdatedAt"].Visible = false;
-            gridView.Columns["SO"].Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
-            gridView.Columns["PartName"].Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
-            gridView.Columns["MachineName"].Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
-            gridView.Columns["OperatorName"].Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
+            gridView.Columns[Constants.Timestamp].Visible= false;
+            gridView.Columns[Constants.UpdatedAt].Visible = false;
+            gridView.Columns[Constants.SO].Fixed = FixedStyle.Left;
+            gridView.Columns[Constants.PartName].Fixed = FixedStyle.Left;
+            gridView.Columns[Constants.MachineName].Fixed = FixedStyle.Left;
+            gridView.Columns[Constants.OperatorName].Fixed = FixedStyle.Left;
             gridView.Appearance.HeaderPanel.ForeColor = Color.Black;
             gridView.Appearance.HeaderPanel.Font = new Font(gridView.Appearance.Row.Font, FontStyle.Bold);
             gridView.Appearance.HeaderPanel.TextOptions.HAlignment = HorzAlignment.Center;
@@ -595,7 +597,7 @@ namespace DigitalProduction
 
         private void GridView_DeviceOutput_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
-            if (e.Column.FieldName == "ActualSizeQty")
+            if (e.Column.FieldName == Constants.ActualSizeQty)
             {
                 e.Appearance.ForeColor = Color.ForestGreen;
                 e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
@@ -604,8 +606,7 @@ namespace DigitalProduction
             if (view == null || e.RowHandle < 0) return;
 
             var row = view.GetRow(e.RowHandle) as DeviceOutput;
-            if (row.IsRecentlyUpdated
-                )
+            if (row.IsRecentlyUpdated)
             {
                 e.Appearance.BackColor = Color.LightYellow;
                 e.Appearance.BackColor2 = Color.LightYellow;

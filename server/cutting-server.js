@@ -1,6 +1,4 @@
 const express = require('express');
-const WebSocket = require('ws');
-const ping = require('ping');
 const { initDatabase, getDeviceList } = require('./database');
 const { setupWebSocket } = require('./websocket');
 const schedule = require('node-schedule');

@@ -244,7 +244,7 @@
     <value>Đăng xuất</value>
   </data>
   <data name="MonthlyPlan" xml:space="preserve">
-    <value>Kế hoạch hàng tháng</value>
+    <value>Xem kế hoạch hàng tháng</value>
   </data>
   <data name="Plant" xml:space="preserve">
     <value>Xưởng</value>
@@ -693,10 +693,16 @@
   <data name="UnitUsagePerPair" xml:space="preserve">
     <value>Dung lượng trên đôi</value>
   </data>
+  <data name="CreateOrder" xml:space="preserve">
+    <value>Tạo đơn chặt</value>
+  </data>
   <data name="CutQuantity" xml:space="preserve">
     <value>Sản lượng đã chặt</value>
   </data>
   <data name="TargetCut" xml:space="preserve">
-    <value>Mục tiêu chặt</value>
+    <value>Số lượng giao May</value>
+  </data>
+  <data name="ActualRemainingQuantity" xml:space="preserve">
+    <value>Sản lượng tồn</value>
   </data>
 </root>

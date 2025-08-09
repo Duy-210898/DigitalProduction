@@ -1510,7 +1510,7 @@ async function getAllProductionSchedule(month = null, year = null, includeDistri
     `;
 
     if (includeDistributed) {
-      whereClause += ` AND d.PartSizeOrderId IS NULL`;
+      whereClause += ` AND d.PartSizeOrderId IS NULL AND d.Status IS NULL`;
     }
     const result = await pool.request()
     .query(`

@@ -50,6 +50,7 @@
             this.cbxDevice = new System.Windows.Forms.ComboBox();
             this.cbx_Status = new System.Windows.Forms.ComboBox();
             this.lblStatus = new DevExpress.XtraEditors.LabelControl();
+            this.btnDeleteSelected = new DevExpress.XtraEditors.SimpleButton();
             this.gridDistribution = new DevExpress.XtraGrid.GridControl();
             this.gridViewDítribution = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
@@ -58,7 +59,6 @@
             this.navigationPage4 = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.navigationFrame1 = new DevExpress.XtraBars.Navigation.NavigationFrame();
-            this.btnDeleteSelected = new DevExpress.XtraEditors.SimpleButton();
             this.navigationPage2.SuspendLayout();
             this.tableLayoutMainDevice.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlDeviceManagement)).BeginInit();
@@ -296,6 +296,14 @@
             this.lblStatus.TabIndex = 10;
             this.lblStatus.Text = "Status: ";
             // 
+            // btnDeleteSelected
+            // 
+            this.btnDeleteSelected.Location = new System.Drawing.Point(784, 44);
+            this.btnDeleteSelected.Name = "btnDeleteSelected";
+            this.btnDeleteSelected.Size = new System.Drawing.Size(129, 35);
+            this.btnDeleteSelected.TabIndex = 11;
+            this.btnDeleteSelected.Text = "simpleButton1";
+            // 
             // gridDistribution
             // 
             this.gridDistribution.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -419,20 +427,13 @@
             this.navigationFrame1.TabIndex = 3;
             this.navigationFrame1.Text = "navigationFrame1";
             // 
-            // btnDeleteSelected
-            // 
-            this.btnDeleteSelected.Location = new System.Drawing.Point(784, 44);
-            this.btnDeleteSelected.Name = "btnDeleteSelected";
-            this.btnDeleteSelected.Size = new System.Drawing.Size(129, 35);
-            this.btnDeleteSelected.TabIndex = 11;
-            this.btnDeleteSelected.Text = "simpleButton1";
-            // 
             // frmDashboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1165, 653);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmDashboard";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.navigationPage2.ResumeLayout(false);

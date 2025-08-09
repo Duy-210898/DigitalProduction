@@ -4,8 +4,6 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DevExpress.Utils;
-using DevExpress.XtraExport.Helpers;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
@@ -15,7 +13,7 @@ namespace DigitalProduction
     public partial class ucViewDistribution : UserControl
     {
 
-        private readonly string[] columnsToHide = {"DeviceID", "OperatorID", "MaterialCode", "PartCode", "CreatedAt", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO", "InventoryQty", "PeicesPerPair", "CuttingDieQty", "MaterialLayer", "TotalPiecesPerPair", "VietnameseName" };
+        private readonly string[] columnsToHide = { "Size", "MaterialName", "MasterWorkOrder", "ART", "SO" ,"PO", "UnitUsage", "DeviceID", "OperatorID", "MaterialCode", "PartCode", "CreatedAt", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO", "InventoryQty", "PeicesPerPair", "CuttingDieQty", "MaterialLayer", "TotalPiecesPerPair", "VietnameseName" };
         private static List<string> selectedSalesOrders = new List<string>();
 
         public ucViewDistribution()
@@ -84,7 +82,7 @@ namespace DigitalProduction
                     var row = view.GetRow(rowHandle) as DataRowView;
                     if (row != null)
                     {
-                        selectedSalesOrders.Add(row["SO"].ToString());
+                        selectedSalesOrders.Add(row[Constants.SO].ToString());
                     }
                 }
 
@@ -142,7 +140,7 @@ namespace DigitalProduction
             // 4. Configure the view
             var view = cboSO.Properties.View;
             view.Columns.Clear();
-            view.Columns.AddVisible("SO", "Sales Order");
+            view.Columns.AddVisible(Constants.SO, "Sales Order");
             view.OptionsView.ShowAutoFilterRow = true;
             view.OptionsView.ShowIndicator = false;
             view.OptionsView.ShowGroupPanel = false;
@@ -261,9 +259,58 @@ namespace DigitalProduction
 
                             // Call your custom logic after columns are created
                             HideGridColumns(detailView);
+                            SetGridColumnOrder(detailView);
                         };
 
                         e.DefaultView = sizeView;
+                        sizeView.CustomColumnDisplayText += (s2, e2) =>
+                        {
+                            if (e2.Column.FieldName == nameof(SizeGroup.Size))
+                            {
+                                if (e2.ListSourceRowIndex < 0) return;
+
+                                var view = s2 as GridView;
+                                var row = view?.GetRow(e2.ListSourceRowIndex) as SizeGroup;
+                                int minCutQty = (int)row.Details.Min(d => d.CutQuantity);
+
+                                // Status: if any detail is pending → Pending, else → Complete
+                                // ✅ Complete if any detail is complete
+                                bool hasAnyComplete = row.Details.Any(d =>
+                                    string.Equals(d.Status, Constants.Complete, StringComparison.OrdinalIgnoreCase));
+
+
+                                string status = hasAnyComplete ? Constants.Complete : Constants.Pending;
+
+                                if (row != null)
+                                {
+                                    e2.DisplayText = $"{row.Size} _ {status} _ Số Lượng: {row._}";
+                                }
+                            }
+                        };
+                        sizeView.RowCellStyle += (s3, e3) =>
+                        {
+                            var view = s3 as GridView;
+                            if (view == null || e3.RowHandle < 0) return;
+
+                            if (e3.Column.FieldName == Constants.Size)
+                            {
+                                var row = view.GetRow(e3.RowHandle) as ScheduleGroup;
+                                if (row == null) return;
+
+                                bool hasPending = row.Sizes
+                                    .SelectMany(sz => sz.Details)
+                                    .Any(d => d.Status == Constants.Pending || string.IsNullOrWhiteSpace(d.Status));
+
+                                if (hasPending)
+                                {
+                                    e3.Appearance.ForeColor = Color.Orange;
+                                }
+                                else
+                                {
+                                    e3.Appearance.ForeColor = Color.Green;
+                                }
+                            }
+                        };
                     }
                 };
                 gridView.MasterRowExpanded += (s, e) =>
@@ -271,10 +318,9 @@ namespace DigitalProduction
                     gridView.BestFitColumns();
                 };
 
-
                 gridView.CustomColumnDisplayText += (s, e) =>
                 {
-                    if (e.Column.FieldName == "SO")
+                    if (e.Column.FieldName == Constants.SO)
                     {
                         if (e.ListSourceRowIndex < 0)
                             return;
@@ -283,11 +329,40 @@ namespace DigitalProduction
                         if (row == null || row.Sizes == null)
                             return;
 
-                        bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.Status == "Pending");
-                        bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.Status == "Complete");
+                        bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.Status == Constants.Pending || d.Status == string.Empty);
+                        bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.Status == Constants.Complete);
 
-                        string statusText = hasPending ? "Pending" : (allComplete ? "Complete" : "Pending");
-                        e.DisplayText = $"{row.SO} || {statusText}";
+                        string statusText = hasPending ? Constants.Pending : (allComplete ? Constants.Complete : Constants.Pending);
+
+                        // Calculate total MinCutQuantity
+                        int totalMinCutQuantity = row.Sizes.Sum(sz => sz._);
+
+                        e.DisplayText = $"{row.SO} _ {statusText} _ Số Lượng: {totalMinCutQuantity}";
+                    }
+                };
+                gridView.RowCellStyle += (s, e) =>
+                {
+                    var view = s as GridView;
+                    if (view == null || e.RowHandle < 0) return;
+
+                    if (e.Column.FieldName == Constants.SO)
+                    {
+                        var row = view.GetRow(e.RowHandle) as ScheduleGroup;
+                        if (row == null) return;
+
+                        // Determine status from the data
+                        bool hasPending = row.Sizes
+                            .SelectMany(sz => sz.Details)
+                            .Any(d => d.Status == Constants.Pending || string.IsNullOrWhiteSpace(d.Status));
+
+                        if (hasPending)
+                        {
+                            e.Appearance.ForeColor = Color.Orange;
+                        }
+                        else
+                        {
+                            e.Appearance.ForeColor = Color.Green;
+                        }
                     }
                 };
 
@@ -321,6 +396,27 @@ namespace DigitalProduction
             gridView.RowCellStyle += gridViewSO_RowCellStyle;
         }
 
+        private void SetGridColumnOrder(GridView gridView)
+        {
+            // Set visible columns and their order
+            gridView.Columns["Model"].Visible = true;
+            gridView.Columns["Model"].VisibleIndex = 0;
+
+            gridView.Columns["PartName"].Visible = true;
+            gridView.Columns["PartName"].VisibleIndex = 1;
+
+            gridView.Columns["SizeQty"].Visible = true;
+            gridView.Columns["SizeQty"].VisibleIndex = 2;
+
+            gridView.Columns["TargetCut"].Visible = true;
+            gridView.Columns["TargetCut"].VisibleIndex = 3;
+
+            gridView.Columns["CutQuantity"].Visible = true;
+            gridView.Columns["CutQuantity"].VisibleIndex = 4;
+
+            gridView.Columns["ActualRemainingQuantity"].Visible = true;
+            gridView.Columns["ActualRemainingQuantity"].VisibleIndex = 5;
+        }
         private void gridViewSO_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
         {
             var view = sender as GridView;
@@ -330,14 +426,14 @@ namespace DigitalProduction
                 var rowData = view.GetRow(e.RowHandle) as ProductionSchedule;
 
                 // Ensure rowData is valid and the column is "Status"
-                if (rowData != null && e.Column.FieldName == "Status")
+                if (rowData != null && e.Column.FieldName == Constants.Status)
                 {
                     // Customize only the "Status" column background color
-                    if (rowData.Status == "Complete")
+                    if (rowData.Status == Constants.Complete)
                     {
                         e.Appearance.BackColor = System.Drawing.Color.LightGreen; // Green for complete
                     }
-                    else if (rowData.Status == "Pending")
+                    else if (rowData.Status == Constants.Pending)
                     {
                         e.Appearance.BackColor = System.Drawing.Color.LightYellow; // Yellow for pending
                     }

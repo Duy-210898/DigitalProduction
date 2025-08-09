@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
@@ -353,8 +354,8 @@ namespace DigitalProduction
                 do
                 {
                     result = await _webSocket.ReceiveAsync(buffer, _cts.Token);
-                    var chunk = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Trim();
-                    sb.Append(chunk.ToString());
+                    var messageChunk = Encoding.UTF8.GetString(buffer.Array, 0, result.Count);
+                    sb.Append(messageChunk);
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
                         NotifyDisconnection();
@@ -364,11 +365,9 @@ namespace DigitalProduction
 
                 // Convert the received byte array to a string and parse as JSON
                 string responseMessage = sb.ToString();
-
-                // Trigger the OnResponseReceived event with the response message
-                OnResponseRealTime?.Invoke(responseMessage);
-
-                return responseMessage;
+                string normalizedMessage = responseMessage.Normalize(NormalizationForm.FormC);
+                OnResponseRealTime?.Invoke(normalizedMessage);
+                return normalizedMessage;
             }
             catch (Exception ex)
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -41,7 +42,7 @@ namespace DigitalProduction
             btnSend.Click += (s, e) => btnSend_Click(false);
             btnDevideData.Click += (s, e) => btnSend_Click(true);
 
-            dateTimePickerSchedule.Properties.VistaCalendarViewStyle = DevExpress.XtraEditors.VistaCalendarViewStyle.YearsGroupView;
+            dateTimePickerSchedule.Properties.VistaCalendarViewStyle = VistaCalendarViewStyle.YearsGroupView;
             dateTimePickerSchedule.Properties.Mask.EditMask = "yyyy";
             dateTimePickerSchedule.Properties.DisplayFormat.FormatString = "yyyy";
             dateTimePickerSchedule.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
@@ -52,14 +53,14 @@ namespace DigitalProduction
 
             InitializeLabelAndSyncButton();
 
-            gridLookUpEditSO.Properties.View = new DevExpress.XtraGrid.Views.Grid.GridView();
+            gridLookUpEditSO.Properties.View = new GridView();
             gridLookUpEditSO.Properties.PopupFormSize = new Size(400, 300);
-            gridLookUpEditSO.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            gridLookUpEditSO.Properties.TextEditStyle = TextEditStyles.Standard;
 
             GridView view = gridLookUpEditSO.Properties.View as GridView;
             view.Columns.Clear();
 
-            view.Columns.AddVisible("SO", "SO");
+            view.Columns.AddVisible(Constants.SO, Constants.SO);
             view.Columns.AddVisible("CreatedAt", LocalizationManager.GetString("CreatedAt"));
             view.Columns["CreatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
             view.Columns["CreatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy";
@@ -67,7 +68,7 @@ namespace DigitalProduction
 
             // Optional: improve filtering UI
             view.OptionsView.ShowAutoFilterRow = true;
-            view.Columns["SO"].OptionsFilter.AutoFilterCondition = AutoFilterCondition.Contains;
+            view.Columns[Constants.SO].OptionsFilter.AutoFilterCondition = AutoFilterCondition.Contains;
 
             // Setup checkbox selection in GridView
             view.OptionsView.ShowIndicator = false;
@@ -170,6 +171,7 @@ namespace DigitalProduction
 
             // check size limit
             cbxSize.EditValueChanged += ComboSize_EditValueChanged;
+            cbxPartName.EditValueChanged += ComboxPart_EditValueChanged;
         }
 
         private void TranslateLableText()
@@ -187,6 +189,78 @@ namespace DigitalProduction
             lblSelectSORequired.Text = LocalizedStrings.SelectSO;
 
         }
+        private void ComboxPart_EditValueChanged(object sender, EventArgs e)
+        {
+            cbxSize.Properties.BeginUpdate();
+            cbxSize.Properties.Items.Clear();
+
+            // Step 1: Get selected PartName from ComboxPart
+            var selectedValue = cbxPartName.EditValue;
+            List<string> selectedParts = selectedValue != null
+             ? selectedValue.ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                       .Select(p => p.Trim())
+                                       .ToList()
+             : new List<string>();
+
+            if (selectedParts == null || selectedParts.Count == 0)
+            {
+                cbxSize.Properties.Items.Clear();
+                cbxSize.Properties.EndUpdate();
+                return;
+            }
+
+            // Step 2: Get data source
+            IEnumerable<object> list = gridViewSchedule.DataSource as IEnumerable<object>;
+            if (list == null)
+            {
+                cbxSize.Properties.EndUpdate();
+                return;
+            }
+
+            // Step 3: Filter by PartName and collect sizes in one loop
+            var sizeSet = new HashSet<string>();
+
+            foreach (var item in list)
+            {
+                var type = item.GetType();
+                var partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
+                if (partValue != null && selectedParts.Contains(partValue))
+                {
+                    var sizeValue = type.GetProperty("Size")?.GetValue(item)?.ToString();
+                    if (!string.IsNullOrEmpty(sizeValue))
+                        sizeSet.Add(sizeValue);
+                }
+            }
+
+            // Step 4: Sort sizes: numeric first, then non-numeric
+            var numericSizes = sizeSet
+                .Where(s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                .Select(s => new
+                {
+                    Original = s,
+                    Parsed = double.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture)
+                })
+                .OrderBy(x => x.Parsed)
+                .Select(x => x.Original)
+                .ToList();
+
+            var nonNumericSizes = sizeSet
+                .Where(s => !double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            // Step 5: add sorted sizes to cbxSize
+            foreach (var size in numericSizes.Concat(nonNumericSizes))
+                cbxSize.Properties.Items.Add(size);
+
+            // Step 6: UI tweaks
+            cbxSize.Properties.DropDownRows = Math.Min(10, cbxSize.Properties.Items.Count);
+            cbxSize.Properties.PopupFormMinSize = new Size(200, 350);
+
+            cbxSize.Properties.EndUpdate();
+            cbxSize.ShowPopup();
+        }
+
 
         private void ComboSize_EditValueChanged(object sender, EventArgs e)
         {
@@ -440,7 +514,7 @@ namespace DigitalProduction
 
             // View options
             gridViewSchedule.OptionsView.ShowGroupPanel = true;
-            gridViewSchedule.OptionsView.GroupDrawMode = DevExpress.XtraGrid.Views.Grid.GroupDrawMode.Office;
+            gridViewSchedule.OptionsView.GroupDrawMode = GroupDrawMode.Office;
             gridViewSchedule.OptionsView.ShowGroupedColumns = true;
 
             // Important: avoid auto-expanding all groups for large datasets
@@ -664,7 +738,7 @@ namespace DigitalProduction
                     e.CheckedComboBox.BorderStyle = BorderStyles.Office2003;
                 }
             };
-            LoadSizeItemsToCheckedComboBox(cbxSize, cbxPartName, gridViewSchedule);
+            LoadPartItemsToCheckedComboBox(cbxPartName, gridViewSchedule);
         }
 
         private void HideGridColumns()
@@ -784,18 +858,15 @@ namespace DigitalProduction
             public DateTime CreatedAt { get; set; }
         }
 
-        private void LoadSizeItemsToCheckedComboBox(CheckedComboBoxEdit comboBoxSize, CheckedComboBoxEdit comboBoxPart, GridView gridView)
+        private void LoadPartItemsToCheckedComboBox(CheckedComboBoxEdit comboBoxPart, GridView gridView)
         {
-            comboBoxSize.Properties.BeginUpdate();
             comboBoxPart.Properties.BeginUpdate();
 
-            comboBoxSize.Properties.Items.Clear();
             comboBoxPart.Properties.Items.Clear();
 
             IEnumerable<object> list = gridView.DataSource as IEnumerable<object>;
             if (list == null)
             {
-                comboBoxSize.Properties.EndUpdate();
                 comboBoxPart.Properties.EndUpdate();
                 return;
             }
@@ -807,52 +878,30 @@ namespace DigitalProduction
             {
                 var type = item.GetType();
 
-                var sizeValue = type.GetProperty("Size")?.GetValue(item)?.ToString();
-                if (!string.IsNullOrEmpty(sizeValue))
-                    sizeSet.Add(sizeValue);
-
                 var partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
                 if (!string.IsNullOrEmpty(partValue))
                     partSet.Add(partValue);
             }
 
             // Sort numeric and non-numeric sizes
-            var numericSizes = sizeSet
-                .Where(s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
-                .Select(s => new
-                {
-                    Original = s,
-                    Parsed = double.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture)
-                })
-                .OrderBy(x => x.Parsed)
-                .Select(x => x.Original)
-                .ToList();
 
             var nonNumericSizes = sizeSet
                 .Where(s => !double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
                 .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            foreach (var size in numericSizes.Concat(nonNumericSizes))
-                comboBoxSize.Properties.Items.Add(size);
 
             foreach (var part in partSet.OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
                 comboBoxPart.Properties.Items.Add(part);
 
             // Optional: Set drop-down row count for better display
-            comboBoxSize.Properties.DropDownRows = Math.Min(10, comboBoxSize.Properties.Items.Count);
             comboBoxPart.Properties.DropDownRows = Math.Min(10, comboBoxPart.Properties.Items.Count);
 
             // Set larger popup size
-            comboBoxSize.Properties.PopupFormMinSize = new Size(200, 350);
             comboBoxPart.Properties.PopupFormMinSize = new Size(200, 350);
 
-            comboBoxSize.Properties.EndUpdate();
             comboBoxPart.Properties.EndUpdate();
-
-            // Optional: auto-expand combo if items exist
-            if (comboBoxSize.Properties.Items.Count > 0)
-                comboBoxPart.ShowPopup();
+            cbxPartName.ShowPopup();
         }
 
         private void ApplyCombinedFilters()

@@ -35,12 +35,11 @@
             this.ribbonPage2 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.accordionControl1 = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.btnMonthlyPlan = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.accordionControlElementWL = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnViewInfoDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnWatchedList = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlSeparator1 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnMonthlyPlan = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnProgressDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceOutput = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -83,10 +82,12 @@
             // 
             // accordionControl1
             // 
-            this.accordionControl1.Appearance.AccordionControl.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.accordionControl1.Appearance.AccordionControl.BackColor = System.Drawing.SystemColors.Control;
             this.accordionControl1.Appearance.AccordionControl.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControl1.Appearance.AccordionControl.ForeColor = System.Drawing.Color.Black;
             this.accordionControl1.Appearance.AccordionControl.Options.UseBackColor = true;
             this.accordionControl1.Appearance.AccordionControl.Options.UseFont = true;
+            this.accordionControl1.Appearance.AccordionControl.Options.UseForeColor = true;
             this.accordionControl1.Appearance.Group.Normal.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.accordionControl1.Appearance.Group.Normal.Options.UseFont = true;
             this.accordionControl1.Appearance.Item.Normal.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -102,49 +103,28 @@
             this.accordionControl1.LookAndFeel.UseDefaultLookAndFeel = false;
             this.accordionControl1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.accordionControl1.Name = "accordionControl1";
-            this.accordionControl1.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
+            this.accordionControl1.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Fluent;
             this.accordionControl1.ShowFilterControl = DevExpress.XtraBars.Navigation.ShowFilterControl.Always;
             this.accordionControl1.Size = new System.Drawing.Size(267, 913);
             this.accordionControl1.TabIndex = 1;
+            this.accordionControl1.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
             // accordionControlElement1
             // 
             this.accordionControlElement1.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.accordionControlElement1.Appearance.Default.Options.UseFont = true;
+            this.accordionControlElement1.Appearance.Normal.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElement1.Appearance.Normal.ForeColor = System.Drawing.Color.CadetBlue;
+            this.accordionControlElement1.Appearance.Normal.Options.UseFont = true;
+            this.accordionControlElement1.Appearance.Normal.Options.UseForeColor = true;
             this.accordionControlElement1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.btnMonthlyPlan,
-            this.accordionControlElementWL,
+            this.btnViewInfoDistribution,
+            this.btnWatchedList,
             this.accordionControlSeparator1});
             this.accordionControlElement1.Expanded = true;
             this.accordionControlElement1.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElement1.ImageOptions.Image")));
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Text = "Production Schedule";
-            // 
-            // btnMonthlyPlan
-            // 
-            this.btnMonthlyPlan.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnMonthlyPlan.Appearance.Default.Options.UseFont = true;
-            this.btnMonthlyPlan.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
-            this.btnMonthlyPlan.Name = "btnMonthlyPlan";
-            this.btnMonthlyPlan.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.btnMonthlyPlan.Text = "Monthly Plan";
-            this.btnMonthlyPlan.Click += new System.EventHandler(this.btnSchedule_Click);
-            // 
-            // accordionControlElementWL
-            // 
-            this.accordionControlElementWL.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.accordionControlElementWL.Appearance.Default.Options.UseFont = true;
-            this.accordionControlElementWL.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.btnViewInfoDistribution,
-            this.btnWatchedList});
-            this.accordionControlElementWL.Expanded = true;
-            this.accordionControlElementWL.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElementWL.ImageOptions.Image")));
-            this.accordionControlElementWL.Name = "accordionControlElementWL";
-            this.accordionControlElementWL.Text = "Watch List";
             // 
             // btnViewInfoDistribution
             // 
@@ -182,7 +162,12 @@
             // 
             this.accordionControlElement3.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.accordionControlElement3.Appearance.Default.Options.UseFont = true;
+            this.accordionControlElement3.Appearance.Normal.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElement3.Appearance.Normal.ForeColor = System.Drawing.Color.CadetBlue;
+            this.accordionControlElement3.Appearance.Normal.Options.UseFont = true;
+            this.accordionControlElement3.Appearance.Normal.Options.UseForeColor = true;
             this.accordionControlElement3.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.btnMonthlyPlan,
             this.btnDistribution,
             this.btnProgressDistribution,
             this.btnDeviceOutput,
@@ -191,6 +176,20 @@
             this.accordionControlElement3.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElement3.ImageOptions.Image")));
             this.accordionControlElement3.Name = "accordionControlElement3";
             this.accordionControlElement3.Text = "PO Distribution";
+            // 
+            // btnMonthlyPlan
+            // 
+            this.btnMonthlyPlan.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnMonthlyPlan.Appearance.Default.Options.UseFont = true;
+            this.btnMonthlyPlan.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
+            this.btnMonthlyPlan.Name = "btnMonthlyPlan";
+            this.btnMonthlyPlan.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnMonthlyPlan.Text = "Create Cutting Order";
+            this.btnMonthlyPlan.Click += new System.EventHandler(this.btnSchedule_Click);
             // 
             // btnDistribution
             // 
@@ -237,6 +236,10 @@
             // 
             this.accordionControlElement4.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.accordionControlElement4.Appearance.Default.Options.UseFont = true;
+            this.accordionControlElement4.Appearance.Normal.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElement4.Appearance.Normal.ForeColor = System.Drawing.Color.CadetBlue;
+            this.accordionControlElement4.Appearance.Normal.Options.UseFont = true;
+            this.accordionControlElement4.Appearance.Normal.Options.UseForeColor = true;
             this.accordionControlElement4.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnDeviceManager,
             this.btnUserManager,
@@ -287,6 +290,10 @@
             // 
             this.accordionControlElement6.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.accordionControlElement6.Appearance.Default.Options.UseFont = true;
+            this.accordionControlElement6.Appearance.Normal.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accordionControlElement6.Appearance.Normal.ForeColor = System.Drawing.Color.CadetBlue;
+            this.accordionControlElement6.Appearance.Normal.Options.UseFont = true;
+            this.accordionControlElement6.Appearance.Normal.Options.UseForeColor = true;
             this.accordionControlElement6.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.btnReportOder,
             this.btnCuttingReportQty});
@@ -358,7 +365,6 @@
             this.SkinOption.AllowSerializeChildren = DevExpress.Utils.DefaultBoolean.False;
             this.SkinOption.Caption = "Skin UI";
             this.SkinOption.Id = 0;
-            this.SkinOption.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("SkinOption.ImageOptions.Image")));
             this.SkinOption.ItemAppearance.Normal.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SkinOption.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Green;
             this.SkinOption.ItemAppearance.Normal.Options.UseFont = true;
@@ -426,7 +432,7 @@
             this.Controls.Add(this.fluentDesignFormControl1);
             this.FluentDesignFormControl = this.fluentDesignFormControl1;
             this.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.IconOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("frmMain.IconOptions.SvgImage")));
+            this.IconOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("frmMain.IconOptions.LargeImage")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "frmMain";
             this.NavigationControl = this.accordionControl1;
@@ -469,10 +475,9 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement5;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement7;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnViewInfoDistribution;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElementWL;
-        private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator1;
         private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator2;
         private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator3;
+        private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator1;
     }
 }
 

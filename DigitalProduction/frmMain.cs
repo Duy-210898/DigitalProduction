@@ -368,10 +368,10 @@ namespace DigitalProduction
             accordionControlElement6.Text = LocalizationManager.GetString("Report");
 
             btnViewInfoDistribution.Text = LocalizationManager.GetString("MonthlyPlan");
-            accordionControlElementWL.Text = LocalizationManager.GetString("WatchList");
+           // accordionControlElementWL.Text = LocalizationManager.GetString("WatchList");
             btnWatchedList.Text = LocalizationManager.GetString("WatchSOList");
             btnDeviceManager.Text = LocalizationManager.GetString("DeviceManager");
-            btnMonthlyPlan.Text = LocalizationManager.GetString("MonthlyPlan");
+            btnMonthlyPlan.Text = LocalizationManager.GetString("CreateOrder");
             btnDistribution.Text = LocalizationManager.GetString("Distribution");
             btnUserManager.Text = LocalizationManager.GetString("UserManager");
             btnDeviceOutput.Text = LocalizationManager.GetString("DeviceOutput");
@@ -405,6 +405,11 @@ namespace DigitalProduction
             {
                 CurrentLanguage = language;
             }
+        }
+
+        private void accordionControlElement1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

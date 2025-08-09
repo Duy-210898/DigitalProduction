@@ -163,7 +163,7 @@
     <value>Machine Name</value>
   </data>
   <data name="MonthlyPlan" xml:space="preserve">
-    <value>Monthly Plan</value>
+    <value>View Monthly Plan</value>
   </data>
   <data name="Plant" xml:space="preserve">
     <value>Plant</value>
@@ -660,13 +660,19 @@
   <data name="RowUpdated" xml:space="preserve">
     <value>All data rows updated successfully.</value>
   </data>
+  <data name="CreateOrder" xml:space="preserve">
+    <value>Create Cutting Order</value>
+  </data>
   <data name="CutQuantity" xml:space="preserve">
     <value>Cut Quantity</value>
   </data>
   <data name="TargetCut" xml:space="preserve">
-    <value>Target Cut</value>
+    <value>Quantity Delivered to Sewing Department</value>
   </data>
   <data name="UnitUsagePerPair" xml:space="preserve">
     <value>Usage Per Pair</value>
+  </data>
+  <data name="ActualRemainingQuantity" xml:space="preserve">
+    <value>Actual Remaining Quantity</value>
   </data>
 </root>

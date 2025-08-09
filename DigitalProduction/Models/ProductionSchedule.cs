@@ -45,6 +45,7 @@ namespace DigitalProduction.Models
         public int? CutQuantity { get; set; } = 0;
         public string Status { get; set; }
         public List<OperatorInfo> AssignedOperators { get; set; } = new List<OperatorInfo>();
+        public int ActualRemainingQuantity => Math.Max(0, (int)(TargetCut - CutQuantity));
     }
     public class ScheduleGroup
     {
@@ -56,6 +57,7 @@ namespace DigitalProduction.Models
     {
         public string Size { get; set; }
         public List<ProductionSchedule> Details { get; set; }
+        public int _ => Details?.Min(d => d.ActualRemainingQuantity) ?? 0;
     }
 
 }
