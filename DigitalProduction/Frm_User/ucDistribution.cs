@@ -386,7 +386,8 @@ namespace DigitalProduction
                     int productId = dbHelper.getProductIdByArt(schedule.ART);
                     int? psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
                     if (psoID == -1 || uniquePSOIDs.Contains(psoID.Value)) continue;
-
+                    DateTime dt = DateTime.Now.AddSeconds(index);
+                    dt = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, 0);
                     var dist = new DistributionData
                     {
                         DeviceID = isDeviceData ? schedule.DeviceID : deviceID,
@@ -402,7 +403,7 @@ namespace DigitalProduction
                         InventoryQty = inventory,
                         TotalPiecesPerPair = totalPiecesPerPair,
                         IsLeather = isLeather,
-                        CreatedAt = DateTime.Now.AddSeconds(index),
+                        CreatedAt = dt,
                         IsDelete = false,
                         Status = "Pending"
                     };
@@ -451,6 +452,7 @@ namespace DigitalProduction
                 {lblTotalPeicesPerPair, "TotalPeicesPerPair" },
                 {lblSelectMachine, "SelectMachine" },
                 {lbl_Name, "NameOperator" },
+                {btnSync, "Sync" },
             };
 
             foreach (var control in controls)
@@ -1249,6 +1251,14 @@ namespace DigitalProduction
         }
         private void btnSaveInventory_Click(object sender, EventArgs e)
         {
+            if (!isDeviceData)
+            {
+                if (gridLookUpDevice.EditValue == null || gridLookUpOperator.EditValue == null)
+                {
+                    ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDeviceAndOperator"));
+                    return;
+                }
+            }
             // Refresh the grid to ensure it reflects the latest changes
             gridViewOverview.RefreshData();
 
@@ -1712,6 +1722,12 @@ namespace DigitalProduction
             public List<DistributionData> Distributions { get; set; } = new List<DistributionData>();
             public List<OperatorInfo> SubDistributions { get; set; } = new List<OperatorInfo>();
         }
+
+        private void btnSync_Click(object sender, EventArgs e)
+        {
+            loadDeviceDistribution();
+        }
+
         public class OperatorInfo
         {
             public int? OperatorID { get; set; }

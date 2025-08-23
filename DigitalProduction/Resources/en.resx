@@ -508,7 +508,7 @@
     <value>Reason</value>
   </data>
   <data name="SelectData" xml:space="preserve">
-    <value>Select data to distribution</value>
+    <value>Select SO to distribution</value>
   </data>
   <data name="Refresh" xml:space="preserve">
     <value>Refresh</value>
@@ -609,8 +609,8 @@
   <data name="Dashboard" xml:space="preserve">
     <value>Dashboard</value>
   </data>
-  <data name="SelectDivideData" xml:space="preserve">
-    <value>Select SO to divide</value>
+  <data name="SelectDevideData" xml:space="preserve">
+    <value>Select SO to devide</value>
   </data>
   <data name="FindEmployeeCode" xml:space="preserve">
     <value>Find Employee Code</value>
@@ -674,5 +674,8 @@
   </data>
   <data name="ActualRemainingQuantity" xml:space="preserve">
     <value>Actual Remaining Quantity</value>
+  </data>
+  <data name="RequiredDeviceAndOperator" xml:space="preserve">
+    <value>Please select a Device and Operator!!!</value>
   </data>
 </root>

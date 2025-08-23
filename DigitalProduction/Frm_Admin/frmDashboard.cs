@@ -95,7 +95,7 @@ namespace DigitalProduction.Frm_Admin
                         device.LastSize = activity.Size;
                         device.LastCutQty = activity.ActualSizeQty;
                         device.LastSizeQty = activity.SizeQty;
-                        device.RefreshCuttingStatus();
+                        //device.RefreshCuttingStatus();
                     }
                 }
 

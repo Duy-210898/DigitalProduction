@@ -30,8 +30,8 @@
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.dateTimePickerViewSO = new DevExpress.XtraEditors.DateEdit();
             this.lblFilterDate = new DevExpress.XtraEditors.LabelControl();
-            this.dateTimePickerViewSO = new System.Windows.Forms.DateTimePicker();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.lblSelectSO = new DevExpress.XtraEditors.LabelControl();
             this.gridLookUpSOs = new DevExpress.XtraEditors.GridLookUpEdit();
@@ -42,6 +42,8 @@
             this.gridViewSO = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerViewSO.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerViewSO.Properties.CalendarTimeProperties)).BeginInit();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpSOs.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
@@ -73,8 +75,8 @@
             this.tableLayoutPanel2.ColumnCount = 1;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel2.Controls.Add(this.lblFilterDate, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.dateTimePickerViewSO, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.lblFilterDate, 0, 0);
             this.tableLayoutPanel2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -83,6 +85,20 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 59.09091F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(255, 66);
             this.tableLayoutPanel2.TabIndex = 3;
+            // 
+            // dateTimePickerViewSO
+            // 
+            this.dateTimePickerViewSO.EditValue = new System.DateTime(2025, 7, 30, 13, 44, 1, 398);
+            this.dateTimePickerViewSO.Location = new System.Drawing.Point(3, 29);
+            this.dateTimePickerViewSO.Name = "dateTimePickerViewSO";
+            this.dateTimePickerViewSO.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dateTimePickerViewSO.Properties.Appearance.Options.UseFont = true;
+            this.dateTimePickerViewSO.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.dateTimePickerViewSO.Properties.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.dateTimePickerViewSO.Size = new System.Drawing.Size(249, 24);
+            this.dateTimePickerViewSO.TabIndex = 7;
             // 
             // lblFilterDate
             // 
@@ -94,17 +110,6 @@
             this.lblFilterDate.Size = new System.Drawing.Size(59, 14);
             this.lblFilterDate.TabIndex = 1;
             this.lblFilterDate.Text = "Filter date:";
-            // 
-            // dateTimePickerViewSO
-            // 
-            this.dateTimePickerViewSO.CustomFormat = "MM/yyyy";
-            this.dateTimePickerViewSO.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dateTimePickerViewSO.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dateTimePickerViewSO.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePickerViewSO.Location = new System.Drawing.Point(3, 29);
-            this.dateTimePickerViewSO.Name = "dateTimePickerViewSO";
-            this.dateTimePickerViewSO.Size = new System.Drawing.Size(249, 29);
-            this.dateTimePickerViewSO.TabIndex = 2;
             // 
             // tableLayoutPanel3
             // 
@@ -208,6 +213,8 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerViewSO.Properties.CalendarTimeProperties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerViewSO.Properties)).EndInit();
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpSOs.Properties)).EndInit();
@@ -223,7 +230,6 @@
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private DevExpress.XtraEditors.LabelControl lblSelectSO;
-        private System.Windows.Forms.DateTimePicker dateTimePickerViewSO;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private DevExpress.XtraEditors.LabelControl lblFilterDate;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
@@ -233,5 +239,6 @@
         private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View;
         private DevExpress.XtraGrid.GridControl gridControlViewSO;
         private DevExpress.XtraGrid.Views.Grid.GridView gridViewSO;
+        private DevExpress.XtraEditors.DateEdit dateTimePickerViewSO;
     }
 }

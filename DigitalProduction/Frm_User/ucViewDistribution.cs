@@ -4,16 +4,18 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
+using WebSocketSharp;
 namespace DigitalProduction
 {
     public partial class ucViewDistribution : UserControl
     {
 
-        private readonly string[] columnsToHide = { "Size", "MaterialName", "MasterWorkOrder", "ART", "SO" ,"PO", "UnitUsage", "DeviceID", "OperatorID", "MaterialCode", "PartCode", "CreatedAt", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO", "InventoryQty", "PeicesPerPair", "CuttingDieQty", "MaterialLayer", "TotalPiecesPerPair", "VietnameseName" };
+        private readonly string[] columnsToHide = { "Status", "Size", "MaterialName", "MasterWorkOrder", "ART", "SO" ,"PO", "UnitUsage", "DeviceID", "OperatorID", "MaterialCode", "PartCode", "CreatedAt", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO", "InventoryQty", "PeicesPerPair", "CuttingDieQty", "MaterialLayer", "TotalPiecesPerPair", "VietnameseName" };
         private static List<string> selectedSalesOrders = new List<string>();
 
         public ucViewDistribution()
@@ -27,17 +29,29 @@ namespace DigitalProduction
             DateTime today = DateTime.Today;
             DateTime firstDayLastMonth = new DateTime(today.Year, today.Month, 1).AddMonths(-1);
 
-            dateTimePickerViewSO.Value = firstDayLastMonth;
-            dateTimePickerViewSO.Format = DateTimePickerFormat.Custom;
-            dateTimePickerViewSO.CustomFormat = "MM/yyyy";
-            dateTimePickerViewSO.ShowUpDown = true;
+            dateTimePickerViewSO.EditValue = firstDayLastMonth;
+
+            // Show calendar in month view
+            dateTimePickerViewSO.Properties.VistaCalendarViewStyle = VistaCalendarViewStyle.YearView;
+            dateTimePickerViewSO.Properties.CalendarView = DevExpress.XtraEditors.Repository.CalendarView.Vista;
+
+            // Format settings
+            dateTimePickerViewSO.Properties.Mask.EditMask = "MM/yyyy";
+            dateTimePickerViewSO.Properties.DisplayFormat.FormatString = "MM/yyyy";
+            dateTimePickerViewSO.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+            dateTimePickerViewSO.Properties.EditFormat.FormatString = "MM/yyyy";
+            dateTimePickerViewSO.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+
+            // Optional: restrict to month/year selection only
+            dateTimePickerViewSO.Properties.VistaDisplayMode = DevExpress.Utils.DefaultBoolean.True;
+
 
             // Load SOs for previous month
             DevExpress.XtraSplashScreen.SplashScreenManager.ShowForm(this, typeof(frmLoading), true, true);
 
             try
             {
-                SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
+                SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.DateTime, Global.CurrentUser.DepartmentID);
             }
             finally
             {
@@ -56,10 +70,10 @@ namespace DigitalProduction
             };
 
             // Reload SOs when month changes
-            dateTimePickerViewSO.ValueChanged += (s, e) =>
+            dateTimePickerViewSO.EditValueChanged += (s, e) =>
             {
                 // Reload GridLookUpEdit with new SOs
-                SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
+                SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.DateTime, Global.CurrentUser.DepartmentID);
 
                 // Clear selected SO
                 gridLookUpSOs.EditValue = null;
@@ -174,6 +188,8 @@ namespace DigitalProduction
 
                 // Step 2: Convert to nested structure: SO ➝ Size ➝ Details
                 var groupedSchedules = flatSchedules
+                    // 🔹 Filter out rows with Size_Label
+                    .Where(s => s.PartName != "Size_Label")
                     .GroupBy(s => s.SO)
                     .Select(soGroup => new ScheduleGroup
                     {
@@ -271,19 +287,19 @@ namespace DigitalProduction
 
                                 var view = s2 as GridView;
                                 var row = view?.GetRow(e2.ListSourceRowIndex) as SizeGroup;
-                                int minCutQty = (int)row.Details.Min(d => d.CutQuantity);
+                                int minCutQty = row.Details.Min(d => d.ActualRemainingQuantity);
 
                                 // Status: if any detail is pending → Pending, else → Complete
                                 // ✅ Complete if any detail is complete
                                 bool hasAnyComplete = row.Details.Any(d =>
-                                    string.Equals(d.Status, Constants.Complete, StringComparison.OrdinalIgnoreCase));
+                                    string.Equals(d.StatusCode, Constants.Complete, StringComparison.OrdinalIgnoreCase));
 
 
                                 string status = hasAnyComplete ? Constants.Complete : Constants.Pending;
 
                                 if (row != null)
                                 {
-                                    e2.DisplayText = $"{row.Size} _ {status} _ Số Lượng: {row._}";
+                                    e2.DisplayText = $"{row.Size} _ {status} _ Số Lượng: {minCutQty}";
                                 }
                             }
                         };
@@ -292,14 +308,15 @@ namespace DigitalProduction
                             var view = s3 as GridView;
                             if (view == null || e3.RowHandle < 0) return;
 
-                            if (e3.Column.FieldName == Constants.Size)
+                            // Kiểm tra đúng cột cần đổi màu
+                            if (e3.Column.FieldName == nameof(SizeGroup.Size))
                             {
-                                var row = view.GetRow(e3.RowHandle) as ScheduleGroup;
+                                var row = view.GetRow(e3.RowHandle) as SizeGroup;
                                 if (row == null) return;
 
-                                bool hasPending = row.Sizes
-                                    .SelectMany(sz => sz.Details)
-                                    .Any(d => d.Status == Constants.Pending || string.IsNullOrWhiteSpace(d.Status));
+                                bool hasPending = row.Details.Any(d =>
+                                    d.StatusCode == Constants.Pending ||
+                                    string.IsNullOrWhiteSpace(d.StatusCode));
 
                                 if (hasPending)
                                 {
@@ -329,13 +346,13 @@ namespace DigitalProduction
                         if (row == null || row.Sizes == null)
                             return;
 
-                        bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.Status == Constants.Pending || d.Status == string.Empty);
-                        bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.Status == Constants.Complete);
+                        bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.StatusCode == Constants.Pending || d.StatusCode == string.Empty);
+                        bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.StatusCode == Constants.Complete);
 
                         string statusText = hasPending ? Constants.Pending : (allComplete ? Constants.Complete : Constants.Pending);
 
                         // Calculate total MinCutQuantity
-                        int totalMinCutQuantity = row.Sizes.Sum(sz => sz._);
+                        int totalMinCutQuantity = Math.Max(0, row.Sizes.Sum(sz => sz._));
 
                         e.DisplayText = $"{row.SO} _ {statusText} _ Số Lượng: {totalMinCutQuantity}";
                     }
@@ -353,7 +370,7 @@ namespace DigitalProduction
                         // Determine status from the data
                         bool hasPending = row.Sizes
                             .SelectMany(sz => sz.Details)
-                            .Any(d => d.Status == Constants.Pending || string.IsNullOrWhiteSpace(d.Status));
+                            .Any(d => d.StatusCode == Constants.Pending || string.IsNullOrWhiteSpace(d.StatusCode));
 
                         if (hasPending)
                         {
@@ -417,7 +434,7 @@ namespace DigitalProduction
             gridView.Columns["ActualRemainingQuantity"].Visible = true;
             gridView.Columns["ActualRemainingQuantity"].VisibleIndex = 5;
         }
-        private void gridViewSO_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
+        private void gridViewSO_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
             var view = sender as GridView;
             if (view != null)
@@ -469,7 +486,7 @@ namespace DigitalProduction
         private void BtnSync_Click(object sender, EventArgs e)
         {
             // Reload SO list
-            SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.Value, Global.CurrentUser.DepartmentID);
+            SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.DateTime, Global.CurrentUser.DepartmentID);
         }
     }
 }

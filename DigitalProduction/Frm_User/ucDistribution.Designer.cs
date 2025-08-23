@@ -67,8 +67,10 @@
             this.lblMaterialLayer = new System.Windows.Forms.Label();
             this.numMaterialLayer = new System.Windows.Forms.NumericUpDown();
             this.numericTotalPeicesPerPair = new System.Windows.Forms.NumericUpDown();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.btnSync = new DevExpress.XtraEditors.SimpleButton();
             this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
             this.gridViewOverview = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2.SuspendLayout();
@@ -86,6 +88,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numPiecesPerPair)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).BeginInit();
+            this.flowLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).BeginInit();
@@ -263,7 +266,7 @@
             this.tableLayoutMainDistribution.Controls.Add(this.tableLayoutPanel5, 0, 1);
             this.tableLayoutMainDistribution.Controls.Add(this.lblSelectMachine, 1, 0);
             this.tableLayoutMainDistribution.Controls.Add(this.panel5, 0, 2);
-            this.tableLayoutMainDistribution.Controls.Add(this.gridLookUpDevice, 1, 1);
+            this.tableLayoutMainDistribution.Controls.Add(this.flowLayoutPanel1, 1, 1);
             this.tableLayoutMainDistribution.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutMainDistribution.Enabled = false;
             this.tableLayoutMainDistribution.Location = new System.Drawing.Point(20, 78);
@@ -589,9 +592,19 @@
             this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(233, 30);
             this.numericTotalPeicesPerPair.TabIndex = 6;
             // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Controls.Add(this.gridLookUpDevice);
+            this.flowLayoutPanel1.Controls.Add(this.btnSync);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(492, 39);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(436, 41);
+            this.flowLayoutPanel1.TabIndex = 13;
+            // 
             // gridLookUpDevice
             // 
-            this.gridLookUpDevice.Location = new System.Drawing.Point(492, 39);
+            this.gridLookUpDevice.Location = new System.Drawing.Point(3, 3);
             this.gridLookUpDevice.Name = "gridLookUpDevice";
             this.gridLookUpDevice.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
             this.gridLookUpDevice.Properties.Appearance.Options.UseBackColor = true;
@@ -610,6 +623,15 @@
             this.gridView1.OptionsSelection.EnableAppearanceFocusedCell = false;
             this.gridView1.OptionsView.RowAutoHeight = true;
             this.gridView1.OptionsView.ShowGroupPanel = false;
+            // 
+            // btnSync
+            // 
+            this.btnSync.Location = new System.Drawing.Point(209, 3);
+            this.btnSync.Name = "btnSync";
+            this.btnSync.Size = new System.Drawing.Size(112, 25);
+            this.btnSync.TabIndex = 12;
+            this.btnSync.Text = "Sync";
+            this.btnSync.Click += new System.EventHandler(this.btnSync_Click);
             // 
             // gridControlOverview
             // 
@@ -654,6 +676,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numPiecesPerPair)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).EndInit();
+            this.flowLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).EndInit();
@@ -706,5 +729,7 @@
         private DevExpress.XtraEditors.GridLookUpEdit gridLookUpDevice;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         private System.Windows.Forms.Label lblUnitUsagePerPair;
+        private DevExpress.XtraEditors.SimpleButton btnSync;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
     }
 }

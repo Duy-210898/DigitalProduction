@@ -286,7 +286,7 @@
             // 
             // rdRawMaterial
             // 
-            this.rdRawMaterial.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.rdRawMaterial.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.rdRawMaterial.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rdRawMaterial.Location = new System.Drawing.Point(352, 45);
             this.rdRawMaterial.Name = "rdRawMaterial";

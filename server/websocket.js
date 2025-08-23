@@ -230,9 +230,6 @@ async function handleGetDistributions(ws, request) {
              `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}.${String(date.getMilliseconds()).padStart(3, '0')}`;
     };
     
-    const formattedStartDate = formatDateForSQL(startDate);
-    const formattedEndDate = formatDateForSQL(endDate);
-    
     // Paging
     const pageNumber = parseInt(filter?.pageNumber || 1);
     const pageSize = parseInt(filter?.pageSize || 100);

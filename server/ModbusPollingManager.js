@@ -1,102 +1,112 @@
 const EventEmitter = require('events');
+const ping = require('ping'); // dùng để ping host
 
+// ================== POLLING MANAGER ==================
 class ModbusPollingManager extends EventEmitter {
-  constructor(interval = 1000) {
+  constructor(interval = 1000, maxConcurrent = 2) {
     super();
     this.interval = interval;
-    this.clients = {};        // { ipAddress: { client, socket, ... } }
-    this.timers = {};         // Lưu timer của từng IP
+    this.maxConcurrent = maxConcurrent;
+    this.clients = {};   // { ip: { client, socket, isConnected, sizeDataInfo, ... } }
+    this.queue = [];     // danh sách IP để polling
+    this.activeCount = 0;
+    this.timer = null;
   }
 
-  /**
-   * Đăng ký một client modbus
-   * @param {string} ipAddress 
-   * @param {object} clientEntry { client, socket, isConnected, sizeDataInfo }
-   */
   registerClient(ipAddress, clientEntry) {
-    this.clients[ipAddress] = { ...clientEntry, isProcessing: false, isConnecting: false };
-    this.startPolling(ipAddress);
+    this.clients[ipAddress] = {
+      ...clientEntry,
+      isProcessing: false,
+      isConnecting: false,
+      taskLocks: {}
+    };
+    if (!this.queue.includes(ipAddress)) {
+      this.queue.push(ipAddress);
+    }
+    if (!this.timer) {
+      this.startScheduler();
+    }
   }
 
-  /**
-   * Bắt đầu polling cho một IP
-   * @param {string} ipAddress 
-   */
-  startPolling(ipAddress) {
-    if (this.timers[ipAddress]) return; // tránh start trùng
-  
-    this.timers[ipAddress] = setInterval(async () => {
-      const entry = this.clients[ipAddress];
-      if (!entry) {
-       // console.warn(`[${ipAddress}] No entry found in clients.`);
-        return;
-      }
-  
-      if (entry.isProcessing) return;
-      entry.isProcessing = true;
-  
-      try {
-        const { client, socket, isConnected } = entry;
-  
-        // Nếu client chưa khởi tạo hoặc chưa kết nối
-        if (!client || !isConnected) {
-          console.warn(`[${ipAddress}] Modbus client not connected — attempting initial connect...`);
-          await this.safeConnect(ipAddress);
-          return;
-        }
-  
-        // Kiểm tra socket
-        if (!socket || socket.destroyed || !socket.writable) {
-          console.warn(`[${ipAddress}] Socket is closed or invalid — reconnecting...`);
-          delete this.clients[ipAddress];
-          await this.safeConnect(ipAddress);
-          return;
-        }
-  
-        // Gửi sự kiện đọc/ghi để bên ngoài xử lý
-        this.emit('poll', client , entry, ipAddress);
-  
-        // Đọc actual nếu có sizeDataInfo hợp lệ
-        const sizeInfo = entry.sizeDataInfo;
-        if (
-          sizeInfo &&
-          typeof sizeInfo === 'object' &&
-          !Array.isArray(sizeInfo) &&
-          Object.keys(sizeInfo).length > 0
-        ) {
-          this.emit('readActual', client, entry, ipAddress);
-        }
-      } catch (err) {
-        console.error(`[${ipAddress}] Error in polling loop: ${err.message}`);
-      } finally {
-        entry.isProcessing = false;
-      }
+  unregisterClient(ipAddress) {
+    delete this.clients[ipAddress];
+    this.queue = this.queue.filter(ip => ip !== ipAddress);
+  }
+
+  startScheduler() {
+    this.timer = setInterval(() => {
+      if (this.activeCount >= this.maxConcurrent) return;
+      const ip = this.queue.shift();
+      if (!ip) return;
+      this.pollOne(ip).finally(() => {
+        this.queue.push(ip);
+      });
     }, this.interval);
   }
-  
-  /**
-   * Dừng polling cho 1 IP
-   */
-  stopPolling(ipAddress) {
-    if (this.timers[ipAddress]) {
-      clearInterval(this.timers[ipAddress]);
-      delete this.timers[ipAddress];
+
+  stopScheduler() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
     }
   }
 
-  /**
-   * Dừng toàn bộ
-   */
-  stopAll() {
-    for (let ip in this.timers) {
-      clearInterval(this.timers[ip]);
+  async pollOne(ipAddress) {
+    const entry = this.clients[ipAddress];
+    if (!entry || entry.isProcessing) return;
+    entry.isProcessing = true;
+    this.activeCount++;
+
+    try {
+      const { client, socket, isConnected } = entry;
+
+      // Connection check
+      if (!client || !isConnected || !socket || socket.destroyed || !socket.writable) {
+        await this.safeConnect(ipAddress);
+        return;
+      }
+
+      // Task 1: Poll distribution
+      await this.runWithLock(entry, 'poll', async () => {
+        if (await ping.promise.probe(ipAddress)) {
+          this.emit('poll', client, entry, ipAddress);
+        }
+      });
+
+      // Task 2: Read actual data if sizeDataInfo exists
+      if (entry.sizeDataInfo && Object.keys(entry.sizeDataInfo).length > 0) {
+        await this.runWithLock(entry, 'readActual', async () => {
+          if (await ping.promise.probe(ipAddress)) {
+            this.emit('readActual', client, entry, ipAddress);
+          }
+        });
+      }
+
+      // Task 3: Write register
+      await this.runWithLock(entry, 'writeRegister', async () => {
+        if (await ping.promise.probe(ipAddress)) {
+          this.emit('writeRegister', client, entry, ipAddress);
+        }
+      });
+
+    } catch (err) {
+      console.error(`[${ipAddress}] Polling error: ${err.message}`);
+    } finally {
+      entry.isProcessing = false;
+      this.activeCount--;
     }
-    this.timers = {};
   }
 
-  /**
-   * Safe connect logic
-   */
+  async runWithLock(entry, taskName, fn) {
+    if (entry.taskLocks[taskName]) return;
+    entry.taskLocks[taskName] = true;
+    try {
+      await fn();
+    } finally {
+      entry.taskLocks[taskName] = false;
+    }
+  }
+
   async safeConnect(ipAddress) {
     const entry = this.clients[ipAddress];
     if (!entry || entry.isConnecting) return;

@@ -172,7 +172,7 @@
     <value>Tổng dung lượng</value>
   </data>
   <data name="UnitUsage" xml:space="preserve">
-    <value>Dung lượng</value>
+    <value>Tổng dung lượng</value>
   </data>
   <data name="ConfirmLogOut" xml:space="preserve">
     <value>Bạn có chắc chắn muốn đăng xuất?</value>
@@ -691,7 +691,7 @@
     <value>Dữ liệu đã được cập nhật.</value>
   </data>
   <data name="UnitUsagePerPair" xml:space="preserve">
-    <value>Dung lượng trên đôi</value>
+    <value>Tổng dung lượng trên đôi</value>
   </data>
   <data name="CreateOrder" xml:space="preserve">
     <value>Tạo đơn chặt</value>
@@ -704,5 +704,8 @@
   </data>
   <data name="ActualRemainingQuantity" xml:space="preserve">
     <value>Sản lượng tồn</value>
+  </data>
+  <data name="RequiredDeviceAndOperator" xml:space="preserve">
+    <value>Vui lòng chọn máy và người vận hành!!!</value>
   </data>
 </root>

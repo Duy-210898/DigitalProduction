@@ -101,18 +101,20 @@ namespace DigitalProduction.Models
             }
         }
 
-        public void RefreshCuttingStatus()
-        {
-            if (LastCutTime.HasValue) // kiểm tra có thời điểm cắt gần nhất không
-            {
-                var elapsed = (DateTime.Now - LastCutTime.Value).TotalSeconds;
-                IsCutting = elapsed <= 3; // nếu dưới hoặc bằng 3 giây, coi là đang cắt
-            }
-            else
-            {
-                IsCutting = false; // nếu chưa cắt lần nào
-            }
-        }
+        //public void RefreshCuttingStatus()
+        //{
+        //    if (LastCutTime.HasValue)
+        //    {
+        //        var elapsed = (DateTime.Now - LastCutTime.Value).TotalSeconds;
+        //        IsCutting = elapsed <= 3;
+        //        Console.WriteLine($"LastCutTime: {LastCutTime.Value}, Elapsed: {elapsed}s, IsCutting: {IsCutting}");
+        //    }
+        //    else
+        //    {
+        //        IsCutting = false;
+        //        Console.WriteLine("No last cut time recorded. IsCutting set to false.");
+        //    }
+        //}
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name) =>
