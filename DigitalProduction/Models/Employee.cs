@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Text;
 
 namespace DigitalProduction.Models
 {
@@ -37,6 +39,33 @@ namespace DigitalProduction.Models
             PositionID = positionID;
             IsActive = isActive;
         }
+        public string OperatorNameUnaccented
+        {
+            get
+            {
+                return RemoveDiacritics(OperatorName);
+            }
+        }
+
+        private static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+
+            // Thay thế riêng ký tự Đ/đ
+            text = text.Replace('Đ', 'D').Replace('đ', 'd');
+
+            var normalized = text.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+
+            foreach (var c in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+
+            return sb.ToString().Normalize(NormalizationForm.FormC);
+        }
+
         public int OperatorID { get; set; }
         public int EmployeeID { get; set; }
         public string Username { get; set; }

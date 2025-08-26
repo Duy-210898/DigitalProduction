@@ -56,23 +56,23 @@ schedule.scheduleJob('10 20 * * *', function () {
   console.log('All connections closed at 20:10.');
 });
 
-// setInterval(async () => {
-//   try {
-//     const ipAddresses = await getDeviceList();
-//     setIpAddresses(ipAddresses);
-//   } catch (error) {
-//     console.error(`Error updating IP addresses: ${error.message}`);
-//   }
-// }, PING_INTERVAL);
-
-(async () => {
+setInterval(async () => {
   try {
     const ipAddresses = await getDeviceList();
-    await setIpAddresses(ipAddresses);
+    setIpAddresses(ipAddresses);
   } catch (error) {
     console.error(`Error updating IP addresses: ${error.message}`);
   }
-})();
+}, PING_INTERVAL);
+
+// (async () => {
+//   try {
+//     const ipAddresses = await getDeviceList();
+//     await setIpAddresses(ipAddresses);
+//   } catch (error) {
+//     console.error(`Error updating IP addresses: ${error.message}`);
+//   }
+// })();
 process.on('SIGINT', closeAllConnections);
 process.on('SIGTERM', closeAllConnections);
 

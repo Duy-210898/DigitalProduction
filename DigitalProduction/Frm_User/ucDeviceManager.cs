@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.DataAccess.Native.Web;
 using DevExpress.XtraEditors;
 using DevExpress.XtraSplashScreen;
 using DigitalProduction.Extensions;

@@ -47,6 +47,7 @@ namespace DigitalProduction
             txtInventory.KeyPress += TxtInventory_KeyPress;
          //   rdRawMaterial.CheckedChanged += MaterialFilterChanged;
             setControlVisibility(false, numericTotalPeicesPerPair, lblTotalPeicesPerPair);
+
         }
 
         private void TxtInventory_KeyPress(object sender, KeyPressEventArgs e)
@@ -317,36 +318,43 @@ namespace DigitalProduction
         }
         private void loadOperatorDistribution()
         {
-            List<Employee> employees= DbHelper.getOperatorsByDepartment();
+            List<Employee> employees = DbHelper.getOperatorsByDepartment();
 
             gridLookUpOperator.Properties.DataSource = employees;
             gridLookUpOperator.Properties.DisplayMember = "OperatorName";
             gridLookUpOperator.Properties.ValueMember = "EmployeeID";
 
-            // Optional: Disable typing if you want DropDownList style
-            gridLookUpOperator.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-
-            // Hide all columns except "MachineName"
+            // Clear columns before setup
             gridLookUpOperator.Properties.View.Columns.Clear();
-            gridLookUpOperator.Properties.PopulateViewColumns();
-            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridLookUpOperator.Properties.View.Columns)
-            {
-                column.Visible = column.FieldName == "OperatorName";
-            }
-            // Enable autocomplete & search
+
+            // Add visible column for Vietnamese name
+            gridLookUpOperator.Properties.View.Columns.AddVisible("OperatorName", "Tên nhân viên");
+
+            // Add hidden helper column for unaccented search
+            gridLookUpOperator.Properties.View.Columns.AddVisible("OperatorNameUnaccented", "Alias (English)");
+        //    gridLookUpOperator.Properties.View.Columns["OperatorNameUnaccented"].Visible = false;
+
+            // Enable autocomplete & typing
             gridLookUpOperator.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
             gridLookUpOperator.Properties.AutoComplete = true;
 
-            // Enable incremental search
+            // Show popup immediately when typing
             gridLookUpOperator.Properties.ImmediatePopup = true;
+
+            // Use "Contains" filter (so typing any substring works)
             gridLookUpOperator.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
+
+            // Allow clearing selection
             gridLookUpOperator.Properties.AllowNullInput = DevExpress.Utils.DefaultBoolean.True;
             gridLookUpOperator.Properties.NullText = "";
 
-            // Filter mode
+            // Enable filtering in both columns (VN + unaccented)
+            gridLookUpOperator.Properties.View.OptionsFind.FindFilterColumns = "OperatorName;OperatorNameUnaccented";
+
+            // Optional: Show search row at top of popup
             gridLookUpOperator.Properties.View.OptionsView.ShowAutoFilterRow = true;
-            gridLookUpOperator.Properties.View.ActiveFilterEnabled = true;
         }
+
 
         private DistributionPayload getDistributionDataFromControls(bool isDeviceData)
         {
