@@ -1,6 +1,6 @@
 const express = require('express');
 const { initDatabase, getDeviceList } = require('./database');
-const { setupWebSocket } = require('./websocket');
+const { setupWebSocket , startCheckConnectCronJob } = require('./websocket');
 const schedule = require('node-schedule');
 const { setIpAddresses, closeAllConnections, connectToDevice } = require('./modbusClient');
 
@@ -27,6 +27,7 @@ const server = app.listen(port, () => {
 });
 
 setupWebSocket(server, app);
+startCheckConnectCronJob();
 
 app.get('/devices', require('./routes/getDevices'));
 app.get('/read/:ip', require('./routes/readData'));

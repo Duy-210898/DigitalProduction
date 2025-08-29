@@ -132,5 +132,10 @@ namespace DigitalProduction.Models
                 IsCutting = false;
             }
         }
+
+        // Daily Activity Machine
+        public double ActiveHoursToday { get; set; }
+        public double EfficiencyPercent
+            => (ActiveHoursToday / 8.0) * 100.0;
     }
 }

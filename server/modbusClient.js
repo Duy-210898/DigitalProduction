@@ -691,7 +691,6 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
               console.error(`❌ Error writing PartID ${part?.PartID} at index ${i}:`, error.message);
             }
           }
-
         } catch (error) {
           console.error(`Error writing registers: ${error.message}`);
         }
@@ -1647,7 +1646,7 @@ async function processActualDataChange(
       OrderID: OrderID,
       PartID: partID,
       SizeID: sizeID,
-      CutQuantity: actualCut,
+      CutQuantity: isLeather ? actualPieces : actualCut,
       CutDate: cutDate,
       EmployeeID: operatorID
     });
@@ -1765,17 +1764,23 @@ async function processSizeID(ipAddress) {
  */
 async function writeToModbusRegister(ipAddress, registerAddress = 8000) {
   let counter = 0;
+
   async function writeLoop() {
     try {
-      // 🔌 If not connected, attempt reconnect after ping check
+     // console.log(`[${ipAddress}] ⏳ Starting write cycle at ${new Date().toISOString()}`);
+
+      // 🔌 Ping check
       const reachable = await pingHost(ipAddress); 
       if (!reachable) {
-        console.warn(`[${ipAddress}] 🔴 Ping failed. Will retry .`);
-      }
-      else {
+        console.warn(`[${ipAddress}] 🔴 Ping failed. Will retry.`);
+      } else {
+       // console.log(`[${ipAddress}] 🟢 Ping OK. Proceeding to write.`);
+
         // ✅ Write counter to register
         counter = (counter + 1) % 60000;
+       // console.log(`[${ipAddress}] ➡️ Writing value ${counter} to register ${registerAddress}`);
         await safeWriteRegister(ipAddress, registerAddress, counter);
+        //console.log(`[${ipAddress}] ✅ Successfully wrote ${counter} to ${registerAddress}`);
       }
 
     } catch (err) {
@@ -1786,12 +1791,15 @@ async function writeToModbusRegister(ipAddress, registerAddress = 8000) {
       if (modbusClients[ipAddress]) {
         modbusClients[ipAddress].isConnected = false;
         modbusClients[ipAddress].isDisconnected = true;
+        console.warn(`[${ipAddress}] 🔌 Marked client as disconnected`);
       }
     } finally {
-      setTimeout(writeLoop, 1000); // Always loop after 1s (or shorter)
+     // console.log(`[${ipAddress}] 🔄 Next write scheduled in 1s\n`);
+      setTimeout(writeLoop, 1000); // Always loop after 1s
     }
   }
 
+ // console.log(`[${ipAddress}] 🚀 Write loop initialized. Target register: ${registerAddress}`);
   writeLoop();
 }
 
@@ -1980,13 +1988,13 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
   } else {
     console.warn('sizeData is not an array:', sizeData);
   }
-  // Khởi tạo sizeDataInfo
-  if (!modbusClients[ipAddress].sizeDataInfo) {
-    modbusClients[ipAddress].sizeDataInfo = { sizeID: [] };
-  }
-  if (!Array.isArray(modbusClients[ipAddress].sizeDataInfo.sizeID)) {
-    modbusClients[ipAddress].sizeDataInfo.sizeID = [];
-  }
+  // // Khởi tạo sizeDataInfo
+  // if (!modbusClients[ipAddress].sizeDataInfo) {
+  //   modbusClients[ipAddress].sizeDataInfo = { sizeID: [] };
+  // }
+  // if (!Array.isArray(modbusClients[ipAddress].sizeDataInfo.sizeID)) {
+  //   modbusClients[ipAddress].sizeDataInfo.sizeID = [];
+  // }
   // Assign values correctly
   modbusClients[ipAddress].sizeDataInfo.sizeCount = processedSizeData.length;
   modbusClients[ipAddress].sizeDataInfo.isLeather = isLeather;
@@ -2040,6 +2048,10 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
       let registerSizeData = stringTo16BitArrayLittleEndian(item.Size).slice(0, 10 * 2);
       const startSizeRegister = registerSize[i].Size;
       await client.writeSingleRegister(registerSize[i].SizeID, item.SizeID);
+
+      modbusClients[ipAddress] ??= {};
+      modbusClients[ipAddress].sizeDataInfo ??= { sizeID: [] };
+      modbusClients[ipAddress].sizeDataInfo.sizeID ??= [];
 
       if (!modbusClients[ipAddress].sizeDataInfo.sizeID.includes(registerSize[i].SizeID)) {
         modbusClients[ipAddress].sizeDataInfo.sizeID.push(registerSize[i].SizeID);
@@ -2096,6 +2108,7 @@ async function closeAllConnections() {
 async function setIpAddresses(ipAddresses) {
   try {
     for (const ipAddress of ipAddresses) {
+     // if(ipAddress === '10.30.4.144') return;
       let reachable = false;
       try {
         reachable = await isHostReachable(ipAddress);

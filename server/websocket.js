@@ -1,8 +1,12 @@
 const WebSocket = require('ws');
 const { connectToDevice, isHostReachable, modbusClients } = require('./modbusClient');
-const { getDeviceList, updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList, getOperatorList, getAllProductionSchedule, getDistributions, getOperatorDistribution, getListOfSOsByYear} = require('./database');
+const { getDeviceList , updateDeviceConnectionStatus, getActualOutputData, getAllDeviceData, getDistributionByDevice, getPlantNames, addDeviceToList, getProductionSchedule, getUniquePages, saveDistributionDataToDB, getUserList, getOperatorList, getAllProductionSchedule, getDistributions, getOperatorDistribution, getListOfSOsByYear} = require('./database');
 const { setClients } = require('./notifications'); 
 const { Time } = require('mssql');
+const cron = require("node-cron");
+const ping = require("ping");
+const nodemailer = require("nodemailer");
+const net = require("net");
 const knownCuttingDevices = new Set();
 let clients = [];
 
@@ -720,7 +724,93 @@ function notifyClients(devicesResponse) {
     }
   });
 }
+// ✅ 4. Schedule cronjob every 1 minute
+//setInterval(calculateActiveHours, 60 * 1000);
+
+
+// ✅ Setup mail transporter (use ENV in production)
+const transporter = nodemailer.createTransport({
+  host: "smtp.sendgrid.net",
+  port: 587,           // 465 for SSL
+  secure: false,       // true for port 465
+});
+
+// 📧 Send mail alert
+async function sendMail(ip, port) {
+  const mailOptions = {
+    from: "ducnhat171998@gmail.com",
+    to: ["ducnhat1708@gmail.com", "Trung-Pham@vn.apachefootwear.com"],
+    //"Trung-Pham@vn.apachefootwear.com"
+    subject: `Device DOWN: ${ip}:${port}`,
+    text: `Device at ${ip}:${port} is unreachable (Ping failed, Socket off).`,
+  };
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`📧 Mail sent for ${ip}:${port}`);
+  } catch (err) {
+    console.error("❌ Mail error:", err.message);
+  }
+}
+
+// 🔍 Check one device
+async function checkDevice(ip, port) {
+  const pingResult = await ping.promise.probe(ip, { timeout: 2 });
+  const isPingAlive = pingResult.alive;
+
+  let isSocketAlive = false;
+  if (isPingAlive) {
+    isSocketAlive = await new Promise((resolve) => {
+      const socket = new net.Socket();
+      socket.setTimeout(2000);
+
+      socket
+        .connect(port, ip, () => {
+         // socket.destroy();
+          resolve(true);
+        })
+        .on("error", () => {
+          //socket.destroy();
+          resolve(false);
+        })
+        .on("timeout", () => {
+         // socket.destroy();
+          resolve(false);
+        });
+    });
+  }
+
+  if (!isPingAlive && !isSocketAlive) {
+    await sendMail(ip, port);
+    await updateDeviceConnectionStatus(ip, false);
+    console.log(`❌ Device ${ip}:${port} DOWN`);
+  } else if (isPingAlive && !isSocketAlive) {
+    //console.log(`⚠️ Device ${ip}:${port} ping OK but socket OFF → no mail`);
+    await updateDeviceConnectionStatus(ip, false);
+  } else {
+  //  console.log(`✅ Device ${ip}:${port} OK`);
+    await updateDeviceConnectionStatus(ip, true);
+  }
+}
+
+// 🔁 Cron job to check devices every 1 minute
+function startCheckConnectCronJob() {
+  cron.schedule("*/30 * * * *", async () => {
+  //  console.log("⏰ Running device check:", new Date().toLocaleString());
+
+    try {
+      const devices = await getAllDeviceData();
+      for (const device of devices) {
+        const ip = device.IpAddress || device.ipAddress;
+        const port = device.Port || 502; // default Modbus
+        if (ip) await checkDevice(ip, port);
+      }
+    } catch (err) {
+      console.error("❌ Cron job error:", err.message);
+    }
+  });
+}
 
 module.exports = {
   setupWebSocket,
+  startCheckConnectCronJob
 };

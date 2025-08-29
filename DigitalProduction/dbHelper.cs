@@ -2205,6 +2205,33 @@ namespace DigitalProduction
 
             return result;
         }
+        public static void UpdateActiveHoursToday(int deviceId, double activeHours)
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string sql = @"
+            IF EXISTS (SELECT 1 FROM DeviceDailyActivity WHERE DeviceID = @DeviceID AND ActivityDate = CAST(GETDATE() AS DATE))
+            BEGIN
+                UPDATE DeviceDailyActivity
+                SET ActiveHours = @ActiveHours
+                WHERE DeviceID = @DeviceID AND ActivityDate = CAST(GETDATE() AS DATE)
+            END
+            ELSE
+            BEGIN
+                INSERT INTO DeviceDailyActivity (DeviceID, ActivityDate, ActiveHours)
+                VALUES (@DeviceID, CAST(GETDATE() AS DATE), @ActiveHours)
+            END";
+
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@DeviceID", deviceId);
+                    cmd.Parameters.AddWithValue("@ActiveHours", activeHours);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
 
     }
 }

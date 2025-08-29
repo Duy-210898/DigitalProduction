@@ -96,6 +96,19 @@ namespace DigitalProduction.Frm_Admin
                         device.LastCutQty = activity.ActualSizeQty;
                         device.LastSizeQty = activity.SizeQty;
                         //device.RefreshCuttingStatus();
+
+                        // ✅ Count only if last cut within 60s
+                        if (activity.UpdatedAt.HasValue)
+                        {
+                            TimeSpan diff = DateTime.Now - activity.UpdatedAt.Value;
+                            if (diff.TotalSeconds <= 60)
+                            {
+                                device.ActiveHoursToday += activity.DurationMinutes / 60.0;
+
+                                // Save to DB
+                                DbHelper.UpdateActiveHoursToday(device.DeviceID, device.ActiveHoursToday);
+                            }
+                        }
                     }
                 }
 
@@ -376,7 +389,7 @@ namespace DigitalProduction.Frm_Admin
                             gridViewDeviceManagement.BestFitColumns();
 
                             // Hide system columns
-                            var columnsToHide = new List<string> { "PlantName", "IpAddress","DeviceID", "DepartmentID", "CreatedAt", "PlantID" , "IsActive"};
+                            var columnsToHide = new List<string> { "EfficiencyPercent", "ActiveHoursToday", "PlantName", "IpAddress","DeviceID", "DepartmentID", "CreatedAt", "PlantID" , "IsActive"};
                             SetGridColumnVisibility(gridViewDeviceManagement, columnsToHide, false);
 
                             // add new column to overview cutting size
@@ -386,6 +399,25 @@ namespace DigitalProduction.Frm_Admin
                                 lastCutTimeCol.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
                                 lastCutTimeCol.DisplayFormat.FormatString = "dd/MM/yyyy HH:mm:ss";
                             }
+
+                            // Add efficiency column
+                            var efficiencyCol = gridViewDeviceManagement.Columns.ColumnByFieldName("EfficiencyPercent");
+                            if (efficiencyCol != null)
+                            {
+                                efficiencyCol.Caption = "Efficiency %";
+                                efficiencyCol.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+                                efficiencyCol.DisplayFormat.FormatString = "P1"; // percentage with 1 decimal
+                            }
+
+                            // Add ActiveHours column
+                            var activeHoursCol = gridViewDeviceManagement.Columns.ColumnByFieldName("ActiveHoursToday");
+                            if (activeHoursCol != null)
+                            {
+                                activeHoursCol.Caption = "Active Hours";
+                                activeHoursCol.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+                                activeHoursCol.DisplayFormat.FormatString = "N2"; // 2 decimals
+                            }
+
                             TranslateHeaders(gridControlDeviceManagement);
                         }, null);
                     }

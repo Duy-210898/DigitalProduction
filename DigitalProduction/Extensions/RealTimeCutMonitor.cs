@@ -52,5 +52,13 @@ namespace DigitalProduction.Extensions
         public int? ActualSizeQty { get; set; }
         public int? SizeQty { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public double DurationMinutes
+        {
+            get
+            {
+                if (!UpdatedAt.HasValue) return 0;
+                return (DateTime.Now - UpdatedAt.Value).TotalMinutes;
+            }
+        }
     }
 }

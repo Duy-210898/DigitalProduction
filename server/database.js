@@ -419,7 +419,7 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
 
     const cutHistoryBefore = pastCutResult.recordset[0].TotalCutQuantity ?? 0;
     actualCut = CutQuantity - cutHistoryBefore;
-
+   // console.log(`✅ Log đã lưu vào CutHistory ${actualCut} ${cutHistoryBefore}`);
     if (actualCut < 0) {
       console.warn('❌ Invalid CutQuantity: result is negative');
       await transaction.rollback();
@@ -1639,6 +1639,67 @@ async function recordExists(tableName, conditions, pool) {
   const result = await request.query(query);
   return result.recordset[0].count > 0; // Return true if record exists
 }
+// ✅ 3. CRONJOB function
+// async function calculateActiveHours() {
+//   try {
+//     await sql.connect(dbConfig);
+
+//     const result = await sql.query`
+//       SELECT d.DeviceID,
+//              MAX(c.CutTime) AS LastCutTime,
+//              ISNULL(da.ActiveHours, 0) AS ActiveHoursToday
+//       FROM DeviceList d
+//       LEFT JOIN CutHistory c ON d.DeviceID = c.DeviceID
+//       LEFT JOIN DeviceDailyActivity da 
+//              ON d.DeviceID = da.DeviceID 
+//             AND da.ActivityDate = CAST(GETDATE() AS DATE)
+//       GROUP BY d.DeviceID, da.ActiveHours;
+//     `;
+
+//     const now = new Date();
+
+//     for (const row of result.recordset) {
+//       const { DeviceID, LastCutTime, ActiveHoursToday } = row;
+//       if (!LastCutTime) continue;
+
+//       const diff = (now - LastCutTime) / 1000; // seconds
+//       if (diff <= 60) {
+//         const newActiveHours = ActiveHoursToday + 1 / 60;
+
+//         await sql.query`
+//           MERGE DeviceDailyActivity AS target
+//           USING (SELECT ${DeviceID} AS DeviceID, CAST(GETDATE() AS DATE) AS ActivityDate) AS src
+//           ON target.DeviceID = src.DeviceID AND target.ActivityDate = src.ActivityDate
+//           WHEN MATCHED THEN
+//             UPDATE SET ActiveHours = ${newActiveHours}
+//           WHEN NOT MATCHED THEN
+//             INSERT (DeviceID, ActivityDate, ActiveHours)
+//             VALUES (${DeviceID}, CAST(GETDATE() AS DATE), ${newActiveHours});
+//         `;
+
+//         const efficiency = (newActiveHours / 8) * 100;
+
+//         const broadcastMsg = JSON.stringify({
+//           action: "activeHoursUpdated",
+//           deviceId: DeviceID,
+//           activeHours: newActiveHours,
+//           efficiency,
+//           updatedAt: now
+//         });
+
+//         wss.clients.forEach(client => {
+//           if (client.readyState === WebSocket.OPEN) {
+//             client.send(broadcastMsg);
+//           }
+//         });
+
+//         console.log(`✅ Device ${DeviceID} cutting, total active: ${newActiveHours.toFixed(2)}h`);
+//       }
+//     }
+//   } catch (err) {
+//     console.error("❌ Cronjob error:", err);
+//   }
+// }
 
 
 module.exports = {
@@ -1667,8 +1728,9 @@ module.exports = {
   getOperatorDistribution,
   getSizeAndDistributionDataFromDb,
   getDistributionIDFromSizeID,
-  getDistributionCompleteFromDb, 
+  getDistributionCompleteFromDb,
   getListOfSOsByYear,
   logCutHistoryToDB,
-  getSubDistributions
+  getSubDistributions,
+ // calculateActiveHours
 };

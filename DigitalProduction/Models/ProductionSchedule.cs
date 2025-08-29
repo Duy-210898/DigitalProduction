@@ -47,9 +47,10 @@ namespace DigitalProduction.Models
         public List<OperatorInfo> AssignedOperators { get; set; } = new List<OperatorInfo>();
         public int ActualRemainingQuantity => Math.Max(0, (CutQuantity + InventoryQty ?? 0) - TargetCut);
         // "Complete" if ActualRemainingQuantity = 0
-        public string StatusCode => SizeQty - TargetCut == 0 ? "Complete" : "Pending";
+        public string StatusCode => (int)(TargetCut - CutQuantity) == 0 ? "Complete"
+            : ActualRemainingQuantity - TargetCut == 0 ? "Complete" : "Pending";
     }
-    public class ScheduleGroup
+        public class ScheduleGroup
     {
         public string SO { get; set; }
         public List<SizeGroup> Sizes { get; set; }

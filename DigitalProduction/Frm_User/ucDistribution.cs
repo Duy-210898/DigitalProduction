@@ -321,17 +321,17 @@ namespace DigitalProduction
             List<Employee> employees = DbHelper.getOperatorsByDepartment();
 
             gridLookUpOperator.Properties.DataSource = employees;
-            gridLookUpOperator.Properties.DisplayMember = "OperatorName";
+            gridLookUpOperator.Properties.DisplayMember = "OperatorNameUnaccented";
             gridLookUpOperator.Properties.ValueMember = "EmployeeID";
 
             // Clear columns before setup
             gridLookUpOperator.Properties.View.Columns.Clear();
 
             // Add visible column for Vietnamese name
-            gridLookUpOperator.Properties.View.Columns.AddVisible("OperatorName", "Tên nhân viên");
+          //  gridLookUpOperator.Properties.View.Columns.AddVisible("OperatorName", "Tên nhân viên");
 
             // Add hidden helper column for unaccented search
-            gridLookUpOperator.Properties.View.Columns.AddVisible("OperatorNameUnaccented", "Alias (English)");
+            gridLookUpOperator.Properties.View.Columns.AddVisible("OperatorNameUnaccented", LocalizationManager.GetString("OperatorName"));
         //    gridLookUpOperator.Properties.View.Columns["OperatorNameUnaccented"].Visible = false;
 
             // Enable autocomplete & typing
@@ -349,10 +349,13 @@ namespace DigitalProduction
             gridLookUpOperator.Properties.NullText = "";
 
             // Enable filtering in both columns (VN + unaccented)
-            gridLookUpOperator.Properties.View.OptionsFind.FindFilterColumns = "OperatorName;OperatorNameUnaccented";
+            //gridLookUpOperator.Properties.View.OptionsFind.FindFilterColumns = "OperatorName";
+            // Enable filtering in both columns (VN + unaccented)
+            gridLookUpOperator.Properties.View.OptionsFind.FindFilterColumns = "OperatorNameUnaccented";
 
             // Optional: Show search row at top of popup
             gridLookUpOperator.Properties.View.OptionsView.ShowAutoFilterRow = true;
+            gridLookUpOperator.Properties.View.BestFitColumns();
         }
 
 
@@ -844,7 +847,7 @@ namespace DigitalProduction
                 RepositoryItemGridLookUpEdit operatorLookup = new RepositoryItemGridLookUpEdit
                 {
                     DataSource = employees,
-                    DisplayMember = "OperatorName",
+                    DisplayMember = "OperatorNameUnaccented",
                     ValueMember = "EmployeeID",
                     NullText = "",
                     TextEditStyle = TextEditStyles.Standard,
@@ -853,13 +856,21 @@ namespace DigitalProduction
                     PopupFilterMode = PopupFilterMode.Contains,
                     AllowNullInput = DevExpress.Utils.DefaultBoolean.True
                 };
+                // Configure View
+                var viewS = operatorLookup.View;
+                viewS.Columns.Clear();
 
+                // Add hidden unaccented column (for searching only)
+                var colAlias = viewS.Columns.AddVisible("OperatorNameUnaccented", LocalizationManager.GetString("OperatorName"));
+
+                // Enable filtering across both columns
+                viewS.OptionsFind.FindFilterColumns = "OperatorNameUnaccented";
                 // Optional: Only show "OperatorName" column
                 operatorLookup.PopulateViewColumns();
-                foreach (GridColumn column in operatorLookup.View.Columns)
-                {
-                    column.Visible = column.FieldName == "OperatorName";
-                }
+                //foreach (GridColumn column in operatorLookup.View.Columns)
+                //{
+                //    column.Visible = column.FieldName == "OperatorName";
+                //}
 
                 // Show auto-filter row (search box)
                 operatorLookup.View.OptionsView.ShowAutoFilterRow = true;

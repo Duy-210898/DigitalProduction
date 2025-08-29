@@ -246,6 +246,15 @@ CREATE TABLE CutHistory (
 );
 GO
 
+CREATE TABLE DeviceDailyActivity (
+    DeviceActivityID INT IDENTITY PRIMARY KEY,
+    DeviceID INT NOT NULL,
+    ActivityDate DATE NOT NULL,
+    ActiveHours FLOAT DEFAULT 0,
+    CONSTRAINT FK_DeviceDailyActivity_DeviceList FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID)
+);
+
+GO
 -- Foreign Key Constraints
 ALTER TABLE ProductionSchedule 
 	ADD CONSTRAINT FK_ProductionSchedule_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),
