@@ -259,11 +259,11 @@ namespace DigitalProduction
 
         private async void gridLookUpDevice_EditValueChanged(object sender, EventArgs e)
         {
-            if (gridLookUpDevice.EditValue == null)
+            if (gridLookUpMachine.EditValue == null)
                 return;
 
             // Get selected DeviceID
-            if (int.TryParse(gridLookUpDevice.EditValue.ToString(), out int deviceID) && deviceID > 0)
+            if (int.TryParse(gridLookUpMachine.EditValue.ToString(), out int deviceID) && deviceID > 0)
             {
                 string ipAddress = await dbHelper.GetIPAddressByDeviceIDAsync(deviceID);
 
@@ -288,33 +288,33 @@ namespace DigitalProduction
         {
             List<Device> machines = DbHelper.getlistMachines();
 
-            gridLookUpDevice.Properties.DataSource = machines;
-            gridLookUpDevice.Properties.DisplayMember = "MachineName";
-            gridLookUpDevice.Properties.ValueMember = "DeviceID";
+            gridLookUpMachine.Properties.DataSource = machines;
+            gridLookUpMachine.Properties.DisplayMember = "MachineName";
+            gridLookUpMachine.Properties.ValueMember = "DeviceID";
 
             // Optional: Disable typing if you want DropDownList style
-            gridLookUpDevice.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            gridLookUpMachine.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
 
             // Hide all columns except "MachineName"
-            gridLookUpDevice.Properties.View.Columns.Clear();
-            gridLookUpDevice.Properties.PopulateViewColumns();
-            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridLookUpDevice.Properties.View.Columns)
+            gridLookUpMachine.Properties.View.Columns.Clear();
+            gridLookUpMachine.Properties.PopulateViewColumns();
+            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridLookUpMachine.Properties.View.Columns)
             {
                 column.Visible = column.FieldName == "MachineName";
             }
             // Enable autocomplete & search
-            gridLookUpDevice.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
-            gridLookUpDevice.Properties.AutoComplete = true;
+            gridLookUpMachine.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            gridLookUpMachine.Properties.AutoComplete = true;
 
             // Enable incremental search
-            gridLookUpDevice.Properties.ImmediatePopup = true;
-            gridLookUpDevice.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
-            gridLookUpDevice.Properties.AllowNullInput = DevExpress.Utils.DefaultBoolean.True;
-            gridLookUpDevice.Properties.NullText = "";
+            gridLookUpMachine.Properties.ImmediatePopup = true;
+            gridLookUpMachine.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
+            gridLookUpMachine.Properties.AllowNullInput = DevExpress.Utils.DefaultBoolean.True;
+            gridLookUpMachine.Properties.NullText = "";
 
             // Filter mode
-            gridLookUpDevice.Properties.View.OptionsView.ShowAutoFilterRow = true;
-            gridLookUpDevice.Properties.View.ActiveFilterEnabled = true;
+            gridLookUpMachine.Properties.View.OptionsView.ShowAutoFilterRow = true;
+            gridLookUpMachine.Properties.View.ActiveFilterEnabled = true;
         }
         private void loadOperatorDistribution()
         {
@@ -371,7 +371,7 @@ namespace DigitalProduction
             int operatorID = 0;
             if (!isDeviceData)
             {
-                deviceID = int.TryParse(gridLookUpDevice.EditValue?.ToString(), out int devID) ? devID : 0;
+                deviceID = int.TryParse(gridLookUpMachine.EditValue?.ToString(), out int devID) ? devID : 0;
                 operatorID = int.TryParse(gridLookUpOperator.EditValue?.ToString(), out int operID) ? operID : 0;
             }
 
@@ -397,7 +397,13 @@ namespace DigitalProduction
                     int productId = dbHelper.getProductIdByArt(schedule.ART);
                     int? psoID = dbHelper.getPartSizeOrderId(partID, sizeID, orderID);
                     if (psoID == -1 || uniquePSOIDs.Contains(psoID.Value)) continue;
-                    DateTime dt = DateTime.Now.AddSeconds(index);
+                    DateTime now = DateTime.Now;
+
+                    // reset seconds = 0
+                    DateTime baseTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+
+                    // add index minutes
+                    DateTime dt = baseTime.AddMinutes(index);
                     dt = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, 0);
                     var dist = new DistributionData
                     {
@@ -471,7 +477,7 @@ namespace DigitalProduction
                 control.Key.Text = LocalizationManager.GetString(control.Value) + (control.Key is Label ? ":" : "");
             }
 
-            gridLookUpDevice.EditValue = LocalizationManager.GetString("SelectDevice");
+            gridLookUpMachine.EditValue = LocalizationManager.GetString("SelectDevice");
         }
 
         private async void SendDistributionDataToServer()
@@ -524,7 +530,7 @@ namespace DigitalProduction
         {
             if (!isDeviceData)
             {
-                if (gridLookUpDevice.EditValue.ToString() == "")
+                if (gridLookUpMachine.EditValue.ToString() == "")
                 {
                     ShowMessage.ShowWarning("Please select an device before proceeding.", "Warning");
                     return;
@@ -575,6 +581,7 @@ namespace DigitalProduction
             table.Columns.Add("GroupSO", typeof(string));
             table.Columns.Add("SO", typeof(string));
             table.Columns.Add("PartName", typeof(string));
+            table.Columns.Add("VietnameseName", typeof(string));
             table.Columns.Add("Size", typeof(string));
             table.Columns.Add("SizeQty", typeof(int));
             table.Columns.Add("PeicesPerPair", typeof(int));
@@ -590,6 +597,7 @@ namespace DigitalProduction
             subDistributionDataSource.Columns.Add("SubDistributionID", typeof(int));
             subDistributionDataSource.Columns.Add("SO", typeof(string)); // Foreign Key
             subDistributionDataSource.Columns.Add("PartName", typeof(string));
+            subDistributionDataSource.Columns.Add("VietnameseName", typeof(string));
             subDistributionDataSource.Columns.Add("Size", typeof(string));
             subDistributionDataSource.Columns.Add("SizeQty", typeof(int));
             subDistributionDataSource.Columns.Add("InventoryQty", typeof(int));
@@ -614,8 +622,9 @@ namespace DigitalProduction
                 foreach (var schedule in scheduleGroup)
                 {
                     string partName = schedule.PartName;
+                    string partVietnameseName = schedule.VietnameseName;
                     string size = GetSizeName(schedule.SizeID);
-                    string key = $"{partName}|{size}";
+                    string key = $"{partName}|{partVietnameseName}|{size}";
 
                     schedule.GroupSO = groupSO;
 
@@ -675,7 +684,7 @@ namespace DigitalProduction
                 var sb = new StringBuilder();
 
                 float totalUnitUsagePerPair = unitUsagePerPairPerSize.Values.Sum();
-                sb.AppendLine($" {LocalizationManager.GetString("UnitUsagePerPair")}: {Math.Round(totalUnitUsagePerPair, 6).ToString("N3",new CultureInfo("de-DE"))}");
+                sb.AppendLine($" {LocalizationManager.GetString("Total Usage")}: {Math.Round(totalUnitUsagePerPair, 6).ToString("N3",new CultureInfo("de-DE"))}");
 
                 // Step 3: Display in label
                 lblUnitUsagePerPair.Text = sb.ToString();
@@ -685,7 +694,8 @@ namespace DigitalProduction
                 {
                     string[] splitKey = entry.Key.Split('|');
                     string partName = splitKey[0];
-                    string entrySize = splitKey[1];
+                    string partVietnameseName = splitKey[1];
+                    string entrySize = splitKey[2];
                     string mergedSO = string.Join(", ", entry.Value.SOs);
                     string unitUsage = entry.Value.UnitUsage;
 
@@ -707,6 +717,7 @@ namespace DigitalProduction
                          groupSO,
                          mergedSO,
                          partName,
+                         partVietnameseName,
                          entrySize,
                          entry.Value.TotalSizeQty,
                          0, 0, 0,
@@ -815,6 +826,7 @@ namespace DigitalProduction
                 detailView.Columns.AddVisible("Size", "Size");
                 detailView.Columns.AddVisible("SizeQty", "SizeQty");
                 detailView.Columns.AddVisible("PartName", "PartName");
+                detailView.Columns.AddVisible("VietnameseName", "VietnameseName");
                 detailView.Columns.AddVisible("InventoryQty", "InventoryQty");
 
                 List<Employee> employees = DbHelper.getOperatorsByDepartment();
@@ -1107,6 +1119,7 @@ namespace DigitalProduction
             string parentSO = rowView["CompositeKey"].ToString();
             string parentSize = rowView["Size"].ToString();
             string parentPartName = rowView["PartName"].ToString();
+            string parentnameseName = rowView["VietnameseName"].ToString();
             int parentSizeQty = TryParseInt(rowView["SizeQty"]);
 
             // Sum all existing SizeQty in child rows of this parent
@@ -1128,6 +1141,7 @@ namespace DigitalProduction
             DataRow child = subDistributionDataSource.NewRow();
             child["CompositeKey"] = parentSO;
             child["PartName"] = parentPartName;
+            child["VietnameseName"] = parentnameseName;
             child["Size"] = parentSize;
             child["SizeQty"] = remainingQty;  // auto fill the rest
             child["InventoryQty"] = 0;
@@ -1170,8 +1184,11 @@ namespace DigitalProduction
             this.isLeather = isLeather;
 
             // check enable and disable if isDeviceData or not
-            gridLookUpDevice.Enabled = !isDeviceData;
-            gridLookUpOperator.Enabled = !isDeviceData;
+            gridLookUpMachine.Visible = !isDeviceData;
+            gridLookUpOperator.Visible = !isDeviceData;
+            lblSelectMachine.Visible = !isDeviceData;
+            lbl_Name.Visible = !isDeviceData;
+            btnSync.Visible = !isDeviceData;
             btnSend.Enabled = false;
 
             tableLayoutMainDistribution.Enabled = true;
@@ -1272,7 +1289,7 @@ namespace DigitalProduction
         {
             if (!isDeviceData)
             {
-                if (gridLookUpDevice.EditValue == null || gridLookUpOperator.EditValue == null)
+                if (gridLookUpMachine.EditValue == null || gridLookUpOperator.EditValue == null)
                 {
                     ShowMessage.ShowInfo(LocalizationManager.GetString("RequiredDeviceAndOperator"));
                     return;
@@ -1377,13 +1394,13 @@ namespace DigitalProduction
 
                         foreach (DataRow child in matchingChildRows)
                         {
-                            int? deviceID = (child.ItemArray[6] == null || child.ItemArray[6] == DBNull.Value)
+                            int? deviceID = (child.ItemArray[7] == null || child.ItemArray[7] == DBNull.Value)
                                 ? (int?)null
-                                : Convert.ToInt32(child.ItemArray[6]);
+                                : Convert.ToInt32(child.ItemArray[7]);
 
-                            int? operatorID = (child.ItemArray[9] == null || child.ItemArray[9] == DBNull.Value)
+                            int? operatorID = (child.ItemArray[10] == null || child.ItemArray[10] == DBNull.Value)
                                 ? (int?)null
-                                : Convert.ToInt32(child.ItemArray[9]);
+                                : Convert.ToInt32(child.ItemArray[10]);
 
                             int inventoryQty = child["InventoryQty"] != DBNull.Value ? Convert.ToInt32(child["InventoryQty"]) : 0;
                             int childSizeQty = child["SizeQty"] != DBNull.Value ? Convert.ToInt32(child["SizeQty"]) : 0;
@@ -1442,7 +1459,7 @@ namespace DigitalProduction
                     }
 
                     int? selectedDeviceID = null;
-                    if (int.TryParse(gridLookUpDevice.EditValue?.ToString().Trim(), out int tempDeviceID))
+                    if (int.TryParse(gridLookUpMachine.EditValue?.ToString().Trim(), out int tempDeviceID))
                     {
                         selectedDeviceID = tempDeviceID;
                     }
@@ -1480,13 +1497,13 @@ namespace DigitalProduction
 
                         foreach (DataRow child in matchingChildRows)
                         {
-                            int? deviceID = (child.ItemArray[6] == null || child.ItemArray[6] == DBNull.Value)
+                            int? deviceID = (child.ItemArray[7] == null || child.ItemArray[7] == DBNull.Value)
                                 ? (int?)null
-                                : Convert.ToInt32(child.ItemArray[6]);
+                                : Convert.ToInt32(child.ItemArray[7]);
 
-                            int? operatorID = (child.ItemArray[9] == null || child.ItemArray[9] == DBNull.Value)
+                            int? operatorID = (child.ItemArray[10] == null || child.ItemArray[10] == DBNull.Value)
                                 ? (int?)null
-                                : Convert.ToInt32(child.ItemArray[9]);
+                                : Convert.ToInt32(child.ItemArray[10]);
 
                             int inventoryQty = child["InventoryQty"] != DBNull.Value ? Convert.ToInt32(child["InventoryQty"]) : 0;
                             int childSizeQty = child["SizeQty"] != DBNull.Value ? Convert.ToInt32(child["SizeQty"]) : 0;
@@ -1588,7 +1605,7 @@ namespace DigitalProduction
                     return false;
                 if (!isDeviceData)
                 {
-                    if (gridLookUpDevice.EditValue == null || gridLookUpOperator.EditValue == null)
+                    if (gridLookUpMachine.EditValue == null || gridLookUpOperator.EditValue == null)
                         return false;
                 }
             }
@@ -1733,7 +1750,7 @@ namespace DigitalProduction
             gridControlOverview.DataSource = null;
             sizeDataList = new List<SizeData>();
             tableLayoutMainDistribution.Enabled = false;
-            gridLookUpDevice.Clear();
+            gridLookUpMachine.Clear();
             gridLookUpOperator.Clear();
         }
         public class DistributionPayload

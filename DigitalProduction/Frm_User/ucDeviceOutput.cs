@@ -136,8 +136,8 @@ namespace DigitalProduction
             // 3. Setup viewModelBindingSource and bind to IsLoading (use Inverse for Enabled)
             viewModelBindingSource.DataSource = _viewModel;
 
-            // Optional: avoid adding multiple bindings
-            gridControl_DeviceOutput.DataBindings.Clear();
+            //// Optional: avoid adding multiple bindings
+            //gridControl_DeviceOutput.DataBindings.Clear();
 
             // Enable or disable grid based on IsLoading
             gridControl_DeviceOutput.DataBindings.Add("Enabled", viewModelBindingSource, "IsLoading", true, DataSourceUpdateMode.OnPropertyChanged);
@@ -502,6 +502,7 @@ namespace DigitalProduction
             gridView.Columns["_isRecentlyUpdated"]?.SetVisible(false);
             gridView.Columns["IsRecentlyUpdated"]?.SetVisible(false);
             gridView.Columns["UniqueId"]?.SetVisible(false);
+            gridView.Columns["OperatorNameUnaccented"]?.SetVisible(false);
 
             StyleNumericColumn(gridView.Columns[Constants.PartName], 5, bold: true);
             StyleNumericColumn(gridView.Columns[Constants.ActualSizeQty], 7);

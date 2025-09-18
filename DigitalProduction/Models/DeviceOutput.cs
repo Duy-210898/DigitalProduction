@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
+using System.Text;
 
 namespace DigitalProduction.Models
 {
@@ -23,6 +25,7 @@ namespace DigitalProduction.Models
         private int? _totalPiecesPerPair;
         private bool _isGroupHeader;
         private string _materialType;
+        private string _operatorNameUnaccented;
         public DateTime? Timestamp { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
@@ -166,6 +169,40 @@ namespace DigitalProduction.Models
         public void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        public string OperatorNameUnaccented
+        {
+            get
+            {
+                return RemoveDiacritics(OperatorName);
+            }
+            set
+            {
+                if (_operatorNameUnaccented != value)
+                {
+                    _operatorNameUnaccented = value;
+                    OnPropertyChanged(nameof(OperatorNameUnaccented));
+                }
+            }
+        }
+
+        private static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+
+            // Thay thế riêng ký tự Đ/đ
+            text = text.Replace('Đ', 'D').Replace('đ', 'd');
+
+            var normalized = text.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+
+            foreach (var c in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+
+            return sb.ToString().Normalize(NormalizationForm.FormC);
         }
     }
 }

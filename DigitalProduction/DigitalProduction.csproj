@@ -25,7 +25,7 @@
     <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>139</ApplicationRevision>
+    <ApplicationRevision>147</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -195,8 +195,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\GenericGridLocalizer .cs" />
     <Compile Include="Extensions\RealTimeCutMonitor.cs" />
     <Compile Include="Extensions\SafeReader.cs" />
+    <Compile Include="Frm_User\ucAddSupplementary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Frm_User\ucAddSupplementary.Designer.cs">
+      <DependentUpon>ucAddSupplementary.cs</DependentUpon>
+    </Compile>
     <Compile Include="Frm_User\ChangePassword.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -219,19 +226,13 @@
     <Compile Include="Frm_Admin\frmDashboard.Designer.cs">
       <DependentUpon>frmDashboard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Frm_User\Schedule.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Frm_User\Schedule.Designer.cs">
-      <DependentUpon>Schedule.cs</DependentUpon>
-    </Compile>
     <Compile Include="Frm_User\SubDistributionDetailForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Frm_User\SubDistributionDetailForm.Designer.cs">
       <DependentUpon>SubDistributionDetailForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="LocalizedStrings.cs" />
+    <Compile Include="Common\Lang.cs" />
     <Compile Include="Models\Constants.cs" />
     <Compile Include="Models\CuttingReportModel.cs" />
     <Compile Include="Models\PartItem.cs" />
@@ -240,7 +241,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PropertyUpdateHelper.cs" />
+    <Compile Include="Helper\PropertyUpdateHelper.cs" />
     <Compile Include="SqlDataImporter.cs" />
     <Compile Include="Frm_User\ucCuttingReport.cs">
       <SubType>UserControl</SubType>
@@ -248,11 +249,11 @@
     <Compile Include="Frm_User\ucCuttingReport.Designer.cs">
       <DependentUpon>ucCuttingReport.cs</DependentUpon>
     </Compile>
-    <Compile Include="DeviceOutputListViewModel.cs" />
+    <Compile Include="ViewModel\DeviceOutputListViewModel.cs" />
     <Compile Include="Extensions\Extentions.cs" />
     <Compile Include="FilterService.cs" />
     <Compile Include="LocalizationManager.cs" />
-    <Compile Include="dbHelper.cs" />
+    <Compile Include="Helper\dbHelper.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -300,9 +301,9 @@
     <Compile Include="Frm_User\ucRegisterUser.Designer.cs">
       <DependentUpon>ucRegisterUser.cs</DependentUpon>
     </Compile>
-    <Compile Include="ResponseMessage.cs" />
-    <Compile Include="SecurityHelper.cs" />
-    <Compile Include="ShowMessage.cs" />
+    <Compile Include="WebSocket\Respone\ResponseMessage.cs" />
+    <Compile Include="Auth\SecurityHelper.cs" />
+    <Compile Include="Helper\ShowMessage.cs" />
     <Compile Include="Frm_User\ucDeviceManager.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -365,7 +366,10 @@
     </Compile>
     <Compile Include="Validation\ValidationType.cs" />
     <Compile Include="Validation\Validator.cs" />
-    <Compile Include="WebSocketClient.cs" />
+    <Compile Include="WebSocket\WebSocketClient.cs" />
+    <EmbeddedResource Include="Frm_User\ucAddSupplementary.resx">
+      <DependentUpon>ucAddSupplementary.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Frm_User\ChangePassword.resx">
       <DependentUpon>ChangePassword.cs</DependentUpon>
     </EmbeddedResource>
@@ -374,9 +378,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Frm_Admin\frmDashboard.resx">
       <DependentUpon>frmDashboard.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Frm_User\Schedule.resx">
-      <DependentUpon>Schedule.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Frm_User\ucCuttingReport.resx">
       <DependentUpon>ucCuttingReport.cs</DependentUpon>
@@ -387,6 +388,7 @@
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
@@ -504,9 +506,12 @@
   <ItemGroup>
     <Content Include="icon_digital.ico" />
     <None Include="Resources\dashboard.png" />
+    <None Include="Resources\icon-merge.png" />
+    <None Include="Resources\bg_Supplementary.jpg" />
     <Content Include="Resources\icon_Add.png" />
     <None Include="Resources\send-data-device.png" />
     <None Include="Resources\logout.png" />
+    <None Include="Resources\icon_unmerge.png" />
     <Content Include="Resources\send-data.png" />
     <None Include="Resources\save_icon.png" />
     <None Include="Resources\reset_icon.png" />
@@ -516,9 +521,7 @@
     <None Include="Resources\Untitled design %281%29.png" />
     <None Include="Resources\Untitled design.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

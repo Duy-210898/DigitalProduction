@@ -28,7 +28,7 @@ namespace DigitalProduction
         private static bool isLeather = false;
         private Timer flyoutAutoHideTimer;
         private readonly List<SalesOrder> selectedSalesOrders = new List<SalesOrder>();
-        private readonly string[] columnsToHide = { "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
+        private readonly string[] columnsToHide = { "StatusCode", "ActualRemainingQuantity", "RemainingQuantity", "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
         public ucSchedule()
         {
@@ -172,20 +172,19 @@ namespace DigitalProduction
             cbxSize.EditValueChanged += ComboSize_EditValueChanged;
             cbxPartName.EditValueChanged += ComboxPart_EditValueChanged;
         }
-
         private void TranslateLableText()
         {
-            lblFilterDate.Text = LocalizedStrings.FilterDate;
-            lblSelectSO.Text = LocalizedStrings.SelectSO;
-            lblPartName.Text = LocalizedStrings.SelectPart;
-            lblSize.Text = LocalizedStrings.SelectSize;
-            rdLeather.Text = LocalizedStrings.leatherMaterial;
-            rdRawMaterial.Text = LocalizedStrings.rawMaterial;
-            lbSelectMaterialType.Text = LocalizedStrings.SelectMaterialType;
-            lblTotalRecords.Text = LocalizedStrings.TotalRecords;
-            btnSend.Text = LocalizedStrings.SelectData;
-            btnDevideData.Text = LocalizedStrings.SelectDevideData;
-            lblSelectSORequired.Text = LocalizedStrings.SelectSO;
+            lblFilterDate.Text = Lang.FilterDate;
+            lblSelectSO.Text = Lang.SelectSO;
+            lblPartName.Text = Lang.SelectPart;
+            lblSize.Text = Lang.SelectSize;
+            rdLeather.Text = Lang.LeatherMaterial;
+            rdRawMaterial.Text = Lang.RawMaterial;
+            lbSelectMaterialType.Text = Lang.SelectMaterialType;
+            lblTotalRecords.Text = Lang.TotalRecords;
+            btnSend.Text = Lang.SelectData;
+            btnDevideData.Text = Lang.SelectDevideData;
+            lblSelectSORequired.Text = Lang.SelectSO;
 
         }
         private void ComboxPart_EditValueChanged(object sender, EventArgs e)
@@ -259,8 +258,6 @@ namespace DigitalProduction
             cbxSize.Properties.EndUpdate();
             cbxSize.ShowPopup();
         }
-
-
         private void ComboSize_EditValueChanged(object sender, EventArgs e)
         {
             CheckedComboBoxEdit editor = sender as CheckedComboBoxEdit;
@@ -301,8 +298,6 @@ namespace DigitalProduction
             flyoutAutoHideTimer.Stop();
             flyoutAutoHideTimer.Start();
         }
-
-
         private void InitializeFlyoutTimer()
         {
             flyoutAutoHideTimer = new Timer();
@@ -316,7 +311,6 @@ namespace DigitalProduction
                 flyoutAutoHideTimer.Stop();
             };
         }
-
         private void ShowValidationBeak(RadioButton radioButton, string message)
         {
             lblFlyoutMessage.Text = message;
@@ -345,7 +339,6 @@ namespace DigitalProduction
             // Hiển thị
             flayoutTableSelectSO.ShowBeakForm(new Point(x, y));
         }
-
 
         public class ProductionScheduleComparer : IEqualityComparer<ProductionSchedule>
         {
@@ -579,11 +572,11 @@ namespace DigitalProduction
         {
             if (_webSocketClient != null)
             {
-                _webSocketClient.OnResponseReceived -= WebSocket_OnMessage;
+                _webSocketClient.OnResponseReceived -= WebSocket_OnMessageAsync;
             }
 
             _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
-            _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
+            _webSocketClient.OnResponseReceived += WebSocket_OnMessageAsync;
 
             if (productionSchedules.Count == 0)
             {
@@ -619,7 +612,9 @@ namespace DigitalProduction
             await _webSocketClient.SendAsync(jsonRequest);
         }
 
-        private void WebSocket_OnMessage(string jsonData)
+        private int _soRetryCount = 0;
+        private const int MaxSoRetries = 3;
+        private async void WebSocket_OnMessageAsync(string jsonData)
         {
             try
             {
@@ -650,18 +645,30 @@ namespace DigitalProduction
                             break;
 
                         case "getListOfSOsByYear":
+                            await Task.Delay(1000); // small delay before retry
                             var soListResponse = JsonConvert.DeserializeObject<ResponseMessage<List<SalesOrder>>>(jsonData);
-                            if (soListResponse?.Data != null)
+                            if (soListResponse?.Data != null && soListResponse.Data.Count > 0)
                             {
+                                // ✅ Got data
+                                _soRetryCount = 0; // reset retry count
                                 gridLookUpEditSO.Properties.DataSource = soListResponse.Data;
                                 gridLookUpEditSO.Properties.DisplayMember = "SO";
                                 gridLookUpEditSO.Properties.ValueMember = "SO";
-                                // SafeUpdateSOList(soListResponse.Data);
                             }
                             else
                             {
-                                gridLookUpEditSO.Properties.DataSource = null;
-                                //cboSO.Properties.Items.Clear();
+                                // ❌ No data, retry if under max retries
+                                if (_soRetryCount < MaxSoRetries)
+                                {
+                                    _soRetryCount++;
+                                    await GetListOfSOsByYearAsync();
+                                }
+                                else
+                                {
+                                    // Final fallback
+                                    gridLookUpEditSO.Properties.DataSource = null;
+                                    ShowMessage.ShowInfo("No Sales Orders found after retries.");
+                                }
                             }
                             break;
 
@@ -825,7 +832,7 @@ namespace DigitalProduction
             btnSend.Margin = new Padding(10, 0, 0, 0);
 
             // Hình ảnh
-            btnSend.ImageOptions.Image = Properties.Resources.send_data;
+            btnSend.ImageOptions.Image = Properties.Resources.icon_merge;
             btnSend.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
 
 
@@ -842,7 +849,7 @@ namespace DigitalProduction
             btnDevideData.Margin = new Padding(10, 0, 0, 0);
 
             // Ảnh và vị trí ảnh
-            btnDevideData.ImageOptions.Image = Properties.Resources.send_data_device;
+            btnDevideData.ImageOptions.Image = Properties.Resources.icon_unmerge;
             btnDevideData.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
 
         }

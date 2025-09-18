@@ -79,44 +79,46 @@ process.on('SIGTERM', closeAllConnections);
 
 async function handleDeviceConnection(ipAddresses) {
   const startTotal = Date.now();
-  const BATCH_SIZE = 20;
-
-  logPerformance(`🚀 Starting batched connection for ${ipAddresses.length} machines...`);
-
+  const MAX_CONCURRENT = 100; // bump this up for more parallelism
+  const results = [];
   let successCount = 0;
   let failCount = 0;
 
-  for (let i = 0; i < ipAddresses.length; i += BATCH_SIZE) {
-    const batch = ipAddresses.slice(i, i + BATCH_SIZE);
+  logPerformance(`🚀 Starting fast connection for ${ipAddresses.length} machines...`);
 
-    const batchStart = Date.now();
+  // Break into chunks of MAX_CONCURRENT
+  for (let i = 0; i < ipAddresses.length; i += MAX_CONCURRENT) {
+    const chunk = ipAddresses.slice(i, i + MAX_CONCURRENT);
 
-      await Promise.allSettled(
-      batch.map(async ip => {
+    const chunkStart = Date.now();
+
+    // Run all connections in parallel
+    const settled = await Promise.allSettled(
+      chunk.map(async (ip) => {
         const start = Date.now();
         try {
-          await connectToDevice(ip);
+          await connectToDevice(ip, { timeout: 500 }); // ⬅️ set lower timeout
           const duration = Date.now() - start;
           logPerformance(`✅ Connected to ${ip} in ${duration} ms`);
           successCount++;
-        } catch (error) {
+        } catch (err) {
           const duration = Date.now() - start;
-          logPerformance(`❌ Failed to connect ${ip} in ${duration} ms: ${error.message}`);
+          logPerformance(`❌ Failed ${ip} in ${duration} ms: ${err.message}`);
           failCount++;
         }
       })
     );
 
-    const batchDuration = Date.now() - batchStart;
-    logPerformance(`📦 Batch ${i / BATCH_SIZE + 1}: ${batch.length} devices connected in ${batchDuration} ms`);
+    results.push(...settled);
+    const chunkDuration = Date.now() - chunkStart;
+    logPerformance(`📦 Chunk ${i / MAX_CONCURRENT + 1}: ${chunk.length} devices in ${chunkDuration} ms`);
   }
 
   const totalDuration = Date.now() - startTotal;
   logPerformance(`📊 Final Summary:`);
   logPerformance(`  🟢 Success: ${successCount}`);
   logPerformance(`  🔴 Failed: ${failCount}`);
-  logPerformance(`  ⏱️ Total time for ${ipAddresses.length} machines: ${totalDuration} ms`);
+  logPerformance(`  ⏱️ Total: ${totalDuration} ms`);
   logPerformance(`------------------------------------------------------------`);
 }
-
 

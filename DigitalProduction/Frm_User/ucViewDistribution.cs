@@ -9,13 +9,12 @@ using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;
-using WebSocketSharp;
 namespace DigitalProduction
 {
     public partial class ucViewDistribution : UserControl
     {
 
-        private readonly string[] columnsToHide = { "Status", "Size", "MaterialName", "MasterWorkOrder", "ART", "SO" ,"PO", "UnitUsage", "DeviceID", "OperatorID", "MaterialCode", "PartCode", "CreatedAt", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO", "InventoryQty", "PeicesPerPair", "CuttingDieQty", "MaterialLayer", "TotalPiecesPerPair", "VietnameseName" };
+        private readonly string[] columnsToHide = { "RemainingQuantity", "Status", "Size", "MaterialName", "MasterWorkOrder", "ART", "SO" ,"PO", "UnitUsage", "DeviceID", "OperatorID", "MaterialCode", "PartCode", "CreatedAt", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO", "InventoryQty", "PeicesPerPair", "CuttingDieQty", "MaterialLayer", "TotalPiecesPerPair" };
         private static List<string> selectedSalesOrders = new List<string>();
 
         public ucViewDistribution()
@@ -168,8 +167,9 @@ namespace DigitalProduction
 
             int itemHeight = 24;
             int maxItems = 10;
-            int popupHeight = Math.Min(soList.Count, maxItems) * itemHeight + 50;
+            int popupHeight = Math.Min(soList.Count, maxItems) * itemHeight + 300;
             cboSO.Properties.PopupFormSize = new Size(cboSO.Width + 100, popupHeight);
+            gridViewSO.OptionsView.ShowGroupPanel = false;
         }
 
         private void LoadProductionSchedulesBySelectedSOs(DevExpress.XtraEditors.GridLookUpEdit cboSO, GridControl gridControl, GridView gridView)
@@ -276,6 +276,31 @@ namespace DigitalProduction
                             // Call your custom logic after columns are created
                             HideGridColumns(detailView);
                             SetGridColumnOrder(detailView);
+                            // 🎨 Add row style for Status column
+                            detailView.RowCellStyle += (s4, e4) =>
+                            {
+                                if (e4.Column.FieldName == nameof(ProductionSchedule.StatusCode))
+                                {
+                                    var view = s4 as GridView;
+                                    var status = view.GetRowCellValue(e4.RowHandle, e4.Column)?.ToString();
+
+                                    if (string.Equals(status, Constants.Complete, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        e4.Appearance.BackColor = Color.LightGreen ;
+                                        e4.Appearance.ForeColor = Color.Black;
+                                    }
+                                    else if (string.Equals(status, Constants.Pending, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        e4.Appearance.BackColor = Color.LightYellow;
+                                        e4.Appearance.ForeColor = Color.Black;
+                                    }
+                                    else
+                                    {
+                                        e4.Appearance.BackColor = Color.LightGray;
+                                        e4.Appearance.ForeColor = Color.Black;
+                                    }
+                                }
+                            };
                         };
 
                         e.DefaultView = sizeView;
@@ -288,18 +313,28 @@ namespace DigitalProduction
                                 var view = s2 as GridView;
                                 var row = view?.GetRow(e2.ListSourceRowIndex) as SizeGroup;
                                 int minCutQty = row.Details.Min(d => d.ActualRemainingQuantity);
+                                // target
+                                int target = row.Details
+                                    .Sum(d => d.SizeQty);
+                                // Actual
+                                int actual = row.Details.Min(a => a.TargetCut);
+                                //inventory
+                                int inventory = Math.Max(0, (int)row.Details
+                                    .Sum(d => (d.CutQuantity + d.InventoryQty) - d.TargetCut));
 
                                 // Status: if any detail is pending → Pending, else → Complete
                                 // ✅ Complete if any detail is complete
-                                bool hasAnyComplete = row.Details.Any(d =>
-                                    string.Equals(d.StatusCode, Constants.Complete, StringComparison.OrdinalIgnoreCase));
-
-
-                                string status = hasAnyComplete ? Constants.Complete : Constants.Pending;
+                                //bool hasAnyPending = row.Details.Any(d =>
+                                //    string.Equals(d.StatusCode, Constants.Pending, StringComparison.OrdinalIgnoreCase));
+                                bool hasComplete = false;
+                                hasComplete = row.Details.Any(d => d.TargetCut - d.SizeQty <= 0);
+                                hasComplete = row.Details.Any(d => (d.CutQuantity + d.InventoryQty) - d.SizeQty >= 0);
+                                string status = hasComplete ? Constants.Complete : Constants.Pending;
 
                                 if (row != null)
                                 {
-                                    e2.DisplayText = $"{row.Size} _ {status} _ Số Lượng: {minCutQty}";
+                                    e2.DisplayText = $"{row.Size} | {LocalizationManager.GetString(status)} | {LocalizationManager.GetString("Number")}: {minCutQty} " +
+                                        $" | {LocalizationManager.GetString("Target")}: {target} {LocalizationManager.GetString("Actual")}: {actual} | {LocalizationManager.GetString("Delivered")}: {inventory}";
                                 }
                             }
                         };
@@ -345,16 +380,24 @@ namespace DigitalProduction
                         var row = gridView.GetRow(e.ListSourceRowIndex) as ScheduleGroup;
                         if (row == null || row.Sizes == null)
                             return;
+                        // Target
+                        int target = row.Sizes
+                            .Select(d => d.Details.FirstOrDefault()?.SizeQty ?? 0)
+                            .Sum();
+                        // Actual
+                        int actual = row.Sizes.Min(a => a._);
+                        // Inventory
+                        int inventory = Math.Max(0, (int)row.Sizes
+                            .SelectMany(t => t.Details)
+                            .Sum(d => (d.CutQuantity + d.InventoryQty) - d.TargetCut));
+                        bool hasComplete = actual >= target ? true : false;
+                        //bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.StatusCode == Constants.Pending || d.StatusCode == string.Empty);
+                        //bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.StatusCode == Constants.Complete);
 
-                        bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.StatusCode == Constants.Pending || d.StatusCode == string.Empty);
-                        bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.StatusCode == Constants.Complete);
-
-                        string statusText = hasPending ? Constants.Pending : (allComplete ? Constants.Complete : Constants.Pending);
-
-                        // Calculate total MinCutQuantity
-                        int totalMinCutQuantity = Math.Max(0, row.Sizes.Sum(sz => sz._));
-
-                        e.DisplayText = $"{row.SO} _ {statusText} _ Số Lượng: {totalMinCutQuantity}";
+                        //string statusText = hasComplete ? Constants.Complete : (allComplete ? Constants.Complete : Constants.Pending);
+                        string statusText = hasComplete ? Constants.Complete : Constants.Pending;
+                        e.DisplayText = $"{row.SO} | {LocalizationManager.GetString(statusText)} | {LocalizationManager.GetString("Target")}: {target}" +
+                         $" | {LocalizationManager.GetString("Actual")}: {actual} | {LocalizationManager.GetString("Delivered")}: {inventory}";
                     }
                 };
                 gridView.RowCellStyle += (s, e) =>
@@ -422,17 +465,20 @@ namespace DigitalProduction
             gridView.Columns["PartName"].Visible = true;
             gridView.Columns["PartName"].VisibleIndex = 1;
 
+            gridView.Columns["VietnameseName"].Visible = true;
+            gridView.Columns["VietnameseName"].VisibleIndex = 2;
+
             gridView.Columns["SizeQty"].Visible = true;
-            gridView.Columns["SizeQty"].VisibleIndex = 2;
+            gridView.Columns["SizeQty"].VisibleIndex = 3;
 
             gridView.Columns["TargetCut"].Visible = true;
-            gridView.Columns["TargetCut"].VisibleIndex = 3;
+            gridView.Columns["TargetCut"].VisibleIndex = 4;
 
             gridView.Columns["CutQuantity"].Visible = true;
-            gridView.Columns["CutQuantity"].VisibleIndex = 4;
+            gridView.Columns["CutQuantity"].VisibleIndex = 5;
 
             gridView.Columns["ActualRemainingQuantity"].Visible = true;
-            gridView.Columns["ActualRemainingQuantity"].VisibleIndex = 5;
+            gridView.Columns["ActualRemainingQuantity"].VisibleIndex = 6;
         }
         private void gridViewSO_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {

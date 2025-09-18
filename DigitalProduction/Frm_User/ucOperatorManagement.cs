@@ -71,6 +71,7 @@ namespace DigitalProduction
             dataGridView_OperatorManagement.Columns["Employeename"].Visible = false;
             dataGridView_OperatorManagement.Columns["PositionID"].Visible = false;
             dataGridView_OperatorManagement.Columns["CreatedAt"].Visible = false;
+            dataGridView_OperatorManagement.Columns["OperatorNameUnaccented"].Visible = false;
             dataGridView_OperatorManagement.Columns["UpdatedAt"].Visible = false;
 
             if (dataGridView_OperatorManagement.Columns.Contains("Username"))

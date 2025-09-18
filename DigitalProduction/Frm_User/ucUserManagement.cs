@@ -8,13 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
-using DevExpress.XtraWaitForm;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
-using static DevExpress.Utils.HashCodeHelper;
 
 namespace DigitalProduction
 {
@@ -68,6 +65,7 @@ namespace DigitalProduction
             dataGridView_UserManagement.Columns["OperatorName"].Visible = false;
             dataGridView_UserManagement.Columns["PositionID"].Visible = false;
             dataGridView_UserManagement.Columns["CreatedAt"].Visible = false;
+            dataGridView_UserManagement.Columns["OperatorNameUnaccented"].Visible = false;
             dataGridView_UserManagement.Columns["UpdatedAt"].Visible = false;
 
             if (dataGridView_UserManagement.Columns.Contains("Username"))

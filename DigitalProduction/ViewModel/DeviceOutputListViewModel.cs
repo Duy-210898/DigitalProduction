@@ -281,7 +281,7 @@ namespace DigitalProduction.ViewModels
                        (d.PartName?.ToLower().Contains(cleanedKeyword) ?? false) ||
                        (d.MachineName?.ToLower().Contains(cleanedKeyword) ?? false) ||
                        (d.SO?.ToLower().Contains(cleanedKeyword) ?? false) ||
-                       (d.OperatorName?.ToLower().Contains(cleanedKeyword) ?? false))
+                       (d.OperatorNameUnaccented?.ToLower().Contains(cleanedKeyword) ?? false))
                    .ToList();
 
                     // Then update your UI or data context
@@ -323,7 +323,7 @@ namespace DigitalProduction.ViewModels
                     d.PartName,
                     d.MachineName,
                     d.SO,
-                    d.OperatorName,
+                    d.OperatorNameUnaccented,
                     d.IsLeather
                 })
                 .SelectMany(group =>
@@ -354,7 +354,7 @@ namespace DigitalProduction.ViewModels
                         MachineName = group.Key.MachineName,
                         SO = group.Key.SO,
                         PartName = group.Key.PartName,
-                        OperatorName = group.Key.OperatorName,
+                        OperatorName = group.Key.OperatorNameUnaccented,
                         IsLeather = isLeather,
                         MaterialType = isLeather
                             ? LocalizationManager.GetString("leatherMaterial")

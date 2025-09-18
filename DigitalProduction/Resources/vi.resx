@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Add" xml:space="preserve">
-    <value>Thêm thiết bị</value>
+    <value>Thêm</value>
   </data>
   <data name="AlreadyConnectedMessage" xml:space="preserve">
     <value>WebSocket đã được kết nối.</value>
@@ -707,5 +707,41 @@
   </data>
   <data name="RequiredDeviceAndOperator" xml:space="preserve">
     <value>Vui lòng chọn máy và người vận hành!!!</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+  <data name="Complete" xml:space="preserve">
+    <value>Hoàn thành</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Chưa hoàn thành</value>
+  </data>
+  <data name="Actual" xml:space="preserve">
+    <value>Thực tế</value>
+  </data>
+  <data name="btnSearch" xml:space="preserve">
+    <value>Tìm kiếm</value>
+  </data>
+  <data name="Delivered" xml:space="preserve">
+    <value>Số lượng đã giao</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+  <data name="StatusCode" xml:space="preserve">
+    <value>Tình trạng</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>Mục tiêu</value>
+  </data>
+  <data name="Total Usage" xml:space="preserve">
+    <value>Tổng dung lượng</value>
+  </data>
+  <data name="VietnameseName" xml:space="preserve">
+    <value>Bộ vị (vi)</value>
+  </data>
+  <data name="AddSupplementary" xml:space="preserve">
+    <value>Thêm Liệu Bù</value>
   </data>
 </root>

@@ -44,6 +44,7 @@
             // 
             // picEye
             // 
+            this.picEye.BackColor = System.Drawing.SystemColors.ControlLight;
             this.picEye.Cursor = System.Windows.Forms.Cursors.Hand;
             this.picEye.Image = global::DigitalProduction.Properties.Resources.icon_eye_close;
             this.picEye.Location = new System.Drawing.Point(801, 367);
@@ -89,6 +90,7 @@
             // 
             this.lblExit.AutoSize = true;
             this.lblExit.BackColor = System.Drawing.Color.Transparent;
+            this.lblExit.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lblExit.Font = new System.Drawing.Font("Tahoma", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Italic | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblExit.ForeColor = System.Drawing.Color.Black;
             this.lblExit.Location = new System.Drawing.Point(853, 13);
@@ -106,6 +108,7 @@
             this.btn_Login.Appearance.ForeColor = System.Drawing.Color.White;
             this.btn_Login.Appearance.Options.UseFont = true;
             this.btn_Login.Appearance.Options.UseForeColor = true;
+            this.btn_Login.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btn_Login.Location = new System.Drawing.Point(555, 434);
             this.btn_Login.LookAndFeel.SkinMaskColor = System.Drawing.Color.Black;
             this.btn_Login.LookAndFeel.SkinMaskColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
@@ -147,12 +150,13 @@
             // chkRememberMe
             // 
             this.chkRememberMe.AutoSize = true;
+            this.chkRememberMe.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.chkRememberMe.Location = new System.Drawing.Point(608, 411);
             this.chkRememberMe.Name = "chkRememberMe";
             this.chkRememberMe.Size = new System.Drawing.Size(94, 17);
             this.chkRememberMe.TabIndex = 34;
             this.chkRememberMe.Text = "Remember me";
-            this.chkRememberMe.UseVisualStyleBackColor = true;
+            this.chkRememberMe.UseVisualStyleBackColor = false;
             // 
             // frmLogin
             // 

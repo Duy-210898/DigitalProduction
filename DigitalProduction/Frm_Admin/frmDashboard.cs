@@ -72,7 +72,25 @@ namespace DigitalProduction.Frm_Admin
             _syncContext = SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
             SetWebSocketClient(null);
             gridViewDeviceManagement.OptionsBehavior.Editable = false;
-            gridViewDítribution.OptionsBehavior.Editable = false;
+            gridViewDistribution.OptionsBehavior.Editable = false;
+
+            // --------------- set up gridViewDistribution and gridViewDeviceManagement ---------------//
+            // Always show filter panel
+            gridViewDistribution.OptionsView.ShowAutoFilterRow = true;
+            gridViewDeviceManagement.OptionsView.ShowAutoFilterRow = true;
+
+            // Hide completely
+            gridViewDistribution.OptionsView.ShowFilterPanelMode = DevExpress.XtraGrid.Views.Base.ShowFilterPanelMode.Never;
+            gridViewDeviceManagement.OptionsView.ShowFilterPanelMode = DevExpress.XtraGrid.Views.Base.ShowFilterPanelMode.Never;
+
+            // Hide the "Drag a column here to group" panel
+            gridViewDistribution.OptionsView.ShowGroupPanel = false;
+            gridViewDeviceManagement.OptionsView.ShowGroupPanel = false;
+
+            // Show the Find (search) panel
+            gridViewDistribution.OptionsFind.AlwaysVisible = true;
+            gridViewDeviceManagement.OptionsFind.AlwaysVisible = true;
+
             lblDateFrom.Text = LocalizationManager.GetString("StartDate");
             lblDateTo.Text = LocalizationManager.GetString("EndDate");
             lblInputSO.Text = LocalizationManager.GetString("InputSO");
@@ -193,8 +211,8 @@ namespace DigitalProduction.Frm_Admin
             gridDistribution.DataSource = data;
 
             // Subscribe to the RowStyle event
-            gridViewDítribution.RowCellStyle += GridViewProgressManagement_RowCellStyle;
-            gridViewDítribution.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
+            gridViewDistribution.RowCellStyle += GridViewProgressManagement_RowCellStyle;
+            gridViewDistribution.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
             // hide column specific
             HideGridColumns(gridDistribution ,"DistributionID", "UserID", "IsDelete", "IsLeather", "OperatorID", "PartSizeOrderID", "DeviceID", "PartID", "ProductID", "ActualSizeQty", "Note", "InventoryQty");
             TranslateHeaders(gridDistribution);

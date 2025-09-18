@@ -8,7 +8,10 @@ using System.Windows.Forms;
 using DevExpress.XtraBars;
 using DevExpress.XtraBars.FluentDesignSystem;
 using DevExpress.XtraBars.Navigation;
+using DevExpress.XtraGrid.Localization;
+using DigitalProduction.Extensions;
 using DigitalProduction.Frm_Admin;
+using DigitalProduction.Frm_User;
 
 namespace DigitalProduction
 {
@@ -26,6 +29,19 @@ namespace DigitalProduction
 
         public frmMain()
         {
+            var vietnameseTranslations = new Dictionary<GridStringId, string>
+            {
+                { GridStringId.FindControlFindButton, LocalizationManager.GetString("btnSearch") },
+                { GridStringId.FindControlClearButton, LocalizationManager.GetString("Delete") },
+                // Note: placeholder is not available in 24.2.3 via GridLocalizer
+                // Other translations can be added here
+                //{ GridStringId.MenuGroupPanelShow, "Hiển thị nhóm theo cột" },
+                //{ GridStringId.MenuGroupPanelHide, "Ẩn nhóm theo cột" },
+                //{ GridStringId.MenuColumnClearFilter, "Xóa bộ lọc" }
+            };
+
+            // Activate the localizer
+            GridLocalizer.Active = new GenericGridLocalizer(vietnameseTranslations);
             resourceManager = new ResourceManager("DigitalProduction.en", typeof(frmMain).Assembly);
 
             InitializeComponent();
@@ -268,7 +284,6 @@ namespace DigitalProduction
         {
             await ShowUserControlAsync<ucDeviceManager>();
         }
-
         private async void btnUserManager_Click(object sender, EventArgs e)
         {
             await ShowUserControlAsync<ucUserManagement>();
@@ -328,7 +343,10 @@ namespace DigitalProduction
         {
             await ShowUserControlAsync<ucSchedule_View>();
         }
-
+        private async void btnAddSuplementary_Click(object sender, EventArgs e)
+        {
+            await ShowUserControlAsync<ucAddSupplementary>();
+        }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
@@ -378,7 +396,8 @@ namespace DigitalProduction
             btnOperator.Text = LocalizationManager.GetString("OperatorManager");
             btnProgressDistribution.Text = LocalizationManager.GetString("Progress");
             btnReportOder.Text = LocalizationManager.GetString("OperatorPerformance");
-            btnCuttingReportQty.Text = LocalizationManager.GetString("CuttingReport");
+            btnAddSupplement.Text = LocalizationManager.GetString("AddSupplementary");
+            //  btnCuttingReportQty.Text = LocalizationManager.GetString("CuttingReport");
         }
 
 

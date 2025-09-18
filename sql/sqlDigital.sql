@@ -56,6 +56,7 @@ CREATE TABLE Part (
     PartId INT PRIMARY KEY IDENTITY(1,1),
     SizeId INT,
     PartName VARCHAR(255),
+	VietNameseName VARCHAR(255),
     PartCode NVARCHAR(255)
 );
 GO

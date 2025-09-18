@@ -43,6 +43,40 @@ namespace DigitalProduction
                 Console.WriteLine("Lỗi: " + ex.Message);
             }
         }
+        /// <summary>
+        /// Thực thi SELECT query và trả về DataTable
+        /// </summary>
+        public static DataTable ExecuteQuery(string query, params SqlParameter[] parameters)
+        {
+            DataTable dt = new DataTable();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                if (parameters != null && parameters.Length > 0)
+                    cmd.Parameters.AddRange(parameters);
+
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                {
+                    da.Fill(dt);
+                }
+            }
+
+            return dt;
+        }
+        public static int ExecuteNonQuery(string sql, params SqlParameter[] parameters)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                if (parameters != null)
+                    cmd.Parameters.AddRange(parameters);
+
+                conn.Open();
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
         // login
         public static bool LoginUser(string username, string hashedPassword)
         {
@@ -1940,6 +1974,20 @@ namespace DigitalProduction
                         // get ID of operator
                         operatorId = GetEmployeeIdByOperatorId(conn, (int)operatorId);
 
+                        // Delete from CutHistory
+                        using (SqlCommand deleteHistory = conn.CreateCommand())
+                        {
+                            deleteHistory.CommandText = @"
+                                DELETE FROM CutHistory
+                                WHERE PartID = @PartID AND SizeID = @SizeID 
+                                      AND OrderID = @OrderID AND EmployeeID = @EmployeeID";
+                            deleteHistory.Parameters.AddWithValue("@PartID", partId);
+                            deleteHistory.Parameters.AddWithValue("@SizeID", sizeId);
+                            deleteHistory.Parameters.AddWithValue("@OrderID", orderId);
+                            deleteHistory.Parameters.AddWithValue("@EmployeeID", operatorId);
+                            deleteHistory.ExecuteNonQuery();
+                        }
+                        // Delete from DeviceOutput
                         using (SqlCommand deleteOutput = conn.CreateCommand())
                         {
                             deleteOutput.CommandText = @"

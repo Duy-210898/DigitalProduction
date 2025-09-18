@@ -419,7 +419,7 @@ async function logCutHistoryToDB({ OrderID, PartID, CutQuantity, SizeID, CutDate
 
     const cutHistoryBefore = pastCutResult.recordset[0].TotalCutQuantity ?? 0;
     actualCut = CutQuantity - cutHistoryBefore;
-   // console.log(`✅ Log đã lưu vào CutHistory ${actualCut} ${cutHistoryBefore}`);
+    //console.log('✅ Log đã lưu vào CutHistory ${actualCut}');
     if (actualCut < 0) {
       console.warn('❌ Invalid CutQuantity: result is negative');
       await transaction.rollback();
@@ -821,8 +821,6 @@ async function getDistributionDataFromDb(ipAddress) {
           Product AS p ON pr.ProductId = p.ProductId
       LEFT JOIN 
           DefaultInfo AS di ON di.ProductID = p.ProductId AND di.PartID = pa.PartId AND di.Model = p.Model
-      LEFT JOIN 
-          DeviceOutput AS do ON do.SizeID = se.SizeID AND do.OrderID = pr.OrderID AND do.PartID = pa.PartID
 
       -- SubDistribution join
       LEFT JOIN 
@@ -832,6 +830,8 @@ async function getDistributionDataFromDb(ipAddress) {
       -- Operator from sub or fallback
       LEFT JOIN 
           Operator AS o ON o.OperatorID = ISNULL(sd.OperatorID, dd.OperatorID)
+      LEFT JOIN 
+          DeviceOutput AS do ON do.SizeID = se.SizeID AND do.OrderID = pr.OrderID AND do.PartID = pa.PartID AND do.OperatorID = o.EmployeeID
 
       WHERE 
           dd.IsDelete = 0  
@@ -1169,6 +1169,7 @@ async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 1
             o.OperatorName,
             u.EmployeeName,
             pa.PartName,
+            pa.VietnameseName,
             se.Size,
             ps.Unit,
             ps.SizeQty,

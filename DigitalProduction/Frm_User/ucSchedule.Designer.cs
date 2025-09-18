@@ -39,6 +39,7 @@
             this.emptySpaceItem5 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.splitContainerControl1 = new DevExpress.XtraEditors.SplitContainerControl();
             this.layoutControl2 = new DevExpress.XtraLayout.LayoutControl();
+            this.cbxSize = new DevExpress.XtraEditors.CheckedComboBoxEdit();
             this.cbxPartName = new DevExpress.XtraEditors.CheckedComboBoxEdit();
             this.gridLookUpEditSO = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
@@ -55,6 +56,7 @@
             this.lblFilterDate = new DevExpress.XtraLayout.LayoutControlItem();
             this.lblPartName = new DevExpress.XtraLayout.LayoutControlItem();
             this.lblSelectSO = new DevExpress.XtraLayout.LayoutControlItem();
+            this.lblSize = new DevExpress.XtraLayout.LayoutControlItem();
             this.emptySpaceItem1 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.layoutControlItem5 = new DevExpress.XtraLayout.LayoutControlItem();
             this.flayoutTableSelectSO = new DevExpress.Utils.FlyoutPanel();
@@ -62,8 +64,6 @@
             this.gridControlSchedule = new DevExpress.XtraGrid.GridControl();
             this.gridViewSchedule = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.lblSize = new DevExpress.XtraLayout.LayoutControlItem();
-            this.cbxSize = new DevExpress.XtraEditors.CheckedComboBoxEdit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Root)).BeginInit();
@@ -79,6 +79,7 @@
             this.splitContainerControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl2)).BeginInit();
             this.layoutControl2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cbxPartName.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
@@ -93,6 +94,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.lblFilterDate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lblPartName)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lblSelectSO)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.flayoutTableSelectSO)).BeginInit();
@@ -100,8 +102,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.gridControlSchedule)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewSchedule)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblSize)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // layoutControl1
@@ -237,6 +237,19 @@
             this.layoutControl2.Size = new System.Drawing.Size(1029, 235);
             this.layoutControl2.TabIndex = 0;
             this.layoutControl2.Text = "layoutControl2";
+            // 
+            // cbxSize
+            // 
+            this.cbxSize.Location = new System.Drawing.Point(441, 147);
+            this.cbxSize.Name = "cbxSize";
+            this.cbxSize.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxSize.Properties.Appearance.Options.UseFont = true;
+            this.cbxSize.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cbxSize.Size = new System.Drawing.Size(238, 24);
+            this.cbxSize.StyleController = this.layoutControl2;
+            this.cbxSize.TabIndex = 17;
+            this.cbxSize.EditValueChanged += new System.EventHandler(this.comboSize_EditValueChanged);
             // 
             // cbxPartName
             // 
@@ -415,6 +428,13 @@
             this.lblSelectSO.Name = "lblSelectSO";
             this.lblSelectSO.Size = new System.Drawing.Size(328, 68);
             // 
+            // lblSize
+            // 
+            this.lblSize.Control = this.cbxSize;
+            this.lblSize.Location = new System.Drawing.Point(328, 28);
+            this.lblSize.Name = "lblSize";
+            this.lblSize.Size = new System.Drawing.Size(331, 68);
+            // 
             // emptySpaceItem1
             // 
             this.emptySpaceItem1.Location = new System.Drawing.Point(659, 0);
@@ -487,26 +507,6 @@
             this.gridView1.GridControl = this.gridControlSchedule;
             this.gridView1.Name = "gridView1";
             // 
-            // lblSize
-            // 
-            this.lblSize.Control = this.cbxSize;
-            this.lblSize.Location = new System.Drawing.Point(328, 28);
-            this.lblSize.Name = "lblSize";
-            this.lblSize.Size = new System.Drawing.Size(331, 68);
-            // 
-            // cbxSize
-            // 
-            this.cbxSize.Location = new System.Drawing.Point(441, 147);
-            this.cbxSize.Name = "cbxSize";
-            this.cbxSize.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxSize.Properties.Appearance.Options.UseFont = true;
-            this.cbxSize.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.cbxSize.Size = new System.Drawing.Size(238, 24);
-            this.cbxSize.StyleController = this.layoutControl2;
-            this.cbxSize.TabIndex = 17;
-            this.cbxSize.EditValueChanged += new System.EventHandler(this.comboSize_EditValueChanged);
-            // 
             // ucSchedule
             // 
             this.BackColor = System.Drawing.SystemColors.ButtonHighlight;
@@ -529,6 +529,7 @@
             this.splitContainerControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl2)).EndInit();
             this.layoutControl2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cbxPartName.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
@@ -543,6 +544,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.lblFilterDate)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lblPartName)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lblSelectSO)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lblSize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.flayoutTableSelectSO)).EndInit();
@@ -551,8 +553,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.gridControlSchedule)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewSchedule)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lblSize)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }

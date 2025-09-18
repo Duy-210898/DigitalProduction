@@ -1,16 +1,24 @@
 const EventEmitter = require('events');
-const ping = require('ping'); // dùng để ping host
 
-// ================== POLLING MANAGER ==================
 class ModbusPollingManager extends EventEmitter {
-  constructor(interval = 1000, maxConcurrent = 2) {
+  constructor(interval = 200, maxConcurrent = 50) {
     super();
     this.interval = interval;
     this.maxConcurrent = maxConcurrent;
-    this.clients = {};   // { ip: { client, socket, isConnected, sizeDataInfo, ... } }
-    this.queue = [];     // danh sách IP để polling
+    this.clients = {};   // { ip: { client, socket, isConnected, hasSizeData, ... } }
+    this.queue = new Set(); // dùng Set để tránh trùng IP
     this.activeCount = 0;
     this.timer = null;
+
+    // Dynamic tuning
+    this.minConcurrent = 10;
+    this.maxLimit = 200;
+    this.lastAdjust = Date.now();
+
+    // // Timer để auto check connection
+    // this.checkTimer = setInterval(() => {
+    //   this.autoCheckConnections();
+    //   }, 1000);
   }
 
   registerClient(ipAddress, clientEntry) {
@@ -18,79 +26,92 @@ class ModbusPollingManager extends EventEmitter {
       ...clientEntry,
       isProcessing: false,
       isConnecting: false,
-      taskLocks: {}
+      taskLocks: {},
+      hasSizeData: !!(clientEntry.sizeDataInfo && Object.keys(clientEntry.sizeDataInfo).length > 0)
     };
-    if (!this.queue.includes(ipAddress)) {
-      this.queue.push(ipAddress);
-    }
+
+    this.queue.add(ipAddress);
+
     if (!this.timer) {
       this.startScheduler();
     }
   }
 
   unregisterClient(ipAddress) {
+    const entry = this.clients[ipAddress];
+    if (entry?.socket) {
+      try {
+        entry.socket.removeAllListeners();
+        entry.socket.destroy();
+      } catch (_) {}
+    }
     delete this.clients[ipAddress];
-    this.queue = this.queue.filter(ip => ip !== ipAddress);
+    this.queue.delete(ipAddress);
   }
 
   startScheduler() {
-    this.timer = setInterval(() => {
-      if (this.activeCount >= this.maxConcurrent) return;
-      const ip = this.queue.shift();
-      if (!ip) return;
-      this.pollOne(ip).finally(() => {
-        this.queue.push(ip);
-      });
-    }, this.interval);
+    const loop = () => {
+      if (this.activeCount < this.maxConcurrent && this.queue.size > 0) {
+        const ip = this.queue.values().next().value; // lấy IP đầu tiên trong Set
+        this.queue.delete(ip);
+
+        if (ip) {
+          this.pollOne(ip).finally(() => {
+            if (this.clients[ip]) { // chỉ add lại nếu client còn tồn tại
+              this.queue.add(ip);
+            }
+          });
+        }
+      }
+
+      // ⚡ auto-adjust concurrency every 5s
+      if (Date.now() - this.lastAdjust > 5000) {
+        this.adjustConcurrency();
+        this.lastAdjust = Date.now();
+      }
+
+      this.timer = setTimeout(loop, this.interval);
+    };
+    this.timer = setTimeout(loop, this.interval);
   }
 
   stopScheduler() {
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
       this.timer = null;
     }
   }
 
-  async pollOne(ipAddress) {
-    const entry = this.clients[ipAddress];
+  async pollOne(ip) {
+    const entry = this.clients[ip];
     if (!entry || entry.isProcessing) return;
     entry.isProcessing = true;
     this.activeCount++;
 
     try {
-      const { client, socket, isConnected } = entry;
+      const { socket, isConnected } = entry;
 
-      // Connection check
-      if (!client || !isConnected || !socket || socket.destroyed || !socket.writable) {
-        await this.safeConnect(ipAddress);
+      if (!isConnected || !socket || socket.destroyed || !socket.writable) {
+        await this.safeConnect(ip);
+        // tự remove client nếu fail quá nhiều lần
+        entry.failCount = (entry.failCount || 0) + 1;
+        if (entry.failCount > 50) {
+          console.warn(`[${ip}] Removed due to repeated failures.`);
+          this.unregisterClient(ip);
+          return;
+        }
         return;
       }
+      entry.failCount = 0;
 
-      // Task 1: Poll distribution
-      await this.runWithLock(entry, 'poll', async () => {
-        if (await ping.promise.probe(ipAddress)) {
-          this.emit('poll', client, entry, ipAddress);
-        }
-      });
+      const tasks = [
+        this.runWithLock(entry, 'checkConnection', () => this.emit('checkConnection', entry, ip)),
+        //this.runWithLock(entry, 'writeRegister', () => this.emit('writeRegister', entry, ip)),
+        this.runWithLock(entry, 'poll', () => this.emit('poll', entry, ip)),
+        this.runWithLock(entry, 'readActual', () => this.emit('readActual', entry, ip))
+      ];
 
-      // Task 2: Read actual data if sizeDataInfo exists
-      if (entry.sizeDataInfo && Object.keys(entry.sizeDataInfo).length > 0) {
-        await this.runWithLock(entry, 'readActual', async () => {
-          if (await ping.promise.probe(ipAddress)) {
-            this.emit('readActual', client, entry, ipAddress);
-          }
-        });
-      }
-
-      // Task 3: Write register
-      await this.runWithLock(entry, 'writeRegister', async () => {
-        if (await ping.promise.probe(ipAddress)) {
-          this.emit('writeRegister', client, entry, ipAddress);
-        }
-      });
-
-    } catch (err) {
-      console.error(`[${ipAddress}] Polling error: ${err.message}`);
+      await Promise.all(tasks);
     } finally {
       entry.isProcessing = false;
       this.activeCount--;
@@ -117,6 +138,32 @@ class ModbusPollingManager extends EventEmitter {
       entry.isConnecting = false;
     }
   }
-}
 
-module.exports = ModbusPollingManager;
+  adjustConcurrency() {
+    const memMB = process.memoryUsage().heapUsed / 1024 / 1024;
+    const loadFactor = this.queue.size / (Object.keys(this.clients).length || 1);
+
+    if (memMB < 1500 && loadFactor > 0.3) {
+      // 🔼 safe to increase concurrency
+      this.maxConcurrent = Math.min(this.maxConcurrent + 10, this.maxLimit);
+    } else if (memMB > 2500) {
+      // 🔽 reduce to prevent OOM
+      this.maxConcurrent = Math.max(this.maxConcurrent - 10, this.minConcurrent);
+    }
+  }
+  // autoCheckConnections() {
+  //   for (const [ip, entry] of Object.entries(this.clients)) {
+  //   this.emit('checkConnection', entry, ip);
+  //   }
+  // }
+}
+// ✅ Helper để check HMI connection
+function isHMIConnected(entry, ip) {
+  if (!entry || entry.isDisconnected || !entry.client || typeof entry.client.readHoldingRegisters !== "function") {
+  console.warn(`[${ip}] ❌ HMI disconnected`);
+  return false;
+  }
+  return true;
+  }
+
+module.exports = {ModbusPollingManager, isHMIConnected};

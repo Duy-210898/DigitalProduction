@@ -8,10 +8,11 @@ using System.Windows.Forms;
 using DevExpress.Utils.Menu;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Localization;
 using DevExpress.XtraGrid.Menu;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
-using DigitalProduction.Frm_User;
+using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using GridviewHelp;
 using Newtonsoft.Json;
@@ -41,7 +42,7 @@ namespace DigitalProduction
         }
         private void ucProgress_Load(object sender, EventArgs e)
         {
-            dtpStartDate.EditValue =  DateTime.Today;
+            dtpStartDate.EditValue = DateTime.Today;
             dtpEndDate.EditValue = DateTime.Today;
             // Make sure controls are created first
             InitializeControls();
@@ -167,7 +168,6 @@ namespace DigitalProduction
         {
             // Clear existing columns
             gridViewProgressManagement.Columns.Clear();
-
             gridViewProgressManagement.Appearance.HeaderPanel.Font = new Font(gridViewProgressManagement.Appearance.Row.Font, FontStyle.Bold);
             gridViewProgressManagement.Appearance.HeaderPanel.BackColor = Color.AntiqueWhite;
             gridViewProgressManagement.Appearance.HeaderPanel.ForeColor = Color.Black;
@@ -180,6 +180,12 @@ namespace DigitalProduction
             gridViewProgressManagement.CustomDrawRowIndicator += (s, e) => { GridViewHelper.GridView_CustomDrawRowIndicator(s, e, gridProgressManagement, gridViewProgressManagement); };
             // thêm menu vào gridview
             gridViewProgressManagement.PopupMenuShowing += (s, e) => { GridViewHelper.AddFontAndColortoPopupMenuShowing(s, e, gridProgressManagement, this.Name); };
+            // Hide the "Drag a column here to group" panel
+            gridViewProgressManagement.OptionsView.ShowGroupPanel = false;
+
+            // Show the Find (search) panel
+            gridViewProgressManagement.OptionsFind.AlwaysVisible = true;
+
             this.Load += (s, e) =>
             {
                 GridViewHelper.SaveAndRestoreLayout(gridProgressManagement, this.Name);
@@ -301,7 +307,7 @@ namespace DigitalProduction
 
             gridProgressManagement.DataSource = filteredData;
             TranslateHeaders();
-           // lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")} {filteredData.Count}";
+            // lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")} {filteredData.Count}";
         }
 
         private bool _isDataLoaded = false;
@@ -357,15 +363,16 @@ namespace DigitalProduction
                 if (response != null)
                 {
                     if (string.IsNullOrEmpty(response))
-                    WebSocket_OnMessage(response);
+                        WebSocket_OnMessage(response);
                     _isDataLoaded = true;
                 }
-                else {
+                else
+                {
 
                     //  MessageBox.Show("InvalidOperation or No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     //ConnectionManager.Instance.IsReconnecting = true;
                     // Retry logic or callback method
-                   return;
+                    return;
                 }
             }
             catch (Exception ex)
@@ -949,7 +956,7 @@ namespace DigitalProduction
 
             lblPagingInfo = new DevExpress.XtraEditors.LabelControl
             {
-                Text = LocalizationManager.GetString("Page") +  "0 / 0",
+                Text = LocalizationManager.GetString("Page") + "0 / 0",
                 Location = new Point(btnPrev.Right + 20, 10)
             };
             pagingPanel.Controls.Add(lblPagingInfo);
@@ -962,7 +969,7 @@ namespace DigitalProduction
             SetWebSocketClient(WebSocketClient.Instance);
             await GetDataAndLoadToGridAsync();
             UpdatePagingLabel();
-           // return Task.CompletedTask;
+            // return Task.CompletedTask;
         }
 
         private int GetTotalPages()
@@ -994,9 +1001,10 @@ namespace DigitalProduction
             public string IpAddress { get; set; }
             public string MachineName { get; set; }
             public string PartName { get; set; }
+            public string VietnameseName { get; set; }
             public string Size { get; set; }
             public string Unit { get; set; }
-           // public double UnitUsage { get; set; }
+            // public double UnitUsage { get; set; }
             public int SizeQty { get; set; }
             public string MaterialName { get; set; }
             public string OperatorName { get; set; }

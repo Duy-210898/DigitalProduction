@@ -7,6 +7,7 @@ const cron = require("node-cron");
 const ping = require("ping");
 const nodemailer = require("nodemailer");
 const net = require("net");
+require("dotenv").config();
 const knownCuttingDevices = new Set();
 let clients = [];
 
@@ -50,7 +51,7 @@ async function handleClientMessage(ws, message) {
   try {
     const request = JSON.parse(message);
     const { app, action } = request;
-    console.log(`Action: ${action}`);
+   // console.log(`Action: ${action}`);
 
     if (!app) {
       console.log('Missing app field');
@@ -708,7 +709,7 @@ async function handleGetOperatorDistribution(ws, request) {
 
   } catch (error) {
     console.error('Error retrieving operator distribution:', error);
-    ws.send(JSON.stringify({ 
+    ws.send(JSON.stringify({
       action: 'getOperatorDistribution', 
       status: 'error', 
       message: 'Failed to retrieve operator distribution data' 
@@ -724,8 +725,8 @@ function notifyClients(devicesResponse) {
     }
   });
 }
-// ✅ 4. Schedule cronjob every 1 minute
-//setInterval(calculateActiveHours, 60 * 1000);
+//✅ 4. Schedule cronjob every 1 minute
+// setInterval(calculateActiveHours, 60 * 1000);
 
 
 // ✅ Setup mail transporter (use ENV in production)
@@ -733,16 +734,23 @@ const transporter = nodemailer.createTransport({
   host: "smtp.sendgrid.net",
   port: 587,           // 465 for SSL
   secure: false,       // true for port 465
+  auth: {
+    user: process.env.SENDGRID_USER, // "apikey"
+    pass: process.env.SENDGRID_PASS  // API key thực tế
+  },
+  tls: {
+    rejectUnauthorized: false // allow self-signed certificate
+  }
 });
 
 // 📧 Send mail alert
-async function sendMail(ip, port) {
+async function sendMail(ip, machineName , port) {
   const mailOptions = {
     from: "ducnhat171998@gmail.com",
     to: ["ducnhat1708@gmail.com", "Trung-Pham@vn.apachefootwear.com"],
     //"Trung-Pham@vn.apachefootwear.com"
     subject: `Device DOWN: ${ip}:${port}`,
-    text: `Device at ${ip}:${port} is unreachable (Ping failed, Socket off).`,
+    text: `Device at ${ip}:${port} and Machine Name: ${machineName} is unreachable (Change IP address or Socket off).`,
   };
   try {
     await transporter.sendMail(mailOptions);
@@ -753,7 +761,7 @@ async function sendMail(ip, port) {
 }
 
 // 🔍 Check one device
-async function checkDevice(ip, port) {
+async function checkDevice(ip, port, matchedDevice, ) {
   const pingResult = await ping.promise.probe(ip, { timeout: 2 });
   const isPingAlive = pingResult.alive;
 
@@ -778,11 +786,10 @@ async function checkDevice(ip, port) {
         });
     });
   }
-
-  if (!isPingAlive && !isSocketAlive) {
-    await sendMail(ip, port);
+  //if(ip !== '10.30.4.144') return;
+  if (!isSocketAlive || !matchedDevice) {
+    await sendMail(ip, machineName, port);
     await updateDeviceConnectionStatus(ip, false);
-    console.log(`❌ Device ${ip}:${port} DOWN`);
   } else if (isPingAlive && !isSocketAlive) {
     //console.log(`⚠️ Device ${ip}:${port} ping OK but socket OFF → no mail`);
     await updateDeviceConnectionStatus(ip, false);
@@ -792,23 +799,38 @@ async function checkDevice(ip, port) {
   }
 }
 
-// 🔁 Cron job to check devices every 1 minute
-function startCheckConnectCronJob() {
-  cron.schedule("*/30 * * * *", async () => {
-  //  console.log("⏰ Running device check:", new Date().toLocaleString());
-
-    try {
-      const devices = await getAllDeviceData();
-      for (const device of devices) {
-        const ip = device.IpAddress || device.ipAddress;
-        const port = device.Port || 502; // default Modbus
-        if (ip) await checkDevice(ip, port);
-      }
-    } catch (err) {
-      console.error("❌ Cron job error:", err.message);
-    }
-  });
+// 🔁 Cron job to check devices every 30 minute
+function startCheckConnectCronJob() 
+{ 
+  cron.schedule("*/30 * * * *", async () => { 
+  // console.log("⏰ Running device check:", new Date().toLocaleString()); 
+  try { 
+    const devices = await getAllDeviceData(); 
+    for (const device of devices) { 
+      const ip = device.IpAddress || device.ipAddress; 
+      const port = device.Port || 502; 
+      // default Modbus 
+      const entry = modbusClients[ip];
+      if(entry === undefined || entry.isConnected == false) continue;
+      let ipAddressResponse = await entry.client.readHoldingRegisters(8009, 4); 
+      const values = ipAddressResponse.response._body.values;
+      // array of 4 numbers 
+      const hmiIp = values.join(".");
+     // console.log(`📡 HMI reports its IP as: ${hmiIp}`);
+      // check if HMI IP exists in devices
+      const matchedDevice = devices.find(d => {
+        const deviceIp = d.IpAddress || d.ipAddress; 
+        return deviceIp === hmiIp;
+      }); 
+      if (ip) await checkDevice(ip, port, matchedDevice, device.machineName); 
+    } 
+  } 
+  catch (err) {
+     console.error("❌ Cron job error:", err.message); 
+    } 
+  }); 
 }
+
 
 module.exports = {
   setupWebSocket,

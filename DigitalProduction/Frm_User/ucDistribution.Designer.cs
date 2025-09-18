@@ -68,7 +68,7 @@
             this.numMaterialLayer = new System.Windows.Forms.NumericUpDown();
             this.numericTotalPeicesPerPair = new System.Windows.Forms.NumericUpDown();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.gridLookUpDevice = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridLookUpMachine = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.btnSync = new DevExpress.XtraEditors.SimpleButton();
             this.gridControlOverview = new DevExpress.XtraGrid.GridControl();
@@ -89,7 +89,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpMachine.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).BeginInit();
@@ -320,6 +320,7 @@
             this.btnDeleteData.Appearance.Options.UseFont = true;
             this.btnDeleteData.Appearance.Options.UseForeColor = true;
             this.btnDeleteData.AutoSize = true;
+            this.btnDeleteData.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnDeleteData.Dock = System.Windows.Forms.DockStyle.Left;
             this.btnDeleteData.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnDeleteData.ImageOptions.SvgImage")));
             this.btnDeleteData.Location = new System.Drawing.Point(50, 150);
@@ -368,6 +369,7 @@
             this.btnSend.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSend.Appearance.Options.UseFont = true;
             this.btnSend.AutoSize = true;
+            this.btnSend.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSend.Dock = System.Windows.Forms.DockStyle.Left;
             this.btnSend.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnSend.ImageOptions.SvgImage")));
             this.btnSend.Location = new System.Drawing.Point(253, 150);
@@ -391,7 +393,7 @@
             // 
             // tableLayoutPanel5
             // 
-            this.tableLayoutPanel5.BackColor = System.Drawing.Color.MistyRose;
+            this.tableLayoutPanel5.BackColor = System.Drawing.Color.LightSteelBlue;
             this.tableLayoutPanel5.ColumnCount = 3;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.36025F));
@@ -410,7 +412,10 @@
             // btnSaveInventory
             // 
             this.btnSaveInventory.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveInventory.Appearance.ForeColor = System.Drawing.Color.Black;
             this.btnSaveInventory.Appearance.Options.UseFont = true;
+            this.btnSaveInventory.Appearance.Options.UseForeColor = true;
+            this.btnSaveInventory.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSaveInventory.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnSaveInventory.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSaveInventory.ImageOptions.Image")));
             this.btnSaveInventory.Location = new System.Drawing.Point(398, 3);
@@ -426,7 +431,7 @@
             // lblInventoryQty
             // 
             this.lblInventoryQty.AutoSize = true;
-            this.lblInventoryQty.BackColor = System.Drawing.Color.MistyRose;
+            this.lblInventoryQty.BackColor = System.Drawing.Color.LightSteelBlue;
             this.lblInventoryQty.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblInventoryQty.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblInventoryQty.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
@@ -468,7 +473,7 @@
             // 
             // tableLayoutPanel4
             // 
-            this.tableLayoutPanel4.BackColor = System.Drawing.Color.MistyRose;
+            this.tableLayoutPanel4.BackColor = System.Drawing.Color.White;
             this.tableLayoutPanel4.ColumnCount = 1;
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel6, 0, 0);
@@ -484,7 +489,8 @@
             // tableLayoutPanel6
             // 
             this.tableLayoutPanel6.AutoSize = true;
-            this.tableLayoutPanel6.BackColor = System.Drawing.Color.MistyRose;
+            this.tableLayoutPanel6.BackColor = System.Drawing.Color.Transparent;
+            this.tableLayoutPanel6.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.tableLayoutPanel6.ColumnCount = 2;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -594,7 +600,7 @@
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.Controls.Add(this.gridLookUpDevice);
+            this.flowLayoutPanel1.Controls.Add(this.gridLookUpMachine);
             this.flowLayoutPanel1.Controls.Add(this.btnSync);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(492, 39);
@@ -602,19 +608,19 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(436, 41);
             this.flowLayoutPanel1.TabIndex = 13;
             // 
-            // gridLookUpDevice
+            // gridLookUpMachine
             // 
-            this.gridLookUpDevice.Location = new System.Drawing.Point(3, 3);
-            this.gridLookUpDevice.Name = "gridLookUpDevice";
-            this.gridLookUpDevice.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.gridLookUpDevice.Properties.Appearance.Options.UseBackColor = true;
-            this.gridLookUpDevice.Properties.AutoHeight = false;
-            this.gridLookUpDevice.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            this.gridLookUpMachine.Location = new System.Drawing.Point(3, 3);
+            this.gridLookUpMachine.Name = "gridLookUpMachine";
+            this.gridLookUpMachine.Properties.Appearance.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.gridLookUpMachine.Properties.Appearance.Options.UseBackColor = true;
+            this.gridLookUpMachine.Properties.AutoHeight = false;
+            this.gridLookUpMachine.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.gridLookUpDevice.Properties.NullText = "";
-            this.gridLookUpDevice.Properties.PopupView = this.gridView1;
-            this.gridLookUpDevice.Size = new System.Drawing.Size(200, 25);
-            this.gridLookUpDevice.TabIndex = 9;
+            this.gridLookUpMachine.Properties.NullText = "";
+            this.gridLookUpMachine.Properties.PopupView = this.gridView1;
+            this.gridLookUpMachine.Size = new System.Drawing.Size(200, 25);
+            this.gridLookUpMachine.TabIndex = 9;
             // 
             // gridView1
             // 
@@ -626,6 +632,7 @@
             // 
             // btnSync
             // 
+            this.btnSync.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSync.Location = new System.Drawing.Point(209, 3);
             this.btnSync.Name = "btnSync";
             this.btnSync.Size = new System.Drawing.Size(112, 25);
@@ -677,7 +684,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numMaterialLayer)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericTotalPeicesPerPair)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpDevice.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpMachine.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlOverview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewOverview)).EndInit();
@@ -726,7 +733,7 @@
         private DevExpress.XtraEditors.GridLookUpEdit gridLookUpOperator;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView2;
         private System.Windows.Forms.Label lblSelectMachine;
-        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpDevice;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpMachine;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         private System.Windows.Forms.Label lblUnitUsagePerPair;
         private DevExpress.XtraEditors.SimpleButton btnSync;

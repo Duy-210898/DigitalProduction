@@ -52,7 +52,7 @@
             this.lblStatus = new DevExpress.XtraEditors.LabelControl();
             this.btnDeleteSelected = new DevExpress.XtraEditors.SimpleButton();
             this.gridDistribution = new DevExpress.XtraGrid.GridControl();
-            this.gridViewDítribution = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.gridViewDistribution = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.pic_Admin = new DevExpress.XtraEditors.PictureEdit();
             this.windowsUIButtonPanel1 = new DevExpress.XtraBars.Docking2010.WindowsUIButtonPanel();
@@ -72,7 +72,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSO.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridDistribution)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridViewDítribution)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewDistribution)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pic_Admin.Properties)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
@@ -308,20 +308,20 @@
             // 
             this.gridDistribution.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridDistribution.Location = new System.Drawing.Point(3, 91);
-            this.gridDistribution.MainView = this.gridViewDítribution;
+            this.gridDistribution.MainView = this.gridViewDistribution;
             this.gridDistribution.Name = "gridDistribution";
             this.gridDistribution.Size = new System.Drawing.Size(964, 553);
             this.gridDistribution.TabIndex = 1;
             this.gridDistribution.UseEmbeddedNavigator = true;
             this.gridDistribution.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
-            this.gridViewDítribution});
+            this.gridViewDistribution});
             // 
-            // gridViewDítribution
+            // gridViewDistribution
             // 
-            this.gridViewDítribution.GridControl = this.gridDistribution;
-            this.gridViewDítribution.Name = "gridViewDítribution";
-            this.gridViewDítribution.OptionsBehavior.AllowDeleteRows = DevExpress.Utils.DefaultBoolean.True;
-            this.gridViewDítribution.RowDeleted += new DevExpress.Data.RowDeletedEventHandler(this.gridViewDítribution_RowDeleted);
+            this.gridViewDistribution.GridControl = this.gridDistribution;
+            this.gridViewDistribution.Name = "gridViewDistribution";
+            this.gridViewDistribution.OptionsBehavior.AllowDeleteRows = DevExpress.Utils.DefaultBoolean.True;
+            this.gridViewDistribution.RowDeleted += new DevExpress.Data.RowDeletedEventHandler(this.gridViewDítribution_RowDeleted);
             // 
             // tableLayoutPanel2
             // 
@@ -450,7 +450,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSO.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridDistribution)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridViewDítribution)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewDistribution)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pic_Admin.Properties)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -483,7 +483,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private DevExpress.XtraBars.Navigation.NavigationFrame navigationFrame1;
         private DevExpress.XtraGrid.GridControl gridDistribution;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridViewDítribution;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridViewDistribution;
         private System.Windows.Forms.ComboBox cbx_Status;
         private DevExpress.XtraEditors.LabelControl lblStatus;
         private System.Windows.Forms.TableLayoutPanel tableLayoutMainDevice;

@@ -102,7 +102,6 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.csproj.A
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ChangePassword.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.frmLoading.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_Admin.frmDashboard.resources
-D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_User.Schedule.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.ucCuttingReport.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.frmLogin.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.frmMain.resources
@@ -231,3 +230,4 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalP.A2EA8899.Up2Date
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.pdb
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_User.ucAddSupplementary.resources

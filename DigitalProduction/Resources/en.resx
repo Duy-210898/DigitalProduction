@@ -208,7 +208,7 @@
     <value>Find</value>
   </data>
   <data name="Add" xml:space="preserve">
-    <value>Add Device</value>
+    <value>Add</value>
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
@@ -508,7 +508,7 @@
     <value>Reason</value>
   </data>
   <data name="SelectData" xml:space="preserve">
-    <value>Select SO to distribution</value>
+    <value>Select SO to combine</value>
   </data>
   <data name="Refresh" xml:space="preserve">
     <value>Refresh</value>
@@ -610,7 +610,7 @@
     <value>Dashboard</value>
   </data>
   <data name="SelectDevideData" xml:space="preserve">
-    <value>Select SO to devide</value>
+    <value>Select SO to separate</value>
   </data>
   <data name="FindEmployeeCode" xml:space="preserve">
     <value>Find Employee Code</value>
@@ -677,5 +677,38 @@
   </data>
   <data name="RequiredDeviceAndOperator" xml:space="preserve">
     <value>Please select a Device and Operator!!!</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Actual</value>
+  </data>
+  <data name="Complete" xml:space="preserve">
+    <value>Complete</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Actual" xml:space="preserve">
+    <value>Actual</value>
+  </data>
+  <data name="btnSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Delivered" xml:space="preserve">
+    <value>Delivered</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="StatusCode" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="VietnameseName" xml:space="preserve">
+    <value>VietnameseName</value>
+  </data>
+  <data name="AddSupplementary" xml:space="preserve">
+    <value>Add Supplementary</value>
   </data>
 </root>
