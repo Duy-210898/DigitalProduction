@@ -742,6 +742,12 @@
     <value>Bộ vị (vi)</value>
   </data>
   <data name="AddSupplementary" xml:space="preserve">
-    <value>Thêm Liệu Bù</value>
+    <value>Thêm liệu bù</value>
+  </data>
+  <data name="FilterbyART" xml:space="preserve">
+    <value>Lọc theo ART</value>
+  </data>
+  <data name="SelectART" xml:space="preserve">
+    <value>-- Chọn ART --</value>
   </data>
 </root>

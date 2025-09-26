@@ -409,7 +409,7 @@ namespace DigitalProduction
             private string _size;
             private string _partName;
 
-            public event Func<OperatorDailySummary, Task> TargetQuantityChanged;
+           // public event Func<OperatorDailySummary, Task> TargetQuantityChanged;
             public string Model { get => _modelName; set { _modelName = value; NotifyPropertyChanged(nameof(Model)); } }
             public string OperatorName { get => _operatorName; set { _operatorName = value; NotifyPropertyChanged(nameof(OperatorName)); } }
             public DateTime Timestamp { get => _timestamp; set { _timestamp = value; NotifyPropertyChanged(nameof(Timestamp)); } }

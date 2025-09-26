@@ -90,7 +90,6 @@ class ModbusPollingManager extends EventEmitter {
 
     try {
       const { socket, isConnected } = entry;
-
       if (!isConnected || !socket || socket.destroyed || !socket.writable) {
         await this.safeConnect(ip);
         // tự remove client nếu fail quá nhiều lần

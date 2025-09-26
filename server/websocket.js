@@ -770,7 +770,6 @@ async function checkDevice(ip, port, matchedDevice, ) {
     isSocketAlive = await new Promise((resolve) => {
       const socket = new net.Socket();
       socket.setTimeout(2000);
-
       socket
         .connect(port, ip, () => {
          // socket.destroy();

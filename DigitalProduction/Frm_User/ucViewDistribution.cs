@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -125,7 +126,67 @@ namespace DigitalProduction
 
             gridViewSO.IndicatorWidth = 50; // Optional: make room for STT
             gridViewSO.OptionsBehavior.Editable = false;
+
+            SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.DateTime, Global.CurrentUser.DepartmentID);
+            SetupARTGridLookUp(gridLookUpART); // ✅ ART filter
+            gridLookUpSOs.CloseUp += (s, e) =>
+            {
+                LoadProductionSchedulesBySelectedSOs(gridLookUpSOs, gridControlViewSO, gridViewSO);
+            };
+
+            gridLookUpSOs.EditValueChanged += (s, e) =>
+            {
+                LoadProductionSchedulesBySelectedSOs(gridLookUpSOs, gridControlViewSO, gridViewSO);
+            };
+
+            gridLookUpART.EditValueChanged += (s, e) => // ✅ ART filter change
+            {
+                LoadProductionSchedulesBySelectedSOs(gridLookUpSOs, gridControlViewSO, gridViewSO);
+            };
+
         }
+
+        private void SetupARTGridLookUp(DevExpress.XtraEditors.GridLookUpEdit cboART)
+        {
+            string sql = @"SELECT DISTINCT ART FROM Product WHERE ART IS NOT NULL ORDER BY ART;";
+            DataTable dt = DbHelper.ExecuteQuery(sql);
+
+            DataTable dtWithEmpty = dt.Clone();
+
+            // Add empty row with display text
+            DataRow emptyRow = dtWithEmpty.NewRow();
+            emptyRow["ART"] = LocalizationManager.GetString("SelectART");
+            dtWithEmpty.Rows.Add(emptyRow);
+
+            // Import existing rows
+            foreach (DataRow row in dt.Rows)
+            {
+                dtWithEmpty.ImportRow(row);
+            }
+
+            // ✅ Use only cboART (not gridLookUpART)
+            cboART.Properties.DataSource = dtWithEmpty;
+            cboART.Properties.DisplayMember = "ART";
+            cboART.Properties.ValueMember = "ART";
+
+            // Preselect the placeholder
+            cboART.EditValue = LocalizationManager.GetString("SelectART");
+
+            // Configure the popup grid
+            var view = cboART.Properties.View;
+            view.Columns.Clear();
+            view.Columns.AddVisible("ART", "ART");
+            view.OptionsView.ShowAutoFilterRow = true;
+            view.OptionsView.ShowIndicator = false;
+            view.OptionsView.ShowGroupPanel = false;
+            view.OptionsBehavior.Editable = false;
+            view.BestFitColumns();
+
+            cboART.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            cboART.Properties.ImmediatePopup = true;
+            cboART.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
+        }
+
 
 
         private void SetupSOGridLookUp(DevExpress.XtraEditors.GridLookUpEdit cboSO, DateTime selectedDate, int departmentId)
@@ -174,17 +235,49 @@ namespace DigitalProduction
 
         private void LoadProductionSchedulesBySelectedSOs(DevExpress.XtraEditors.GridLookUpEdit cboSO, GridControl gridControl, GridView gridView)
         {
-            if (selectedSalesOrders == null || selectedSalesOrders.Count == 0)
-            {
-                gridControl.DataSource = null;
-                return;
-            }
+            //if (selectedSalesOrders == null || selectedSalesOrders.Count == 0)
+            //{
+            //    gridControl.DataSource = null;
+            //    return;
+            //}
             try
             {
                 DevExpress.XtraSplashScreen.SplashScreenManager.ShowForm(this, typeof(frmLoading), true, true);
 
-                // Step 1: Load flat list
-                var flatSchedules = DbHelper.GetSchedulesBySOList(selectedSalesOrders);
+                // Lấy danh sách SO đã chọn
+                var sos = selectedSalesOrders;
+
+                // Lấy ART đã chọn
+                string selectedART = gridLookUpART.EditValue?.ToString();
+
+                // Step 1: Lấy flat list từ DB
+                List<ProductionSchedule> flatSchedules;
+
+                if (sos != null && sos.Count > 0)
+                {
+                    // 🔹 Load theo danh sách SO
+                    flatSchedules = DbHelper.GetSchedulesBySOList(sos);
+                }
+                else if (!string.IsNullOrEmpty(selectedART) && selectedART != LocalizationManager.GetString("SelectART"))
+                {
+                    // 🔹 Không chọn SO, chỉ chọn ART → load theo ART
+                    flatSchedules = DbHelper.GetSchedulesByART(selectedART);
+                }
+                else
+                {
+                    // ❌ Không chọn gì thì clear grid
+                    gridControl.DataSource = null;
+                    return;
+                }
+
+                // Step 2: Nếu chọn cả ART + SO → filter thêm ART
+                if (!string.IsNullOrEmpty(selectedART) && selectedART != LocalizationManager.GetString("SelectART"))
+                {
+                    flatSchedules = flatSchedules
+                        .Where(s => string.Equals(s.ART, selectedART, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
 
                 // Step 2: Convert to nested structure: SO ➝ Size ➝ Details
                 var groupedSchedules = flatSchedules
@@ -317,7 +410,7 @@ namespace DigitalProduction
                                 int target = row.Details
                                     .Sum(d => d.SizeQty);
                                 // Actual
-                                int actual = row.Details.Min(a => a.TargetCut);
+                                int actual = (int)row.Details.Min(a => a.CutQuantity);
                                 //inventory
                                 int inventory = Math.Max(0, (int)row.Details
                                     .Sum(d => (d.CutQuantity + d.InventoryQty) - d.TargetCut));
@@ -327,8 +420,9 @@ namespace DigitalProduction
                                 //bool hasAnyPending = row.Details.Any(d =>
                                 //    string.Equals(d.StatusCode, Constants.Pending, StringComparison.OrdinalIgnoreCase));
                                 bool hasComplete = false;
-                                hasComplete = row.Details.Any(d => d.TargetCut - d.SizeQty <= 0);
-                                hasComplete = row.Details.Any(d => (d.CutQuantity + d.InventoryQty) - d.SizeQty >= 0);
+                                hasComplete = actual >= target;
+                                //hasComplete = row.Details.Any(d => d.TargetCut - d.SizeQty <= 0);
+                                //hasComplete = row.Details.Any(d => (d.CutQuantity + d.InventoryQty) - d.SizeQty >= 0);
                                 string status = hasComplete ? Constants.Complete : Constants.Pending;
 
                                 if (row != null)
@@ -338,31 +432,62 @@ namespace DigitalProduction
                                 }
                             }
                         };
+                        //sizeView.RowCellStyle += (s3, e3) =>
+                        //{
+                        //    var view = s3 as GridView;
+                        //    if (view == null || e3.RowHandle < 0) return;
+
+                        //    // Kiểm tra đúng cột cần đổi màu
+                        //    if (e3.Column.FieldName == nameof(SizeGroup.Size))
+                        //    {
+                        //        var row = view.GetRow(e3.RowHandle) as SizeGroup;
+                        //        if (row == null) return;
+
+                        //        bool hasPending = row.Details.Any(d =>
+                        //            d.StatusCode == Constants.Pending ||
+                        //            string.IsNullOrWhiteSpace(d.StatusCode));
+
+                        //        if (hasPending)
+                        //        {
+                        //            e3.Appearance.ForeColor = Color.Orange;
+                        //        }
+                        //        else
+                        //        {
+                        //            e3.Appearance.ForeColor = Color.Green;
+                        //        }
+                        //    }
+                        //};
                         sizeView.RowCellStyle += (s3, e3) =>
                         {
                             var view = s3 as GridView;
                             if (view == null || e3.RowHandle < 0) return;
 
-                            // Kiểm tra đúng cột cần đổi màu
                             if (e3.Column.FieldName == nameof(SizeGroup.Size))
                             {
                                 var row = view.GetRow(e3.RowHandle) as SizeGroup;
                                 if (row == null) return;
 
-                                bool hasPending = row.Details.Any(d =>
-                                    d.StatusCode == Constants.Pending ||
-                                    string.IsNullOrWhiteSpace(d.StatusCode));
+                                // Tính Target và Actual cho SizeGroup
+                                int target = row.Details.Sum(d => d.SizeQty);
+                                int actual = (int)row.Details.Sum(d => d.CutQuantity + d.InventoryQty);
+                                bool hasComplete = actual >= target;
 
-                                if (hasPending)
-                                {
-                                    e3.Appearance.ForeColor = Color.Orange;
-                                }
-                                else
+                                if (hasComplete)
                                 {
                                     e3.Appearance.ForeColor = Color.Green;
                                 }
+                                else
+                                {
+                                    // Nếu còn Pending thì cam, còn lại đỏ
+                                    bool hasPending = row.Details.Any(d =>
+                                        d.StatusCode == Constants.Pending ||
+                                        string.IsNullOrWhiteSpace(d.StatusCode));
+
+                                    e3.Appearance.ForeColor = hasPending ? Color.Orange : Color.Red;
+                                }
                             }
                         };
+
                     }
                 };
                 gridView.MasterRowExpanded += (s, e) =>
@@ -390,7 +515,7 @@ namespace DigitalProduction
                         int inventory = Math.Max(0, (int)row.Sizes
                             .SelectMany(t => t.Details)
                             .Sum(d => (d.CutQuantity + d.InventoryQty) - d.TargetCut));
-                        bool hasComplete = actual >= target ? true : false;
+                        bool hasComplete = actual >= target;
                         //bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.StatusCode == Constants.Pending || d.StatusCode == string.Empty);
                         //bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.StatusCode == Constants.Complete);
 
@@ -400,6 +525,31 @@ namespace DigitalProduction
                          $" | {LocalizationManager.GetString("Actual")}: {actual} | {LocalizationManager.GetString("Delivered")}: {inventory}";
                     }
                 };
+                //gridView.RowCellStyle += (s, e) =>
+                //{
+                //    var view = s as GridView;
+                //    if (view == null || e.RowHandle < 0) return;
+
+                //    if (e.Column.FieldName == Constants.SO)
+                //    {
+                //        var row = view.GetRow(e.RowHandle) as ScheduleGroup;
+                //        if (row == null) return;
+
+                //        // Determine status from the data
+                //        bool hasPending = row.Sizes
+                //            .SelectMany(sz => sz.Details)
+                //            .Any(d => d.StatusCode == Constants.Pending || string.IsNullOrWhiteSpace(d.StatusCode));
+
+                //        if (hasPending)
+                //        {
+                //            e.Appearance.ForeColor = Color.Orange;
+                //        }
+                //        else
+                //        {
+                //            e.Appearance.ForeColor = Color.Green;
+                //        }
+                //    }
+                //};
                 gridView.RowCellStyle += (s, e) =>
                 {
                     var view = s as GridView;
@@ -410,21 +560,26 @@ namespace DigitalProduction
                         var row = view.GetRow(e.RowHandle) as ScheduleGroup;
                         if (row == null) return;
 
-                        // Determine status from the data
-                        bool hasPending = row.Sizes
-                            .SelectMany(sz => sz.Details)
-                            .Any(d => d.StatusCode == Constants.Pending || string.IsNullOrWhiteSpace(d.StatusCode));
+                        // Target
+                        int target = row.Sizes
+                            .Select(d => d.Details.FirstOrDefault()?.SizeQty ?? 0)
+                            .Sum();
 
-                        if (hasPending)
+                        // Actual
+                        int actual = row.Sizes.Min(a => a._);  // <-- giống bên trên của bạn
+                        bool hasComplete = actual >= target;
+
+                        if (hasComplete)
                         {
-                            e.Appearance.ForeColor = Color.Orange;
+                            e.Appearance.ForeColor = Color.Green;  // Hoàn thành
                         }
                         else
                         {
-                            e.Appearance.ForeColor = Color.Green;
+                            e.Appearance.ForeColor = Color.Orange; // Chưa hoàn thành
                         }
                     }
                 };
+
 
                 gridView.ExpandAllGroups();
                 gridView.RefreshData();

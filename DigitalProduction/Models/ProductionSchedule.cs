@@ -61,9 +61,9 @@ namespace DigitalProduction.Models
     {
         public string Size { get; set; }
         public List<ProductionSchedule> Details { get; set; }
-        public int _ => Details != null && Details.Any()
+        public int _ => (Details != null && Details.Any()
              ? Details.Min(d => d.TargetCut)
-             : 0;
+             : 0);
     }
 
 }

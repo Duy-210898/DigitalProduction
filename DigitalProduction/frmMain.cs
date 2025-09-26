@@ -277,9 +277,6 @@ namespace DigitalProduction
             }
         }
 
-
-
-
         private async void btnDeviceManager_Click(object sender, EventArgs e)
         {
             await ShowUserControlAsync<ucDeviceManager>();
@@ -348,6 +345,11 @@ namespace DigitalProduction
             await ShowUserControlAsync<ucAddSupplementary>();
         }
 
+        private async void btnTreatment_Click(object sender, EventArgs e)
+        {
+            await ShowUserControlAsync<ucTreatment>();
+        }
+
         private void frmMain_Load(object sender, EventArgs e)
         {
             if (Global.CurrentUser == null)
@@ -381,7 +383,7 @@ namespace DigitalProduction
             this.Text = LocalizationManager.GetString("Home");
             accordionControlElement1.Text = LocalizationManager.GetString("ProductionSchedule");
             accordionControlElement4.Text = LocalizationManager.GetString("SystemManagerment");
-            accordionControlElement3.Text = LocalizationManager.GetString("CuttingManager");
+            accordionControlElement3.Text = LocalizationManager.GetString("DistributionManagement");
             barSubItem1.Caption = LocalizationManager.GetString("Guest");
             accordionControlElement6.Text = LocalizationManager.GetString("Report");
 

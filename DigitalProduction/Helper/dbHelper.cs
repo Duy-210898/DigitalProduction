@@ -1637,6 +1637,158 @@ namespace DigitalProduction
 
             return soList;
         }
+        public static List<ProductionSchedule> GetSchedulesByART(string art)
+        {
+            var result = new List<ProductionSchedule>();
+
+            string sql = @"
+                SELECT *
+                FROM (
+                    -- First: With ProductionSchedule
+                    SELECT 
+                        po.OrderID,
+                        po.Factory,
+                        po.SO,
+                        po.PO,
+                        po.MasterWorkOrder,
+                        po.LastNo,
+                        po.Process,
+                        s.Size,
+                        s.SizeID,
+                        p.ART,
+                        p.Model,
+                        pso.SizeQty,
+                        pso.TargetCut,
+                        pso.Unit AS PartSizeUnit,
+                        m.MaterialID,
+                        m.MaterialCode,
+                        m.MaterialName,
+                        m.Unit AS MaterialUnit,
+                        pa.PartId,
+                        pa.PartName,
+                        pa.VietnameseName,
+                        pa.PartCode,
+                        ps.CreatedAt,
+                        d.Status,
+                        d.InventoryQty,
+                        do.CuttingDieQty, 
+                        do.PiecesPerPair, 
+                        do.MaterialLayer, 
+                        do.TotalPiecesPerPair,
+                        ISNULL(do.ActualSizeQty, 0) + ISNULL(d.InventoryQty, 0) AS CutQuantity
+                    FROM Product p
+                    JOIN ProductOrder po ON p.ProductId = po.ProductId
+                    JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+                    JOIN Part pa ON pso.PartId = pa.PartId
+                    JOIN Material m ON pso.MaterialID = m.MaterialID
+                    JOIN Size s ON pso.SizeId = s.SizeID
+                    JOIN ProductionSchedule ps ON ps.OrderID = po.OrderID AND ps.PartID = pa.PartId AND ps.SizeID = s.SizeID
+                    LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
+                    LEFT JOIN DeviceOutput do ON do.SizeID = s.SizeID AND do.PartId = pa.PartId AND do.OrderID = po.OrderID
+                    WHERE p.ART = @ART
+
+                    UNION ALL
+
+                    -- Second: Only DistributionData / DeviceOutput (Not in ProductionSchedule)
+                    SELECT 
+                        po.OrderID,
+                        po.Factory,
+                        po.SO,
+                        po.PO,
+                        po.MasterWorkOrder,
+                        po.LastNo,
+                        po.Process,
+                        s.Size,
+                        s.SizeID,
+                        p.ART,
+                        p.Model,
+                        pso.SizeQty,
+                        pso.TargetCut,
+                        pso.Unit AS PartSizeUnit,
+                        m.MaterialID,
+                        m.MaterialCode,
+                        m.MaterialName,
+                        m.Unit AS MaterialUnit,
+                        pa.PartId,
+                        pa.PartName,
+                        pa.VietnameseName,
+                        pa.PartCode,
+                        GETDATE() AS CreatedAt,  -- placeholder
+                        d.Status,
+                        d.InventoryQty,
+                        do.CuttingDieQty, 
+                        do.PiecesPerPair, 
+                        do.MaterialLayer, 
+                        do.TotalPiecesPerPair,
+                        ISNULL(do.ActualSizeQty, 0) + ISNULL(d.InventoryQty, 0) AS CutQuantity
+                    FROM Product p
+                    JOIN ProductOrder po ON p.ProductId = po.ProductId
+                    JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+                    JOIN Part pa ON pso.PartId = pa.PartId
+                    JOIN Material m ON pso.MaterialID = m.MaterialID
+                    JOIN Size s ON pso.SizeId = s.SizeID
+                    LEFT JOIN DistributionData d ON pso.PartSizeOrderId = d.PartSizeOrderId
+                    LEFT JOIN DeviceOutput do ON do.SizeID = s.SizeID AND do.PartId = pa.PartId AND do.OrderID = po.OrderID
+                    WHERE p.ART = @ART
+                      AND NOT EXISTS (
+                          SELECT 1 
+                          FROM ProductionSchedule ps2
+                          WHERE ps2.OrderID = po.OrderID AND ps2.PartID = pa.PartId AND ps2.SizeID = s.SizeID
+                      )
+                ) AS CombinedResults
+                ORDER BY TRY_CAST(Size AS DECIMAL(4,1));
+            ";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@ART", art);
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        result.Add(new ProductionSchedule
+                        {
+                            OrderID = Convert.ToInt32(reader["OrderID"]),
+                            Factory = reader["Factory"].ToString(),
+                            SO = reader["SO"].ToString(),
+                            PO = reader["PO"].ToString(),
+                            MasterWorkOrder = reader["MasterWorkOrder"].ToString(),
+                            LastNo = reader["LastNo"].ToString(),
+                            Process = reader["Process"].ToString(),
+                            Size = reader["Size"].ToString(),
+                            SizeID = Convert.ToInt32(reader["SizeID"]),
+                            ART = reader["ART"].ToString(),
+                            Model = reader["Model"].ToString(),
+                            SizeQty = reader["SizeQty"] is int qty ? qty : 0,
+                            PartSizeUnit = reader["PartSizeUnit"].ToString(),
+                            MaterialID = Convert.ToInt32(reader["MaterialID"]),
+                            MaterialCode = reader["MaterialCode"].ToString(),
+                            MaterialName = reader["MaterialName"].ToString(),
+                            MaterialUnit = reader["MaterialUnit"].ToString(),
+                            PartId = Convert.ToInt32(reader["PartId"]),
+                            PartName = reader["PartName"].ToString(),
+                            VietnameseName = reader["VietnameseName"].ToString(),
+                            PartCode = reader["PartCode"].ToString(),
+                            CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]) : DateTime.MinValue,
+                            Status = reader["Status"]?.ToString(),
+                            InventoryQty = reader["InventoryQty"] is int inv ? inv : 0,
+                            CuttingDieQty = reader["CuttingDieQty"] is int die ? die : 0,
+                            PeicesPerPair = reader["PiecesPerPair"] is int ppp ? ppp : 0,
+                            MaterialLayer = reader["MaterialLayer"] is int ml ? ml : 0,
+                            TargetCut = reader["TargetCut"] is int tgc ? tgc : 0,
+                            TotalPiecesPerPair = reader["TotalPiecesPerPair"] is int tpp ? tpp : 0,
+                            CutQuantity = reader["CutQuantity"] is int cqt ? cqt : 0
+                        });
+                    }
+                }
+            }
+
+            return result;
+        }
+
         public static List<ProductionSchedule> GetSchedulesBySOList(List<string> soList)
         {
             var result = new List<ProductionSchedule>();

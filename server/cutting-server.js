@@ -83,9 +83,7 @@ async function handleDeviceConnection(ipAddresses) {
   const results = [];
   let successCount = 0;
   let failCount = 0;
-
   logPerformance(`🚀 Starting fast connection for ${ipAddresses.length} machines...`);
-
   // Break into chunks of MAX_CONCURRENT
   for (let i = 0; i < ipAddresses.length; i += MAX_CONCURRENT) {
     const chunk = ipAddresses.slice(i, i + MAX_CONCURRENT);
@@ -108,12 +106,10 @@ async function handleDeviceConnection(ipAddresses) {
         }
       })
     );
-
     results.push(...settled);
     const chunkDuration = Date.now() - chunkStart;
     logPerformance(`📦 Chunk ${i / MAX_CONCURRENT + 1}: ${chunk.length} devices in ${chunkDuration} ms`);
   }
-
   const totalDuration = Date.now() - startTotal;
   logPerformance(`📊 Final Summary:`);
   logPerformance(`  🟢 Success: ${successCount}`);

@@ -784,7 +784,7 @@ async function getDistributionDataFromDb(ipAddress) {
           o.EmployeeID AS OperatorID,
           p.ART,
           pa.PartID,
-          pa.PartName,
+          ISNULL(pa.VietnameseName, pa.PartName) AS PartName,
           m.MaterialCode,
           m.MaterialID,
           m.MaterialName,

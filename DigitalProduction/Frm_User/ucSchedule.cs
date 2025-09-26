@@ -27,6 +27,12 @@ namespace DigitalProduction
         public event EventHandler<RadioButton> RadioSelected;
         private static bool isLeather = false;
         private Timer flyoutAutoHideTimer;
+        // Decide which field to filter by, based on language
+
+       private string partField = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "vi"
+            ? "VietnameseName"
+            : "PartName";
+
         private readonly List<SalesOrder> selectedSalesOrders = new List<SalesOrder>();
         private readonly string[] columnsToHide = { "StatusCode", "ActualRemainingQuantity", "RemainingQuantity", "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
@@ -221,7 +227,13 @@ namespace DigitalProduction
             foreach (var item in list)
             {
                 var type = item.GetType();
-                var partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
+                var partValue = type.GetProperty(partField)?.GetValue(item)?.ToString();
+
+                // If VietnameseName selected but empty, use PartName
+                if (string.IsNullOrWhiteSpace(partValue) && partField == "VietnameseName")
+                {
+                    partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
+                }
                 if (partValue != null && selectedParts.Contains(partValue))
                 {
                     var sizeValue = type.GetProperty("Size")?.GetValue(item)?.ToString();
@@ -536,24 +548,43 @@ namespace DigitalProduction
         {
             gridViewSchedule.ClearGrouping();
 
-            GridColumn partNameColumn = gridViewSchedule.Columns["PartName"];
-            GridColumn sizeColumn = gridViewSchedule.Columns["Size"];
             GridColumn soColumn = gridViewSchedule.Columns["SO"];
+            GridColumn sizeColumn = gridViewSchedule.Columns["Size"];
+
+            // Create or reuse a grouping column that merges VietnameseName and PartName
+            GridColumn groupPartNameColumn = gridViewSchedule.Columns[LocalizationManager.GetString("PartName")];
+            if (groupPartNameColumn == null)
+            {
+                groupPartNameColumn = gridViewSchedule.Columns.AddVisible(LocalizationManager.GetString("PartName"), "Part Name");
+                groupPartNameColumn.UnboundType = DevExpress.Data.UnboundColumnType.String;
+
+                gridViewSchedule.CustomUnboundColumnData += (s, e) =>
+                {
+                    if (e.Column.FieldName == LocalizationManager.GetString("PartName") && e.IsGetData)
+                    {
+                        var vietnameseName = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "VietnameseName")?.ToString();
+                        var partName = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "PartName")?.ToString();
+
+                        if (partField == "VietnameseName")
+                            e.Value = !string.IsNullOrWhiteSpace(vietnameseName) ? vietnameseName : partName;
+                        else
+                            e.Value = partName;
+                    }
+                };
+            }
+
+            int groupIndex = 0;
+
             if (soColumn != null)
-            {
-                soColumn.GroupIndex = 0;
-            }
-            if (partNameColumn != null)
-            {
-                partNameColumn.GroupIndex = 1;
-            }
+                soColumn.GroupIndex = groupIndex++;
+
+            if (groupPartNameColumn != null)
+                groupPartNameColumn.GroupIndex = groupIndex++;
 
             if (sizeColumn != null)
-            {
-                sizeColumn.GroupIndex = 2;
-            }
+                sizeColumn.GroupIndex = groupIndex++;
 
-            gridViewSchedule.ExpandAllGroups(); // Expand all groups after setting
+            gridViewSchedule.ExpandAllGroups();
         }
 
 
@@ -578,11 +609,11 @@ namespace DigitalProduction
             _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
             _webSocketClient.OnResponseReceived += WebSocket_OnMessageAsync;
 
-            if (productionSchedules.Count == 0)
-            {
-                _ = GetListOfSOsByYearAsync();
-                // _ = GetDataAndLoadToGridAsync();
-            }
+            //if (productionSchedules.Count == 0)
+            //{
+            //    _ = GetListOfSOsByYearAsync();
+            //    // _ = GetDataAndLoadToGridAsync();
+            //}
         }
 
         public async Task GetDataAndLoadToGridAsync()
@@ -612,8 +643,8 @@ namespace DigitalProduction
             await _webSocketClient.SendAsync(jsonRequest);
         }
 
-        private int _soRetryCount = 0;
-        private const int MaxSoRetries = 3;
+        //private int _soRetryCount = 0;
+        //private const int MaxSoRetries = 3;
         private async void WebSocket_OnMessageAsync(string jsonData)
         {
             try
@@ -650,25 +681,25 @@ namespace DigitalProduction
                             if (soListResponse?.Data != null && soListResponse.Data.Count > 0)
                             {
                                 // ✅ Got data
-                                _soRetryCount = 0; // reset retry count
+                               // _soRetryCount = 0; // reset retry count
                                 gridLookUpEditSO.Properties.DataSource = soListResponse.Data;
                                 gridLookUpEditSO.Properties.DisplayMember = "SO";
                                 gridLookUpEditSO.Properties.ValueMember = "SO";
                             }
                             else
                             {
-                                // ❌ No data, retry if under max retries
-                                if (_soRetryCount < MaxSoRetries)
-                                {
-                                    _soRetryCount++;
-                                    await GetListOfSOsByYearAsync();
-                                }
-                                else
-                                {
+                                //// ❌ No data, retry if under max retries
+                                //if (_soRetryCount < MaxSoRetries)
+                                //{
+                                //    _soRetryCount++;
+                                //    await GetListOfSOsByYearAsync();
+                                //}
+                                //else
+                                //{
                                     // Final fallback
                                     gridLookUpEditSO.Properties.DataSource = null;
                                     ShowMessage.ShowInfo("No Sales Orders found after retries.");
-                                }
+                                //}
                             }
                             break;
 
@@ -884,7 +915,13 @@ namespace DigitalProduction
             {
                 var type = item.GetType();
 
-                var partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
+                var partValue = type.GetProperty(partField)?.GetValue(item)?.ToString();
+
+                // If VietnameseName selected but empty, use PartName
+                if (string.IsNullOrWhiteSpace(partValue) && partField == "VietnameseName")
+                {
+                    partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
+                }
                 if (!string.IsNullOrEmpty(partValue))
                     partSet.Add(partValue);
             }
@@ -913,7 +950,7 @@ namespace DigitalProduction
         private void ApplyCombinedFilters()
         {
             var sizeValues = GetCheckedValues(cbxSize, gridViewSchedule, "Size");
-            var partValues = GetCheckedValues(cbxPartName, gridViewSchedule, "PartName");
+            var partValues = GetCheckedValues(cbxPartName, gridViewSchedule, "PartName"); // dùng PartName để chắc chắn có dữ liệu
 
             List<string> filters = new List<string>();
 
@@ -921,9 +958,29 @@ namespace DigitalProduction
                 filters.Add($"[Size] IN ({string.Join(", ", sizeValues)})");
 
             if (partValues.Any())
-                filters.Add($"[PartName] IN ({string.Join(", ", partValues)})");
+            {
+                var partFilter = string.Join(", ", partValues);
 
-            gridViewSchedule.ActiveFilterString = string.Join(" AND ", filters);
+                if (partField == "VietnameseName")
+                {
+                    // In Vietnamese: prefer VietnameseName, fallback to PartName if empty
+                    filters.Add($@"
+                (
+                    (IsNullOrEmpty([VietnameseName]) AND [PartName] IN ({partFilter}))
+                    OR
+                    ([VietnameseName] IN ({partFilter}))
+                )");
+                }
+                else
+                {
+                    // Other languages: use PartName only
+                    filters.Add($"[PartName] IN ({partFilter})");
+                }
+            }
+
+            gridViewSchedule.ActiveFilterString = filters.Any()
+                ? string.Join(" AND ", filters)
+                : string.Empty;
         }
 
         private List<string> GetCheckedValues(CheckedComboBoxEdit comboBox, GridView gridView, string fieldName)
@@ -968,17 +1025,38 @@ namespace DigitalProduction
                 .FirstOrDefault(rb => rb.Checked)?.Text;
         }
 
-
-        private void OnRadioCheckedChanged(object sender, EventArgs e)
+        private async void OnRadioCheckedChanged(object sender, EventArgs e)
         {
             RadioButton rd = sender as RadioButton;
             if (rd.Checked)
             {
+                IOverlaySplashScreenHandle handle = null;
+
+                try
+                {
+                    handle = SplashScreenManager.ShowOverlayForm(this);
+
+                    // 🔹 Sleep 1 giây (không block UI)
+                    await Task.Delay(500);
+
+                    // Thực hiện cập nhật dữ liệu
+                    if (!string.IsNullOrEmpty(selectedYear.ToString()))
+                    {
+                        await GetListOfSOsByYearAsync();
+                    }
+                }
+                finally
+                {
+                    if (handle != null)
+                        SplashScreenManager.CloseOverlayForm(handle);
+                }
+
                 lblSelectSORequired.Enabled = true;
                 flayoutTableSelectSO.Enabled = true;
                 flayoutTableSelectSO.HideBeakForm(); // Hide if already shown
                 RadioSelected?.Invoke(this, rd);
             }
+
         }
     }
 }

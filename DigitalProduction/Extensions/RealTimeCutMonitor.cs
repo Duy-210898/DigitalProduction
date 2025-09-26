@@ -14,7 +14,7 @@ namespace DigitalProduction.Extensions
         public RealTimeCutMonitor()
         {
             _pollTimer = new Timer(3000); // 3 seconds
-            _pollTimer.Elapsed += async (s, e) => CheckCutActivity();
+            _pollTimer.Elapsed += (s, e) => CheckCutActivity();
             _pollTimer.AutoReset = true;
         }
 

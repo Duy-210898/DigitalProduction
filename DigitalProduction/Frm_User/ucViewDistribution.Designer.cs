@@ -38,6 +38,8 @@
             this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.btnSync = new DevExpress.XtraEditors.SimpleButton();
+            this.gridLookUpART = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridControlViewSO = new DevExpress.XtraGrid.GridControl();
             this.gridViewSO = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel1.SuspendLayout();
@@ -48,6 +50,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpSOs.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             this.tableLayoutPanel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpART.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlViewSO)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewSO)).BeginInit();
             this.SuspendLayout();
@@ -164,6 +168,7 @@
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel4.Controls.Add(this.btnSync, 0, 1);
+            this.tableLayoutPanel4.Controls.Add(this.gridLookUpART, 1, 1);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(308, 75);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
@@ -184,6 +189,24 @@
             this.btnSync.Size = new System.Drawing.Size(145, 51);
             this.btnSync.TabIndex = 5;
             this.btnSync.Text = "simpleButton1";
+            // 
+            // gridLookUpART
+            // 
+            this.gridLookUpART.EditValue = "";
+            this.gridLookUpART.Location = new System.Drawing.Point(302, 24);
+            this.gridLookUpART.Name = "gridLookUpART";
+            this.gridLookUpART.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpART.Properties.PopupView = this.gridView1;
+            this.gridLookUpART.Size = new System.Drawing.Size(294, 20);
+            this.gridLookUpART.TabIndex = 6;
+            // 
+            // gridView1
+            // 
+            this.gridView1.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridView1.Name = "gridView1";
+            this.gridView1.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridView1.OptionsView.ShowGroupPanel = false;
             // 
             // gridControlViewSO
             // 
@@ -220,6 +243,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpSOs.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             this.tableLayoutPanel4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpART.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControlViewSO)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewSO)).EndInit();
             this.ResumeLayout(false);
@@ -240,5 +265,7 @@
         private DevExpress.XtraGrid.GridControl gridControlViewSO;
         private DevExpress.XtraGrid.Views.Grid.GridView gridViewSO;
         private DevExpress.XtraEditors.DateEdit dateTimePickerViewSO;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpART;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
     }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
@@ -20,6 +22,10 @@ namespace DigitalProduction.Frm_User
     {
         private int? selectedYear = System.DateTime.Today.Year;
         private WebSocketClient _webSocketClient;
+        private string partField = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "vi"
+                    ? "VietnameseName"
+                    : "PartName";
+
         public ucAddSupplementary()
         {
 
@@ -88,14 +94,26 @@ namespace DigitalProduction.Frm_User
                 comboBoxPart.Properties.EndUpdate();
                 return;
             }
-
-            string sql = @"
+            string sql = String.Empty;
+            if (partField == "VietnameseName")
+            {
+                sql = @"
+                SELECT DISTINCT  ISNULL(pa.VietnameseName, pa.PartName) AS PartName
+                    FROM PartSizeOrder ps
+                    JOIN Part pa ON pa.PartID = ps.PartID
+                    JOIN ProductOrder pr ON ps.OrderId = pr.OrderID
+                    WHERE pr.SO = @SO
+                    ORDER BY PartName;";
+            }
+            else {
+                sql = @"
                 SELECT DISTINCT pa.PartName
                     FROM PartSizeOrder ps
                     JOIN Part pa ON pa.PartID = ps.PartID
                     JOIN ProductOrder pr ON ps.OrderId = pr.OrderID
                     WHERE pr.SO = @SO
                     ORDER BY pa.PartName;";
+            }
 
             DataTable dt = DbHelper.ExecuteQuery(sql, new SqlParameter("@SO", selectedSO));
 
@@ -135,16 +153,34 @@ namespace DigitalProduction.Frm_User
             }
 
             // SQL query: chỉ dùng 1 tham số @Part
-             string sql = @"
+            string sql = String.Empty;
+            if (partField == "VietnameseName")
+            {
+                sql = @"
                     SELECT s.Size
-                    FROM PartSizeOrder ps
-                    JOIN Size s ON s.SizeID = ps.SizeID
-                    JOIN Part pa ON pa.PartID = ps.PartID
-                    JOIN ProductOrder pr ON ps.OrderId = pr.OrderID
-                    WHERE pr.SO = @SO
-                        AND pa.PartName = @Part
-                    ORDER BY TRY_CAST(s.Size AS INT), s.Size;";
-
+                        FROM PartSizeOrder ps
+                        JOIN Size s ON s.SizeID = ps.SizeID
+                        JOIN Part pa ON pa.PartID = ps.PartID
+                        JOIN ProductOrder pr ON ps.OrderId = pr.OrderID
+                        WHERE pr.SO = @SO
+                            AND (
+                                   (pa.VietnameseName IS NOT NULL AND pa.VietnameseName <> '' AND pa.VietnameseName = @Part)
+                                OR (ISNULL(pa.VietnameseName, '') = '' AND pa.PartName = @Part)
+                                )
+                        ORDER BY TRY_CAST(s.Size AS INT), s.Size;
+                        ";
+            }
+            else {
+                sql = @"
+                     SELECT s.Size
+                        FROM PartSizeOrder ps
+                        JOIN Size s ON s.SizeID = ps.SizeID
+                        JOIN Part pa ON pa.PartID = ps.PartID
+                        JOIN ProductOrder pr ON ps.OrderId = pr.OrderID
+                        WHERE pr.SO = @SO
+                            AND pa.PartName = @Part
+                        ORDER BY TRY_CAST(s.Size AS INT), s.Size;";
+            }
             DataTable dt = DbHelper.ExecuteQuery(
                 sql,
                 new SqlParameter("@SO", selectedSO),
@@ -154,24 +190,49 @@ namespace DigitalProduction.Frm_User
             // Add size vào combobox
             if (dt != null && dt.Rows.Count > 0)
             {
+                cbxSize.Properties.BeginUpdate();
+                cbxSize.Properties.Items.Clear();
+
+                var sizes = new List<string>();
+
                 foreach (DataRow row in dt.Rows)
                 {
                     string size = row["Size"].ToString();
-                    if (!string.IsNullOrEmpty(size))
+                    if (!string.IsNullOrWhiteSpace(size))
                     {
-                        cbxSize.Properties.Items.Add(size);
+                        sizes.Add(size);
                     }
                 }
-            }
 
-            cbxSize.Properties.DropDownRows = Math.Min(10, cbxSize.Properties.Items.Count);
-            cbxSize.Properties.PopupFormMinSize = new Size(200, 350);
+                // Phân loại numeric vs non-numeric
+                var numericSizes = sizes
+                    .Where(s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                    .Select(s => new { Value = s, Num = double.Parse(s, CultureInfo.InvariantCulture) })
+                    .OrderBy(x => x.Num)
+                    .Select(x => x.Value)
+                    .ToList();
 
-            cbxSize.Properties.EndUpdate();
+                var nonNumericSizes = sizes
+                    .Where(s => !double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                    .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
-            if (cbxSize.Properties.Items.Count > 0)
-            {
-                cbxSize.ShowPopup();
+                // Add numeric trước rồi tới non-numeric
+                foreach (var size in numericSizes.Concat(nonNumericSizes))
+                {
+                    if (!cbxSize.Properties.Items.Contains(size))
+                        cbxSize.Properties.Items.Add(size);
+                }
+
+                cbxSize.Properties.DropDownRows = Math.Min(10, cbxSize.Properties.Items.Count);
+                cbxSize.Properties.PopupFormMinSize = new Size(200, 350);
+
+                cbxSize.Properties.EndUpdate();
+
+                if (cbxSize.Properties.Items.Count > 0)
+                {
+                    cbxSize.ShowPopup();
+                }
             }
         }
 
@@ -222,7 +283,7 @@ namespace DigitalProduction.Frm_User
                     switch (action)
                     {
                         case "getListOfSOsByYear":
-                            await Task.Delay(1000); // small delay before retry
+                            await Task.Delay(1000); // small delay before retry+
                             var soListResponse = JsonConvert.DeserializeObject<ResponseMessage<List<SalesOrder>>>(jsonData);
                             if (soListResponse?.Data != null && soListResponse.Data.Count > 0)
                             {

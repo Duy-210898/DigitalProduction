@@ -711,4 +711,10 @@
   <data name="AddSupplementary" xml:space="preserve">
     <value>Add Supplementary</value>
   </data>
+  <data name="FilterbyART" xml:space="preserve">
+    <value>Filter by ART</value>
+  </data>
+  <data name="SelectART" xml:space="preserve">
+    <value>-- Select ART --</value>
+  </data>
 </root>

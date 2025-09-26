@@ -8,11 +8,9 @@ using System.Windows.Forms;
 using DevExpress.Utils.Menu;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
-using DevExpress.XtraGrid.Localization;
 using DevExpress.XtraGrid.Menu;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
-using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using GridviewHelp;
 using Newtonsoft.Json;
@@ -284,7 +282,6 @@ namespace DigitalProduction
                     distribution.CreatedAt <= endDate
                 ).ToList()
             );
-
             _ = UpdateGridControlAsync(filteredData);
         }
 
@@ -368,7 +365,6 @@ namespace DigitalProduction
                 }
                 else
                 {
-
                     //  MessageBox.Show("InvalidOperation or No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     //ConnectionManager.Instance.IsReconnecting = true;
                     // Retry logic or callback method
@@ -477,7 +473,6 @@ namespace DigitalProduction
             }
         }
 
-
         private void TranslateHeaders()
         {
             if (gridProgressManagement.MainView is GridView gridView && gridView.Columns.Count > 0)
@@ -503,12 +498,10 @@ namespace DigitalProduction
             gridViewProgressManagement.Columns["CreatedAt"].Visible = false;
             gridViewProgressManagement.Columns["UpdatedAt"].Visible = false;
             gridViewProgressManagement.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
-
             gridViewProgressManagement.Columns["SO"].Width = 130;
             gridViewProgressManagement.Columns["MachineName"].Width = 110;
             gridViewProgressManagement.Columns["OperatorName"].Width = 150;
             gridViewProgressManagement.Columns["PartName"].Width = 130;
-
             gridViewProgressManagement.PopupMenuShowing += (s, e) =>
             {
                 if (e.MenuType == GridMenuType.Column)
@@ -839,7 +832,6 @@ namespace DigitalProduction
             return detailView;
         }
 
-
         private void GridViewProgressManagement_CustomDrawColumnHeader(object sender, ColumnHeaderCustomDrawEventArgs e)
         {
             if (e.Column != null && e.Column.FieldName == LocalizationManager.GetString("Reason"))
@@ -1017,9 +1009,7 @@ namespace DigitalProduction
             public bool IsLeather { get; set; }
             // New read-only property
             public string MaterialType => IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
-
             public int? Note { get; set; }
-
             public string NoteReason
             {
                 get

@@ -40,6 +40,8 @@
             this.btnProgressDistribution = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceOutput = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlSeparator2 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
+            this.btnAddSupplement = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnTreatmentPart = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnUserManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -59,7 +61,6 @@
             this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement5 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement7 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.btnAddSupplement = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemTextEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl1)).BeginInit();
@@ -123,7 +124,8 @@
             this.btnProgressDistribution,
             this.btnDeviceOutput,
             this.accordionControlSeparator2,
-            this.btnAddSupplement});
+            this.btnAddSupplement,
+            this.btnTreatmentPart});
             this.accordionControlElement3.Expanded = true;
             this.accordionControlElement3.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElement3.ImageOptions.Image")));
             this.accordionControlElement3.Name = "accordionControlElement3";
@@ -183,6 +185,24 @@
             // accordionControlSeparator2
             // 
             this.accordionControlSeparator2.Name = "accordionControlSeparator2";
+            // 
+            // btnAddSupplement
+            // 
+            this.btnAddSupplement.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F);
+            this.btnAddSupplement.Appearance.Default.Options.UseFont = true;
+            this.btnAddSupplement.Name = "btnAddSupplement";
+            this.btnAddSupplement.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnAddSupplement.Text = "Add Supplementary";
+            this.btnAddSupplement.Click += new System.EventHandler(this.btnAddSuplementary_Click);
+            // 
+            // btnTreatmentPart
+            // 
+            this.btnTreatmentPart.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F);
+            this.btnTreatmentPart.Appearance.Default.Options.UseFont = true;
+            this.btnTreatmentPart.Name = "btnTreatmentPart";
+            this.btnTreatmentPart.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnTreatmentPart.Text = "Treatment Part";
+            this.btnTreatmentPart.Click += new System.EventHandler(this.btnTreatment_Click);
             // 
             // accordionControlElement4
             // 
@@ -402,15 +422,6 @@
             this.accordionControlElement7.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.accordionControlElement7.Text = "View Distribution";
             // 
-            // btnAddSupplement
-            // 
-            this.btnAddSupplement.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F);
-            this.btnAddSupplement.Appearance.Default.Options.UseFont = true;
-            this.btnAddSupplement.Name = "btnAddSupplement";
-            this.btnAddSupplement.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.btnAddSupplement.Text = "Add Supplementary";
-            this.btnAddSupplement.Click += new System.EventHandler(this.btnAddSuplementary_Click);
-            // 
             // frmMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -468,6 +479,7 @@
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnViewInfoDistribution;
         private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator1;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnAddSupplement;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnTreatmentPart;
     }
 }
 
