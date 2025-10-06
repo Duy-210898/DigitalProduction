@@ -1,10 +1,11 @@
+
 const fs = require('fs');
 const net = require('net');
 const Modbus = require('jsmodbus');
 const ping = require('ping');
-const { ModbusPollingManager, isHMIConnected } = require('./ModbusPollingManager');
+const {ModbusPollingManager, isHMIConnected } = require('./ModbusPollingManager');
 const manager = new ModbusPollingManager(200);
-const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setDistributionIsComplete, setSubDistributionComplete, getSubDistributions, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb, logCutHistoryToDB } = require('./database');
+const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setDistributionIsComplete, setSubDistributionComplete , getSubDistributions, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb, logCutHistoryToDB } = require('./database');
 //const { notifyClientsToDeleteOrder } = require('./notifications');
 
 let countRemainSizeData = {};
@@ -35,7 +36,7 @@ function logToFile(filePath, message) {
  */
 async function attemptSingleConnection(ipAddress, entry) {
   return new Promise((resolve) => {
-    function connect() {
+     function connect() {
       const socket = new net.Socket();
       const client = new Modbus.client.TCP(socket, 1);
       const CONNECT_TIMEOUT = 60000;
@@ -46,13 +47,13 @@ async function attemptSingleConnection(ipAddress, entry) {
       // Timeout handler
       socket.setTimeout(CONNECT_TIMEOUT);
       socket.once('timeout', () => {
-        // console.warn(`[${ipAddress}] ⚠️ Connection timed out after ${CONNECT_TIMEOUT}ms`);
+       // console.warn(`[${ipAddress}] ⚠️ Connection timed out after ${CONNECT_TIMEOUT}ms`);
         delete modbusClients[ipAddress].socket
       });
 
       // First connection error
       socket.once('error', (err) => {
-        //   console.warn(`[${ipAddress}] ⚠️ Socket error: ${err.message}`);
+     //   console.warn(`[${ipAddress}] ⚠️ Socket error: ${err.message}`);
         delete modbusClients[ipAddress].socket
       });
 
@@ -64,21 +65,22 @@ async function attemptSingleConnection(ipAddress, entry) {
         // Monitor errors after connected
         socket.on('error', (err) => {
           console.warn(`[${ipAddress}] ⚠️ Socket error during session: ${err.message}`);
-          //  entry.isConnected = false;
+        //  entry.isConnected = false;
           delete modbusClients[ipAddress].socket
         });
 
         socket.on('close', () => {
-          // console.warn(`[${ipAddress}] ⚠️ Socket closed. Retrying in 5s...`);
+         // console.warn(`[${ipAddress}] ⚠️ Socket closed. Retrying in 5s...`);
           entry.isConnected = false;
           delete modbusClients[ipAddress].socket
-          //  setTimeout(connect, 2000); // retry
+        //  setTimeout(connect, 2000); // retry
         });
 
         resolve({ client, socket });
       });
     }
-    if (!entry.isConnected) {
+
+    if(!entry.isConnected) {
       updateDeviceConnectionStatus(ipAddress, false);
     }
     connect();
@@ -91,7 +93,7 @@ async function attemptSingleConnection(ipAddress, entry) {
  * @param {string} ipAddress The IP address of the device.
  */
 async function connectToDevice(ipAddress) {
-  // if (ipAddress !== '10.30.4.144') return;
+    if (ipAddress === '10.30.4.144') return;
   const entry = modbusClients[ipAddress] = modbusClients[ipAddress] || {};
 
   // Prevent duplicate connects
@@ -121,9 +123,11 @@ async function connectToDevice(ipAddress) {
   }
 }
 
+
+
 async function startReadingRegisters(client, socket, ipAddress) {
   const entry = modbusClients[ipAddress];
-
+  
   try {
     Object.assign(entry, {
       client,
@@ -159,7 +163,7 @@ manager.on('poll', async (entry, ip) => {
   }
 });
 
-manager.on('readActual', async (entry, ip) => {
+manager.on('readActual', async (entry , ip) => {
   if (!entry || entry.isDisconnected || typeof entry.client.readHoldingRegisters !== "function") {
     console.warn(`[${ip}] ReadActual skipped: device is marked as disconnected`);
     return;
@@ -167,7 +171,7 @@ manager.on('readActual', async (entry, ip) => {
   await readActualData(entry.client, ip);
 });
 
-manager.on('checkConnection', async (entry, ip) => {
+manager.on('checkConnection', async (entry , ip) => {
   if (!isHMIConnected(entry, ip)) return;
   try {
     await writeToModbusRegister(entry.client, entry, entry.isConnected, ip);
@@ -175,6 +179,7 @@ manager.on('checkConnection', async (entry, ip) => {
     console.warn(`[${ip}] ⚠️ Initial register write failed: ${err.message}`);
   }
 });
+
 
 manager.on('reconnect', async (ip) => {
   try {
@@ -222,16 +227,16 @@ async function checkAndSaveDistribution(client, ipAddress) {
 
     let distributionData;
     if (orderID === 0) {
-      //  console.log(`Register 1000 is 0. Fetching distribution data for IP: ${ipAddress}`);
+    //  console.log(`Register 1000 is 0. Fetching distribution data for IP: ${ipAddress}`);
 
       // Fetch distribution data from DB
       distributionData = await getDistributionDataFromDb(ipAddress);
       processDistributionData(client, ipAddress, distributionData, false);
     }
     else {
-      //get index SOs and Part if available
-      adjustModbusIndex(await safeRead(1020, client), ipAddress, true);
-      adjustModbusIndex(await safeRead(1022, client), ipAddress, false);
+       //get index SOs and Part if available
+       adjustModbusIndex(await safeRead(1020,client), ipAddress, true);
+       adjustModbusIndex(await safeRead(1022, client), ipAddress, false);
 
       storeDistributionData[ipAddress] = {};
       //retry get storeDistributionData
@@ -248,7 +253,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
       if (!modbusClients[ipAddress]?.SOs || modbusClients[ipAddress].SOs.length === 0) {
         return;
       }
-      // if (ipAddress !== '10.30.4.144') return;
+       if (ipAddress === '10.30.4.144') return;
       // interrupt HMI set distributionData again
       if (!modbusClients[ipAddress].sizeDataInfo ||
         typeof modbusClients[ipAddress].sizeDataInfo !== 'object' ||
@@ -282,7 +287,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
               item.Status = 'Complete';
             }
           });
-
+          
           // Filter and map the completed orders
           const completedOrders = sizeData
             .filter(item => item.Status === 'Complete')
@@ -290,20 +295,20 @@ async function checkAndSaveDistribution(client, ipAddress) {
               OrderID: item.OrderID,
               SizeID: item.SizeID,
               PartID: item.PartID,
-              OperatorID: item.OperatorID
+              OperatorID : item.OperatorID
             }));
-
+          
           if (completedOrders.length > 0) {
             for (const completeOrder of completedOrders) {
               const alreadyProcessed = previousCompletedOrders.some(prev =>
                 prev.OrderID === completeOrder.OrderID &&
                 prev.SizeID === completeOrder.SizeID &&
-                prev.PartID === completeOrder.PartID &&
+                prev.PartID === completeOrder.PartID && 
                 prev.OperatorID === completeOrder.OperatorID
               );
-
+          
               if (alreadyProcessed) continue;
-
+          
               const distributionIDFromSize = await getDistributionIDFromSizeID(
                 ipAddress,
                 completeOrder.OrderID,
@@ -311,35 +316,35 @@ async function checkAndSaveDistribution(client, ipAddress) {
                 completeOrder.SizeID,
                 completeOrder.PartID
               );
-
+              
               if (distributionIDFromSize?.DistributionID?.length > 0) {
                 try {
-                  const { DistributionID } = distributionIDFromSize.DistributionID[0];
-
+                  const { DistributionID }  = distributionIDFromSize.DistributionID[0];
+                  
                   // 🔁 Get SubDistributions under this Distribution
                   const subList = await getSubDistributions(DistributionID);
-
+              
                   if (!Array.isArray(subList) || subList.length === 0) {
-                    // console.warn(`⚠️ No subdistributions found for DistributionID: ${DistributionID}`);
+                   // console.warn(`⚠️ No subdistributions found for DistributionID: ${DistributionID}`);
                     await setDistributionIsComplete(DistributionID, 'Complete');
                   }
                   else {
                     let subCompletedCount = 0;
-
+                    
                     for (const sub of subList.filter(s => s.IpAddress === ipAddress)) {
-                      //const status = sub.Status;
-                      // if (status !== 'Complete') {
-                      sub.Status = "Complete";
-                      await setSubDistributionComplete(sub.SubDistributionID, 'Complete');
-                      console.log(`✅ SubDistribution ${sub.SubDistributionID} marked Complete`);
-                      subCompletedCount++;
-                      // }
+                      const status = sub.Status;
+                      if (status !== 'Complete') {
+                        sub.Status = "Complete";
+                        await setSubDistributionComplete(sub.SubDistributionID, 'Complete');
+                        console.log(`✅ SubDistribution ${sub.SubDistributionID} marked Complete`);
+                        subCompletedCount++;
+                      }
                     }
-
+                    
                     const allSubCompleted = subList.every(sub =>
                       sub.Status === 'Complete'
                     );
-
+                    
                     if (allSubCompleted) {
                       await setDistributionIsComplete(DistributionID, 'Complete');
                       console.log(`✅ Distribution ${DistributionID} marked Complete (all subs done)`);
@@ -353,7 +358,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
                     OrderID: completeOrder.OrderID,
                     SizeID: completeOrder.SizeID,
                     PartID: completeOrder.PartID,
-                    OperatorID: completeOrder.OperatorID
+                    OperatorID : completeOrder.OperatorID
                   });
                 } catch (error) {
                   console.error(
@@ -634,6 +639,7 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
       }
     }
   }
+
   // -----------------------------
   // Save DistributionData
   // -----------------------------
@@ -680,14 +686,16 @@ function adjustModbusIndex(value, ipAddress, isMultipleSOs) {
 
   if (isMultipleSOs) {
     clients.indexMultipleSOs = adjusted;
-    // console.log(`[adjustModbusIndex] [${ipAddress}] indexMultipleSOs set to ${adjusted} (raw: ${value})`);
+   // console.log(`[adjustModbusIndex] [${ipAddress}] indexMultipleSOs set to ${adjusted} (raw: ${value})`);
   } else {
     clients.indexMultiplePartNames = adjusted;
-    // console.log(`[adjustModbusIndex] [${ipAddress}] indexMultiplePartNames set to ${adjusted} (raw: ${value})`);
+   // console.log(`[adjustModbusIndex] [${ipAddress}] indexMultiplePartNames set to ${adjusted} (raw: ${value})`);
   }
 
   return adjusted;
 }
+
+
 
 function indexCompleteOnes(binaryString) {
   let count = binaryString.split('').filter(bit => bit === '1').length;
@@ -757,30 +765,29 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
     // Read the register value from the device
     const response = await client.readHoldingRegisters(register3000Address, 1);
     const registerValue = response.response._body.values[0];
-
+    
     // Convert register value to binary (16-bit)
     const binaryValue3000 = registerValue.toString(2).padStart(16, '0');
-    //  console.log(`Register ${register3000Address} = ${registerValue}`);
-    // console.log(`Binary 3000: ${binaryValue3000}`);
-
+  //  console.log(`Register ${register3000Address} = ${registerValue}`);
+   // console.log(`Binary 3000: ${binaryValue3000}`);
+    
     const clientData = modbusClients[ipAddress];
     if (!clientData?.SOs?.length) return;
-
+    
     if (isBitOn(binaryValue3000, nextSOIndex)) {
       await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
 
       const maxSOs = modbusClients[ipAddress].SOs.length;
       let next = Math.min(modbusClients[ipAddress].indexMultipleSOs + 1, maxSOs - 1);
 
-      //  console.log(`Next value ${next} to register 3000 address ${ipAddress}`);
+    //  console.log(`Next value ${next} to register 3000 address ${ipAddress}`);
 
       modbusClients[ipAddress].indexMultipleSOs = next;
-    
       //await client.writeSingleRegister(1020, next);
       storeDistributionData[ipAddress] = {};
       modbusClients[ipAddress].previousSizeData = [];
       modbusClients[ipAddress].previousData = {};
-      modbusClients[ipAddress].sizeDataInfo = {};
+      modbusClients[ipAddress].sizeDataInfo ={};
       modbusClients[ipAddress].sizeDataInfo.sizeID = [];
     }
     // if (modbusClients[ipAddress].lockPartNameAdvance) {
@@ -799,13 +806,13 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
       let previous = Math.max(0, modbusClients[ipAddress].indexMultipleSOs - 1);
 
       modbusClients[ipAddress].indexMultipleSOs = previous;
-      //  console.log(`Previous value ${previous} to register 3000 ${ipAddress}`);
+    //  console.log(`Previous value ${previous} to register 3000 ${ipAddress}`);
 
       //await client.writeSingleRegister(1020, previous);
       storeDistributionData[ipAddress] = {};
       modbusClients[ipAddress].previousSizeData = [];
       modbusClients[ipAddress].previousData = {};
-      modbusClients[ipAddress].sizeDataInfo = {};
+      modbusClients[ipAddress].sizeDataInfo ={};
       modbusClients[ipAddress].sizeDataInfo.sizeID = [];
     }
 
@@ -829,7 +836,7 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
         modbusClients[ipAddress].indexMultiplePartNames = previous;
         //  await client.writeSingleRegister(1022, previous);
 
-        //   console.log(`Previous value ${previous} to register 3000 address ${ipAddress}`);
+     //   console.log(`Previous value ${previous} to register 3000 address ${ipAddress}`);
 
         storeDistributionData[ipAddress] = {};
         modbusClients[ipAddress].previousSizeData = [];
@@ -845,7 +852,7 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
 
         if (currentSO && Array.isArray(currentSO.Data)) {
           uniquePartNameSOs = [...new Set(currentSO.Data.map(p => p.PartName))];
-          //  console.log(`Unique PartName Store:`, uniquePartNameSOs);
+        //  console.log(`Unique PartName Store:`, uniquePartNameSOs);
         } else {
           console.warn(`currentSO or currentSO.Data is undefined for IP: ${ipAddress}`);
         }
@@ -855,107 +862,107 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
 
         modbusClients[ipAddress].indexMultiplePartNames = next;
         // await client.writeSingleRegister(1022, next);
-        //    console.log(`Next value ${next} maxPartNames:${maxPartNames} to register 3000 address ${ipAddress}`);
+    //    console.log(`Next value ${next} maxPartNames:${maxPartNames} to register 3000 address ${ipAddress}`);
 
         storeDistributionData[ipAddress] = {};
         modbusClients[ipAddress].previousSizeData = [];
         modbusClients[ipAddress].previousData = {};
-      }
-      const distributionData = await getDistributionDataFromDb(ipAddress);
-
-      // Kiểm tra SO hiện tại
-      let currentSOComplete = false;
-
-      //   console.log(`Nhat: ${clientData.indexMultipleSOs}`)
-      const currentSO = clientData.SOs[clientData.indexMultipleSOs];
-      if (currentSO) {
-        currentSOComplete = await updateCompletionStatus(currentSO);
-      }
-      async function updateCompletionStatus(currentSO) {
-        if (!currentSO || !Array.isArray(currentSO.Data)) return false;
-
-        const data = currentSO.Data;
-        for (const item of data) {
-          if (item.Status !== 'Stop' &&
-            typeof item.ActualSizeQty === 'number' &&
-            typeof item.SizeQty === 'number' &&
-            item.ActualSizeQty >= item.SizeQty) {
-            item.Status = 'Complete';
-            // const distributionIDFromSize = await getDistributionIDFromSizeID(
-            //   ipAddress,
-            //   item.OrderID,
-            //   item.IsLeather ? 1 : 0,
-            //   item.SizeID,
-            //   item.PartID
-            // );
-            // if (distributionIDFromSize?.DistributionID?.length > 0) {
-            //     const { DistributionID }  = distributionIDFromSize.DistributionID[0];
-            //     setDistributionIsComplete(DistributionID, "Complete");
-            // }
-          }
-        }
-
-        // Re-check if all items are now Complete or Stop
-        return data.every(item => item.Status === 'Complete' || item.Status === 'Stop');
-      }
-      function removeCurrentSO(clientData) {
-        if (
-          !Array.isArray(clientData.SOs) ||
-          clientData.SOs.length === 0 ||
-          clientData.indexMultipleSOs < 0 ||
-          clientData.indexMultipleSOs >= clientData.SOs.length
-        ) {
-          return;
-        }
-
-        // Remove the current SO
-        clientData.SOs.splice(clientData.indexMultipleSOs, 1);
-
-        // Adjust the index safely
-        if (clientData.SOs.length === 0) {
-          clientData.indexMultipleSOs = -1; // No SOs left
-        } else if (clientData.indexMultipleSOs >= clientData.SOs.length) {
-          clientData.indexMultipleSOs = clientData.SOs.length - 1; // Point to the last valid SO
+    }
+    const distributionData = await getDistributionDataFromDb(ipAddress);
+    
+    // Kiểm tra SO hiện tại
+    let currentSOComplete = false;
+    
+ //   console.log(`Nhat: ${clientData.indexMultipleSOs}`)
+    const currentSO = clientData.SOs[clientData.indexMultipleSOs];
+    if (currentSO) {
+      currentSOComplete = await updateCompletionStatus(currentSO);
+    }
+    async function updateCompletionStatus(currentSO) {
+      if (!currentSO || !Array.isArray(currentSO.Data)) return false;
+    
+      const data = currentSO.Data;
+      for (const item of data) {
+        if ( item.Status !== 'Stop' &&
+          typeof item.ActualSizeQty === 'number' &&
+          typeof item.SizeQty === 'number' &&
+          item.ActualSizeQty >= item.SizeQty) {
+          item.Status = 'Complete';
+          // const distributionIDFromSize = await getDistributionIDFromSizeID(
+          //   ipAddress,
+          //   item.OrderID,
+          //   item.IsLeather ? 1 : 0,
+          //   item.SizeID,
+          //   item.PartID
+          // );
+          // if (distributionIDFromSize?.DistributionID?.length > 0) {
+          //     const { DistributionID }  = distributionIDFromSize.DistributionID[0];
+          //     setDistributionIsComplete(DistributionID, "Complete");
+          // }
         }
       }
-
-      // Nếu tất cả SOs complete hoặc distributionData null
-      if (currentSOComplete) {
-        removeCurrentSO(clientData);
-        await delay(3000);
-        await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
-        resetClientData(ipAddress, clientData);
-        return; // Nếu clear thì return luôn
-      }
-
-      // Check if distribution data has more SOs than client memory
-      let isPendingSize = false;
-      if (distributionData?.OrderIDWithSOs?.length > clientData.SOs.length || distributionData?.OrderIDWithSOs?.length < clientData.SOs.length) {
-        isPendingSize = true;
-      }
-
-      // Nếu isPendingSize = true => Clear và return ngay
-      if (isPendingSize) {
-        await delay(3000);
-        await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
-        resetClientData(ipAddress, clientData);
+    
+      // Re-check if all items are now Complete or Stop
+      return data.every(item => item.Status === 'Complete' || item.Status === 'Stop');
+    }
+    function removeCurrentSO(clientData) {
+      if (
+        !Array.isArray(clientData.SOs) ||
+        clientData.SOs.length === 0 ||
+        clientData.indexMultipleSOs < 0 ||
+        clientData.indexMultipleSOs >= clientData.SOs.length
+      ) {
         return;
       }
-
-      // Helper để reset dữ liệu client
-      function resetClientData(ip, clientData) {
-        storeDistributionData[ip] = {};
-        clientData.previousSizeData = [];
-        clientData.previousData = {};
-        clientData.indexMultipleSOs = 0;
-        clientData.indexMultiplePartNames = 0;
-        if (clientData.sizeDataInfo) {
-          clientData.sizeDataInfo.sizeID = [];
-        }
+    
+      // Remove the current SO
+      clientData.SOs.splice(clientData.indexMultipleSOs, 1);
+    
+      // Adjust the index safely
+      if (clientData.SOs.length === 0) {
+        clientData.indexMultipleSOs = -1; // No SOs left
+      } else if (clientData.indexMultipleSOs >= clientData.SOs.length) {
+        clientData.indexMultipleSOs = clientData.SOs.length - 1; // Point to the last valid SO
       }
+    }
+    
+    // Nếu tất cả SOs complete hoặc distributionData null
+    if (currentSOComplete) {
+      removeCurrentSO(clientData);
+      await delay(3000);
+      await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
+      resetClientData(ipAddress, clientData);
+      return; // Nếu clear thì return luôn
+    }
+
+    // Check if distribution data has more SOs than client memory
+    let isPendingSize = false;
+    if (distributionData?.OrderIDWithSOs?.length > clientData.SOs.length || distributionData?.OrderIDWithSOs?.length < clientData.SOs.length) {
+      isPendingSize = true;
+    }
+
+    // Nếu isPendingSize = true => Clear và return ngay
+    if (isPendingSize) {
+      await delay(3000);
+      await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
+      resetClientData(ipAddress, clientData);
+      return;
+    }
+
+    // Helper để reset dữ liệu client
+    function resetClientData(ip, clientData) {
+      storeDistributionData[ip] = {};
+      clientData.previousSizeData = [];
+      clientData.previousData = {};
+      clientData.indexMultipleSOs = 0;
+      clientData.indexMultiplePartNames = 0;
+      if (clientData.sizeDataInfo) {
+        clientData.sizeDataInfo.sizeID = [];
+      }
+    }
     } catch (error) {
       console.error(`Error processing part name change for ${ipAddress}:`, error);
-    }
+    } 
     // finally {
     //   modbusClients[ipAddress].lockPartNameAdvance = false;
     // }
@@ -990,7 +997,7 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
   let uniquePartNameSOs = [];
   if (currentSO && Array.isArray(currentSO.Data)) {
     uniquePartNameSOs = [...new Set(currentSO.Data.map(p => p.PartName))];
-    // console.log(`Unique PartName Store:`, uniquePartNameSOs);
+   // console.log(`Unique PartName Store:`, uniquePartNameSOs);
   } else {
     console.warn(`currentSO or currentSO.Data is undefined for IP: ${ipAddress}`);
   }
@@ -1039,21 +1046,21 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
 
   const sizeInfo = modbusClients[ipAddress].sizeDataInfo;
   if (!sizeInfo) return;
-
+  
   const fullSizeAddress = sizeInfo.sizeID;
   if (!Array.isArray(fullSizeAddress) || fullSizeAddress.length === 0) return;
-
+  
   if (!modbusClients[ipAddress].previousSizeData) {
     modbusClients[ipAddress].previousSizeData = [];
   }
-
+  
   const isLeatherMaterial = isLeather === 2;
   const typeMaterial = isLeatherMaterial ? 1 : 0;
   let baseActual = typeMaterial ? 922 : 794;
-
+  
   try {
     let sizeGroups = [];
-
+  
     if (isLeatherMaterial) {
       // Split into 2 arrays of 3 items
       sizeGroups = [
@@ -1064,24 +1071,24 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
       // Just one group of up to 6 items
       sizeGroups = [fullSizeAddress.slice(0, 6)];
     }
-
+  
     // Iterate each group
     for (let g = 0; g < sizeGroups.length; g++) {
       const group = sizeGroups[g];
-
+  
       await Promise.all(
         group.map(async (sizeAddressID, index) => {
           if (!sizeAddressID) return;
-
+  
           const sizeID = await safeRead(sizeAddressID, client);
           if (!sizeID || sizeID === 0) {
-            console.warn(`⚠️ Skipping invalid sizeID at group ${g} index ${index} ${ipAddress}`);
+            console.warn(`⚠️ Skipping invalid sizeID at group ${g} index ${index}`);
             return;
           }
-
+  
           const matched = summedValues.find(item => parseInt(item.sizeID) === sizeID);
           if (!matched) return;
-
+  
           let leatherSizeIDs = [45, 47, 49];
           let isLeather = leatherSizeIDs.includes(sizeAddressID);
 
@@ -1091,40 +1098,39 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
           }
           let sizeSpace = 16;
           const actualAddress = baseActual + sizeSpace * (index);
-          //const existing = modbusClients[ipAddress].previousSizeData.find(data => data.sizeID === sizeID);
+        //const existing = modbusClients[ipAddress].previousSizeData.find(data => data.sizeID === sizeID);
 
-          // const isSame =
-          //   existing &&
-          //   existing.actualCut === newData.actualCut &&
-          //   existing.actualPieces === newData.actualPieces &&
-          //   existing.actualQtys === newData.actualQtys;
+        // const isSame =
+        //   existing &&
+        //   existing.actualCut === newData.actualCut &&
+        //   existing.actualPieces === newData.actualPieces &&
+        //   existing.actualQtys === newData.actualQtys;
 
-          // if (!isSame) {
+        // if (!isSame) {
 
-          async function safeWrite(client, address, value) {
-            if (value !== 0) {
-              await client.writeSingleRegister(address, value);
-            }
+        async function safeWrite(client, address, value) {
+          if (value !== 0) {
+            await client.writeSingleRegister(address, value);
           }
+        }
+        await safeWrite(client, actualAddress, matched.totalCuts);
+        await safeWrite(client, actualAddress + 4, matched.totalPieces);
+        await safeWrite(client, actualAddress + 8, matched.totalQtys);
 
-          await safeWrite(client, actualAddress, matched.totalCuts);
-          await safeWrite(client, actualAddress + 4, matched.totalPieces);
-          await safeWrite(client, actualAddress + 8, matched.totalQtys);
+        // console.log(
+        //   `✅ Written values for sizeID=${sizeID}, addrID=${sizeAddressID}, cuts=${matched.totalCuts}, pieces=${matched.totalPieces}, qtys=${matched.totalQtys}, baseAddr=${actualAddress}, index=${index}, IP=${ipAddress}`
+        // );
 
-          // console.log(
-          //   `✅ Written values for sizeID=${sizeID}, addrID=${sizeAddressID}, cuts=${matched.totalCuts}, pieces=${matched.totalPieces}, qtys=${matched.totalQtys}, baseAddr=${actualAddress}, index=${index}, IP=${ipAddress}`
-          // );
+        //   if (existing) {
+        //     Object.assign(existing, newData);
+        //   } else {
+        //     modbusClients[ipAddress].previousSizeData.push(newData);
+        //   }
+        // } else {
+        //   console.log(`⏭️ Skipped writing for sizeID ${sizeID}, no change in values.`);
+        // }
 
-          //   if (existing) {
-          //     Object.assign(existing, newData);
-          //   } else {
-          //     modbusClients[ipAddress].previousSizeData.push(newData);
-          //   }
-          // } else {
-          //   console.log(`⏭️ Skipped writing for sizeID ${sizeID}, no change in values.`);
-          // }
-
-
+  
           //console.log(`✅ Written sizeID ${sizeID} at group ${g}, index ${index}, address ${actualAddress}`);
         })
       );
@@ -1155,7 +1161,7 @@ async function writeOperatorID(client, ipAddress, operatorID) {
     // Write both registers starting at address 1018
     await client.writeMultipleRegisters(1018, [lowRegister, highRegister]);
 
-    // console.log(`✅ Wrote OperatorID (${operatorID}) to IP: ${ipAddress}`);
+   // console.log(`✅ Wrote OperatorID (${operatorID}) to IP: ${ipAddress}`);
   } catch (error) {
     const errorMsg = `❌ Error writing OperatorID to IP ${ipAddress}: ${error.message}`;
     console.error(errorMsg);
@@ -1180,7 +1186,7 @@ const safeRead = async (address, client) => {
 };
 async function readActualData(client, ipAddress) {
   try {
-    if (modbusClients[ipAddress].isConnected == false) return;
+    if(modbusClients[ipAddress].isConnected == false) return;
     const rawLeather = await safeRead(1001, client);
     const isLeather = rawLeather === 2 ? 1 : 0;
 
@@ -1208,7 +1214,7 @@ async function readActualData(client, ipAddress) {
       modbusClients[ipAddress].previousData = {};
     }
     const sizeInfo = modbusClients[ipAddress].sizeDataInfo;
-    if (Object.keys(sizeInfo).length == 0) { return }
+    if (Object.keys(sizeInfo).length == 0) { return}
     const sizeCompleteID = modbusClients[ipAddress].sizeCompleteID || [];
 
     // Đọc chọn size từ thanh ghi
@@ -1224,7 +1230,7 @@ async function readActualData(client, ipAddress) {
 
     // async function updatePendingStatuses(modbusClients, ipAddress) {
     //   const SOs = modbusClients[ipAddress]?.SOs;
-
+    
     //   if (!Array.isArray(SOs) || SOs.length === 0) {
     //     console.warn(`[updatePendingStatuses] No SOs found for ${ipAddress}`);
     //     return;
@@ -1246,7 +1252,7 @@ async function readActualData(client, ipAddress) {
     // updatePendingStatuses(modbusClients, ipAddress);
 
     // Lấy size index từ HMI
-    if (Object.keys(sizeInfo).length == 0) { return }
+    if (Object.keys(sizeInfo).length == 0) { return}
     const sizeAddressID = sizeInfo.sizeID[index];
     let sizeQtyAddress;
     let actualAddress;
@@ -1257,27 +1263,27 @@ async function readActualData(client, ipAddress) {
       // leather rules
       const leatherSizeIDs = [45, 47, 49];
       const isLeatherSize = leatherSizeIDs.includes(sizeIDValue);
-
+      
       if (isLeatherSize) {
         const customIndex = getLeatherIndex(sizeIDValue);
-
+      
         baseSizeQtyAddress = 219;
         baseActual = 223;
-
+      
         sizeQtyAddress = baseSizeQtyAddress + 16 * customIndex;
         actualAddress = baseActual + 16 * customIndex;
-
+      
         // console.log(
         //   `🟤 Leather sizeID=${sizeIDValue}, customIndex=${customIndex}, sizeQtyAddress=${sizeQtyAddress}, actualAddress=${actualAddress}`
         // );
       } else {
         sizeQtyAddress = baseSizeQtyAddress + 16 * index;
         actualAddress = baseActual + 16 * index;
-
+      
         // console.log(
         //   `⚪ Normal sizeID=${sizeIDValue}, index=${index}, sizeQtyAddress=${sizeQtyAddress}, actualAddress=${actualAddress}`
         // );
-      }
+      }      
 
       // Đọc nhiều thanh ghi (register) song song với safeRead
       let [
@@ -1321,40 +1327,7 @@ async function readActualData(client, ipAddress) {
       let partID;
       let checkPendingSize = []; // always start as array
       if (modbusClients[ipAddress].hasMultipleSOs != null) {
-        if (isLeather) {
-          checkPendingSize =
-          modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-            ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending') || [];
-
-          const pendingItem = checkPendingSize.sort((a, b) => b.SizeQty - a.SizeQty).find(item => item.Status === 'Pending');
-          if (pendingItem) {
-            SizeID = pendingItem.SizeID;
-            partID = pendingItem.PartID;
-            OrderID = pendingItem.OrderID;
-            checkPendingSize = [pendingItem];
-          } else { return; }
-          // get all PartID And OrderID of leather
-          if (checkPendingSize.length === 0) return;
-          collectPartAndOrderID = (
-            checkPendingSize
-              ?.map(item => ({
-                PartID: item.PartID,
-                OrderID: item.OrderID,
-                SizeID: item.SizeID,
-                OperatorID: item.OperatorID,
-                SizeQty: item.SizeQty
-              }))
-              .reduce((acc, curr) => {
-                const key = `${curr.PartID}-${curr.OrderID}-${curr.SizeID}-${curr.OperatorID}`;
-                if (!acc.map.has(key)) {
-                  acc.map.set(key, true);
-                  acc.result.push(curr);
-                }
-                return acc;
-              }, { map: new Map(), result: [] }).result
-          ) || [];
-        }
-        else {
+        if (!isLeather) {
           partID = await safeRead(300, client);
           checkPendingSize = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
             ?.filter(item => item.SizeID === SizeID && item.PartID === partID) || [];
@@ -1371,20 +1344,45 @@ async function readActualData(client, ipAddress) {
             // Lọc theo status, partID and orderID nếu có gộp size
             checkPendingSize =
               modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-                ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending' && item.PartID === partID) || [];
+              ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending' && item.PartID === partID) || [];
           } else if (checkPendingSize.length === 1) {
             if (checkPendingSize[0].Status !== 'Pending') {
               return;
             }
             checkPendingSize =
               modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-                ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending' && item.PartID === partID && item.OrderID === OrderID) || [];
+              ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending' && item.PartID === partID && item.OrderID === OrderID) || [];
           } else { return; }
+        if (checkPendingSize.length === 0) return;
+        } else {
+          checkPendingSize =
+            modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
+              ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending') || [];
+
+          // get all PartID And OrderID of leather
+          if (checkPendingSize.length === 0) return;
+          collectPartAndOrderID = (
+            checkPendingSize
+              ?.map(item => ({
+                PartID: item.PartID,
+                OrderID: item.OrderID,
+                SizeID: item.SizeID,
+                OperatorID: item.OperatorID
+              }))
+              .reduce((acc, curr) => {
+                const key = `${curr.PartID}-${curr.OrderID}-${curr.SizeID}-${curr.OperatorID}`;
+                if (!acc.map.has(key)) {
+                  acc.map.set(key, true);
+                  acc.result.push(curr);
+                }
+                return acc;
+              }, { map: new Map(), result: [] }).result
+          ) || [];
         }
 
         if (!checkPendingSize.length) return;
 
-        // Gán giá trị chặt lưu tạm thời
+         // Gán giá trị chặt lưu tạm thời
         modbusClients[ipAddress].storedActualCut = actualCut ?? 0;
         modbusClients[ipAddress].storedActualSizeQty = actualSizeQty ?? 0;
         modbusClients[ipAddress].storedActualPieces = actualPieces ?? 0;
@@ -1400,22 +1398,10 @@ async function readActualData(client, ipAddress) {
 
         // collect total size complete actualSizeQty and actualCut
         let totalCompletedSize;
-        if (isLeather) {
-          const data = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]
-            ?.Data ?? [];
-
-          // Get all completed items with this SizeID
-          const completed = data.filter(
-            item => item.Status === "Complete" && item.SizeID === SizeID
-          );
-
-          // ✅ Deduplicate: only keep 1 item per SizeID
-          const uniqueCompleted = Array.from(
-            new Map(completed.map(item => [item.SizeID, item])).values()
-          );
-
-          totalCompletedSize =
-            uniqueCompleted.reduce(
+        if (!isLeather) {
+          totalCompletedSize = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
+            ?.filter(item => item.Status === 'Complete' && item.SizeID === SizeID && item.PartID === partID)
+            ?.reduce(
               (acc, item) => {
                 acc.totalSizeQty += item.SizeQty ?? 0;
                 acc.totalActualCut += item.ActualCut ?? 0;
@@ -1425,7 +1411,7 @@ async function readActualData(client, ipAddress) {
             ) ?? { totalSizeQty: 0, totalActualCut: 0 };
         } else {
           totalCompletedSize = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-            ?.filter(item => item.Status === 'Complete' && item.SizeID === SizeID && item.PartID === partID)
+            ?.filter(item => item.Status === 'Complete' && item.SizeID === SizeID)
             ?.reduce(
               (acc, item) => {
                 acc.totalSizeQty += item.SizeQty ?? 0;
@@ -1443,7 +1429,7 @@ async function readActualData(client, ipAddress) {
 
         const completedQty = Number(totalCompletedSize.totalSizeQty) || 0;
         const sizeRemain = completedQty;
-        
+
         const availableQty = modbusClients[ipAddress].storedActualSizeQty - sizeRemain;
         if (availableQty < 0) {
           return;
@@ -1454,16 +1440,15 @@ async function readActualData(client, ipAddress) {
             const so = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs];
             if (so?.Data?.length) {
               for (const item of collectPartAndOrderID) {
-                const matches = so.Data.filter(
+                const match = so.Data.find(
                   x => x.SizeID === SizeID &&
+                    x.PartID === item.PartID &&
                     x.OrderID === item.OrderID &&
-                    x.SizeQty === item.SizeQty &&
                     x.Status === 'Pending'
                 );
-                for (const match of matches) {
-                  match.Status = "Complete";
+                if (match) {
+                  match.Status = 'Complete';
                   match.ActualCut = modbusClients[ipAddress].storedActualCut - totalCompletedSize.totalActualCut;
-
                   if (actualSizeQty > firstPending.SizeQty) {
                     match.ActualSizeQty = firstPending.SizeQty;
                   } else {
@@ -1471,14 +1456,6 @@ async function readActualData(client, ipAddress) {
                   }
                   //console.log(`Updated status to Complete for SizeID: ${SizeID}, PartID: ${item.PartID}, OrderID: ${item.OrderID}`);
                 }
-                // filter collectPartAndOrderID base on macthes
-                collectPartAndOrderID = matches.map(m => ({
-                  PartID: m.PartID,
-                  OrderID: m.OrderID,
-                  SizeID: m.SizeID,
-                  OperatorID: m.OperatorID,
-                  SizeQty: m.SizeQty
-                }));
               }
             }
           } else {
@@ -1509,25 +1486,8 @@ async function readActualData(client, ipAddress) {
           // console.log(`Total Complete => ActualCut [Address] ${ipAddress} ${actualCut} actualSizeQty ${actualSizeQty}`);
         } else {
           if (isLeather) {
-            const so = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs];
-            for (const item of collectPartAndOrderID) {
-              const matches = so.Data.filter(
-                x => x.SizeID === SizeID &&
-                  x.OrderID === item.OrderID &&
-                  x.SizeQty === item.SizeQty &&
-                  x.Status === 'Pending'
-              );
-              // filter collectPartAndOrderID base on macthes
-              collectPartAndOrderID = matches.map(m => ({
-                PartID: m.PartID,
-                OrderID: m.OrderID,
-                SizeID: m.SizeID,
-                OperatorID: m.OperatorID,
-                SizeQty: m.SizeQty
-              }));
-            }
+            actualPieces = firstPending.TotalPiecesPerPair * actualSizeQty + actualCut;
             modbusClients[ipAddress].storedActualSizeQty -= totalCompletedSize.totalSizeQty;
-            actualPieces = firstPending.TotalPiecesPerPair * modbusClients[ipAddress].storedActualSizeQty + actualCut;
             actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
           } else {
             modbusClients[ipAddress].storedActualCut -= totalCompletedSize.totalActualCut;
@@ -1538,7 +1498,7 @@ async function readActualData(client, ipAddress) {
           }
           // console.log(`ActualCut [Address] ${ipAddress} actualSizeQty ${actualSizeQty}`);
         }
-        // assign to checking pending size
+         // assign to checking pending size
         firstPending.ActualCut = actualCut;
         firstPending.ActualPieces = actualPieces;
         firstPending.ActualSizeQty = actualSizeQty;
@@ -1595,6 +1555,7 @@ function findSubDistribution(ip, sizeID, partID, orderID, operatorID) {
   );
 }
 
+
 async function processActualDataChange(
   ipAddress,
   sizeID,
@@ -1607,7 +1568,7 @@ async function processActualDataChange(
   actualSizeQty,
   totalPieces,
   isLeather,
-  OrderID,
+  OrderID, 
   operatorID
 ) {
   const newData = {
@@ -1637,13 +1598,13 @@ async function processActualDataChange(
   hasChanges = isNewData || JSON.stringify(newData) !== JSON.stringify(prevData);
 
   if (hasChanges) {
-    // console.log(`Data changed or first-time load for sizeID ${sizeID}, updating DB...`, newData);
+   // console.log(`Data changed or first-time load for sizeID ${sizeID}, updating DB...`, newData);
 
     // Calculate cut delta
     // const previousCut = prevData?.ActualCut ?? 0;
     // const cutDelta = actualCut - previousCut;
 
-    // if (cutDelta > 0) {
+   // if (cutDelta > 0) {
     const cutDate = new Date().toISOString().split("T")[0]; // format YYYY-MM-DD
 
     //console.log('Nhat: ' + operatorID);
@@ -1673,7 +1634,7 @@ async function processActualDataChange(
       console.warn(`modbusClients[${ipAddress}] is invalid. Re-initializing.`);
       modbusClients[ipAddress] = {};
     }
-
+    
     if (!modbusClients[ipAddress].previousData || typeof modbusClients[ipAddress].previousData !== 'object') {
       modbusClients[ipAddress].previousData = {};
     }
@@ -1689,7 +1650,7 @@ async function processActualDataChange(
 // proccess to mutiple SO size -- save on DB
 async function processSizeID(ipAddress) {
   if (!modbusClients[ipAddress]?.SOs?.length) {
-    // console.log(`[sizeID] No SOs data available for IP: ${ipAddress}`);
+   // console.log(`[sizeID] No SOs data available for IP: ${ipAddress}`);
     return;
   }
 
@@ -1715,19 +1676,19 @@ async function processSizeID(ipAddress) {
       )
     ).values()
   );
-
+  
   for (const { OrderID, SizeID, PartID, ActualCut, CuttingDieQty, PiecesPerPair, MaterialLayer, TotalPiecesPerPair, OperatorID, Leather } of validPairs) {
 
     for (const so of modbusClients[ipAddress]?.SOs || []) {
       const match = (so.Data || []).find(item =>
         item.OrderID === OrderID &&
         item.SizeID === SizeID &&
-        item.PartID === PartID &&
+        item.PartID === PartID && 
         item.OperatorID === OperatorID
       );
       if (match) {
         match.ActualCut = typeof match.ActualCut === 'number' ? match.ActualCut : 0;
-        //    console.log(`Set ActualCut for OrderID: ${OrderID}, SizeID: ${SizeID}, PartID: ${PartID}`);
+    //    console.log(`Set ActualCut for OrderID: ${OrderID}, SizeID: ${SizeID}, PartID: ${PartID}`);
       }
     }
     // Check if this pair was already processed
@@ -1736,7 +1697,7 @@ async function processSizeID(ipAddress) {
       continue; // Skip processing if already saved
     }
 
-    // console.log(`[sizeID] Processing OrderID: ${OrderID}, SizeID: ${SizeID}, PartID: ${PartID}, Leather ${Leather}`);
+  // console.log(`[sizeID] Processing OrderID: ${OrderID}, SizeID: ${SizeID}, PartID: ${PartID}, Leather ${Leather}`);
 
     const newData = {
       SizeID,
@@ -1757,11 +1718,11 @@ async function processSizeID(ipAddress) {
       }
       await saveActualDataToDB({
         OrderID,
-        OperatorID: OperatorID,
+        OperatorID : OperatorID,
         IsLeather: Leather,
         SizeData: [newData],
       });
-      //  console.log(`[sizeID] Successfully saved data for OrderID: ${OrderID}, SizeID: ${SizeID}, PartID: ${PartID}`);
+    //  console.log(`[sizeID] Successfully saved data for OrderID: ${OrderID}, SizeID: ${SizeID}, PartID: ${PartID}`);
     } catch (error) {
       console.error(`[sizeID] Error saving data for OrderID: ${OrderID}, SizeID: ${SizeID}, PartID: ${PartID}: ${error.message}`);
     }
@@ -1800,11 +1761,13 @@ async function writeToModbusRegister(client, entry, isConnected, ipAddress, regi
   }, 1000);
 }
 
+
 async function safeWriteRegister(client, entry, isConnected, ipAddress, register, value) {
   if (!entry || !isConnected) {
     console.warn(`[${ipAddress}] ❌ No client found, cannot write`);
     return;
   }
+
   try {
     // Lock để đảm bảo 1 thiết bị chỉ có 1 write chạy cùng lúc
     if (!entry.writeLock) entry.writeLock = Promise.resolve();
@@ -1818,15 +1781,15 @@ async function safeWriteRegister(client, entry, isConnected, ipAddress, register
 
         try {
           await client.writeSingleRegister(register, value);
-          // console.log(`✅ Wrote ${value} → ${register} @ ${ipAddress}`);
+         // console.log(`✅ Wrote ${value} → ${register} @ ${ipAddress}`);
         } catch (err) {
-          // console.error(`[${ipAddress}] ❌ Write failed: ${err.message}`);
+         // console.error(`[${ipAddress}] ❌ Write failed: ${err.message}`);
           entry.isConnected = false;
           if (entry.socket) {
             try {
               entry.socket.end();
               entry.socket.destroy();
-            } catch (_) { }
+            } catch (_) {}
             delete entry.socket;
           }
           entry.isConnecting = false;
@@ -1844,6 +1807,7 @@ async function safeWriteRegister(client, entry, isConnected, ipAddress, register
     entry.isConnected = false;
   }
 }
+
 
 function startMonitoring() {
   setInterval(async () => {
@@ -1909,9 +1873,9 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
       const startRegister = orderInfoAddresses[index].start;
       for (let j = 0; j < registerData.length; j++) {
         try {
-          //    console.log(`The covert text:  ${convert16BitArrayToString(registerData)} ${startRegister + j} ${registerData[j]}`);
+      //    console.log(`The covert text:  ${convert16BitArrayToString(registerData)} ${startRegister + j} ${registerData[j]}`);
           await client.writeSingleRegister(startRegister + j, registerData[j]);
-          //  console.log(`Successfully wrote to register ${startRegister + j}`);
+        //  console.log(`Successfully wrote to register ${startRegister + j}`);
         } catch (error) {
           console.error(`Error writing to register ${startRegister + j}: ${error.message}`);
         }
@@ -1926,7 +1890,7 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
         const leatherData = parseInt(data.Leather);
         const startRegister = 1001;
         await client.writeSingleRegister(startRegister, leatherData);
-        // console.log(`Successfully wrote Leather data to register ${startRegister} with value ${leatherData} ${ipAddress}`);
+       // console.log(`Successfully wrote Leather data to register ${startRegister} with value ${leatherData} ${ipAddress}`);
       } catch (error) {
         console.error(`Error writing Leather data: ${error.message}`);
       }
@@ -1944,7 +1908,7 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
         for (let i = 0; i < materialCodeArray.length; i++) {
           const registerAddress = materialRegisterAddress + i; // Increment register address for each 16-bit value
           await client.writeSingleRegister(registerAddress, materialCodeArray[i]);
-          //  console.log(`Successfully wrote materialCode ${materialCodeArray[i]} to register ${registerAddress}`);
+        //  console.log(`Successfully wrote materialCode ${materialCodeArray[i]} to register ${registerAddress}`);
         }
       } catch (error) {
         console.error(`Error writing materialCode: ${error.message}`);
@@ -1962,7 +1926,7 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
         await client.writeSingleRegister(BASE_REGISTER, defaultValue.Data[0].PiecesPerPair ?? 0);
         await client.writeSingleRegister(BASE_REGISTER + 4, defaultValue.Data[0].MaterialLayer ?? 0);
         await client.writeSingleRegister(BASE_REGISTER + 8, defaultValue.Data[0].CuttingDieQty ?? 0);
-        //   console.log(`✅ Successfully wrote to Modbus registers (Leather == 1), Register ${BASE_REGISTER}, Address ${ipAddress}`);
+     //   console.log(`✅ Successfully wrote to Modbus registers (Leather == 1), Register ${BASE_REGISTER}, Address ${ipAddress}`);
       } catch (error) {
         console.error("❌ Error writing to Modbus registers (Leather == 1): ", error);
       }
@@ -1970,15 +1934,16 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
       const BASE_REGISTER = 966; // Đảm bảo có dữ liệu để lặp qua
       try {
         await client.writeSingleRegister(BASE_REGISTER, defaultValue.Data[0].TotalPiecesPerPair ?? 0);
-        //    console.log("✅ Successfully wrote to Modbus registers (Leather != 1)");
+    //    console.log("✅ Successfully wrote to Modbus registers (Leather != 1)");
       } catch (error) {
         console.error("❌ Error writing to Modbus registers (Leather != 1): ", error);
       }
     }
+
     // Write SizeData
     await writeRegisterSizeData(client, ipAddress, data.SizeData, data.Leather);
     await writeActualSizesForMultipleSOs(ipAddress, client, data.Leather);
-    //  console.log('Data successfully saved to Modbus');
+  //  console.log('Data successfully saved to Modbus');
   } catch (error) {
     console.error(`Error saving distribution data to Modbus: ${error.message}`);
   }
@@ -1992,9 +1957,9 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
 
   const chunkSize = 6;
   let processedSizeData = [];
-
+  
   if (Array.isArray(sizeData)) {
-    // ✅ Deduplicate by Size (works even if Size is undefined)
+      // ✅ Deduplicate by Size (works even if Size is undefined)
     const uniqueSizeData = Array.from(
       new Map(sizeData.map(item => [item.Size || Symbol(), item])).values()
     );
@@ -2015,7 +1980,7 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
   modbusClients[ipAddress].sizeDataInfo.sizeCount = processedSizeData.length;
   modbusClients[ipAddress].sizeDataInfo.isLeather = isLeather;
 
-  // console.log(`[sizeDataInfo] Number of size ${modbusClients[ipAddress].sizeDataInfo.sizeCount} and isLeather ${isLeather}`);
+ // console.log(`[sizeDataInfo] Number of size ${modbusClients[ipAddress].sizeDataInfo.sizeCount} and isLeather ${isLeather}`);
 
   let registerSize = [];
   if (isLeather == 2) {
@@ -2058,6 +2023,7 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
       console.error(`Invalid value detected for SizeID ${item.SizeID}: Values must be within the range 0-65535.`);
       continue;  // Skip
     }
+
     try {
       // Write SizeID, Size, SizeQty, and InventoryQty to the corresponding Modbus registers
       let registerSizeData = stringTo16BitArrayLittleEndian(item.Size).slice(0, 10 * 2);
@@ -2070,12 +2036,12 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
 
       if (!modbusClients[ipAddress].sizeDataInfo.sizeID.includes(registerSize[i].SizeID)) {
         modbusClients[ipAddress].sizeDataInfo.sizeID.push(registerSize[i].SizeID);
-        //  console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`);
-        // console.log(`Writing to register ${registerSize[i].SizeID}, value: ${item.SizeID}`);
+      //  console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`);
+       // console.log(`Writing to register ${registerSize[i].SizeID}, value: ${item.SizeID}`);
       }
 
       for (let j = 0; j < registerSizeData.length; j++) {
-        //   console.log(`Writing to register ${startSizeRegister + j}, value: ${registerSizeData[j]}`);
+     //   console.log(`Writing to register ${startSizeRegister + j}, value: ${registerSizeData[j]}`);
         await client.writeSingleRegister(startSizeRegister + j, registerSizeData[j]);
       }
 
@@ -2084,7 +2050,7 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
 
       await client.writeSingleRegister(registerSize[i].SizeQty, item.SizeQty || 0);
       await client.writeSingleRegister(registerSize[i].InventoryQty, item.InventoryQty || 0);
-      //   console.log(`Successfully written to Modbus for SizeID ${item.SizeID}`);
+   //   console.log(`Successfully written to Modbus for SizeID ${item.SizeID}`);
     } catch (error) {
       console.error(`Error writing to Modbus for SizeID ${item.SizeID}:`, error);
     }
@@ -2104,13 +2070,15 @@ async function closeAllConnections() {
       if (modbusClient.socket && !modbusClient.socket.destroyed) {
         modbusClient.socket.end();
         modbusClient.socket.destroy();
-        //   console.log(`🔒 Socket connection destroyed for ${ipAddress}`);
+     //   console.log(`🔒 Socket connection destroyed for ${ipAddress}`);
       }
+
       delete modbusClient.client;
       delete modbusClient.socket;
       delete modbusClient.sizeDataInfo;
       modbusClient.isConnected = false;
       modbusClient.isDisconnected = true;
+
       logToFile(successLogPath, `Closed connection to device at ${ipAddress}`);
     } catch (err) {
       console.error(`❌ Failed to close connection for ${ipAddress}: ${err.message}`);
@@ -2120,6 +2088,7 @@ async function closeAllConnections() {
 
 let currentIndex = 0; // lưu vị trí đang check dở
 const BATCH_SIZE = 5; // số IP check mỗi lần gọi
+
 async function setIpAddresses(ipAddresses) {
   try {
     if (ipAddresses.length === 0) return;
@@ -2134,6 +2103,7 @@ async function setIpAddresses(ipAddresses) {
     // Check batch song song (limit bằng BATCH_SIZE)
     await Promise.all(batch.map(async (ipAddress) => {
       let reachable = false;
+
       try {
         reachable = await isHostReachable(ipAddress);
       } catch (err) {
@@ -2142,11 +2112,13 @@ async function setIpAddresses(ipAddresses) {
         logToFile(errorLogPath, msg);
         return;
       }
+
       if (!reachable) {
         const msg = `🚫 ${ipAddress} is not reachable on port 502. Skipping.`;
         logToFile(errorLogPath, msg);
         return;
       }
+
       try {
         await connectToDevice(ipAddress);
       } catch (err) {
