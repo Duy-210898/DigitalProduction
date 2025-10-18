@@ -1008,7 +1008,7 @@ namespace DigitalProduction
             public DateTime UpdatedAt { get; set; }
             public bool IsLeather { get; set; }
             // New read-only property
-            public string MaterialType => IsLeather ? LocalizationManager.GetString("leatherMaterial") : LocalizationManager.GetString("rawMaterial");
+            public string MaterialType => IsLeather ? Lang.LeatherMaterial : Lang.RawMaterial;
             public int? Note { get; set; }
             public string NoteReason
             {

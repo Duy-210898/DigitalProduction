@@ -260,8 +260,8 @@
             this.tableLayoutMainDistribution.AutoSize = true;
             this.tableLayoutMainDistribution.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.tableLayoutMainDistribution.ColumnCount = 2;
-            this.tableLayoutMainDistribution.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.52417F));
-            this.tableLayoutMainDistribution.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.47583F));
+            this.tableLayoutMainDistribution.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.30935F));
+            this.tableLayoutMainDistribution.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.69065F));
             this.tableLayoutMainDistribution.Controls.Add(this.panel2, 1, 2);
             this.tableLayoutMainDistribution.Controls.Add(this.tableLayoutPanel5, 0, 1);
             this.tableLayoutMainDistribution.Controls.Add(this.lblSelectMachine, 1, 0);
@@ -284,10 +284,10 @@
             this.panel2.AutoSize = true;
             this.panel2.Controls.Add(this.tableLayoutPanel7);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(492, 86);
+            this.panel2.Location = new System.Drawing.Point(490, 86);
             this.panel2.Margin = new System.Windows.Forms.Padding(3, 3, 20, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(419, 198);
+            this.panel2.Size = new System.Drawing.Size(421, 198);
             this.panel2.TabIndex = 6;
             // 
             // tableLayoutPanel7
@@ -308,7 +308,7 @@
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.2439F));
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(419, 198);
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(421, 198);
             this.tableLayoutPanel7.TabIndex = 10;
             // 
             // btnDeleteData
@@ -372,7 +372,7 @@
             this.btnSend.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSend.Dock = System.Windows.Forms.DockStyle.Left;
             this.btnSend.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnSend.ImageOptions.SvgImage")));
-            this.btnSend.Location = new System.Drawing.Point(253, 150);
+            this.btnSend.Location = new System.Drawing.Point(254, 150);
             this.btnSend.LookAndFeel.SkinName = "Dark Side";
             this.btnSend.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnSend.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
@@ -406,7 +406,7 @@
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(483, 41);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(481, 41);
             this.tableLayoutPanel5.TabIndex = 8;
             // 
             // btnSaveInventory
@@ -418,12 +418,12 @@
             this.btnSaveInventory.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSaveInventory.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnSaveInventory.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSaveInventory.ImageOptions.Image")));
-            this.btnSaveInventory.Location = new System.Drawing.Point(398, 3);
+            this.btnSaveInventory.Location = new System.Drawing.Point(397, 3);
             this.btnSaveInventory.LookAndFeel.SkinName = "Dark Side";
             this.btnSaveInventory.LookAndFeel.UseDefaultLookAndFeel = false;
             this.btnSaveInventory.Margin = new System.Windows.Forms.Padding(50, 3, 3, 3);
             this.btnSaveInventory.Name = "btnSaveInventory";
-            this.btnSaveInventory.Size = new System.Drawing.Size(82, 35);
+            this.btnSaveInventory.Size = new System.Drawing.Size(81, 35);
             this.btnSaveInventory.TabIndex = 5;
             this.btnSaveInventory.Text = "Save";
             this.btnSaveInventory.Click += new System.EventHandler(this.btnSaveInventory_Click);
@@ -437,7 +437,7 @@
             this.lblInventoryQty.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblInventoryQty.Location = new System.Drawing.Point(3, 0);
             this.lblInventoryQty.Name = "lblInventoryQty";
-            this.lblInventoryQty.Size = new System.Drawing.Size(235, 41);
+            this.lblInventoryQty.Size = new System.Drawing.Size(234, 41);
             this.lblInventoryQty.TabIndex = 2;
             this.lblInventoryQty.Text = "Inventory Quanity:";
             this.lblInventoryQty.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -446,7 +446,7 @@
             // 
             this.txtInventory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtInventory.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtInventory.Location = new System.Drawing.Point(244, 3);
+            this.txtInventory.Location = new System.Drawing.Point(243, 3);
             this.txtInventory.Name = "txtInventory";
             this.txtInventory.Size = new System.Drawing.Size(101, 30);
             this.txtInventory.TabIndex = 1;
@@ -455,9 +455,9 @@
             // 
             this.lblSelectMachine.BackColor = System.Drawing.SystemColors.Window;
             this.lblSelectMachine.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblSelectMachine.Location = new System.Drawing.Point(492, 0);
+            this.lblSelectMachine.Location = new System.Drawing.Point(490, 0);
             this.lblSelectMachine.Name = "lblSelectMachine";
-            this.lblSelectMachine.Size = new System.Drawing.Size(436, 36);
+            this.lblSelectMachine.Size = new System.Drawing.Size(438, 36);
             this.lblSelectMachine.TabIndex = 0;
             this.lblSelectMachine.Text = "Select Machine";
             this.lblSelectMachine.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -468,7 +468,7 @@
             this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel5.Location = new System.Drawing.Point(3, 86);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(483, 198);
+            this.panel5.Size = new System.Drawing.Size(481, 198);
             this.panel5.TabIndex = 7;
             // 
             // tableLayoutPanel4
@@ -483,7 +483,7 @@
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 198F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(483, 198);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(481, 198);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // tableLayoutPanel6
@@ -511,25 +511,25 @@
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(477, 192);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(475, 192);
             this.tableLayoutPanel6.TabIndex = 8;
             // 
             // numCuttingDieQty
             // 
             this.numCuttingDieQty.Dock = System.Windows.Forms.DockStyle.Top;
             this.numCuttingDieQty.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numCuttingDieQty.Location = new System.Drawing.Point(241, 39);
+            this.numCuttingDieQty.Location = new System.Drawing.Point(240, 39);
             this.numCuttingDieQty.Name = "numCuttingDieQty";
-            this.numCuttingDieQty.Size = new System.Drawing.Size(233, 30);
+            this.numCuttingDieQty.Size = new System.Drawing.Size(232, 30);
             this.numCuttingDieQty.TabIndex = 0;
             // 
             // numPiecesPerPair
             // 
             this.numPiecesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
             this.numPiecesPerPair.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numPiecesPerPair.Location = new System.Drawing.Point(241, 3);
+            this.numPiecesPerPair.Location = new System.Drawing.Point(240, 3);
             this.numPiecesPerPair.Name = "numPiecesPerPair";
-            this.numPiecesPerPair.Size = new System.Drawing.Size(233, 30);
+            this.numPiecesPerPair.Size = new System.Drawing.Size(232, 30);
             this.numPiecesPerPair.TabIndex = 0;
             // 
             // lblTotalPeicesPerPair
@@ -539,7 +539,7 @@
             this.lblTotalPeicesPerPair.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblTotalPeicesPerPair.Location = new System.Drawing.Point(3, 108);
             this.lblTotalPeicesPerPair.Name = "lblTotalPeicesPerPair";
-            this.lblTotalPeicesPerPair.Size = new System.Drawing.Size(232, 29);
+            this.lblTotalPeicesPerPair.Size = new System.Drawing.Size(231, 29);
             this.lblTotalPeicesPerPair.TabIndex = 7;
             this.lblTotalPeicesPerPair.Text = "Total Peices Per Pair";
             this.lblTotalPeicesPerPair.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -551,7 +551,7 @@
             this.lblPeicesPerPair.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblPeicesPerPair.Location = new System.Drawing.Point(3, 0);
             this.lblPeicesPerPair.Name = "lblPeicesPerPair";
-            this.lblPeicesPerPair.Size = new System.Drawing.Size(232, 33);
+            this.lblPeicesPerPair.Size = new System.Drawing.Size(231, 33);
             this.lblPeicesPerPair.TabIndex = 4;
             this.lblPeicesPerPair.Text = "Peices Per Pair:";
             this.lblPeicesPerPair.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -563,7 +563,7 @@
             this.lblCuttingDie.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblCuttingDie.Location = new System.Drawing.Point(3, 36);
             this.lblCuttingDie.Name = "lblCuttingDie";
-            this.lblCuttingDie.Size = new System.Drawing.Size(232, 33);
+            this.lblCuttingDie.Size = new System.Drawing.Size(231, 33);
             this.lblCuttingDie.TabIndex = 3;
             this.lblCuttingDie.Text = "Cutting Die Quanity:";
             this.lblCuttingDie.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -575,7 +575,7 @@
             this.lblMaterialLayer.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblMaterialLayer.Location = new System.Drawing.Point(3, 72);
             this.lblMaterialLayer.Name = "lblMaterialLayer";
-            this.lblMaterialLayer.Size = new System.Drawing.Size(232, 33);
+            this.lblMaterialLayer.Size = new System.Drawing.Size(231, 33);
             this.lblMaterialLayer.TabIndex = 5;
             this.lblMaterialLayer.Text = "Material Layer:";
             this.lblMaterialLayer.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -584,18 +584,18 @@
             // 
             this.numMaterialLayer.Dock = System.Windows.Forms.DockStyle.Top;
             this.numMaterialLayer.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numMaterialLayer.Location = new System.Drawing.Point(241, 75);
+            this.numMaterialLayer.Location = new System.Drawing.Point(240, 75);
             this.numMaterialLayer.Name = "numMaterialLayer";
-            this.numMaterialLayer.Size = new System.Drawing.Size(233, 30);
+            this.numMaterialLayer.Size = new System.Drawing.Size(232, 30);
             this.numMaterialLayer.TabIndex = 0;
             // 
             // numericTotalPeicesPerPair
             // 
             this.numericTotalPeicesPerPair.Dock = System.Windows.Forms.DockStyle.Top;
             this.numericTotalPeicesPerPair.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(241, 111);
+            this.numericTotalPeicesPerPair.Location = new System.Drawing.Point(240, 111);
             this.numericTotalPeicesPerPair.Name = "numericTotalPeicesPerPair";
-            this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(233, 30);
+            this.numericTotalPeicesPerPair.Size = new System.Drawing.Size(232, 30);
             this.numericTotalPeicesPerPair.TabIndex = 6;
             // 
             // flowLayoutPanel1
@@ -603,9 +603,9 @@
             this.flowLayoutPanel1.Controls.Add(this.gridLookUpMachine);
             this.flowLayoutPanel1.Controls.Add(this.btnSync);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(492, 39);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(490, 39);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(436, 41);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(438, 41);
             this.flowLayoutPanel1.TabIndex = 13;
             // 
             // gridLookUpMachine

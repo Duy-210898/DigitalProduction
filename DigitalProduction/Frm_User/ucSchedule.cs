@@ -34,7 +34,7 @@ namespace DigitalProduction
             : "PartName";
 
         private readonly List<SalesOrder> selectedSalesOrders = new List<SalesOrder>();
-        private readonly string[] columnsToHide = { "StatusCode", "ActualRemainingQuantity", "RemainingQuantity", "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
+        private readonly string[] columnsToHide = { "OperatorID", "DeviceID", "StatusCode", "ActualRemainingQuantity", "RemainingQuantity", "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
         public ucSchedule()
         {

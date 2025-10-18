@@ -199,6 +199,8 @@
             // 
             this.btnTreatmentPart.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F);
             this.btnTreatmentPart.Appearance.Default.Options.UseFont = true;
+            this.btnTreatmentPart.Expanded = true;
+            this.btnTreatmentPart.HeaderVisible = false;
             this.btnTreatmentPart.Name = "btnTreatmentPart";
             this.btnTreatmentPart.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnTreatmentPart.Text = "Treatment Part";

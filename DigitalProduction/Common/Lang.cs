@@ -17,5 +17,6 @@
         public static string SelectDevideData => LocalizationManager.GetString("SelectDevideData");
         public static string Quantity => LocalizationManager.GetString("Quantity");
         public static string Add => LocalizationManager.GetString("Add");
+        public static string SaveDistribution => LocalizationManager.GetString("SaveDistribution");
     }
 }

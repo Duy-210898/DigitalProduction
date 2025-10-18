@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -379,12 +378,12 @@ namespace DigitalProduction
 
                                     if (string.Equals(status, Constants.Complete, StringComparison.OrdinalIgnoreCase))
                                     {
-                                        e4.Appearance.BackColor = Color.LightGreen ;
+                                        e4.Appearance.BackColor = Color.LightGreen;
                                         e4.Appearance.ForeColor = Color.Black;
                                     }
                                     else if (string.Equals(status, Constants.Pending, StringComparison.OrdinalIgnoreCase))
                                     {
-                                        e4.Appearance.BackColor = Color.LightYellow;
+                                        e4.Appearance.BackColor = Color.Orange;
                                         e4.Appearance.ForeColor = Color.Black;
                                     }
                                     else
@@ -406,12 +405,12 @@ namespace DigitalProduction
                                 var view = s2 as GridView;
                                 var row = view?.GetRow(e2.ListSourceRowIndex) as SizeGroup;
                                 int minCutQty = row.Details.Min(d => d.ActualRemainingQuantity);
-                                // target
+                                // Target
                                 int target = row.Details
                                     .Sum(d => d.SizeQty);
                                 // Actual
                                 int actual = (int)row.Details.Min(a => a.CutQuantity);
-                                //inventory
+                                // Inventory
                                 int inventory = Math.Max(0, (int)row.Details
                                     .Sum(d => (d.CutQuantity + d.InventoryQty) - d.TargetCut));
 
@@ -476,14 +475,14 @@ namespace DigitalProduction
                                 {
                                     e3.Appearance.ForeColor = Color.Green;
                                 }
-                                else
-                                {
-                                    // Nếu còn Pending thì cam, còn lại đỏ
-                                    bool hasPending = row.Details.Any(d =>
-                                        d.StatusCode == Constants.Pending ||
-                                        string.IsNullOrWhiteSpace(d.StatusCode));
+                                else { 
+                                //{
+                                //    // Nếu còn Pending thì cam
+                                //    bool hasPending = row.Details.Any(d =>
+                                //        d.StatusCode == Constants.Pending &&
+                                //        string.IsNullOrWhiteSpace(d.StatusCode));
 
-                                    e3.Appearance.ForeColor = hasPending ? Color.Orange : Color.Red;
+                                    e3.Appearance.ForeColor = Color.Orange;
                                 }
                             }
                         };
@@ -525,31 +524,7 @@ namespace DigitalProduction
                          $" | {LocalizationManager.GetString("Actual")}: {actual} | {LocalizationManager.GetString("Delivered")}: {inventory}";
                     }
                 };
-                //gridView.RowCellStyle += (s, e) =>
-                //{
-                //    var view = s as GridView;
-                //    if (view == null || e.RowHandle < 0) return;
-
-                //    if (e.Column.FieldName == Constants.SO)
-                //    {
-                //        var row = view.GetRow(e.RowHandle) as ScheduleGroup;
-                //        if (row == null) return;
-
-                //        // Determine status from the data
-                //        bool hasPending = row.Sizes
-                //            .SelectMany(sz => sz.Details)
-                //            .Any(d => d.StatusCode == Constants.Pending || string.IsNullOrWhiteSpace(d.StatusCode));
-
-                //        if (hasPending)
-                //        {
-                //            e.Appearance.ForeColor = Color.Orange;
-                //        }
-                //        else
-                //        {
-                //            e.Appearance.ForeColor = Color.Green;
-                //        }
-                //    }
-                //};
+              
                 gridView.RowCellStyle += (s, e) =>
                 {
                     var view = s as GridView;
@@ -566,7 +541,7 @@ namespace DigitalProduction
                             .Sum();
 
                         // Actual
-                        int actual = row.Sizes.Min(a => a._);  // <-- giống bên trên của bạn
+                        int actual = row.Sizes.Min(a => a._);
                         bool hasComplete = actual >= target;
 
                         if (hasComplete)
@@ -649,15 +624,15 @@ namespace DigitalProduction
                     // Customize only the "Status" column background color
                     if (rowData.Status == Constants.Complete)
                     {
-                        e.Appearance.BackColor = System.Drawing.Color.LightGreen; // Green for complete
+                        e.Appearance.BackColor = Color.LightGreen; // Green for complete
                     }
                     else if (rowData.Status == Constants.Pending)
                     {
-                        e.Appearance.BackColor = System.Drawing.Color.LightYellow; // Yellow for pending
+                        e.Appearance.BackColor = Color.Orange; // Yellow for pending
                     }
                     else
                     {
-                        e.Appearance.BackColor = System.Drawing.Color.LightSteelBlue; // Red for other statuses
+                        e.Appearance.BackColor = Color.LightSteelBlue; // Red for other statuses
                     }
                 }
             }

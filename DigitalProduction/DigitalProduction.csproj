@@ -25,7 +25,7 @@
     <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>148</ApplicationRevision>
+    <ApplicationRevision>153</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -242,17 +242,17 @@
     <Compile Include="Models\Constants.cs" />
     <Compile Include="Models\CuttingReportModel.cs" />
     <Compile Include="Models\PartItem.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Helper\PropertyUpdateHelper.cs" />
     <Compile Include="Frm_User\ucCuttingReport.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Frm_User\ucCuttingReport.Designer.cs">
       <DependentUpon>ucCuttingReport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\DeviceOutputListViewModel.cs" />
     <Compile Include="Extensions\Extentions.cs" />
@@ -396,7 +396,6 @@
     <EmbeddedResource Include="Frm_User\ucTreatment.resx">
       <DependentUpon>ucTreatment.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\licenses.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>

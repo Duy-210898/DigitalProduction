@@ -337,8 +337,8 @@ namespace DigitalProduction.ViewModels
                         {
                             child.IsGroupHeader = false;
                             child.MaterialType = isLeather
-                                ? LocalizationManager.GetString("leatherMaterial")
-                                : LocalizationManager.GetString("rawMaterial");
+                                ? Lang.LeatherMaterial
+                                : Lang.RawMaterial;
                             return child;
                         })
                         .OrderByDescending(c => c.UpdatedAt)
@@ -357,8 +357,8 @@ namespace DigitalProduction.ViewModels
                         OperatorName = group.Key.OperatorNameUnaccented,
                         IsLeather = isLeather,
                         MaterialType = isLeather
-                            ? LocalizationManager.GetString("leatherMaterial")
-                            : LocalizationManager.GetString("rawMaterial"),
+                            ? Lang.LeatherMaterial
+                            : Lang.RawMaterial,
                         UpdatedAt = children.Max(c => c.UpdatedAt), // optional
                         UniqueId = Guid.NewGuid().ToString()
                     };

@@ -366,10 +366,10 @@
   <data name="Search" xml:space="preserve">
     <value>Search...</value>
   </data>
-  <data name="leatherMaterial" xml:space="preserve">
+  <data name="LeatherMaterial" xml:space="preserve">
     <value>Leather Material</value>
   </data>
-  <data name="rawMaterial" xml:space="preserve">
+  <data name="RawMaterial" xml:space="preserve">
     <value>Synthetic Material</value>
   </data>
   <data name="NumberOfOrder" xml:space="preserve">
@@ -716,5 +716,8 @@
   </data>
   <data name="SelectART" xml:space="preserve">
     <value>-- Select ART --</value>
+  </data>
+  <data name="SaveDistribution" xml:space="preserve">
+    <value>Distribution data saved and sent to Modbus successfully</value>
   </data>
 </root>

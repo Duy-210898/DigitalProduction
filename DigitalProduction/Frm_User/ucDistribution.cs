@@ -399,8 +399,8 @@ namespace DigitalProduction
                     if (psoID == -1 || uniquePSOIDs.Contains(psoID.Value)) continue;
                     DateTime now = DateTime.Now;
 
-                    // reset seconds = 0
-                    DateTime baseTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+                    // seconds =  1
+                    DateTime baseTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 30);
 
                     // add index minutes
                     DateTime dt = baseTime.AddMinutes(index);
@@ -507,7 +507,7 @@ namespace DigitalProduction
                     if (response != null && response.Status == "success")
                     {
                         ResetSendDistribution();
-                        ShowMessage.ShowInfo(response.Message, "Success");
+                        ShowMessage.ShowInfo(Lang.SaveDistribution, "Success");
                     }
                     else
                     {

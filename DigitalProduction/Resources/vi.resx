@@ -396,10 +396,10 @@
   <data name="Search" xml:space="preserve">
     <value>Tìm kiếm...</value>
   </data>
-  <data name="leatherMaterial" xml:space="preserve">
+  <data name="LeatherMaterial" xml:space="preserve">
     <value>Liệu da</value>
   </data>
-  <data name="rawMaterial" xml:space="preserve">
+  <data name="RawMaterial" xml:space="preserve">
     <value>Liệu nhân tạo</value>
   </data>
   <data name="NumberOfOrder" xml:space="preserve">
@@ -749,5 +749,8 @@
   </data>
   <data name="SelectART" xml:space="preserve">
     <value>-- Chọn ART --</value>
+  </data>
+  <data name="SaveDistribution" xml:space="preserve">
+    <value>Dữ liệu phân phối đã được lưu và gửi đến Modbus thành công.</value>
   </data>
 </root>

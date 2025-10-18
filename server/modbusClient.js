@@ -5,6 +5,7 @@ const ping = require('ping');
 const { ModbusPollingManager, isHMIConnected } = require('./ModbusPollingManager');
 const manager = new ModbusPollingManager(200);
 const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setDistributionIsComplete, setSubDistributionComplete, getSubDistributions, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb, logCutHistoryToDB } = require('./database');
+const { machine } = require('os');
 //const { notifyClientsToDeleteOrder } = require('./notifications');
 
 let countRemainSizeData = {};
@@ -91,7 +92,7 @@ async function attemptSingleConnection(ipAddress, entry) {
  * @param {string} ipAddress The IP address of the device.
  */
 async function connectToDevice(ipAddress) {
-  // if (ipAddress !== '10.30.4.144') return;
+  //  if (ipAddress !== '10.30.0.177') return;
   const entry = modbusClients[ipAddress] = modbusClients[ipAddress] || {};
 
   // Prevent duplicate connects
@@ -102,7 +103,7 @@ async function connectToDevice(ipAddress) {
   try {
     const { client, socket } = await attemptSingleConnection(ipAddress, entry);
 
-    console.log(`[${ipAddress}] ✅ Connection successful.`);
+  //  console.log(`[${ipAddress}] ✅ Connection successful.`);
     logToFile(successLogPath, `Connected to device at ${ipAddress}`);
 
     await updateDeviceConnectionStatus(ipAddress, true);
@@ -248,7 +249,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
       if (!modbusClients[ipAddress]?.SOs || modbusClients[ipAddress].SOs.length === 0) {
         return;
       }
-      // if (ipAddress !== '10.30.4.144') return;
+      //  if (ipAddress !== '10.30.0.177') return;
       // interrupt HMI set distributionData again
       if (!modbusClients[ipAddress].sizeDataInfo ||
         typeof modbusClients[ipAddress].sizeDataInfo !== 'object' ||
@@ -424,6 +425,10 @@ function delay(ms) {
 
 // 🔧 helper: safe batch write
 async function batchWrite(client, writes, batchSize = 10, batchDelay = 50) {
+  // if (!client.isOpen && !client.isConnected) {
+  //  // console.warn("⚠️ Cannot write — Modbus client not connected.");
+  //   return;
+  // }
   for (let i = 0; i < writes.length; i += batchSize) {
     const chunk = writes.slice(i, i + batchSize);
 
@@ -556,9 +561,10 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
       157, 162, 167, 172, 177, 182, 187, 192, 197, 202
     ];
     const uniqueSOs = [
-      ...new Set(clientData.SOs[clientData.indexMultipleSOs].Data.map(so => so.SO))
+      ...new Set(
+        (clientData.SOs?.[clientData.indexMultipleSOs]?.Data ?? []).map(so => so.SO)
+      )
     ];
-
     const soWrites = [];
     uniqueSOs.forEach((so, i) => {
       const values = stringTo16BitArrayLittleEndian(so);
@@ -566,13 +572,15 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
         soWrites.push({ addr: registerSOAddress[i] + j, val });
       });
     });
-    await batchWrite(client, soWrites, 5, 30);
+    await batchWrite(client, soWrites, 5, 30).catch(err => {
+      console.error("🚨 batchWrite crashed:", err);
+    });
 
     // -----------------------------
     // Part Names
     // -----------------------------
     const uniquePartSOsMap = [
-      ...new Set(clientData.SOs[clientData.indexMultipleSOs].Data.map(p => `${p.PartName}|${p.PartID}`))
+      ...new Set(clientData?.SOs[clientData.indexMultipleSOs]?.Data.map(p => `${p.PartName}|${p.PartID}`))
     ].map(item => {
       const [PartName, PartID] = item.split('|');
       return { PartName, PartID: parseInt(PartID) };
@@ -598,13 +606,27 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
       if (distributionData.Leather === 2) {
         await client.writeSingleRegister(partDisplayStartRegister, uniquePartSOsMap.length);
       } else {
-        const selectedPart = uniquePartSOsMap[modbusClients[ipAddress].indexMultiplePartNames];
+        const selectedPart =
+          uniquePartSOsMap[modbusClients[ipAddress].indexMultiplePartNames];
+
+        if (!selectedPart || !selectedPart.PartName) {
+          console.warn("⚠️ selectedPart not found or missing PartName for IP:", ipAddress);
+          return; // or handle it gracefully
+        }
+
         distributionData.SizeData = distributionData.SizeData.filter(
           item => item.PartName === selectedPart.PartName
         );
+
         const registerData = stringTo16BitArrayASCII(selectedPart.PartName).slice(0, 20);
-        const writes = registerData.map((val, j) => ({ addr: partDisplayStartRegister + j, val }));
-        await batchWrite(client, writes, 10, 20);
+        const writes = registerData.map((val, j) => ({
+          addr: partDisplayStartRegister + j,
+          val
+        }));
+
+        await batchWrite(client, writes, 10, 20).catch(err => {
+          console.error("🚨 batchWrite crashed:", err);
+        });
       }
 
       // Multiple part names (registers starting at 320)
@@ -616,7 +638,10 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
           partWrites.push({ addr: startRegister + j, val });
         });
       });
-      await batchWrite(client, partWrites, 10, 30);
+      await batchWrite(client, partWrites, 10, 30).catch(err => {
+        console.error("🚨 batchWrite crashed:", err);
+      });
+  
 
       // Part IDs
       if (distributionData.Leather === 2) {
@@ -624,7 +649,10 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
           addr: 91 + i,
           val: part.PartID
         }));
-        await batchWrite(client, partIDWrites, 10, 50);
+        await batchWrite(client, partIDWrites, 10, 50).catch(err => {
+          console.error("🚨 batchWrite crashed:", err);
+        });
+    
       } else {
         const index = modbusClients[ipAddress]?.indexMultiplePartNames;
         const singlePart = uniquePartSOsMap[index];
@@ -644,7 +672,7 @@ function removeDiacritics(str) {
 }
 
 function stringTo16BitArrayASCII(str) {
-  const clean = removeDiacritics(str);  // "Cổ giày" -> "Co giay"
+  const clean = removeDiacritics(str);  // remove mark "Cổ giày" -> "Co giay"
   const bytes = new TextEncoder().encode(clean);
   const result = [];
 
@@ -861,7 +889,6 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
         modbusClients[ipAddress].previousSizeData = [];
         modbusClients[ipAddress].previousData = {};
       }
-      const distributionData = await getDistributionDataFromDb(ipAddress);
 
       // Kiểm tra SO hiện tại
       let currentSOComplete = false;
@@ -881,17 +908,17 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
             typeof item.SizeQty === 'number' &&
             item.ActualSizeQty >= item.SizeQty) {
             item.Status = 'Complete';
-            // const distributionIDFromSize = await getDistributionIDFromSizeID(
-            //   ipAddress,
-            //   item.OrderID,
-            //   item.IsLeather ? 1 : 0,
-            //   item.SizeID,
-            //   item.PartID
-            // );
-            // if (distributionIDFromSize?.DistributionID?.length > 0) {
-            //     const { DistributionID }  = distributionIDFromSize.DistributionID[0];
-            //     setDistributionIsComplete(DistributionID, "Complete");
-            // }
+            const distributionIDFromSize = await getDistributionIDFromSizeID(
+              ipAddress,
+              item.OrderID,
+              item.IsLeather ? 1 : 0,
+              item.SizeID,
+              item.PartID
+            );
+            if (distributionIDFromSize?.DistributionID?.length > 0) {
+                const { DistributionID }  = distributionIDFromSize.DistributionID[0];
+                setDistributionIsComplete(DistributionID, "Complete");
+            }
           }
         }
 
@@ -916,18 +943,18 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
           clientData.indexMultipleSOs = -1; // No SOs left
         } else if (clientData.indexMultipleSOs >= clientData.SOs.length) {
           clientData.indexMultipleSOs = clientData.SOs.length - 1; // Point to the last valid SO
-        }
+        } 
       }
 
       // Nếu tất cả SOs complete hoặc distributionData null
       if (currentSOComplete) {
         removeCurrentSO(clientData);
+        resetClientData(ipAddress, clientData);
         await delay(3000);
         await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
-        resetClientData(ipAddress, clientData);
         return; // Nếu clear thì return luôn
       }
-
+      const distributionData = await getDistributionDataFromDb(ipAddress);
       // Check if distribution data has more SOs than client memory
       let isPendingSize = false;
       if (distributionData?.OrderIDWithSOs?.length > clientData.SOs.length || distributionData?.OrderIDWithSOs?.length < clientData.SOs.length) {
@@ -936,9 +963,9 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
 
       // Nếu isPendingSize = true => Clear và return ngay
       if (isPendingSize) {
+        resetClientData(ipAddress, clientData);
         await delay(3000);
         await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
-        resetClientData(ipAddress, clientData);
         return;
       }
 
@@ -1460,18 +1487,19 @@ async function readActualData(client, ipAddress) {
                     x.SizeQty === item.SizeQty &&
                     x.Status === 'Pending'
                 );
-                for (const match of matches) {
-                  match.Status = "Complete";
-                  match.ActualCut = modbusClients[ipAddress].storedActualCut - totalCompletedSize.totalActualCut;
+                if(matches.length > 0) {
+                  for (const match of matches) {
+                    match.Status = "Complete";
+                    match.ActualCut = modbusClients[ipAddress].storedActualCut - totalCompletedSize.totalActualCut;
 
-                  if (actualSizeQty > firstPending.SizeQty) {
-                    match.ActualSizeQty = firstPending.SizeQty;
-                  } else {
-                    match.ActualSizeQty = modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
+                    if (actualSizeQty > firstPending.SizeQty) {
+                      match.ActualSizeQty = firstPending.SizeQty;
+                    } else {
+                      match.ActualSizeQty = modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
+                    }
+                    //console.log(`Updated status to Complete for SizeID: ${SizeID}, PartID: ${item.PartID}, OrderID: ${item.OrderID}`);
                   }
-                  //console.log(`Updated status to Complete for SizeID: ${SizeID}, PartID: ${item.PartID}, OrderID: ${item.OrderID}`);
-                }
-                // filter collectPartAndOrderID base on macthes
+                      // filter collectPartAndOrderID base on macthes
                 collectPartAndOrderID = matches.map(m => ({
                   PartID: m.PartID,
                   OrderID: m.OrderID,
@@ -1479,6 +1507,30 @@ async function readActualData(client, ipAddress) {
                   OperatorID: m.OperatorID,
                   SizeQty: m.SizeQty
                 }));
+                } 
+                else {
+                    const so = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs];
+                    if (so?.Data?.length) {
+                      for (const item of collectPartAndOrderID) {
+                        const match = so.Data.find(
+                          x => x.SizeID === SizeID &&
+                            x.PartID === item.PartID &&
+                            x.OrderID === item.OrderID &&
+                            x.Status === 'Pending'
+                        );
+                      if (match) {
+                        match.Status = 'Complete';
+                        match.ActualCut = modbusClients[ipAddress].storedActualCut - totalCompletedSize.totalActualCut;
+                        if (actualSizeQty > firstPending.SizeQty) {
+                          match.ActualSizeQty = firstPending.SizeQty;
+                        } else {
+                          match.ActualSizeQty = modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
+                        }
+                        //console.log(`Updated status to Complete for SizeID: ${SizeID}, PartID: ${item.PartID}, OrderID: ${item.OrderID}`);
+                      }
+                    }
+                  }
+                }
               }
             }
           } else {
@@ -2143,8 +2195,8 @@ async function setIpAddresses(ipAddresses) {
         return;
       }
       if (!reachable) {
-        const msg = `🚫 ${ipAddress} is not reachable on port 502. Skipping.`;
-        logToFile(errorLogPath, msg);
+        // const msg = `🚫 ${ipAddress} is not reachable on port 502. Skipping.`;
+        // logToFile(errorLogPath, msg);
         return;
       }
       try {
