@@ -33,7 +33,7 @@
             // ucUserManagement
             // 
             this.Name = "ucUserManagement";
-            this.Size = new System.Drawing.Size(602, 443);
+            this.Size = new System.Drawing.Size(849, 590);
             this.ResumeLayout(false);
 
         }

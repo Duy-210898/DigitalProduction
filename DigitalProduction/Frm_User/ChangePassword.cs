@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Windows.Input;
 using DevExpress.XtraEditors;
 
 namespace DigitalProduction
@@ -10,8 +11,18 @@ namespace DigitalProduction
             public ChangePassword()
             {
                 InitializeComponent();
+                Translation();
                 this.DoubleBuffered = true;
             }
+
+        private void Translation()
+        {
+            lblUserName.Text = Lang.UserName;
+            lblOldPwd.Text = Lang.OldPwd;
+            lblNewPwd.Text = Lang.NewPwd;
+            lblConfirmPwd.Text = Lang.ConfirmPwd;
+            btnChangePassword.Text = Lang.ChangePwd;
+        }
 
         private void btnChangePassword_Click(object sender, EventArgs e)
         {

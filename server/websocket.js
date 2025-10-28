@@ -26,7 +26,7 @@ function setupWebSocket(server) {
   // Khi có client kết nối
   wss.on('connection', (ws) => {
     const time = new Date().toLocaleTimeString(); // Lấy giờ:phút:giây
-    console.log(`Client connected at ${time}`);
+   // console.log(`Client connected at ${time}`);
     
     clients.push(ws);
     setClients(clients); // Cập nhật danh sách client khi có kết nối mới
@@ -236,13 +236,13 @@ async function handleGetDistributions(ws, request) {
     };
     
     // Paging
-    const pageNumber = parseInt(filter?.pageNumber || 1);
-    const pageSize = parseInt(filter?.pageSize || 100);
+    // const pageNumber = parseInt(filter?.pageNumber || 1);
+    // const pageSize = parseInt(filter?.pageSize || 100);
 
     // console.log("Start Date:", formattedStartDate); // 2025-03-04 00:00:00.000
     // console.log("End Date:", formattedEndDate);     // 2025-03-04 23:59:59.999
     // Gọi hàm getDistributionByDevice từ database.js để lấy dữ liệu phân phối
-    const { records, totalCount } = await getDistributions(startDate, endDate, pageNumber, pageSize);
+    const { records, totalCount } = await getDistributions(startDate, endDate);
 
     if (!records || records.length === 0) {
       return ws.send(JSON.stringify({
@@ -785,7 +785,7 @@ async function checkDevice(ip, port, matchedDevice, ) {
         });
     });
   }
-  //if(ip !== '10.30.4.144') return;
+  //if(ip !== '10.30.0.177') return;
   if (!isSocketAlive || !matchedDevice) {
     await sendMail(ip, machineName, port);
     await updateDeviceConnectionStatus(ip, false);

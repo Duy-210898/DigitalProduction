@@ -18,5 +18,13 @@
         public static string Quantity => LocalizationManager.GetString("Quantity");
         public static string Add => LocalizationManager.GetString("Add");
         public static string SaveDistribution => LocalizationManager.GetString("SaveDistribution");
+        public static string WarningModel => LocalizationManager.GetString("WarningModel");
+        public static string WarningSelectSize => LocalizationManager.GetString("WarningSelectSize");
+        public static string PartName => LocalizationManager.GetString("PartName");
+        public static string UserName => LocalizationManager.GetString("Username");
+        public static string OldPwd => LocalizationManager.GetString("OldPwd");
+        public static string NewPwd => LocalizationManager.GetString("NewPwd");
+        public static string ConfirmPwd => LocalizationManager.GetString("ConfirmPwd");
+        public static string ChangePwd => LocalizationManager.GetString("ChangePwd");
     }
 }

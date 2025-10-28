@@ -20,7 +20,7 @@ namespace DigitalProduction
         private List<Device> currentDeviceStatuses = new List<Device>();
         private readonly DataTable deviceDataTable;
         private Panel groupPanelButtonContainer;
-        private Button button;
+        private SimpleButton button;
         private ucRegisterDevice frmRegister;
         private Panel paginationPanel;
         private Label lblPageInfo;
@@ -306,7 +306,6 @@ namespace DigitalProduction
                 dgvRow.Cells["PlantCombo"].Value = plantID;
             }
         }
-
         private void SetColumnVisibility(bool isVisible, params string[] columnNames)
         {
             foreach (var name in columnNames)
@@ -317,7 +316,6 @@ namespace DigitalProduction
                 }
             }
         }
-
         private void AddCancelButton(DataGridViewRow row)
         {
             if (!dgvDevices.Columns.Contains("CancelAction"))
@@ -351,7 +349,6 @@ namespace DigitalProduction
                 dgvDevices.Columns.Remove(columnName);
             }
         }
-
         private void SetRowEditable(DataGridViewRow row, bool isEditable)
         {
             Color backColor = isEditable ? Color.LightYellow : Color.White;
@@ -366,7 +363,6 @@ namespace DigitalProduction
             row.Cells["ConnectionStatus"].ReadOnly = true;
             row.Cells["ConnectionStatus"].Style.BackColor = Color.White;
         }
-
         private void UpdateDevice(string address, string machineName, string plantName, string departmentName, bool isActive, bool connectionStatus)
         {
             // Example: Update data in DataTable
@@ -385,8 +381,6 @@ namespace DigitalProduction
 
             dgvDevices.Refresh(); // Refresh UI after updating
         }
-
-
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
@@ -474,7 +468,6 @@ namespace DigitalProduction
             }
         }
 
-
         // Helper method to safely invoke UI updates
         private void SafeInvoke(Action action)
         {
@@ -500,7 +493,6 @@ namespace DigitalProduction
             SafeInvoke(() => MessageBox.Show(message, title, MessageBoxButtons.OK, icon));
         }
       
-
         private void PopulateDeviceDataTable(List<Device> devices)
         {
             deviceDataTable.Rows.Clear();
@@ -540,10 +532,10 @@ namespace DigitalProduction
 
         private void CreateButtonContainer()
         {
-            groupPanelButtonContainer = new Panel { Dock = DockStyle.Top, Height = 50 };
+            groupPanelButtonContainer = new Panel { Dock = DockStyle.Top, Height = 70 };
             Controls.Add(groupPanelButtonContainer);
 
-            button = new Button { Text = LocalizationManager.GetString("AddNewDevice"), Size = new Size(100, 40), Location = new Point(10, 5) };
+            button = new SimpleButton { Text = LocalizationManager.GetString("AddNewDevice"), Size = new Size(150, 40), Location = new Point(10, 5) };
             groupPanelButtonContainer.Controls.Add(button);
             button.Click += Button_Click;
         }
@@ -601,11 +593,10 @@ namespace DigitalProduction
                 Location = new Point(20, 10)
             };
 
-
             SimpleButton syncButton = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(100, 40)
+                Size = new Size(150, 40)
             };
             syncButton.Click += SyncButton_Click;
             syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
@@ -614,7 +605,7 @@ namespace DigitalProduction
             this.Controls.Add(paginationPanel);
             this.Controls.SetChildIndex(paginationPanel, 0);
             groupPanelButtonContainer.Controls.Add(syncButton);
-            syncButton.Location = new Point(120, 5); // Adjust the location accordingly
+            syncButton.Location = new Point(180, 5); // Adjust the location accordingly
         }
         private async void SyncButton_Click(object sender, EventArgs e)
         {

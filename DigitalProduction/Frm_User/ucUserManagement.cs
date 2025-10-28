@@ -448,14 +448,14 @@ namespace DigitalProduction
             groupPanelButtonContainer = new PanelControl()
             {
                 Dock = DockStyle.Top,
-                Height = 50 // Adjust the height to suit your layout
+                Height = 70 // Adjust the height to suit your layout
             };
 
             Controls.Add(groupPanelButtonContainer);
             button = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("RegisterUser"),
-                Size = new Size(135, 35),
+                Size = new Size(150, 40),
                 Location = new Point(spacing, marginTop)
             };
 
@@ -465,7 +465,7 @@ namespace DigitalProduction
             SimpleButton syncButton = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(100, 35),
+                Size = new Size(150, 40),
                 Location = new Point(button.Right + spacing, marginTop)
             };
             syncButton.ImageOptions.Image = Properties.Resources.sync_icon;

@@ -66,6 +66,7 @@
             this.gridProgressManagement.Name = "gridProgressManagement";
             this.gridProgressManagement.Size = new System.Drawing.Size(889, 498);
             this.gridProgressManagement.TabIndex = 0;
+            this.gridProgressManagement.UseEmbeddedNavigator = true;
             this.gridProgressManagement.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewProgressManagement,
             this.gridView1});

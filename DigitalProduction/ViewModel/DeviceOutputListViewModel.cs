@@ -396,53 +396,100 @@ namespace DigitalProduction.ViewModels
             }
         }
 
+        //private void PerformUpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
+        //{
+        //    try
+        //    {
+        //        if (newData.Count > 500) // large batch
+        //        {
+        //            BindingDeviceOutputs.ReplaceWith(newData);
+        //        }
+        //        else
+        //        {
+        //            // ✅ Use dictionary for unique keys
+        //            var newLookup = newData
+        //                .GroupBy(x => x.UniqueKey())
+        //                .ToDictionary(g => g.Key, g => g.Last());
+
+        //            var existingKeys = new HashSet<string>(BindingDeviceOutputs.Select(x => x.UniqueKey()));
+
+        //            // ✅ Update existing rows
+        //            foreach (var existing in BindingDeviceOutputs)
+        //            {
+        //                if (newLookup.TryGetValue(existing.UniqueKey(), out var updated))
+        //                {
+        //                    UpdateProperties(existing, updated,
+        //                        nameof(DeviceOutput.ActualCut),
+        //                        nameof(DeviceOutput.ActualPieces),
+        //                        nameof(DeviceOutput.InventoryQty),
+        //                        nameof(DeviceOutput.ActualSizeQty));
+        //                }
+        //            }
+
+        //            // ✅ Remove extra rows
+        //            for (int i = BindingDeviceOutputs.Count - 1; i >= 0; i--)
+        //            {
+        //                if (!newLookup.ContainsKey(BindingDeviceOutputs[i].UniqueKey()))
+        //                    BindingDeviceOutputs.RemoveAt(i);
+        //            }
+
+        //            // ✅ Add new rows (from unique dictionary)
+        //            foreach (var kvp in newLookup)
+        //            {
+        //                if (!existingKeys.Contains(kvp.Key))
+        //                    BindingDeviceOutputs.Add(kvp.Value);
+        //            }
+
+        //            // ✅ (Optional) Reorder to match newData
+        //            ReorderBindingList(BindingDeviceOutputs, newData);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error updating UI: {ex.Message}\n{ex.StackTrace}");
+        //    }
+        //}
+
         private void PerformUpdateBindingDeviceOutputs(IList<DeviceOutput> newData)
         {
             try
             {
-                if (newData.Count > 500) // large batch
+                // ✅ Tạo dictionary để lookup nhanh
+                var newLookup = newData
+                    .GroupBy(x => x.UniqueKey())
+                    .ToDictionary(g => g.Key, g => g.Last());
+
+                var existingKeys = new HashSet<string>(BindingDeviceOutputs.Select(x => x.UniqueKey()));
+
+                // ✅ Update từng dòng có thay đổi — không reorder, không clear
+                foreach (var existing in BindingDeviceOutputs)
                 {
-                    BindingDeviceOutputs.ReplaceWith(newData);
+                    if (newLookup.TryGetValue(existing.UniqueKey(), out var updated))
+                    {
+                        UpdateProperties(existing, updated,
+                            nameof(DeviceOutput.ActualCut),
+                            nameof(DeviceOutput.ActualPieces),
+                            nameof(DeviceOutput.InventoryQty),
+                            nameof(DeviceOutput.ActualSizeQty));
+                    }
                 }
-                else
+
+                // ✅ Thêm dòng mới (nếu có)
+                foreach (var kvp in newLookup)
                 {
-                    // ✅ Use dictionary for unique keys
-                    var newLookup = newData
-                        .GroupBy(x => x.UniqueKey())
-                        .ToDictionary(g => g.Key, g => g.Last());
-
-                    var existingKeys = new HashSet<string>(BindingDeviceOutputs.Select(x => x.UniqueKey()));
-
-                    // ✅ Update existing rows
-                    foreach (var existing in BindingDeviceOutputs)
-                    {
-                        if (newLookup.TryGetValue(existing.UniqueKey(), out var updated))
-                        {
-                            UpdateProperties(existing, updated,
-                                nameof(DeviceOutput.ActualCut),
-                                nameof(DeviceOutput.ActualPieces),
-                                nameof(DeviceOutput.InventoryQty),
-                                nameof(DeviceOutput.ActualSizeQty));
-                        }
-                    }
-
-                    // ✅ Remove extra rows
-                    for (int i = BindingDeviceOutputs.Count - 1; i >= 0; i--)
-                    {
-                        if (!newLookup.ContainsKey(BindingDeviceOutputs[i].UniqueKey()))
-                            BindingDeviceOutputs.RemoveAt(i);
-                    }
-
-                    // ✅ Add new rows (from unique dictionary)
-                    foreach (var kvp in newLookup)
-                    {
-                        if (!existingKeys.Contains(kvp.Key))
-                            BindingDeviceOutputs.Add(kvp.Value);
-                    }
-
-                    // ✅ (Optional) Reorder to match newData
-                    ReorderBindingList(BindingDeviceOutputs, newData);
+                    if (!existingKeys.Contains(kvp.Key))
+                        BindingDeviceOutputs.Add(kvp.Value);
                 }
+
+                // ✅ Xóa dòng không còn tồn tại
+                for (int i = BindingDeviceOutputs.Count - 1; i >= 0; i--)
+                {
+                    if (!newLookup.ContainsKey(BindingDeviceOutputs[i].UniqueKey()))
+                        BindingDeviceOutputs.RemoveAt(i);
+                }
+
+                // ❌ Không reorder list để tránh nhảy dòng
+                // (Giữ nguyên thứ tự BindingDeviceOutputs hiện tại)
             }
             catch (Exception ex)
             {

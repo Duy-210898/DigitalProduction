@@ -24,13 +24,6 @@ namespace DigitalProduction
         private DevExpress.XtraEditors.Repository.RepositoryItemComboBox noteComboBoxEditor;
         private Rectangle _reasonHeaderCheckBoxRect;
         private bool _reasonHeaderChecked = false;
-        private int currentPage = 1;
-        private int pageSize = 100;
-        private int totalCount = 0;
-        private ComboBoxEdit cmbPageSize;
-        private SimpleButton btnPrev;
-        private SimpleButton btnNext;
-        private LabelControl lblPagingInfo;
         private Dictionary<int, List<SubDistribution>> _subDistributionCache = new Dictionary<int, List<SubDistribution>>();
         public ucProgress()
         {
@@ -44,11 +37,11 @@ namespace DigitalProduction
             dtpEndDate.EditValue = DateTime.Today;
             // Make sure controls are created first
             InitializeControls();
-            InitPagingFooter(gridProgressManagement);
         }
 
         private void InitializeControls()
         {
+
             // Sync Data button
             syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
             syncButton.Text = LocalizationManager.GetString("Sync");
@@ -84,7 +77,6 @@ namespace DigitalProduction
 
             // Set grid control columns
             ConfigureGridControl();
-
             // Subscribe to the RowStyle event
             gridViewProgressManagement.RowCellStyle += GridViewProgressManagement_RowCellStyle;
         }
@@ -333,12 +325,6 @@ namespace DigitalProduction
                 return;
             }
 
-            int pageNumber = currentPage;
-            int selectedPageSize = 100;
-
-            if (cmbPageSize?.SelectedItem != null && int.TryParse(cmbPageSize.SelectedItem.ToString(), out int parsedSize))
-                selectedPageSize = parsedSize;
-
             var request = new
             {
                 app = Global.App,
@@ -347,8 +333,6 @@ namespace DigitalProduction
                 {
                     startDate = dtpStartDate.DateTime.ToString("yyyy-MM-dd"),
                     endDate = dtpEndDate.DateTime.ToString("yyyy-MM-dd"),
-                    pageNumber = pageNumber,
-                    pageSize = selectedPageSize
                 }
             };
 
@@ -424,8 +408,6 @@ namespace DigitalProduction
                 {
                     Console.WriteLine("No Data Found or DistributionData is null");
                 }
-                totalCount = response.TotalCount;
-                UpdatePagingLabel();
             }
             catch (JsonException jsonEx)
             {
@@ -889,100 +871,12 @@ namespace DigitalProduction
             btnApplyDevice.Text = LocalizationManager.GetString("TransferDevice");
             this.Text = LocalizationManager.GetString("ListOfDistributions");
         }
-        private void InitPagingFooter(Control gridControl)
-        {
-            var pagingPanel = new DevExpress.XtraEditors.PanelControl
-            {
-                Dock = DockStyle.Bottom,
-                Height = 40,
-                BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder
-            };
-
-            cmbPageSize = new DevExpress.XtraEditors.ComboBoxEdit
-            {
-                Width = 70,
-                Location = new Point(10, 8)
-            };
-            cmbPageSize.Properties.Items.AddRange(new object[] { 50, 100, 200, 500 });
-            cmbPageSize.SelectedIndexChanged += async (s, e) =>
-            {
-                if (int.TryParse(cmbPageSize.SelectedItem?.ToString(), out int newSize))
-                {
-                    pageSize = newSize;
-                    currentPage = 1;
-                    await LoadCurrentPageAsync();
-                }
-            };
-            cmbPageSize.SelectedIndex = 1;
-            pagingPanel.Controls.Add(cmbPageSize);
-
-            btnNext = new DevExpress.XtraEditors.SimpleButton
-            {
-                Text = LocalizationManager.GetString("Next") + " »",
-                Location = new Point(cmbPageSize.Right + 10, 6)
-            };
-            btnNext.Click += async (s, e) =>
-            {
-                if (currentPage < GetTotalPages())
-                {
-                    currentPage++;
-                    await LoadCurrentPageAsync();
-                }
-            };
-            pagingPanel.Controls.Add(btnNext);
-
-            btnPrev = new DevExpress.XtraEditors.SimpleButton
-            {
-                Text = "« " + LocalizationManager.GetString("Previous"),
-                Location = new Point(btnNext.Right + 10, 6)
-            };
-            btnPrev.Click += async (s, e) =>
-            {
-                if (currentPage > 1)
-                {
-                    currentPage--;
-                    await LoadCurrentPageAsync();
-                }
-            };
-            pagingPanel.Controls.Add(btnPrev);
-
-            lblPagingInfo = new DevExpress.XtraEditors.LabelControl
-            {
-                Text = LocalizationManager.GetString("Page") + "0 / 0",
-                Location = new Point(btnPrev.Right + 20, 10)
-            };
-            pagingPanel.Controls.Add(lblPagingInfo);
-
-            gridControl.Controls.Add(pagingPanel);
-            pagingPanel.BringToFront();
-        }
+    
         private async Task LoadCurrentPageAsync()
         {
             SetWebSocketClient(WebSocketClient.Instance);
             await GetDataAndLoadToGridAsync();
-            UpdatePagingLabel();
             // return Task.CompletedTask;
-        }
-
-        private int GetTotalPages()
-        {
-            return (int)Math.Ceiling((double)totalCount / pageSize);
-        }
-
-        private void UpdatePagingLabel()
-        {
-            int totalPages = GetTotalPages();
-            int start = (currentPage - 1) * pageSize + 1;
-            int end = Math.Min(currentPage * pageSize, totalCount);
-
-            if (lblPagingInfo != null)
-            {
-                lblPagingInfo.Text = $" {LocalizationManager.GetString("Page")} {currentPage} / {totalPages} ({LocalizationManager.GetString("TotalRecords")} {totalCount} rows)";
-            }
-
-            gridViewProgressManagement.OptionsView.ShowFooter = true;
-            gridViewProgressManagement.Columns[0].SummaryItem.SummaryType = DevExpress.Data.SummaryItemType.Custom;
-            gridViewProgressManagement.Columns[0].SummaryItem.DisplayFormat = $"Showing {start}–{end} of {totalCount}";
         }
 
         public class Distribution

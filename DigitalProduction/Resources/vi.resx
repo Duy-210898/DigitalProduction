@@ -753,4 +753,22 @@
   <data name="SaveDistribution" xml:space="preserve">
     <value>Dữ liệu phân phối đã được lưu và gửi đến Modbus thành công.</value>
   </data>
+  <data name="WarningModel" xml:space="preserve">
+    <value>Hình thể phải giống nhau!!!</value>
+  </data>
+  <data name="WarningSelectSize" xml:space="preserve">
+    <value>Vui lòng chọn nhỏ hơn hoặc bằng 6 size</value>
+  </data>
+  <data name="ChangePwd" xml:space="preserve">
+    <value>Thay đổi mật khẩu</value>
+  </data>
+  <data name="ConfirmPwd" xml:space="preserve">
+    <value>Xác nhận mật khẩu mới</value>
+  </data>
+  <data name="NewPwd" xml:space="preserve">
+    <value>Mật khẩu mới</value>
+  </data>
+  <data name="OldPwd" xml:space="preserve">
+    <value>Mật khẩu cũ</value>
+  </data>
 </root>

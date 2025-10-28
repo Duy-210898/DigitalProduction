@@ -33,7 +33,7 @@
             // ucDeviceManager
             // 
             this.Name = "ucDeviceManager";
-            this.Size = new System.Drawing.Size(650, 391);
+            this.Size = new System.Drawing.Size(790, 551);
             this.ResumeLayout(false);
 
         }

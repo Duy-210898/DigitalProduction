@@ -1147,16 +1147,13 @@ async function getAllDeviceData() {
 }
 
 // Fetch data from SQL Server
-async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 100) {
+async function getDistributions(startDate, endDate) {
   try {
     const pool = await sql.connect(dbConfig);
-    const offset = (pageNumber - 1) * pageSize;
 
     const request = pool.request();
     request.input('startDate', sql.DateTime, startDate);
     request.input('endDate', sql.DateTime, endDate);
-    request.input('offset', sql.Int, offset);
-    request.input('pageSize', sql.Int, pageSize);
 
     // 1. Get paginated data
     const dataQuery = `
@@ -1207,8 +1204,7 @@ async function getDistributions(startDate, endDate, pageNumber = 1, pageSize = 1
         ) do
         WHERE dd.IsDelete = 0 AND 
           dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
-        ORDER BY dd.UpdatedAt ASC
-        OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
+        ORDER BY dd.UpdatedAt ASC;
     `;
 
     // 2. Get total count

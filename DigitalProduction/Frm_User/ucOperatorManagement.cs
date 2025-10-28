@@ -20,7 +20,6 @@ namespace DigitalProduction
         public BindingList<Employee> employees = new BindingList<Employee>();
         private WebSocketClient _webSocketClient;
         private PanelControl groupPanelButtonContainer;
-        private SimpleButton button;
         private ucRegisterOperator frmRegister;
         private PanelControl paginationPanel;
         private LabelControl lblPageInfo;
@@ -582,7 +581,7 @@ namespace DigitalProduction
             groupPanelButtonContainer = new PanelControl
             {
                 Dock = DockStyle.Top,
-                Height = 60
+                Height = 70
             };
             Controls.Add(groupPanelButtonContainer);
 
@@ -594,7 +593,7 @@ namespace DigitalProduction
             txtOperatorId = new TextBox
             {
                 Location = new Point(marginLeft, marginTop),
-                Size = new Size(100, 25),
+                Size = new Size(100, 30),
                 ForeColor = Color.Gray,
                 Text = LocalizationManager.GetString("EmployeeID")
             };
@@ -620,28 +619,28 @@ namespace DigitalProduction
             SimpleButton btnFind = new SimpleButton
             {
                 Text = LocalizationManager.GetString("FindEmployeeCode"),
-                Size = new Size(120, 25),
+                Size = new Size(120, 30),
                 Location = new Point(txtOperatorId.Right + spacing, marginTop)
             };
             btnFind.Click += BtnFind_Click;
             groupPanelButtonContainer.Controls.Add(btnFind);
 
             // 🔹 Register Operator button
-            button = new SimpleButton
+            SimpleButton btnRegister = new SimpleButton
             {
                 Text = LocalizationManager.GetString("RegisterOperator"),
-                Size = new Size(135, 30),
+                Size = new Size(135, 40),
                 Location = new Point(btnFind.Right + spacing, marginTop)
             };
-            button.Click += Button_Click;
-            groupPanelButtonContainer.Controls.Add(button);
+            btnRegister.Click += Button_Click;
+            groupPanelButtonContainer.Controls.Add(btnRegister);
 
             // 🔹 Sync button
             SimpleButton syncButton = new SimpleButton
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(100, 30),
-                Location = new Point(button.Right + spacing, marginTop),
+                Size = new Size(100, 40),
+                Location = new Point(btnRegister.Right + spacing, marginTop),
                 ImageOptions = { Image = Properties.Resources.sync_icon }
             };
             syncButton.Click += SyncButton_Click;

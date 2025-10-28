@@ -92,7 +92,7 @@ async function attemptSingleConnection(ipAddress, entry) {
  * @param {string} ipAddress The IP address of the device.
  */
 async function connectToDevice(ipAddress) {
-  //  if (ipAddress !== '10.30.0.177') return;
+  //  if (ipAddress !== '10.30.4.144') return;
   const entry = modbusClients[ipAddress] = modbusClients[ipAddress] || {};
 
   // Prevent duplicate connects
@@ -249,7 +249,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
       if (!modbusClients[ipAddress]?.SOs || modbusClients[ipAddress].SOs.length === 0) {
         return;
       }
-      //  if (ipAddress !== '10.30.0.177') return;
+      //  if (ipAddress !== '10.30.4.144') return;
       // interrupt HMI set distributionData again
       if (!modbusClients[ipAddress].sizeDataInfo ||
         typeof modbusClients[ipAddress].sizeDataInfo !== 'object' ||
@@ -1218,7 +1218,6 @@ async function readActualData(client, ipAddress) {
     // Read OrderID from register 1000
     const orderIDData = await client.readHoldingRegisters(1000, 1);
     if (!orderIDData?.response?._body?.values?.[0]) {
-      // console.log("Cannot read OrderID from register 1000");
       return;
     }
     let OrderID = orderIDData.response._body.values[0];
@@ -1234,51 +1233,26 @@ async function readActualData(client, ipAddress) {
     if (!modbusClients[ipAddress].previousData) {
       modbusClients[ipAddress].previousData = {};
     }
+
     const sizeInfo = modbusClients[ipAddress].sizeDataInfo;
-    if (Object.keys(sizeInfo).length == 0) { return }
+    if (Object.keys(sizeInfo).length == 0) return;
+
     const sizeCompleteID = modbusClients[ipAddress].sizeCompleteID || [];
 
     // Đọc chọn size từ thanh ghi
     const responseChooseSize = await client.readHoldingRegisters(modbusClients[ipAddress].chooseSizeAddress, 1);
     const registerChooseSizeValue = responseChooseSize.response._body.values[0];
-
     let binaryChooseSizeValue = registerChooseSizeValue.toString(2).padStart(16, '0');
     const index = findSetBitIndex(binaryChooseSizeValue);
-    if (index === -1) {
-      // Không chọn size thì return
-      return;
-    }
+    if (index === -1) return;
 
-    // async function updatePendingStatuses(modbusClients, ipAddress) {
-    //   const SOs = modbusClients[ipAddress]?.SOs;
-
-    //   if (!Array.isArray(SOs) || SOs.length === 0) {
-    //     console.warn(`[updatePendingStatuses] No SOs found for ${ipAddress}`);
-    //     return;
-    //   }
-    //   // avoid case if size complete or not
-    //   for (const so of SOs) {
-    //     if (!Array.isArray(so?.Data)) continue;
-    //     for (const item of so.Data) {
-    //       const actual = Number(item?.ActualSizeQty ?? 0);
-    //       const target = Number(item?.SizeQty ?? 0);
-    //       if (actual >= target && target > 0) {
-    //         item.Status = 'Complete';
-    //       } else {
-    //         item.Status = 'Pending';
-    //       }
-    //     }
-    //   }
-    // }      
-    // updatePendingStatuses(modbusClients, ipAddress);
-
-    // Lấy size index từ HMI
-    if (Object.keys(sizeInfo).length == 0) { return }
+    if (Object.keys(sizeInfo).length == 0) return;
     const sizeAddressID = sizeInfo.sizeID[index];
     let sizeQtyAddress;
     let actualAddress;
 
     try {
+      if (sizeAddressID === undefined) return;
       const sizeIDValue = parseInt(sizeAddressID);
 
       // leather rules
@@ -1287,26 +1261,16 @@ async function readActualData(client, ipAddress) {
 
       if (isLeatherSize) {
         const customIndex = getLeatherIndex(sizeIDValue);
-
         baseSizeQtyAddress = 219;
         baseActual = 223;
-
         sizeQtyAddress = baseSizeQtyAddress + 16 * customIndex;
         actualAddress = baseActual + 16 * customIndex;
-
-        // console.log(
-        //   `🟤 Leather sizeID=${sizeIDValue}, customIndex=${customIndex}, sizeQtyAddress=${sizeQtyAddress}, actualAddress=${actualAddress}`
-        // );
       } else {
         sizeQtyAddress = baseSizeQtyAddress + 16 * index;
         actualAddress = baseActual + 16 * index;
-
-        // console.log(
-        //   `⚪ Normal sizeID=${sizeIDValue}, index=${index}, sizeQtyAddress=${sizeQtyAddress}, actualAddress=${actualAddress}`
-        // );
       }
 
-      // Đọc nhiều thanh ghi (register) song song với safeRead
+      // Đọc nhiều thanh ghi song song với safeRead
       let [
         sizeID,
         sizeQty = 0,
@@ -1338,29 +1302,32 @@ async function readActualData(client, ipAddress) {
       const isComplete = actualCut === sizeQty;
       if (isComplete && !sizeCompleteID.includes(SizeID)) {
         sizeCompleteID.push(SizeID);
-        // console.log(`[sizeCompleteID] Added: ${sizeID}`);
       }
 
       completeSizeCount++;
 
       // ----- Multiple SO logic -----
-
       let partID;
-      let checkPendingSize = []; // always start as array
+      let checkPendingSize = [];
       if (modbusClients[ipAddress].hasMultipleSOs != null) {
         if (isLeather) {
           checkPendingSize =
-          modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-            ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending') || [];
+            modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
+              ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending') || [];
 
-          const pendingItem = checkPendingSize.sort((a, b) => b.SizeQty - a.SizeQty).find(item => item.Status === 'Pending');
+          const pendingItem = checkPendingSize.reduce((max, item) => {
+            if (item.Status === 'Pending') {
+              return (!max || item.SizeQty > max.SizeQty) ? item : max;
+            }
+            return max;
+          }, null);
           if (pendingItem) {
             SizeID = pendingItem.SizeID;
             partID = pendingItem.PartID;
             OrderID = pendingItem.OrderID;
             checkPendingSize = [pendingItem];
-          } else { return; }
-          // get all PartID And OrderID of leather
+          } else return;
+
           if (checkPendingSize.length === 0) return;
           collectPartAndOrderID = (
             checkPendingSize
@@ -1380,43 +1347,35 @@ async function readActualData(client, ipAddress) {
                 return acc;
               }, { map: new Map(), result: [] }).result
           ) || [];
-        }
-        else {
+        } else {
           partID = await safeRead(300, client);
           checkPendingSize = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
             ?.filter(item => item.SizeID === SizeID && item.PartID === partID) || [];
 
           if (checkPendingSize.length > 1) {
-            // Sắp xếp giảm dần và lấy phần tử đầu tiên -> pending
-            const pendingItem = checkPendingSize.sort((a, b) => b.SizeQty - a.SizeQty).find(item => item.Status === 'Pending');
+            const pendingItem = checkPendingSize.reduce((max, item) => {
+              if (item.Status === 'Pending') {
+                return (!max || item.SizeQty > max.SizeQty) ? item : max;
+              }
+              return max;
+            }, null);
             if (pendingItem) {
               SizeID = pendingItem.SizeID;
               partID = pendingItem.PartID;
               OrderID = pendingItem.OrderID;
               checkPendingSize = [pendingItem];
-            } else { return; }
-            // Lọc theo status, partID and orderID nếu có gộp size
-            checkPendingSize =
-              modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-                ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending' && item.PartID === partID) || [];
+            } else return;
           } else if (checkPendingSize.length === 1) {
-            if (checkPendingSize[0].Status !== 'Pending') {
-              return;
-            }
-            checkPendingSize =
-              modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data
-                ?.filter(item => item.SizeID === SizeID && item.Status === 'Pending' && item.PartID === partID && item.OrderID === OrderID) || [];
-          } else { return; }
+            if (checkPendingSize[0].Status !== 'Pending') return;
+          } else return;
         }
 
         if (!checkPendingSize.length) return;
 
-        // Gán giá trị chặt lưu tạm thời
         modbusClients[ipAddress].storedActualCut = actualCut ?? 0;
         modbusClients[ipAddress].storedActualSizeQty = actualSizeQty ?? 0;
         modbusClients[ipAddress].storedActualPieces = actualPieces ?? 0;
 
-        // Lấy phần tử đầu tiên
         const firstPending = checkPendingSize[0];
         if (!firstPending) return;
 
@@ -1425,22 +1384,19 @@ async function readActualData(client, ipAddress) {
         partID = firstPending.PartID;
         operatorID = firstPending.OperatorID;
 
-        // collect total size complete actualSizeQty and actualCut
         let totalCompletedSize;
         if (isLeather) {
-          const data = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]
-            ?.Data ?? [];
-
-          // Get all completed items with this SizeID
-          const completed = data.filter(
-            item => item.Status === "Complete" && item.SizeID === SizeID
-          );
-
-          // ✅ Deduplicate: only keep 1 item per SizeID
-          const uniqueCompleted = Array.from(
-            new Map(completed.map(item => [item.SizeID, item])).values()
-          );
-
+          const data = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs]?.Data ?? [];
+          const completed = data.filter(item => item.Status === "Complete" && item.SizeID === SizeID);
+          const uniqueCompleted = [];
+          const seen = new Set();
+          for (const item of completed) {
+            const key = `${item.SizeID}-${item.SizeQty}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              uniqueCompleted.push(item);
+            }
+          }
           totalCompletedSize =
             uniqueCompleted.reduce(
               (acc, item) => {
@@ -1469,12 +1425,8 @@ async function readActualData(client, ipAddress) {
         }
 
         const completedQty = Number(totalCompletedSize.totalSizeQty) || 0;
-        const sizeRemain = completedQty;
-        
-        const availableQty = modbusClients[ipAddress].storedActualSizeQty - sizeRemain;
-        if (availableQty < 0) {
-          return;
-        }
+        const availableQty = modbusClients[ipAddress].storedActualSizeQty - completedQty;
+        if (availableQty < 0) return;
 
         if (availableQty >= firstPending.SizeQty) {
           if (isLeather) {
@@ -1487,48 +1439,34 @@ async function readActualData(client, ipAddress) {
                     x.SizeQty === item.SizeQty &&
                     x.Status === 'Pending'
                 );
-                if(matches.length > 0) {
+                if (matches.length > 1) {
                   for (const match of matches) {
                     match.Status = "Complete";
                     match.ActualCut = modbusClients[ipAddress].storedActualCut - totalCompletedSize.totalActualCut;
-
-                    if (actualSizeQty > firstPending.SizeQty) {
-                      match.ActualSizeQty = firstPending.SizeQty;
-                    } else {
-                      match.ActualSizeQty = modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
-                    }
-                    //console.log(`Updated status to Complete for SizeID: ${SizeID}, PartID: ${item.PartID}, OrderID: ${item.OrderID}`);
+                    match.ActualSizeQty = actualSizeQty > firstPending.SizeQty
+                      ? firstPending.SizeQty
+                      : modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
                   }
-                      // filter collectPartAndOrderID base on macthes
-                collectPartAndOrderID = matches.map(m => ({
-                  PartID: m.PartID,
-                  OrderID: m.OrderID,
-                  SizeID: m.SizeID,
-                  OperatorID: m.OperatorID,
-                  SizeQty: m.SizeQty
-                }));
-                } 
-                else {
-                    const so = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs];
-                    if (so?.Data?.length) {
-                      for (const item of collectPartAndOrderID) {
-                        const match = so.Data.find(
-                          x => x.SizeID === SizeID &&
-                            x.PartID === item.PartID &&
-                            x.OrderID === item.OrderID &&
-                            x.Status === 'Pending'
-                        );
-                      if (match) {
-                        match.Status = 'Complete';
-                        match.ActualCut = modbusClients[ipAddress].storedActualCut - totalCompletedSize.totalActualCut;
-                        if (actualSizeQty > firstPending.SizeQty) {
-                          match.ActualSizeQty = firstPending.SizeQty;
-                        } else {
-                          match.ActualSizeQty = modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
-                        }
-                        //console.log(`Updated status to Complete for SizeID: ${SizeID}, PartID: ${item.PartID}, OrderID: ${item.OrderID}`);
-                      }
-                    }
+                  collectPartAndOrderID = matches.map(m => ({
+                    PartID: m.PartID,
+                    OrderID: m.OrderID,
+                    SizeID: m.SizeID,
+                    OperatorID: m.OperatorID,
+                    SizeQty: m.SizeQty
+                  }));
+                } else {
+                  const match = so.Data.find(
+                    x => x.SizeID === SizeID &&
+                      x.PartID === item.PartID &&
+                      x.OrderID === item.OrderID &&
+                      x.Status === 'Pending'
+                  );
+                  if (match) {
+                    match.Status = 'Complete';
+                    match.ActualCut = modbusClients[ipAddress].storedActualCut - totalCompletedSize.totalActualCut;
+                    match.ActualSizeQty = actualSizeQty > firstPending.SizeQty
+                      ? firstPending.SizeQty
+                      : modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
                   }
                 }
               }
@@ -1536,12 +1474,9 @@ async function readActualData(client, ipAddress) {
           } else {
             firstPending.Status = 'Complete';
             firstPending.ActualCut = modbusClients[ipAddress].storedActualCut - totalCompletedSize.totalActualCut;
-            if (actualSizeQty > firstPending.SizeQty) {
-              firstPending.ActualSizeQty = firstPending.SizeQty;
-            } else {
-              firstPending.ActualSizeQty = modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
-            }
-            // console.log(`Updated status to Complete for SizeID: ${sizeID}, OrderID: ${OrderID}`);
+            firstPending.ActualSizeQty = actualSizeQty > firstPending.SizeQty
+              ? firstPending.SizeQty
+              : modbusClients[ipAddress].storedActualSizeQty - totalCompletedSize.totalActualSizeQty;
           }
 
           actualSizeQty = await readActualSizeQty(sizeQty, actualSizeQty, firstPending, totalCompletedSize);
@@ -1555,10 +1490,8 @@ async function readActualData(client, ipAddress) {
             } else {
               actualCut -= totalCompletedSize.totalActualCut;
             }
-
             actualPieces = (firstPending.MaterialLayer * firstPending.CuttingDieQty) * actualCut;
           }
-          // console.log(`Total Complete => ActualCut [Address] ${ipAddress} ${actualCut} actualSizeQty ${actualSizeQty}`);
         } else {
           if (isLeather) {
             const so = modbusClients[ipAddress]?.SOs?.[modbusClients[ipAddress].indexMultipleSOs];
@@ -1569,7 +1502,6 @@ async function readActualData(client, ipAddress) {
                   x.SizeQty === item.SizeQty &&
                   x.Status === 'Pending'
               );
-              // filter collectPartAndOrderID base on macthes
               collectPartAndOrderID = matches.map(m => ({
                 PartID: m.PartID,
                 OrderID: m.OrderID,
@@ -1588,21 +1520,72 @@ async function readActualData(client, ipAddress) {
             actualSizeQty = modbusClients[ipAddress].storedActualSizeQty;
             actualPieces = (firstPending.MaterialLayer * firstPending.CuttingDieQty) * actualCut;
           }
-          // console.log(`ActualCut [Address] ${ipAddress} actualSizeQty ${actualSizeQty}`);
         }
-        // assign to checking pending size
+
         firstPending.ActualCut = actualCut;
         firstPending.ActualPieces = actualPieces;
         firstPending.ActualSizeQty = actualSizeQty;
       }
 
-      if (collectPartAndOrderID !== undefined && collectPartAndOrderID.length > 0) {
+      // ✅ Only process if data changed
+      if (collectPartAndOrderID?.length > 0) {
         for (const item of collectPartAndOrderID) {
-          processActualDataChange(ipAddress, SizeID, item.PartID, piecesPerPair, materialLayer, cuttingDieQty, actualCut, actualPieces, actualSizeQty, totalPieces, isLeather, item.OrderID, operatorID);
+          const key = `${SizeID}-${item.PartID}-${item.OrderID}`;
+          const newData = { actualCut, actualPieces, actualSizeQty };
+          const prevData = modbusClients[ipAddress].previousData[key];
+          const isDifferent = !prevData ||
+            prevData.actualCut !== newData.actualCut ||
+            prevData.actualPieces !== newData.actualPieces ||
+            prevData.actualSizeQty !== newData.actualSizeQty;
+
+          if (isDifferent) {
+            processActualDataChange(
+              ipAddress,
+              SizeID,
+              item.PartID,
+              piecesPerPair,
+              materialLayer,
+              cuttingDieQty,
+              actualCut,
+              actualPieces,
+              actualSizeQty,
+              totalPieces,
+              isLeather,
+              item.OrderID,
+              operatorID
+            );
+            modbusClients[ipAddress].previousData[key] = newData;
+          }
         }
       } else {
-        processActualDataChange(ipAddress, SizeID, partID, piecesPerPair, materialLayer, cuttingDieQty, actualCut, actualPieces, actualSizeQty, totalPieces, isLeather, OrderID, operatorID);
+        const key = `${SizeID}-${partID}-${OrderID}`;
+        const newData = { actualCut, actualPieces, actualSizeQty };
+        const prevData = modbusClients[ipAddress].previousData[key];
+        const isDifferent = !prevData ||
+          prevData.actualCut !== newData.actualCut ||
+          prevData.actualPieces !== newData.actualPieces ||
+          prevData.actualSizeQty !== newData.actualSizeQty;
+
+        if (isDifferent) {
+          processActualDataChange(
+            ipAddress,
+            SizeID,
+            partID,
+            piecesPerPair,
+            materialLayer,
+            cuttingDieQty,
+            actualCut,
+            actualPieces,
+            actualSizeQty,
+            totalPieces,
+            isLeather,
+            OrderID,
+            operatorID
+          );
+          modbusClients[ipAddress].previousData[key] = newData;
+        }
       }
+
     } catch (error) {
       console.error(`Error processing sizeID ${sizeAddressID}:`, error.message);
     }
@@ -1614,7 +1597,7 @@ async function readActualData(client, ipAddress) {
     logToFile(errorLogPath, `Error reading actual data: ${error.message}`);
   }
 
-  // Helper function inside main function
+  // Helper function
   async function readActualSizeQty(sizeQty, actualSizeQty, checkPendingSize, totalCompletedSize) {
     if (modbusClients[ipAddress].storedActualSizeQty >= sizeQty) {
       let extraSizeRemaining = modbusClients[ipAddress].storedActualSizeQty - sizeQty;
@@ -1626,6 +1609,7 @@ async function readActualData(client, ipAddress) {
     return parseInt(actualSizeQty);
   }
 }
+
 function getLeatherIndex(sizeIDValue) {
   const leatherMap = {
     45: 0,
@@ -2122,7 +2106,7 @@ async function writeRegisterSizeData(client, ipAddress, sizeData, isLeather) {
 
       if (!modbusClients[ipAddress].sizeDataInfo.sizeID.includes(registerSize[i].SizeID)) {
         modbusClients[ipAddress].sizeDataInfo.sizeID.push(registerSize[i].SizeID);
-        //  console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`);
+        // console.log(`[sizeDataInfo] sizeID ${registerSize[i].SizeID}`);
         // console.log(`Writing to register ${registerSize[i].SizeID}, value: ${item.SizeID}`);
       }
 

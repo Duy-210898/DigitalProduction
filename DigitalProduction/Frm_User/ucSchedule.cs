@@ -409,13 +409,13 @@ namespace DigitalProduction
 
             if (!allSame)
             {
-                MessageBox.Show("Please sure Model is the same", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowMessage.ShowWarning(Lang.WarningModel);
                 return;
             }
             HashSet<int> sizeIDs = new HashSet<int>(filteredSchedules.Select(s => s.SizeID));
             if (sizeIDs.Count > 6)
             {
-                MessageBox.Show("Only allow minimun or equal to 6 sizes", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowMessage.ShowWarning(Lang.WarningSelectSize);
                 return;
             }
 
@@ -552,15 +552,15 @@ namespace DigitalProduction
             GridColumn sizeColumn = gridViewSchedule.Columns["Size"];
 
             // Create or reuse a grouping column that merges VietnameseName and PartName
-            GridColumn groupPartNameColumn = gridViewSchedule.Columns[LocalizationManager.GetString("PartName")];
+            GridColumn groupPartNameColumn = gridViewSchedule.Columns[Lang.PartName];
             if (groupPartNameColumn == null)
             {
-                groupPartNameColumn = gridViewSchedule.Columns.AddVisible(LocalizationManager.GetString("PartName"), "Part Name");
+                groupPartNameColumn = gridViewSchedule.Columns.AddVisible(Lang.PartName, "Part Name");
                 groupPartNameColumn.UnboundType = DevExpress.Data.UnboundColumnType.String;
 
                 gridViewSchedule.CustomUnboundColumnData += (s, e) =>
                 {
-                    if (e.Column.FieldName == LocalizationManager.GetString("PartName") && e.IsGetData)
+                    if (e.Column.FieldName == Lang.PartName && e.IsGetData)
                     {
                         var vietnameseName = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "VietnameseName")?.ToString();
                         var partName = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "PartName")?.ToString();
