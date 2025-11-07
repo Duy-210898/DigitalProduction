@@ -880,13 +880,14 @@ async function getDistributionDataFromDb(ipAddress) {
      const sizeDataMap = new Map();
 
      result.recordset.forEach(item => {
-       const key = `${item.SizeID}-${item.Size}-${item.PartName}`;
+       const key = `${item.SizeID}-${item.Size}-${item.PartName}-${item.PartID}`;
      
        if (!sizeDataMap.has(key)) {
          sizeDataMap.set(key, {
            SizeID: item.SizeID,
            Size: item.Size,
            PartName: item.PartName,
+           PartID: item.PartID,
            SizeQty: 0,
            InventoryQty: item.InventoryQty
          });

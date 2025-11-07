@@ -29,12 +29,12 @@ namespace DigitalProduction
         private Timer flyoutAutoHideTimer;
         // Decide which field to filter by, based on language
 
-       private string partField = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "vi"
-            ? "VietnameseName"
-            : "PartName";
+        private string partField = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "vi"
+             ? "VietnameseName"
+             : "PartName";
 
         private readonly List<SalesOrder> selectedSalesOrders = new List<SalesOrder>();
-        private readonly string[] columnsToHide = { "OperatorID", "DeviceID", "StatusCode", "ActualRemainingQuantity", "RemainingQuantity", "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
+        private readonly string[] columnsToHide = { Lang.PartName, "CutQuantity", "OperatorID", "DeviceID", "StatusCode", "ActualRemainingQuantity", "RemainingQuantity", "InventoryQty", "DepartmentID", "Factory", "OrderID", "LastNo", "PartSizeUnit", "SizeID", "MaterialUnit", "MaterialID", "Process", "PartId", "GroupSO" };
 
         public ucSchedule()
         {
@@ -174,6 +174,8 @@ namespace DigitalProduction
             gridViewSchedule.Appearance.FooterPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             gridViewSchedule.Appearance.FooterPanel.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
 
+            // apply part code column 
+            AddPartNamePartCodeColumn();
             // check size limit
             cbxSize.EditValueChanged += ComboSize_EditValueChanged;
             cbxPartName.EditValueChanged += ComboxPart_EditValueChanged;
@@ -198,43 +200,53 @@ namespace DigitalProduction
             cbxSize.Properties.BeginUpdate();
             cbxSize.Properties.Items.Clear();
 
-            // Step 1: Get selected PartName from ComboxPart
+            // Step 1: Get selected PartName_PartCode from combo box
             var selectedValue = cbxPartName.EditValue;
             List<string> selectedParts = selectedValue != null
-             ? selectedValue.ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                                       .Select(p => p.Trim())
-                                       .ToList()
-             : new List<string>();
+                ? selectedValue.ToString()
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => p.Trim())
+                    .ToList()
+                : new List<string>();
 
             if (selectedParts == null || selectedParts.Count == 0)
             {
-                cbxSize.Properties.Items.Clear();
                 cbxSize.Properties.EndUpdate();
                 return;
             }
 
             // Step 2: Get data source
-            IEnumerable<object> list = gridViewSchedule.DataSource as IEnumerable<object>;
+            var list = gridViewSchedule.DataSource as IEnumerable<object>;
             if (list == null)
             {
                 cbxSize.Properties.EndUpdate();
                 return;
             }
 
-            // Step 3: Filter by PartName and collect sizes in one loop
+            // Step 3: Filter by combined PartName_PartCode
             var sizeSet = new HashSet<string>();
 
             foreach (var item in list)
             {
                 var type = item.GetType();
-                var partValue = type.GetProperty(partField)?.GetValue(item)?.ToString();
 
-                // If VietnameseName selected but empty, use PartName
-                if (string.IsNullOrWhiteSpace(partValue) && partField == "VietnameseName")
-                {
-                    partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
-                }
-                if (partValue != null && selectedParts.Contains(partValue))
+                var partName = type.GetProperty("PartName")?.GetValue(item)?.ToString();
+                var vietnameseName = type.GetProperty("VietnameseName")?.GetValue(item)?.ToString();
+                var partCode = type.GetProperty("PartCode")?.GetValue(item)?.ToString();
+
+                // Determine base part display name
+                string baseName;
+                if (partField == "VietnameseName")
+                    baseName = !string.IsNullOrWhiteSpace(vietnameseName) ? vietnameseName : partName;
+                else
+                    baseName = partName;
+
+                // Combine for matching
+                string combinedName = !string.IsNullOrWhiteSpace(partCode)
+                    ? $"{baseName}_{partCode}"
+                    : baseName;
+
+                if (!string.IsNullOrWhiteSpace(combinedName) && selectedParts.Contains(combinedName))
                 {
                     var sizeValue = type.GetProperty("Size")?.GetValue(item)?.ToString();
                     if (!string.IsNullOrEmpty(sizeValue))
@@ -242,7 +254,7 @@ namespace DigitalProduction
                 }
             }
 
-            // Step 4: Sort sizes: numeric first, then non-numeric
+            // Step 4: Sort sizes — numeric first, then non-numeric
             var numericSizes = sizeSet
                 .Where(s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
                 .Select(s => new
@@ -259,7 +271,7 @@ namespace DigitalProduction
                 .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            // Step 5: add sorted sizes to cbxSize
+            // Step 5: Add sorted sizes to cbxSize
             foreach (var size in numericSizes.Concat(nonNumericSizes))
                 cbxSize.Properties.Items.Add(size);
 
@@ -270,6 +282,7 @@ namespace DigitalProduction
             cbxSize.Properties.EndUpdate();
             cbxSize.ShowPopup();
         }
+
         private void ComboSize_EditValueChanged(object sender, EventArgs e)
         {
             CheckedComboBoxEdit editor = sender as CheckedComboBoxEdit;
@@ -551,7 +564,7 @@ namespace DigitalProduction
             GridColumn soColumn = gridViewSchedule.Columns["SO"];
             GridColumn sizeColumn = gridViewSchedule.Columns["Size"];
 
-            // Create or reuse a grouping column that merges VietnameseName and PartName
+            // Create or reuse grouping column
             GridColumn groupPartNameColumn = gridViewSchedule.Columns[Lang.PartName];
             if (groupPartNameColumn == null)
             {
@@ -564,11 +577,26 @@ namespace DigitalProduction
                     {
                         var vietnameseName = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "VietnameseName")?.ToString();
                         var partName = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "PartName")?.ToString();
+                        var partCode = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "PartCode")?.ToString();
 
+                        // Determine base name
+                        string baseName;
                         if (partField == "VietnameseName")
-                            e.Value = !string.IsNullOrWhiteSpace(vietnameseName) ? vietnameseName : partName;
+                            baseName = !string.IsNullOrWhiteSpace(vietnameseName) ? vietnameseName : partName;
                         else
-                            e.Value = partName;
+                            baseName = partName;
+
+                        // Combine with PartCode if available
+                        if (!string.IsNullOrWhiteSpace(baseName))
+                        {
+                            e.Value = !string.IsNullOrWhiteSpace(partCode)
+                                ? $"{baseName}_{partCode}"
+                                : baseName;
+                        }
+                        else
+                        {
+                            e.Value = partCode; // fallback if baseName empty
+                        }
                     }
                 };
             }
@@ -586,7 +614,6 @@ namespace DigitalProduction
 
             gridViewSchedule.ExpandAllGroups();
         }
-
 
         private void InitializeMonthFilter()
         {
@@ -681,7 +708,7 @@ namespace DigitalProduction
                             if (soListResponse?.Data != null && soListResponse.Data.Count > 0)
                             {
                                 // ✅ Got data
-                               // _soRetryCount = 0; // reset retry count
+                                // _soRetryCount = 0; // reset retry count
                                 gridLookUpEditSO.Properties.DataSource = soListResponse.Data;
                                 gridLookUpEditSO.Properties.DisplayMember = "SO";
                                 gridLookUpEditSO.Properties.ValueMember = "SO";
@@ -696,9 +723,9 @@ namespace DigitalProduction
                                 //}
                                 //else
                                 //{
-                                    // Final fallback
-                                    gridLookUpEditSO.Properties.DataSource = null;
-                                    ShowMessage.ShowInfo("No Sales Orders found after retries.");
+                                // Final fallback
+                                gridLookUpEditSO.Properties.DataSource = null;
+                                ShowMessage.ShowInfo("No Sales Orders found after retries.");
                                 //}
                             }
                             break;
@@ -731,6 +758,7 @@ namespace DigitalProduction
 
         private void UpdateGrid(List<ProductionSchedule> newSchedules)
         {
+            // Refresh the main data source
             productionSchedules.Clear();
             foreach (var schedule in newSchedules)
             {
@@ -738,22 +766,30 @@ namespace DigitalProduction
             }
 
             ApplyMonthFilter();
-
-            // Hide columns after data is bound
             HideGridColumns();
+
+            // Enable multiple selection in filter popups
             gridViewSchedule.OptionsFilter.AllowMultiSelectInCheckedFilterPopup = true;
-            gridViewSchedule.Columns["Size"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
-            gridViewSchedule.Columns["SO"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
-            gridViewSchedule.Columns["PartName"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+
+            // Common filter columns
+            if (gridViewSchedule.Columns["Size"] != null)
+                gridViewSchedule.Columns["Size"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+            if (gridViewSchedule.Columns["SO"] != null)
+                gridViewSchedule.Columns["SO"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+
+            // ✅ configure combined PartName_PartCode column
+
+            if (gridViewSchedule.Columns["PartNamePartCode"] != null)
+                gridViewSchedule.Columns["PartNamePartCode"].OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+
+            // Custom sorting for numeric "Size" filter popup
             gridViewSchedule.ShowFilterPopupCheckedListBox += (s, e) =>
             {
                 if (e.Column.FieldName == "Size")
                 {
-                    var originalItems = e.CheckedComboBox.Items
-                        .Cast<CheckedListBoxItem>()
-                        .ToList();
+                    var originalItems = e.CheckedComboBox.Items.Cast<CheckedListBoxItem>().ToList();
 
-                    var sortedItems = originalItems
+                    var numericItems = originalItems
                         .Where(item => double.TryParse(item.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out _))
                         .OrderBy(item =>
                         {
@@ -762,20 +798,79 @@ namespace DigitalProduction
                         })
                         .ToList();
 
-                    // Clear the current items
+                    var nonNumericItems = originalItems
+                        .Where(item => !double.TryParse(item.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                        .OrderBy(item => item.Value?.ToString(), StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
                     e.CheckedComboBox.Items.Clear();
 
-                    // Add sorted items with correct check state
-                    foreach (var item in sortedItems)
+                    foreach (var item in numericItems.Concat(nonNumericItems))
                     {
-                        e.CheckedComboBox.Items.Add(new CheckedListBoxItem(item.Value, item.Description, item.CheckState == CheckState.Checked ? CheckState.Checked : CheckState.Unchecked, item.Enabled));
+                        e.CheckedComboBox.Items.Add(
+                            new CheckedListBoxItem(
+                                item.Value,
+                                item.Description,
+                                item.CheckState == CheckState.Checked ? CheckState.Checked : CheckState.Unchecked,
+                                item.Enabled
+                            )
+                        );
                     }
 
-                    // Optional UI styling
                     e.CheckedComboBox.BorderStyle = BorderStyles.Office2003;
                 }
             };
+
+            // Load combo box for Part selection
             LoadPartItemsToCheckedComboBox(cbxPartName, gridViewSchedule);
+        }
+
+        private void AddPartNamePartCodeColumn()
+        {
+            // If the column already exists, don't add it again
+            if (gridViewSchedule.Columns["PartNamePartCode"] != null)
+                return;
+
+            GridColumn partNameCodeColumn = gridViewSchedule.Columns["PartNamePartCode"];
+            if (partNameCodeColumn == null)
+            {
+                partNameCodeColumn = gridViewSchedule.Columns.AddField("PartNamePartCode");
+                partNameCodeColumn.UnboundType = DevExpress.Data.UnboundColumnType.String;
+
+                // 🧩 Formula for combining PartName and PartCode
+                if (partField == "VietnameseName")
+                    partNameCodeColumn.UnboundExpression = "Iif(IsNullOrEmpty([VietnameseName]), Trim([PartName]), Trim([VietnameseName])) + '_' + Trim([PartCode])";
+                else
+                    partNameCodeColumn.UnboundExpression = "Trim([PartName]) + '_' + Trim([PartCode])";
+
+                // 👇 Hide from the UI
+                partNameCodeColumn.Visible = false;
+                partNameCodeColumn.ShowUnboundExpressionMenu = false;
+            }
+
+            // Set filter popup to CheckedList
+            partNameCodeColumn.OptionsFilter.FilterPopupMode = FilterPopupMode.CheckedList;
+
+            // Custom data binding for this calculated column
+            gridViewSchedule.CustomUnboundColumnData += (s, e) =>
+            {
+                if (e.Column.FieldName == "PartNamePartCode" && e.IsGetData)
+                {
+                    var vietnameseName = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "VietnameseName")?.ToString();
+                    var partName = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "PartName")?.ToString();
+                    var partCode = gridViewSchedule.GetListSourceRowCellValue(e.ListSourceRowIndex, "PartCode")?.ToString();
+
+                    string baseName;
+                    if (partField == "VietnameseName")
+                        baseName = !string.IsNullOrWhiteSpace(vietnameseName) ? vietnameseName : partName;
+                    else
+                        baseName = partName;
+
+                    e.Value = !string.IsNullOrWhiteSpace(partCode)
+                        ? $"{baseName}_{partCode}"
+                        : baseName;
+                }
+            };
         }
 
         private void HideGridColumns()
@@ -898,86 +993,92 @@ namespace DigitalProduction
         private void LoadPartItemsToCheckedComboBox(CheckedComboBoxEdit comboBoxPart, GridView gridView)
         {
             comboBoxPart.Properties.BeginUpdate();
-
             comboBoxPart.Properties.Items.Clear();
 
-            IEnumerable<object> list = gridView.DataSource as IEnumerable<object>;
+            var list = gridView.DataSource as IEnumerable<object>;
             if (list == null)
             {
                 comboBoxPart.Properties.EndUpdate();
                 return;
             }
 
-            var sizeSet = new HashSet<string>();
-            var partSet = new HashSet<string>();
+            var partSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var item in list)
             {
                 var type = item.GetType();
 
-                var partValue = type.GetProperty(partField)?.GetValue(item)?.ToString();
+                // Read values
+                var partName = type.GetProperty("PartName")?.GetValue(item)?.ToString();
+                var partCode = type.GetProperty("PartCode")?.GetValue(item)?.ToString();
+                var vietnameseName = type.GetProperty("VietnameseName")?.GetValue(item)?.ToString();
 
-                // If VietnameseName selected but empty, use PartName
-                if (string.IsNullOrWhiteSpace(partValue) && partField == "VietnameseName")
-                {
-                    partValue = type.GetProperty("PartName")?.GetValue(item)?.ToString();
-                }
-                if (!string.IsNullOrEmpty(partValue))
-                    partSet.Add(partValue);
-            }
+                string partValue = null;
 
-            // Sort numeric and non-numeric sizes
-
-            var nonNumericSizes = sizeSet
-                .Where(s => !double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
-                .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-
-            foreach (var part in partSet.OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
-                comboBoxPart.Properties.Items.Add(part);
-
-            // Optional: Set drop-down row count for better display
-            comboBoxPart.Properties.DropDownRows = Math.Min(10, comboBoxPart.Properties.Items.Count);
-
-            // Set larger popup size
-            comboBoxPart.Properties.PopupFormMinSize = new Size(200, 350);
-
-            comboBoxPart.Properties.EndUpdate();
-            cbxPartName.ShowPopup();
-        }
-
-        private void ApplyCombinedFilters()
-        {
-            var sizeValues = GetCheckedValues(cbxSize, gridViewSchedule, "Size");
-            var partValues = GetCheckedValues(cbxPartName, gridViewSchedule, "PartName"); // dùng PartName để chắc chắn có dữ liệu
-
-            List<string> filters = new List<string>();
-
-            if (sizeValues.Any())
-                filters.Add($"[Size] IN ({string.Join(", ", sizeValues)})");
-
-            if (partValues.Any())
-            {
-                var partFilter = string.Join(", ", partValues);
-
+                // Fallback logic for VietnameseName
                 if (partField == "VietnameseName")
                 {
-                    // In Vietnamese: prefer VietnameseName, fallback to PartName if empty
-                    filters.Add($@"
-                (
-                    (IsNullOrEmpty([VietnameseName]) AND [PartName] IN ({partFilter}))
-                    OR
-                    ([VietnameseName] IN ({partFilter}))
-                )");
+                    partValue = string.IsNullOrWhiteSpace(vietnameseName) ? partName : vietnameseName;
                 }
                 else
                 {
-                    // Other languages: use PartName only
-                    filters.Add($"[PartName] IN ({partFilter})");
+                    partValue = partName;
+                }
+
+                // Combine PartName and PartCode
+                if (!string.IsNullOrWhiteSpace(partValue))
+                {
+                    string displayText = !string.IsNullOrWhiteSpace(partCode)
+                        ? partValue + "_" + partCode
+                        : partValue;
+
+                    partSet.Add(displayText);
                 }
             }
 
+            // Sort and add
+            foreach (var part in partSet.OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
+                comboBoxPart.Properties.Items.Add(part);
+
+            comboBoxPart.Properties.DropDownRows = Math.Min(10, comboBoxPart.Properties.Items.Count);
+            comboBoxPart.Properties.PopupFormMinSize = new Size(200, 350);
+
+            comboBoxPart.Properties.EndUpdate();
+
+            cbxPartName.ShowPopup();
+        }
+        private void ApplyCombinedFilters()
+        {
+            var sizeValues = GetCheckedValues(cbxSize, gridViewSchedule, "Size") ?? new List<string>();
+            var partValues = GetCheckedValues(cbxPartName, gridViewSchedule, "PartNamePartCode") ?? new List<string>();
+
+            List<string> filters = new List<string>();
+
+            // 🟦 Size filter
+            if (sizeValues.Any())
+            {
+                var formattedSizes = string.Join(", ", sizeValues.Select(v => $"'{v.Replace("'", "")}'"));
+                filters.Add($"[Size] IN ({formattedSizes})");
+            }
+
+            // 🟩 PartName + PartCode filter
+            if (partValues.Any())
+            {
+                var formattedParts = string.Join(", ", partValues.Select(v => $"'{v.Replace("'", "")}'"));
+                if (partField == "VietnameseName")
+                {
+                    // If using Vietnamese name mode: combine VietnameseName (fallback to PartName) + PartCode
+                    string vnCombined = "Iif(IsNullOrEmpty([VietnameseName]), Trim([PartName]), Trim([VietnameseName])) + '_' + Trim([PartCode])";
+                    filters.Add($"({vnCombined} IN ({formattedParts}))");
+                }
+                else
+                {
+                    // Otherwise, just use the combined column (hidden but available)
+                    filters.Add($"[PartNamePartCode] IN ({formattedParts})");
+                }
+            }
+
+            // 🟨 Apply to grid
             gridViewSchedule.ActiveFilterString = filters.Any()
                 ? string.Join(" AND ", filters)
                 : string.Empty;

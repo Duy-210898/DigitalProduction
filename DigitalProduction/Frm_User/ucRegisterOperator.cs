@@ -70,7 +70,7 @@ namespace DigitalProduction
                 { lblEmployeeID, "EmployeeID" },
                 { lblEmployeeName, "EmployeeName" },
                 { btn_submit, "Submit" },
-                { btn_close, "Cancle" }
+                { btn_close, "Cancel" }
             };
 
             foreach (var control in controls)

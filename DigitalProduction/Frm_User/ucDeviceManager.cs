@@ -97,7 +97,7 @@ namespace DigitalProduction
                 row.Cells["IsActive"].ReadOnly = true;
                 row.Cells["ConnectionStatus"].ReadOnly = true;
 
-                row.Cells["Action"].Value = "Edit";
+                row.Cells["Action"].Value = Lang.Edit;
             }
 
             if (dgvDevices != null)
@@ -120,28 +120,28 @@ namespace DigitalProduction
                 string action = row.Cells["Action"].Value.ToString();
 
 
-                if (action == "Edit")
+                if (action == Lang.Edit)
                 {
                     // Reset "Action" column for all other rows to prevent multiple edits
                     foreach (DataGridViewRow r in dgvDevices.Rows)
                     {
                         if (r.Index != e.RowIndex)
                         {
-                            r.Cells["Action"].Value = "Edit";
+                            r.Cells["Action"].Value = Lang.Edit;
                             SetRowEditable(r, false);
                         }
                     }
                     isEditing = true;
                     HandleEditAction(row);
                 }
-                else if (action == "Update")
+                else if (action == Lang.Update)
                 {
                     HandleUpdateAction(row);
                 }
             }
             else if (dgvDevices.Columns[e.ColumnIndex].Name == "CancelAction")
             {
-                if (row.Cells["Action"].Value != null && row.Cells["Action"].Value.ToString() == "Update")
+                if (row.Cells["Action"].Value != null && row.Cells["Action"].Value.ToString() == Lang.Update)
                 {
                     isEditing = false;
                     HandleCancelAction(row);
@@ -172,8 +172,8 @@ namespace DigitalProduction
                 // Hide original columns
                 SetColumnVisibility(false, "Department Name", "Plant Name");
 
-                // Change button text to "Update"
-                row.Cells["Action"].Value = "Update";
+                // Change button text to Lang.Update
+                row.Cells["Action"].Value = Lang.Update;
 
                 // Add Cancel button
                 AddCancelButton(row);
@@ -208,7 +208,7 @@ namespace DigitalProduction
             }
             ShowMessage.ShowInfo(message, status ? "Success" : "Fail");
             SetRowEditable(row, false);
-            row.Cells["Action"].Value = "Edit";
+            row.Cells["Action"].Value = Lang.Edit;
 
             // Clear Cancel button text
             RemoveColumnIfExists("CancelAction");
@@ -228,7 +228,7 @@ namespace DigitalProduction
                 SetColumnVisibility(true, "Department Name", "Plant Name");
 
                 SetRowEditable(row, false);
-                row.Cells["Action"].Value = "Edit";
+                row.Cells["Action"].Value = Lang.Edit;
 
                 // Remove Cancel button and ComboBox columns
                 RemoveColumnIfExists("CancelAction");
@@ -323,13 +323,13 @@ namespace DigitalProduction
                 DataGridViewButtonColumn cancelColumn = new DataGridViewButtonColumn
                 {
                     Name = "CancelAction",
-                    HeaderText = "Cancel",
-                    Text = "Cancel",
+                    HeaderText = Lang.Cancel,
+                    Text = Lang.Cancel,
                     UseColumnTextForButtonValue = true
                 };
                 dgvDevices.Columns.Add(cancelColumn);
             }
-            row.Cells["CancelAction"].Value = "Cancel";
+            row.Cells["CancelAction"].Value = Lang.Cancel;
         }
         private void UpdateDepartmentAndPlantName(int rowIndex, string key, string newName)
         {

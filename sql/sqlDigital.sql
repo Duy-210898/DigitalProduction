@@ -176,8 +176,8 @@ CREATE TABLE ProductionSchedule (
     SizeID INT NOT NULL,
     PartID INT NOT NULL,
     OrderID INT NOT NULL,
-    MaterialCode VARCHAR(50),
-    MaterialName VARCHAR(1000),
+    MaterialsID VARCHAR(50),
+    MaterialsName VARCHAR(1000),
     UNIT VARCHAR(10),
     ProductionProcess VARCHAR(50),
     Page VARCHAR(10),
@@ -197,9 +197,13 @@ CREATE TABLE PartSizeOrder (
 	SizeQty INT,
 	TargetCut INT,
 	Unit VARCHAR(50),
-	UnitUsage FLOAT
+	UnitUsage FLOAT,
+	CreatedAt DATETIME DEFAULT GETDATE()
 );
 GO
+CREATE INDEX IX_PartSizeOrder_Keys
+ON PartSizeOrder (PartId, OrderId, SizeId);
+
 -- Table: DefaultInfo
 CREATE TABLE DefaultInfo (
     DefaultID INT PRIMARY KEY IDENTITY(1,1),
@@ -255,6 +259,32 @@ CREATE TABLE DeviceDailyActivity (
     CONSTRAINT FK_DeviceDailyActivity_DeviceList FOREIGN KEY (DeviceID) REFERENCES DeviceList(DeviceID)
 );
 
+GO
+CREATE TABLE CuttingSyncRawData (
+    RawID INT IDENTITY(1,1) PRIMARY KEY,
+    SyncBatchID UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(), -- nhóm batch sync
+    Factory NVARCHAR(10),
+    ART NVARCHAR(255),
+    Model NVARCHAR(255),
+    PO NVARCHAR(50),
+    SO NVARCHAR(50),
+    MasterWorkOrder NVARCHAR(50),
+    Size NVARCHAR(10),
+    PartCode NVARCHAR(100),
+    PartName NVARCHAR(200),
+    PartNameVI NVARCHAR(200),
+    MaterialCode VARCHAR(50),
+    MaterialsName VARCHAR(1000),
+    SizeQty INT,
+    Unit NVARCHAR(50),
+    ProductionProcess NVARCHAR(50),
+    Page NVARCHAR(50),
+    LastNo NVARCHAR(100),
+    UnitUsage FLOAT,
+    TargetCut INT,
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    SyncedBy NVARCHAR(100) NULL -- có thể là 'auto', 'system', 'username'
+);
 GO
 -- Foreign Key Constraints
 ALTER TABLE ProductionSchedule 

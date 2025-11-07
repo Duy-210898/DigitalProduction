@@ -7,7 +7,7 @@ using DigitalProduction.Validation;
 
 namespace DigitalProduction
 {
-    public partial class ucRegisterUser : DevExpress.XtraEditors.XtraUserControl
+    public partial class ucRegisterUser : XtraUserControl
     {
         public event EventHandler ExitClicked;
        // public event EventHandler<Employee> UserCreated;
@@ -102,7 +102,7 @@ namespace DigitalProduction
                 { lblDepartment, "Department" },
                 { lblPosition, "Position" },
                 { btn_submit, "Submit" },
-                { btn_close, "Cancle" }
+                { btn_close, "Cancel" }
             };
 
             foreach (var control in controls)

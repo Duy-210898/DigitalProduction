@@ -461,7 +461,7 @@ namespace DigitalProduction.ViewModels
 
                 var existingKeys = new HashSet<string>(BindingDeviceOutputs.Select(x => x.UniqueKey()));
 
-                // ✅ Update từng dòng có thay đổi — không reorder, không clear
+                // ✅ Cập nhật dữ liệu đã có
                 foreach (var existing in BindingDeviceOutputs)
                 {
                     if (newLookup.TryGetValue(existing.UniqueKey(), out var updated))
@@ -474,11 +474,29 @@ namespace DigitalProduction.ViewModels
                     }
                 }
 
-                // ✅ Thêm dòng mới (nếu có)
+                // ✅ Thêm dòng mới vào đúng nhóm
                 foreach (var kvp in newLookup)
                 {
                     if (!existingKeys.Contains(kvp.Key))
-                        BindingDeviceOutputs.Add(kvp.Value);
+                    {
+                        var newItem = kvp.Value;
+
+                        // 🔍 Tìm nhóm tương ứng (ví dụ theo PartName)
+                        var groupKey = newItem.PartName; // hoặc newItem.GroupKey / newItem.PartID
+
+                        // 📍 Tìm vị trí chèn: ngay sau dòng cuối cùng của nhóm đó
+                        int insertIndex = BindingDeviceOutputs
+                            .Select((item, index) => new { item, index })
+                            .Where(x => x.item.PartName == groupKey)
+                            .Select(x => x.index)
+                            .DefaultIfEmpty(-1)
+                            .Max();
+
+                        if (insertIndex >= 0 && insertIndex < BindingDeviceOutputs.Count - 1)
+                            BindingDeviceOutputs.Insert(insertIndex + 1, newItem);
+                        else
+                            BindingDeviceOutputs.Add(newItem); // nếu chưa có nhóm thì thêm cuối
+                    }
                 }
 
                 // ✅ Xóa dòng không còn tồn tại
@@ -489,13 +507,13 @@ namespace DigitalProduction.ViewModels
                 }
 
                 // ❌ Không reorder list để tránh nhảy dòng
-                // (Giữ nguyên thứ tự BindingDeviceOutputs hiện tại)
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error updating UI: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
 
         private void ReorderBindingList(BindingList<DeviceOutput> list, IList<DeviceOutput> orderList)
         {

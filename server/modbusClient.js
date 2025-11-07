@@ -92,7 +92,7 @@ async function attemptSingleConnection(ipAddress, entry) {
  * @param {string} ipAddress The IP address of the device.
  */
 async function connectToDevice(ipAddress) {
-  //  if (ipAddress !== '10.30.4.144') return;
+  if (ipAddress !== '10.30.0.165') return;
   const entry = modbusClients[ipAddress] = modbusClients[ipAddress] || {};
 
   // Prevent duplicate connects
@@ -249,7 +249,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
       if (!modbusClients[ipAddress]?.SOs || modbusClients[ipAddress].SOs.length === 0) {
         return;
       }
-      //  if (ipAddress !== '10.30.4.144') return;
+       if (ipAddress !== '10.30.0.165') return;
       // interrupt HMI set distributionData again
       if (!modbusClients[ipAddress].sizeDataInfo ||
         typeof modbusClients[ipAddress].sizeDataInfo !== 'object' ||
@@ -537,14 +537,15 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
     const sizeData = clientData.SOs[clientData.indexMultipleSOs].Data;
 
     const sizeTotals = sizeData.reduce((acc, item) => {
-      const key = `${item.SizeID}-${item.PartName}`;
+      const key = `${item.SizeID}-${item.PartName}-${item.PartID}`;
       if (!acc.has(key)) {
         acc.set(key, {
           SizeID: item.SizeID,
           Size: item.Size,
           SizeQty: 0,
           InventoryQty: item.InventoryQty,
-          PartName: item.PartName
+          PartName: item.PartName,
+          PartID: item.PartID
         });
       }
       acc.get(key).SizeQty += item.SizeQty;
@@ -615,8 +616,8 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
         }
 
         distributionData.SizeData = distributionData.SizeData.filter(
-          item => item.PartName === selectedPart.PartName
-        );
+          item => item.PartName === selectedPart.PartName && item.PartID === selectedPart.PartID
+        );        
 
         const registerData = stringTo16BitArrayASCII(selectedPart.PartName).slice(0, 20);
         const writes = registerData.map((val, j) => ({
@@ -869,11 +870,20 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
         await clearDeleteBit(client, registerValue, register3000Address, deleteIndex);
 
         const currentSO = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
+       // let uniquePartNameSOs = [];
+        let seenPartIDs = new Set();
         let uniquePartNameSOs = [];
-
+        
         if (currentSO && Array.isArray(currentSO.Data)) {
-          uniquePartNameSOs = [...new Set(currentSO.Data.map(p => p.PartName))];
-          //  console.log(`Unique PartName Store:`, uniquePartNameSOs);
+          for (const item of currentSO.Data) {
+            if (!seenPartIDs.has(item.PartID)) {
+              seenPartIDs.add(item.PartID);   // mark as seen
+              uniquePartNameSOs.push(item);                 // add to diff if PartID is new
+            }
+          }
+        
+          // console.log("Unique PartIDs:", [...seenPartIDs]);
+          // console.log("New unique items added to diff:", diff);
         } else {
           console.warn(`currentSO or currentSO.Data is undefined for IP: ${ipAddress}`);
         }
@@ -1014,18 +1024,26 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
 
   const currentSO = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
   if (currentSO == undefined) return;
-  let uniquePartNameSOs = [];
-  if (currentSO && Array.isArray(currentSO.Data)) {
-    uniquePartNameSOs = [...new Set(currentSO.Data.map(p => p.PartName))];
-    // console.log(`Unique PartName Store:`, uniquePartNameSOs);
-  } else {
-    console.warn(`currentSO or currentSO.Data is undefined for IP: ${ipAddress}`);
-  }
+  // ✅ Create a unique list by both PartName and PartID
+  const uniquePartNameSOs = [
+    ...new Map(
+      currentSO.Data.map(item => [`${item.PartName}_${item.PartID}`, item])
+    ).values()
+  ];
 
   if (uniquePartNameSOs.length === 0) return;
 
-  const selectedPartName = uniquePartNameSOs[modbusClients[ipAddress].indexMultiplePartNames];
-  const distribution = currentSO.Data.filter(item => item.PartName === selectedPartName);
+  // ✅ Pick the currently selected part (by index)
+  const selectedItem = uniquePartNameSOs[modbusClients[ipAddress].indexMultiplePartNames];
+  if (!selectedItem) return;
+
+  // ✅ Find all entries in the same group (same PartName & PartID)
+  const distribution = currentSO.Data.filter(
+    item => item.PartName === selectedItem.PartName && item.PartID === selectedItem.PartID
+  );
+
+  // console.log(`Selected PartName: ${selectedItem.PartName}, PartID: ${selectedItem.PartID}`);
+  // console.log(`Distribution:`, distribution);
 
   if (distribution.length === 0) return;
 

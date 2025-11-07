@@ -208,7 +208,7 @@ namespace DigitalProduction
                                 break;
 
                             default:
-                                ShowErrorNotification($"Unsupported action: {scheduleResponse.Action}");
+                                //ShowErrorNotification($"Unsupported action: {scheduleResponse.Action}");
                                 break;
                         }
                     }

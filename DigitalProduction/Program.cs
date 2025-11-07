@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.LookAndFeel;
@@ -8,26 +11,51 @@ namespace DigitalProduction
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        private const int SW_RESTORE = 9;
+
         [STAThread]
         static void Main()
         {
+            bool createdNew;
+            using (Mutex mutex = new Mutex(true, "DigitalProductionAppMutex", out createdNew))
+            {
+                if (!createdNew)
+                {
+                    // Find and bring the first instance to front
+                    Process current = Process.GetCurrentProcess();
+                    foreach (var process in Process.GetProcessesByName(current.ProcessName))
+                    {
+                        if (process.Id != current.Id)
+                        {
+                            ShowWindow(process.MainWindowHandle, SW_RESTORE);
+                            SetForegroundWindow(process.MainWindowHandle);
+                            break;
+                        }
+                    }
 
-           UserLookAndFeel.Default.SetSkinStyle("WXI"); 
-           WindowsFormsSettings.DefaultFont = new System.Drawing.Font("Arial", 10);
-            // Enable visual styles for the application
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+                    // Exit the new instance
+                    return;
+                }
 
-            // Start WebSocket connection with retry logic
-            Task.Run(() => ConnectWithRetry());
+                // ✅ Continue normal startup
+                UserLookAndFeel.Default.SetSkinStyle("WXI");
+                WindowsFormsSettings.DefaultFont = new System.Drawing.Font("Arial", 10);
 
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
 
-            // Run the main application form
-            WindowsFormsSettings.ScrollUIMode = ScrollUIMode.Fluent;
-            Application.Run(new frmLogin());
+                // Connect WebSocket asynchronously
+                Task.Run(() => ConnectWithRetry());
+
+                WindowsFormsSettings.ScrollUIMode = ScrollUIMode.Fluent;
+                Application.Run(new frmLogin());
+            }
         }
 
         static async Task ConnectWithRetry()
@@ -42,7 +70,7 @@ namespace DigitalProduction
                 {
                     await WebSocketClient.Instance.Connect("ws://10.30.0.116:8000");
                     Console.WriteLine("Connected to WebSocket server successfully.");
-                    return; // Exit loop when successful
+                    return;
                 }
                 catch (Exception ex)
                 {
@@ -50,8 +78,9 @@ namespace DigitalProduction
 
                     if (attempt == maxAttempts - 1)
                     {
-                        MessageBox.Show("Failed to connect after multiple attempts. Please check the server.", "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return; // Stop retrying after max attempts
+                        MessageBox.Show("Failed to connect after multiple attempts. Please check the server.",
+                            "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
                     }
 
                     await Task.Delay(delay);

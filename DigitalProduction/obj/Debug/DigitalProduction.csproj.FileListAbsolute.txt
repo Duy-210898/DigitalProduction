@@ -231,3 +231,4 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.pdb
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_User.ucAddSupplementary.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_User.ucTreatment.resources
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses
