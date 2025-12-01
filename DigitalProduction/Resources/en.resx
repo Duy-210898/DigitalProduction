@@ -738,4 +738,7 @@
   <data name="OldPwd" xml:space="preserve">
     <value>Old Password</value>
   </data>
+  <data name="Detail" xml:space="preserve">
+    <value>Detail</value>
+  </data>
 </root>

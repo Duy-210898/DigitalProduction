@@ -205,7 +205,7 @@ namespace DigitalProduction.Frm_Admin
             string status = cbx_Status.SelectedItem == null ? "" : cbx_Status.SelectedItem.ToString();
 
             // Get data from database
-            List<Distribution> data = DbHelper.GetDistributionData(fromDate, toDate, selectedDeviceId, so, status);
+            List<DistributionModelView> data = DbHelper.GetDistributionData(fromDate, toDate, selectedDeviceId, so, status);
 
             // Bind to grid or other control
             gridDistribution.DataSource = data;
@@ -240,7 +240,7 @@ namespace DigitalProduction.Frm_Admin
             foreach (var rowHandle in selectedRows)
             {
                 var row = view.GetRow(rowHandle);
-                if (row is Distribution item)
+                if (row is DistributionModelView item)
                 {
                     if (item.Status == "Pending" || item.Status == "Complete")
                     {
@@ -305,7 +305,7 @@ namespace DigitalProduction.Frm_Admin
             if (view != null)
             {
                 // Get the current row data
-                Distribution rowData = view.GetRow(e.RowHandle) as Distribution;
+                DistributionModelView rowData = view.GetRow(e.RowHandle) as DistributionModelView;
 
                 if (rowData != null && e.Column.FieldName == "Status")
                 {

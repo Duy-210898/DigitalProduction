@@ -199,4 +199,7 @@
   <data name="bg_Supplementary" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\bg_Supplementary.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icons_detail" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icons-detail.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Menu;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
+using DigitalProduction.Frm_User;
 using DigitalProduction.Models;
 using GridviewHelp;
 using Newtonsoft.Json;
@@ -19,7 +21,7 @@ namespace DigitalProduction
 {
     public partial class ucProgress : UserControl
     {
-        private BindingList<Distribution> distributionDataList = new BindingList<Distribution>();
+        private BindingList<DistributionModelView> distributionDataList = new BindingList<DistributionModelView>();
         private WebSocketClient _webSocketClient;
         private DevExpress.XtraEditors.Repository.RepositoryItemComboBox noteComboBoxEditor;
         private Rectangle _reasonHeaderCheckBoxRect;
@@ -37,11 +39,76 @@ namespace DigitalProduction
             dtpEndDate.EditValue = DateTime.Today;
             // Make sure controls are created first
             InitializeControls();
+
+            // Bật embedded navigator
+            gridProgressManagement.UseEmbeddedNavigator = true;
+
+            // Tăng chiều cao thanh navigator
+            gridProgressManagement.EmbeddedNavigator.Margin = new Padding(0);
+            gridProgressManagement.EmbeddedNavigator.Height = 50;
+
+            // Ẩn nút mặc định 
+            gridProgressManagement.EmbeddedNavigator.Buttons.Append.Visible = false;
+            gridProgressManagement.EmbeddedNavigator.Buttons.Edit.Visible = false;
+            gridProgressManagement.EmbeddedNavigator.Buttons.EndEdit.Visible = false;
+            gridProgressManagement.EmbeddedNavigator.Buttons.Remove.Visible = false;
+            gridProgressManagement.EmbeddedNavigator.Buttons.CancelEdit.Visible = false;
+            gridProgressManagement.EmbeddedNavigator.Buttons.First.Visible = false;
+            gridProgressManagement.EmbeddedNavigator.Buttons.Last.Visible = false;
+
+            // gán ImageList để nút dễ thấy
+            var imgs = new ImageList();
+            imgs.Images.Add(Properties.Resources.icons_detail);
+            gridProgressManagement.EmbeddedNavigator.Buttons.ImageList = imgs;
+
+            // Thêm nút custom
+            var showDetailButton = new DevExpress.XtraEditors.NavigatorCustomButton(
+                index: -1,         // thêm ở cuối
+                imageIndex: 0,
+                enabled: true,
+                visible: true,
+                tag: 100,
+                hint: "Show Detail"
+            );
+
+            gridProgressManagement.EmbeddedNavigator.CustomButtons.AddRange(
+                new DevExpress.XtraEditors.NavigatorCustomButton[] { showDetailButton }
+            );
+            // Đăng ký sự kiện
+            gridProgressManagement.EmbeddedNavigator.ButtonClick += (s, e2) =>
+            {
+                if (e2.Button.Tag != null && (int)e2.Button.Tag == 100) // Nút Show Detail
+                {
+                    try
+                    {
+                        this.Cursor = Cursors.WaitCursor;
+
+                        System.Threading.Thread.Sleep(1000); // fake loading
+
+                        using (Form frm = new Form())
+                        {
+                            frm.Text = "Detail Progress";
+                            frm.StartPosition = FormStartPosition.CenterParent;
+                            frm.Size = new Size(1000, 600);
+
+                            uc_DetailProgress detailControl = new uc_DetailProgress(distributionDataList);
+                            detailControl.Dock = DockStyle.Fill;
+
+                            frm.Controls.Add(detailControl);
+                            frm.ShowDialog();
+                        }
+                    }
+                    finally
+                    {
+                        // Đặt lại cursor về bình thường
+                        this.Cursor = Cursors.Default;
+                    }
+                }
+            };
         }
 
         private void InitializeControls()
         {
-
             // Sync Data button
             syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
             syncButton.Text = LocalizationManager.GetString("Sync");
@@ -96,7 +163,7 @@ namespace DigitalProduction
 
             for (int rowHandle = 0; rowHandle < gridViewProgressManagement.RowCount; rowHandle++)
             {
-                var distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+                var distribution = gridViewProgressManagement.GetRow(rowHandle) as DistributionModelView;
                 if (distribution != null && distribution.Status == "Pending")
                 {
                     bool success = DbHelper.UpdateDistributionDevice(distribution.DistributionID, selectedDeviceId);
@@ -134,7 +201,7 @@ namespace DigitalProduction
             // Hide all columns except "MachineName"
             gridLookUpDevice.Properties.View.Columns.Clear();
             gridLookUpDevice.Properties.PopulateViewColumns();
-            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridLookUpDevice.Properties.View.Columns)
+            foreach (GridColumn column in gridLookUpDevice.Properties.View.Columns)
             {
                 column.Visible = column.FieldName == "MachineName";
             }
@@ -268,7 +335,7 @@ namespace DigitalProduction
             Task.Run(async () => await GetDataAndLoadToGridAsync());
             endDate = endDate.AddDays(1).AddTicks(-1);
 
-            var filteredData = new BindingList<Distribution>(
+            var filteredData = new BindingList<DistributionModelView>(
                 distributionDataList.Where(distribution =>
                     distribution.CreatedAt >= startDate &&
                     distribution.CreatedAt <= endDate
@@ -278,7 +345,7 @@ namespace DigitalProduction
         }
 
 
-        private async Task UpdateGridControlAsync(BindingList<Distribution> filteredData)
+        private async Task UpdateGridControlAsync(BindingList<DistributionModelView> filteredData)
         {
             if (this.InvokeRequired)
             {
@@ -388,7 +455,7 @@ namespace DigitalProduction
                     await Task.Delay(10); // async delay, avoid blocking UI thread
                 }
 
-                var response = ResponseMessage<List<Distribution>>.FromJson(jsonData);
+                var response = ResponseMessage<List<DistributionModelView>>.FromJson(jsonData);
                 Console.WriteLine(jsonData);
 
                 if (response?.DistributionData?.Any() == true)
@@ -401,7 +468,7 @@ namespace DigitalProduction
                             distributionDataList.Add(distribution);
                     }
 
-                    _ = UpdateGridControlAsync(new BindingList<Distribution>(distributionDataList));
+                    _ = UpdateGridControlAsync(new BindingList<DistributionModelView>(distributionDataList));
                     loadDeviceDistribution();
                 }
                 else
@@ -433,7 +500,7 @@ namespace DigitalProduction
             if (view != null)
             {
                 // Get the current row data
-                var rowData = view.GetRow(e.RowHandle) as Distribution;
+                var rowData = view.GetRow(e.RowHandle) as DistributionModelView;
 
                 // Ensure rowData is valid and the column is "Status"
                 if (rowData != null && e.Column.FieldName == "Status")
@@ -478,7 +545,26 @@ namespace DigitalProduction
             gridViewProgressManagement.Columns["MaterialName"].Visible = false;
             gridViewProgressManagement.Columns["EmployeeName"].Visible = false;
             gridViewProgressManagement.Columns["CreatedAt"].Visible = false;
-            gridViewProgressManagement.Columns["UpdatedAt"].Visible = false;
+            // gridViewProgressManagement.Columns["UpdatedAt"].Visible = false;
+            gridViewProgressManagement.CustomColumnDisplayText += (s, e) =>
+            {
+                if (e.Column.FieldName == "UpdatedAt" && e.Value != null && e.Value != DBNull.Value)
+                {
+                    try
+                    {
+                        DateTimeOffset dto = DateTimeOffset.Parse(e.Value.ToString());
+                        e.DisplayText = dto.LocalDateTime.ToString("dd/MM/yyyy HH:mm:ss");
+                    }
+                    catch
+                    {
+                        e.DisplayText = "";
+                    }
+                }
+            };
+
+            gridViewProgressManagement.BestFitColumns();
+            gridViewProgressManagement.OptionsView.ColumnAutoWidth = false;
+
             gridViewProgressManagement.Columns["MaterialType"].Caption = LocalizationManager.GetString("MaterialType");
             gridViewProgressManagement.Columns["SO"].Width = 130;
             gridViewProgressManagement.Columns["MachineName"].Width = 110;
@@ -531,7 +617,7 @@ namespace DigitalProduction
                 {
                     if (e.Column.FieldName == LocalizationManager.GetString("Reason"))
                     {
-                        var model = (Distribution)e.Row;
+                        var model = (DistributionModelView)e.Row;
                         if (e.IsGetData)
                         {
                             if (model.Note.HasValue && noteDescriptions.TryGetValue(model.Note.Value, out string description))
@@ -555,7 +641,7 @@ namespace DigitalProduction
                     if (gridViewProgressManagement.FocusedColumn.FieldName == LocalizationManager.GetString("Reason"))
                     {
                         int rowHandle = gridViewProgressManagement.FocusedRowHandle;
-                        Distribution distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+                        DistributionModelView distribution = gridViewProgressManagement.GetRow(rowHandle) as DistributionModelView;
 
                         // Check if the distribution object exists and its status is not "Complete"
                         if (distribution != null && distribution.Status != "Complete")
@@ -593,7 +679,7 @@ namespace DigitalProduction
                     if (gridViewProgressManagement.FocusedColumn.FieldName == "InventoryQty")
                     {
                         int rowHandle = gridViewProgressManagement.FocusedRowHandle;
-                        Distribution distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+                        DistributionModelView distribution = gridViewProgressManagement.GetRow(rowHandle) as DistributionModelView;
 
                         if (distribution != null)
                         {
@@ -618,7 +704,7 @@ namespace DigitalProduction
                     if (e.Column.FieldName == "InventoryQty")
                     {
                         int rowHandle = e.RowHandle;
-                        Distribution distribution = gridViewProgressManagement.GetRow(rowHandle) as Distribution;
+                        DistributionModelView distribution = gridViewProgressManagement.GetRow(rowHandle) as DistributionModelView;
 
                         if (distribution != null)
                         {
@@ -699,7 +785,7 @@ namespace DigitalProduction
             gridViewProgressManagement.MasterRowEmpty += (s, e) =>
             {
                 var view = s as GridView;
-                Distribution masterRow = view.GetRow(e.RowHandle) as Distribution;
+                DistributionModelView masterRow = view.GetRow(e.RowHandle) as DistributionModelView;
 
                 if (masterRow == null || !_subDistributionCache.TryGetValue(masterRow.DistributionID, out var subList) || subList.Count == 0)
                 {
@@ -714,7 +800,7 @@ namespace DigitalProduction
             gridViewProgressManagement.MasterRowGetChildList += (s, e) =>
             {
                 var view = s as GridView;
-                Distribution masterRow = view.GetRow(e.RowHandle) as Distribution;
+                DistributionModelView masterRow = view.GetRow(e.RowHandle) as DistributionModelView;
 
                 if (masterRow != null &&
                     _subDistributionCache.TryGetValue(masterRow.DistributionID, out var subList))
@@ -839,7 +925,7 @@ namespace DigitalProduction
                 gridViewProgressManagement.InvalidateColumnHeader(gridViewProgressManagement.Columns[LocalizationManager.GetString("Reason")]);
                 for (int i = 0; i < gridViewProgressManagement.RowCount; i++)
                 {
-                    var row = gridViewProgressManagement.GetRow(i) as Distribution;
+                    var row = gridViewProgressManagement.GetRow(i) as DistributionModelView;
                     if (row != null && row.Status != "Complete")
                     {
                         row.Note = _reasonHeaderChecked ? 1 : (int?)null;
@@ -851,7 +937,7 @@ namespace DigitalProduction
             }
         }
 
-        private void GridViewProgressManagement_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
+        private void GridViewProgressManagement_ShowingEditor(object sender, CancelEventArgs e)
         {
             GridView view = sender as GridView;
 
@@ -871,60 +957,13 @@ namespace DigitalProduction
             btnApplyDevice.Text = LocalizationManager.GetString("TransferDevice");
             this.Text = LocalizationManager.GetString("ListOfDistributions");
         }
-    
-        private async Task LoadCurrentPageAsync()
-        {
-            SetWebSocketClient(WebSocketClient.Instance);
-            await GetDataAndLoadToGridAsync();
-            // return Task.CompletedTask;
-        }
 
-        public class Distribution
-        {
-            public int DistributionID { get; set; }
-            public string SO { get; set; }
-            public int? DeviceID { get; set; }
-            public string IpAddress { get; set; }
-            public string MachineName { get; set; }
-            public string PartName { get; set; }
-            public string VietnameseName { get; set; }
-            public string Size { get; set; }
-            public string Unit { get; set; }
-            // public double UnitUsage { get; set; }
-            public int SizeQty { get; set; }
-            public string MaterialName { get; set; }
-            public string OperatorName { get; set; }
-            public string EmployeeName { get; set; }
-            public int? ActualSizeQty { get; set; }
-            public int InventoryQty { get; set; }
-            public string Status { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public DateTime UpdatedAt { get; set; }
-            public bool IsLeather { get; set; }
-            // New read-only property
-            public string MaterialType => IsLeather ? Lang.LeatherMaterial : Lang.RawMaterial;
-            public int? Note { get; set; }
-            public string NoteReason
-            {
-                get
-                {
-                    if (!Note.HasValue)
-                        return string.Empty;
+        //private async Task LoadCurrentPageAsync()
+        //{
+        //    SetWebSocketClient(WebSocketClient.Instance);
+        //    await GetDataAndLoadToGridAsync();
+        //    // return Task.CompletedTask;
+        //}
 
-                    switch (Note.Value)
-                    {
-                        case 0:
-                            return "1 - " + LocalizationManager.GetString("NotEnoughMaterials");
-                        case 1:
-                            return "2 - " + LocalizationManager.GetString("ChangeOfPlan");
-                        case 2:
-                            return "3 - " + LocalizationManager.GetString("ForgotToChooseSize");
-                        default:
-                            return string.Empty;
-                    }
-                }
-            }
-
-        }
     }
 }

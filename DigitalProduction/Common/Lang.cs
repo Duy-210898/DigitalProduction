@@ -28,5 +28,6 @@
         public static string ChangePwd => LocalizationManager.GetString("ChangePwd");
         public static string Edit => LocalizationManager.GetString("Edit");
         public static string Update => LocalizationManager.GetString("Update");
+        public static string Detail => LocalizationManager.GetString("Detail");
     }
 }

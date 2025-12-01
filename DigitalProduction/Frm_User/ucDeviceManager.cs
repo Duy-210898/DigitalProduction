@@ -25,7 +25,6 @@ namespace DigitalProduction
         private Panel paginationPanel;
         private Label lblPageInfo;
         private DataGridView dgvDevices;
-
         private bool isEditing = false;
 
         public ucDeviceManager()
@@ -96,7 +95,6 @@ namespace DigitalProduction
                 row.Cells["Department Name"].ReadOnly = true;
                 row.Cells["IsActive"].ReadOnly = true;
                 row.Cells["ConnectionStatus"].ReadOnly = true;
-
                 row.Cells["Action"].Value = Lang.Edit;
             }
 
@@ -583,30 +581,44 @@ namespace DigitalProduction
                 this.Controls.Remove(paginationPanel);
                 paginationPanel.Dispose();
             }
-            paginationPanel = new Panel { Dock = DockStyle.Bottom, Height = 50, Padding = new Padding(10) };
+
+            paginationPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 50,
+                Padding = new Padding(10),
+                BackColor = Color.AliceBlue
+            };
+
             lblPageInfo = new Label
             {
                 Text = $"{LocalizationManager.GetString("TotalRecords")} {devices.Count}",
-                Size = new Size(200, 30),
+                AutoSize = true,
                 ForeColor = Color.Green,
                 Font = new Font("Arial", 10, FontStyle.Bold),
                 Location = new Point(20, 10)
             };
+            paginationPanel.Controls.Add(lblPageInfo);
 
+            // Add bottom panel (NO SetChildIndex!!)
+            this.Controls.Add(paginationPanel);
+
+            // Make sure grid stays above the bottom panel
+            paginationPanel.SendToBack();
+
+            // Move Sync button to top panel
             SimpleButton syncButton = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(150, 40)
+                Size = new Size(150, 40),
+                Location = new Point(180, 5),
+                ImageOptions = { Image = Properties.Resources.sync_icon }
             };
             syncButton.Click += SyncButton_Click;
-            syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
 
-            paginationPanel.Controls.Add(lblPageInfo);
-            this.Controls.Add(paginationPanel);
-            this.Controls.SetChildIndex(paginationPanel, 0);
             groupPanelButtonContainer.Controls.Add(syncButton);
-            syncButton.Location = new Point(180, 5); // Adjust the location accordingly
         }
+
         private async void SyncButton_Click(object sender, EventArgs e)
         {
             if (!isEditing) // Prevent refresh while editing

@@ -455,7 +455,7 @@ namespace DigitalProduction
 
                 // 🔥 Highlight "Distribution" in Accordion Menu
                 mainForm.HighlightSelectedItem(mainForm.btnDistribution);
-                MessageBox.Show($"Sent {filteredSchedules.Count} records to Distribution!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //MessageBox.Show($"Sent {filteredSchedules.Count} records to Distribution!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
         }

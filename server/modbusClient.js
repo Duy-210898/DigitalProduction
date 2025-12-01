@@ -1,11 +1,9 @@
 const fs = require('fs');
 const net = require('net');
 const Modbus = require('jsmodbus');
-const ping = require('ping');
 const { ModbusPollingManager, isHMIConnected } = require('./ModbusPollingManager');
 const manager = new ModbusPollingManager(200);
 const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setDistributionIsComplete, setSubDistributionComplete, getSubDistributions, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb, logCutHistoryToDB } = require('./database');
-const { machine } = require('os');
 //const { notifyClientsToDeleteOrder } = require('./notifications');
 
 let countRemainSizeData = {};
@@ -92,7 +90,7 @@ async function attemptSingleConnection(ipAddress, entry) {
  * @param {string} ipAddress The IP address of the device.
  */
 async function connectToDevice(ipAddress) {
-  if (ipAddress !== '10.30.0.165') return;
+  // if (ipAddress !== '10.30.4.144') return;
   const entry = modbusClients[ipAddress] = modbusClients[ipAddress] || {};
 
   // Prevent duplicate connects
@@ -111,7 +109,7 @@ async function connectToDevice(ipAddress) {
 
     return { client, socket };
   } catch (error) {
-    console.error(`[${ipAddress}] ❌ Connection failed: ${error.message}`);
+ //   console.error(`[${ipAddress}] ❌ Connection failed: ${error.message}`);
     logToFile(errorLogPath, `[${ipAddress}] Connection failed: ${error.message}`);
 
     entry.isConnected = false;
@@ -249,7 +247,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
       if (!modbusClients[ipAddress]?.SOs || modbusClients[ipAddress].SOs.length === 0) {
         return;
       }
-       if (ipAddress !== '10.30.0.165') return;
+      // if (ipAddress !== '10.30.4.144') return;
       // interrupt HMI set distributionData again
       if (!modbusClients[ipAddress].sizeDataInfo ||
         typeof modbusClients[ipAddress].sizeDataInfo !== 'object' ||
@@ -457,7 +455,7 @@ async function batchWrite(client, writes, batchSize = 10, batchDelay = 50) {
 async function processDistributionData(client, ipAddress, distributionData, isExisted) {
   if (!distributionData) {
     if (isDelete) {
-      console.warn(`No distribution data found for IP ${ipAddress}. Skipping save.`);
+    //  console.warn(`No distribution data found for IP ${ipAddress}. Skipping save.`);
       const response = await client.readHoldingRegisters(register3000Address, 1);
       const registerValue = response.response._body.values[0];
       await clearDeleteBit(client, registerValue, register3000Address, 2);
@@ -527,6 +525,46 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
   }
 
   // -----------------------------
+  // Write Order Info
+  // -----------------------------
+  
+  const soGroup = clientData.SOs[clientData.indexMultipleSOs];
+  if (soGroup && Array.isArray(soGroup.Data) && soGroup.Data.length > 0) {
+    const orderInfo = [
+      soGroup.Data[0]?.Model ?? "",
+      soGroup.Data[0]?.ART ?? ""
+    ];
+
+    const orderInfoAddresses = [
+      { start: 0, maxRegisters: 25 },  // Model
+      { start: 25, maxRegisters: 10 }  // ART
+    ];
+
+    for (let i = 0; i < orderInfo.length; i++) {
+      let registerData = stringTo16BitArrayLittleEndian(orderInfo[i] || "");
+      const { start, maxRegisters } = orderInfoAddresses[i];
+
+      // Ensure we do not exceed maxRegisters
+      if (registerData.length > maxRegisters * 2) {
+        registerData = registerData.slice(0, maxRegisters * 2);
+      }
+
+      for (let j = 0; j < registerData.length; j++) {
+        try {
+          await client.writeSingleRegister(start + j, registerData[j]);
+        } catch (error) {
+          console.error(
+            `Error writing order info register ${start + j} for IP ${ipAddress}:`,
+            error.message
+          );
+        }
+      }
+    }
+  } else {
+    console.warn(`⚠️ Cannot write Order Info: Invalid soGroup.Data for IP ${ipAddress}`);
+  }
+
+  // -----------------------------
   // Consolidate SizeData
   // -----------------------------
   if (
@@ -580,83 +618,114 @@ async function processDistributionData(client, ipAddress, distributionData, isEx
     // -----------------------------
     // Part Names
     // -----------------------------
+    const rawParts = clientData?.SOs[clientData.indexMultipleSOs]?.Data || [];
+
+    // Compute total UnitUsage per Part
+    const usageMap = rawParts.reduce((acc, p) => {
+      const key = `${p.PartName}|${p.PartID}`;
+      acc[key] = (acc[key] || 0) + (p.UnitUsage || 0);
+      return acc;
+    }, {});
+
+    // Build your existing uniquePartSOsMap (but add DisplayText)
     const uniquePartSOsMap = [
-      ...new Set(clientData?.SOs[clientData.indexMultipleSOs]?.Data.map(p => `${p.PartName}|${p.PartID}`))
+      ...new Set(rawParts.map(p => `${p.PartName}|${p.PartID}`))
     ].map(item => {
       const [PartName, PartID] = item.split('|');
-      return { PartName, PartID: parseInt(PartID) };
+      const TotalUnitUsage = usageMap[item] || 0;
+
+      return {
+        PartName,
+        PartID: parseInt(PartID),
+        TotalUnitUsage,
+        DisplayText: `${PartName} - ${TotalUnitUsage}`
+      };
     });
 
+
+    // -----------------------------------------------------
+    // REMAINDER OF YOUR LOGIC (with DisplayText applied)
+    // -----------------------------------------------------
     if (uniquePartSOsMap.length > 0) {
       if (modbusClients[ipAddress].indexMultiplePartNames == null) {
         modbusClients[ipAddress].indexMultiplePartNames = 0;
       }
 
-      // Write registers 1022 + 1023
-      await client.writeSingleRegister(
-        1022,
-        modbusClients[ipAddress].indexMultiplePartNames + 1 > uniquePartSOsMap.length
-          ? uniquePartSOsMap.length
-          : modbusClients[ipAddress].indexMultiplePartNames + 1
-      );
-      await delay(50);
-      await client.writeSingleRegister(1023, uniquePartSOsMap.length);
+    // Write registers 1022 + 1023
+    await client.writeSingleRegister(
+      1022,
+      modbusClients[ipAddress].indexMultiplePartNames + 1 > uniquePartSOsMap.length
+        ? uniquePartSOsMap.length
+        : modbusClients[ipAddress].indexMultiplePartNames + 1
+    );
+    await delay(50);
+    await client.writeSingleRegister(1023, uniquePartSOsMap.length);
 
-      // Display part name
-      const partDisplayStartRegister = distributionData.Leather === 2 ? 115 : 270;
-      if (distributionData.Leather === 2) {
-        await client.writeSingleRegister(partDisplayStartRegister, uniquePartSOsMap.length);
-      } else {
-        const selectedPart =
-          uniquePartSOsMap[modbusClients[ipAddress].indexMultiplePartNames];
+    // Display part name (now PartName + Usage)
+    const partDisplayStartRegister = distributionData.Leather === 2 ? 115 : 270;
 
-        if (!selectedPart || !selectedPart.PartName) {
-          console.warn("⚠️ selectedPart not found or missing PartName for IP:", ipAddress);
-          return; // or handle it gracefully
-        }
+    if (distributionData.Leather === 2) {
+      await client.writeSingleRegister(partDisplayStartRegister, uniquePartSOsMap.length);
+    } else {
+      const selectedPart =
+        uniquePartSOsMap[modbusClients[ipAddress].indexMultiplePartNames];
 
-        distributionData.SizeData = distributionData.SizeData.filter(
-          item => item.PartName === selectedPart.PartName && item.PartID === selectedPart.PartID
-        );        
-
-        const registerData = stringTo16BitArrayASCII(selectedPart.PartName).slice(0, 20);
-        const writes = registerData.map((val, j) => ({
-          addr: partDisplayStartRegister + j,
-          val
-        }));
-
-        await batchWrite(client, writes, 10, 20).catch(err => {
-          console.error("🚨 batchWrite crashed:", err);
-        });
+      if (!selectedPart || !selectedPart.PartName) {
+        console.warn("⚠️ selectedPart not found or missing PartName for IP:", ipAddress);
+        return;
       }
 
-      // Multiple part names (registers starting at 320)
-      const partWrites = [];
-      uniquePartSOsMap.slice(0, 20).forEach((part, i) => {
-        const startRegister = 320 + i * 20;
-        const registerData = stringTo16BitArrayASCII(part.PartName).slice(0, 20);
-        registerData.forEach((val, j) => {
-          partWrites.push({ addr: startRegister + j, val });
-        });
-      });
-      await batchWrite(client, partWrites, 10, 30).catch(err => {
+      distributionData.SizeData = distributionData.SizeData.filter(
+        item => item.PartName === selectedPart.PartName &&
+                item.PartID === selectedPart.PartID
+      );
+
+      // 👇 display "PartName (Usage)" instead of only PartName
+      const registerData = stringTo16BitArrayASCII(selectedPart.DisplayText).slice(0, 20);
+
+      const writes = registerData.map((val, j) => ({
+        addr: partDisplayStartRegister + j,
+        val
+      }));
+
+      await batchWrite(client, writes, 10, 20).catch(err => {
         console.error("🚨 batchWrite crashed:", err);
       });
-  
+    }
 
-      // Part IDs
-      if (distributionData.Leather === 2) {
-        const partIDWrites = uniquePartSOsMap.map((part, i) => ({
-          addr: 91 + i,
-          val: part.PartID
-        }));
-        await batchWrite(client, partIDWrites, 10, 50).catch(err => {
-          console.error("🚨 batchWrite crashed:", err);
-        });
-    
-      } else {
+    // Multiple part names list (starting at 320)
+    const partWrites = [];
+
+    uniquePartSOsMap.slice(0, 20).forEach((part, i) => {
+      const startRegister = 320 + i * 20;
+
+      // 👇 Use DisplayText here too
+      const registerData = stringTo16BitArrayASCII(part.DisplayText).slice(0, 20);
+
+      registerData.forEach((val, j) => {
+        partWrites.push({ addr: startRegister + j, val });
+      });
+    });
+
+    await batchWrite(client, partWrites, 10, 30).catch(err =>
+      console.error("🚨 batchWrite crashed:", err)
+    );
+
+
+    // Part IDs
+    if (distributionData.Leather === 2) {
+      const partIDWrites = uniquePartSOsMap.map((part, i) => ({
+        addr: 91 + i,
+        val: part.PartID
+      }));
+
+      await batchWrite(client, partIDWrites, 10, 50).catch(err =>
+        console.error("🚨 batchWrite crashed:", err)
+      );
+    } else {
         const index = modbusClients[ipAddress]?.indexMultiplePartNames;
         const singlePart = uniquePartSOsMap[index];
+
         if (singlePart) {
           await client.writeSingleRegister(300, singlePart.PartID);
         }
@@ -1023,8 +1092,9 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
   if (!hasMultipleSOs) return;
 
   const currentSO = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
-  if (currentSO == undefined) return;
-  // ✅ Create a unique list by both PartName and PartID
+  if (!currentSO) return;
+
+  // Create unique list by PartName + PartID
   const uniquePartNameSOs = [
     ...new Map(
       currentSO.Data.map(item => [`${item.PartName}_${item.PartID}`, item])
@@ -1033,84 +1103,63 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
 
   if (uniquePartNameSOs.length === 0) return;
 
-  // ✅ Pick the currently selected part (by index)
+  // Pick the currently selected part
   const selectedItem = uniquePartNameSOs[modbusClients[ipAddress].indexMultiplePartNames];
   if (!selectedItem) return;
 
-  // ✅ Find all entries in the same group (same PartName & PartID)
+  // Find all entries with the same PartName & PartID
   const distribution = currentSO.Data.filter(
     item => item.PartName === selectedItem.PartName && item.PartID === selectedItem.PartID
   );
 
-  // console.log(`Selected PartName: ${selectedItem.PartName}, PartID: ${selectedItem.PartID}`);
-  // console.log(`Distribution:`, distribution);
-
   if (distribution.length === 0) return;
 
-  const groupedBySizeExisted = distribution
+  // Group by SizeID
+  const groupedBySize = distribution
     .filter(({ ActualCut, ActualSizeQty, ActualPieces }) =>
       ActualCut != null && ActualSizeQty != null && ActualPieces != null
     )
     .reduce((acc, item) => {
       const sizeID = item.SizeID;
-      const actualCut = item.ActualCut ?? 0;
-      const actualSizeQty = item.ActualSizeQty ?? 0;
-      const actualPieces = item.ActualPieces ?? 0;
-
-      if (!acc[sizeID]) {
-        acc[sizeID] = { cuts: [], qtys: [], pieces: [] };
-      }
-
-      acc[sizeID].cuts.push(actualCut);
-      acc[sizeID].qtys.push(actualSizeQty);
-      acc[sizeID].pieces.push(actualPieces);
-
+      if (!acc[sizeID]) acc[sizeID] = { cuts: [], qtys: [], pieces: [] };
+      acc[sizeID].cuts.push(item.ActualCut ?? 0);
+      acc[sizeID].qtys.push(item.ActualSizeQty ?? 0);
+      acc[sizeID].pieces.push(item.ActualPieces ?? 0);
       return acc;
     }, {});
 
-  if (!groupedBySizeExisted) return;
-
-  const summedValues = Object.keys(groupedBySizeExisted).map(sizeID => {
-    const { cuts, qtys, pieces } = groupedBySizeExisted[sizeID];
+  const summedValues = Object.keys(groupedBySize).map(sizeID => {
+    const { cuts, qtys, pieces } = groupedBySize[sizeID];
     return {
-      sizeID,
-      totalCuts: cuts.reduce((sum, cut) => sum + cut, 0),
-      totalQtys: qtys.reduce((sum, qty) => sum + qty, 0),
-      totalPieces: pieces.reduce((sum, piece) => sum + piece, 0)
+      sizeID: parseInt(sizeID),
+      totalCuts: cuts.reduce((sum, v) => sum + v, 0),
+      totalQtys: qtys.reduce((sum, v) => sum + v, 0),
+      totalPieces: pieces.reduce((sum, v) => sum + v, 0)
     };
   });
 
   if (summedValues.length === 0) return;
 
   const sizeInfo = modbusClients[ipAddress].sizeDataInfo;
-  if (!sizeInfo) return;
+  if (!sizeInfo || !Array.isArray(sizeInfo.sizeID) || sizeInfo.sizeID.length === 0) return;
 
   const fullSizeAddress = sizeInfo.sizeID;
-  if (!Array.isArray(fullSizeAddress) || fullSizeAddress.length === 0) return;
-
-  if (!modbusClients[ipAddress].previousSizeData) {
-    modbusClients[ipAddress].previousSizeData = [];
-  }
+  if (!modbusClients[ipAddress].previousSizeData) modbusClients[ipAddress].previousSizeData = [];
 
   const isLeatherMaterial = isLeather === 2;
-  const typeMaterial = isLeatherMaterial ? 1 : 0;
-  let baseActual = typeMaterial ? 922 : 794;
+  const baseActualDefault = isLeatherMaterial ? 922 : 794;
+  const leatherSizeIDs = [45, 47, 49];
+  const sizeSpace = 16;
 
   try {
+    // Split into groups for writing
     let sizeGroups = [];
-
     if (isLeatherMaterial) {
-      // Split into 2 arrays of 3 items
-      sizeGroups = [
-        fullSizeAddress.slice(0, 3),
-        fullSizeAddress.slice(3, 6)
-      ];
+      sizeGroups = [fullSizeAddress.slice(0, 3), fullSizeAddress.slice(3, 6)];
     } else {
-      // Just one group of up to 6 items
       sizeGroups = [fullSizeAddress.slice(0, 6)];
     }
 
-    // Iterate each group
     for (let g = 0; g < sizeGroups.length; g++) {
       const group = sizeGroups[g];
 
@@ -1120,35 +1169,26 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
 
           const sizeID = await safeRead(sizeAddressID, client);
           if (!sizeID || sizeID === 0) {
-            console.warn(`⚠️ Skipping invalid sizeID at group ${g} index ${index} ${ipAddress}`);
+            console.warn(`⚠️ Skipping invalid sizeID at group ${g} index ${index} for ${ipAddress}`);
             return;
           }
 
-          const matched = summedValues.find(item => parseInt(item.sizeID) === sizeID);
-          if (!matched) return;
-
-          let leatherSizeIDs = [45, 47, 49];
-          let isLeather = leatherSizeIDs.includes(sizeAddressID);
-
-          // Determine spacing rule
-          if (isLeather) {
-            baseActual = 223;
+          const matched = summedValues.find(item => item.sizeID === sizeID);
+          if (!matched) {
+          //  console.warn(`⚠️ No data found for sizeID ${sizeID}`);
+            return;
           }
-          let sizeSpace = 16;
-          const actualAddress = baseActual + sizeSpace * (index);
-          //const existing = modbusClients[ipAddress].previousSizeData.find(data => data.sizeID === sizeID);
 
-          // const isSame =
-          //   existing &&
-          //   existing.actualCut === newData.actualCut &&
-          //   existing.actualPieces === newData.actualPieces &&
-          //   existing.actualQtys === newData.actualQtys;
-
-          // if (!isSame) {
+          // Determine per-column baseActual
+          let columnBase = leatherSizeIDs.includes(sizeAddressID) ? 223 : baseActualDefault;
+          const actualAddress = columnBase + sizeSpace * index;
 
           async function safeWrite(client, address, value) {
-            if (value !== 0) {
+            // Always write, even if value is 0
+            try {
               await client.writeSingleRegister(address, value);
+            } catch (err) {
+              console.error(`❌ Failed writing address ${address}:`, err);
             }
           }
 
@@ -1156,26 +1196,12 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
           await safeWrite(client, actualAddress + 4, matched.totalPieces);
           await safeWrite(client, actualAddress + 8, matched.totalQtys);
 
-          // console.log(
-          //   `✅ Written values for sizeID=${sizeID}, addrID=${sizeAddressID}, cuts=${matched.totalCuts}, pieces=${matched.totalPieces}, qtys=${matched.totalQtys}, baseAddr=${actualAddress}, index=${index}, IP=${ipAddress}`
-          // );
-
-          //   if (existing) {
-          //     Object.assign(existing, newData);
-          //   } else {
-          //     modbusClients[ipAddress].previousSizeData.push(newData);
-          //   }
-          // } else {
-          //   console.log(`⏭️ Skipped writing for sizeID ${sizeID}, no change in values.`);
-          // }
-
-
-          //console.log(`✅ Written sizeID ${sizeID} at group ${g}, index ${index}, address ${actualAddress}`);
+         // console.log(`✅ Written sizeID ${sizeID} at group ${g}, index ${index}, address ${actualAddress}`);
         })
       );
     }
   } catch (err) {
-    console.error("❌ Error during write:", err);
+    console.error("❌ Error during writeActualSizesForMultipleSOs:", err);
   }
 }
 
@@ -1200,9 +1226,8 @@ async function writeOperatorID(client, ipAddress, operatorID) {
     // Write both registers starting at address 1018
     await client.writeMultipleRegisters(1018, [lowRegister, highRegister]);
 
-    // console.log(`✅ Wrote OperatorID (${operatorID}) to IP: ${ipAddress}`);
   } catch (error) {
-    const errorMsg = `❌ Error writing OperatorID to IP ${ipAddress}: ${error.message}`;
+    const errorMsg = `❌ Error writting OperatorID to IP ${ipAddress}: ${error.message}`;
     console.error(errorMsg);
     logToFile(errorLogPath, errorMsg);
   }
@@ -1949,30 +1974,6 @@ async function saveDistributionDataToModbus(client, ipAddress, data) {
     // Ensure modbusClients structure exists
     modbusClients[ipAddress] ||= {};
     modbusClients[ipAddress].sizeDataInfo ||= {};
-    // Write Order Info
-    const orderInfo = [data.Model, data.ART];
-    const orderInfoAddresses = [
-      { start: 0, maxRegisters: 25 },
-      { start: 25, maxRegisters: 10 }
-    ];
-
-    const orderInfoPromises = orderInfo.map(async (info, index) => {
-      let registerData = stringTo16BitArrayLittleEndian(info);
-      const maxRegisters = orderInfoAddresses[index].maxRegisters;
-      registerData = registerData.slice(0, maxRegisters * 2);
-      const startRegister = orderInfoAddresses[index].start;
-      for (let j = 0; j < registerData.length; j++) {
-        try {
-          //    console.log(`The covert text:  ${convert16BitArrayToString(registerData)} ${startRegister + j} ${registerData[j]}`);
-          await client.writeSingleRegister(startRegister + j, registerData[j]);
-          //  console.log(`Successfully wrote to register ${startRegister + j}`);
-        } catch (error) {
-          console.error(`Error writing to register ${startRegister + j}: ${error.message}`);
-        }
-      }
-    });
-
-    await Promise.all(orderInfoPromises);
 
     // Write Leather Data
     const leatherDataPromise = (async () => {
@@ -2217,7 +2218,7 @@ async function setIpAddresses(ipAddresses) {
   }
 }
 
-async function isHostReachable(ipAddress, port = 502) { // Default Modbus port
+async function isHostReachable(ipAddress, port = 502) {
   return new Promise((resolve) => {
     const socket = new net.Socket();
 
@@ -2225,16 +2226,17 @@ async function isHostReachable(ipAddress, port = 502) { // Default Modbus port
 
     socket.on('connect', () => {
       socket.destroy();
-      resolve(true); // Host is reachable
+      resolve(true);
     });
 
     socket.on('timeout', () => {
       socket.destroy();
-      resolve(false); // Timeout reached
+      resolve(false);
     });
 
     socket.on('error', () => {
-      resolve(false); // Error means not reachable
+      socket.destroy();   // important cleanup
+      resolve(false);
     });
 
     socket.connect(port, ipAddress);

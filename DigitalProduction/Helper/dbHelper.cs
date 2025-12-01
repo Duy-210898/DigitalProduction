@@ -4,7 +4,6 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DigitalProduction.Extensions;
@@ -1949,9 +1948,9 @@ namespace DigitalProduction
             return result;
         }
 
-        public static List<Distribution> GetDistributionData(DateTime from, DateTime to, int deviceId, string so, string status)
+        public static List<DistributionModelView> GetDistributionData(DateTime from, DateTime to, int deviceId, string so, string status)
         {
-            List<Distribution> list = new List<Distribution>();
+            List<DistributionModelView> list = new List<DistributionModelView>();
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -2018,7 +2017,7 @@ namespace DigitalProduction
                     {
                         while (reader.Read())
                         {
-                            list.Add(new Distribution
+                            list.Add(new DistributionModelView
                             {
                                 DistributionID = Convert.ToInt32(reader["DistributionID"]),
                                 DeviceID = SafeReader.GetNullableInt(reader, "DeviceID"),

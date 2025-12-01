@@ -771,4 +771,7 @@
   <data name="OldPwd" xml:space="preserve">
     <value>Mật khẩu cũ</value>
   </data>
+  <data name="Detail" xml:space="preserve">
+    <value>Chi tiết</value>
+  </data>
 </root>
