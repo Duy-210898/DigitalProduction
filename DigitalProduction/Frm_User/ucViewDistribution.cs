@@ -183,12 +183,12 @@ namespace DigitalProduction
 
             cboART.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
             cboART.Properties.ImmediatePopup = true;
-            cboART.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
+            cboART.Properties.PopupFilterMode = PopupFilterMode.Contains;
         }
 
 
 
-        private void SetupSOGridLookUp(DevExpress.XtraEditors.GridLookUpEdit cboSO, DateTime selectedDate, int departmentId)
+        private void SetupSOGridLookUp(GridLookUpEdit cboSO, DateTime selectedDate, int departmentId)
         {
             // 1. Get list of SOs
             List<string> soList = DbHelper.GetDistinctSOListByMonthAndDepartment(
@@ -223,7 +223,7 @@ namespace DigitalProduction
             // 5. Configure popup
             cboSO.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
             cboSO.Properties.ImmediatePopup = true;
-            cboSO.Properties.PopupFilterMode = DevExpress.XtraEditors.PopupFilterMode.Contains;
+            cboSO.Properties.PopupFilterMode = PopupFilterMode.Contains;
 
             int itemHeight = 24;
             int maxItems = 10;
@@ -232,7 +232,7 @@ namespace DigitalProduction
             gridViewSO.OptionsView.ShowGroupPanel = false;
         }
 
-        private void LoadProductionSchedulesBySelectedSOs(DevExpress.XtraEditors.GridLookUpEdit cboSO, GridControl gridControl, GridView gridView)
+        private void LoadProductionSchedulesBySelectedSOs(GridLookUpEdit cboSO, GridControl gridControl, GridView gridView)
         {
             //if (selectedSalesOrders == null || selectedSalesOrders.Count == 0)
             //{
@@ -406,8 +406,7 @@ namespace DigitalProduction
                                 var row = view?.GetRow(e2.ListSourceRowIndex) as SizeGroup;
                                 int minCutQty = row.Details.Min(d => d.ActualRemainingQuantity);
                                 // Target
-                                int target = row.Details
-                                    .Sum(d => d.SizeQty);
+                                int target = row.Details[0].SizeQty;
                                 // Actual
                                 int actual = (int)row.Details.Min(a => a.CutQuantity);
                                 // Inventory
@@ -417,7 +416,7 @@ namespace DigitalProduction
                                 // Status: if any detail is pending → Pending, else → Complete
                                 // ✅ Complete if any detail is complete
                                 //bool hasAnyPending = row.Details.Any(d =>
-                                //    string.Equals(d.StatusCode, Constants.Pending, StringComparison.OrdinalIgnoreCase));
+                                //string.Equals(d.StatusCode, Constants.Pending, StringComparison.OrdinalIgnoreCase));
                                 bool hasComplete = false;
                                 hasComplete = actual >= target;
                                 //hasComplete = row.Details.Any(d => d.TargetCut - d.SizeQty <= 0);

@@ -7,6 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Repository;
+using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
@@ -24,15 +28,31 @@ namespace DigitalProduction
         private ucRegisterDevice frmRegister;
         private Panel paginationPanel;
         private Label lblPageInfo;
-        private DataGridView dgvDevices;
+
+        // DevExpress Controls
+        private GridControl gridControlDevices;
+        private GridView gridViewDevices;
+
         private bool isEditing = false;
+        private int editingRowHandle = GridControl.InvalidRowHandle;
+
+        private readonly Dictionary<int, object> originalEditValues = new Dictionary<int, object>();
+
+
+        // Repository Items for in-place editing
+        private RepositoryItemButtonEdit repositoryItemButtonEditAction;
+        private RepositoryItemButtonEdit repositoryItemButtonEditCancel;
+        private RepositoryItemGridLookUpEdit repositoryItemGridLookUpEditDepartment;
+        private RepositoryItemGridLookUpEdit repositoryItemGridLookUpEditPlant;
+        private RepositoryItemCheckEdit repositoryItemCheckEditIsActive;
+        private RepositoryItemCheckEdit repositoryItemCheckEditConnectionStatus;
+
 
         public ucDeviceManager()
         {
             InitializeComponent();
-            deviceDataTable = new DataTable();
-            InitializeDataGridView();
-            dgvDevices.DataSource = InitializeDeviceDataTable();
+            deviceDataTable = InitializeDeviceDataTable();
+            InitializeGridControl();
             CreateButtonContainer();
 
             // show add new device
@@ -40,114 +60,264 @@ namespace DigitalProduction
             frmRegister.Visible = false;
             this.Controls.Add(frmRegister);
             frmRegister.ExitClicked += RegisterControl_ExitClicked;
-           // frmRegister.DeviceCreated += RegisterForm_DeviceCreated;
+            // frmRegister.DeviceCreated += RegisterForm_DeviceCreated; // Keep if needed
         }
 
-        private void InitializeDataGridView()
+        private void InitializeGridControl()
         {
-            dgvDevices = new DataGridView
+            // 1. Create the GridControl and GridView
+            gridControlDevices = new GridControl
             {
                 Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                ReadOnly = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                RowTemplate = { Height = 50 }
+                DataSource = deviceDataTable
             };
 
-            this.Controls.Add(dgvDevices);
+            gridViewDevices = new GridView(gridControlDevices)
+            {
+                OptionsView = {
+                    ShowGroupPanel = false,
+                    ColumnAutoWidth = true,
+                    RowAutoHeight = true,
+                    EnableAppearanceEvenRow = true,
+                    EnableAppearanceOddRow = true
+                },
+                OptionsBehavior = {
+                    Editable = true,
+                    ReadOnly = false
+                }
+            };
+
+            gridControlDevices.MainView = gridViewDevices;
+            this.Controls.Add(gridControlDevices);
+
+            // 2. Configure Columns
+            ConfigureGridColumns();
+
+            // 3. Subscribe to event handlers
+            gridViewDevices.RowCellClick += GridViewDevices_RowCellClick;
+            gridViewDevices.CustomRowCellEdit += GridViewDevices_CustomRowCellEdit;
+            gridViewDevices.CellValueChanged += GridViewDevices_CellValueChanged;
+            gridControlDevices.LookAndFeel.UseDefaultLookAndFeel = true;
         }
+
+        private void ConfigureGridColumns()
+        {
+            gridViewDevices.Columns.Clear();
+
+            // Add all necessary columns from the DataTable
+            foreach (DataColumn dataColumn in deviceDataTable.Columns)
+            {
+                var gridColumn = gridViewDevices.Columns.AddField(dataColumn.ColumnName);
+                gridColumn.FieldName = dataColumn.ColumnName;
+                gridColumn.Visible = true;
+                gridColumn.OptionsColumn.AllowEdit = false; // Default to read-only
+                gridColumn.OptionsColumn.ReadOnly = true;
+
+                // Handle boolean columns with CheckEdit for better display
+                if (dataColumn.DataType == typeof(bool))
+                {
+                    if (dataColumn.ColumnName == "IsActive")
+                    {
+                        repositoryItemCheckEditIsActive = new RepositoryItemCheckEdit();
+                        gridControlDevices.RepositoryItems.Add(repositoryItemCheckEditIsActive);
+                        gridColumn.ColumnEdit = repositoryItemCheckEditIsActive;
+                    }
+                    else if (dataColumn.ColumnName == "ConnectionStatus")
+                    {
+                        repositoryItemCheckEditConnectionStatus = new RepositoryItemCheckEdit { ReadOnly = true };
+                        gridControlDevices.RepositoryItems.Add(repositoryItemCheckEditConnectionStatus);
+                        gridColumn.ColumnEdit = repositoryItemCheckEditConnectionStatus;
+                        gridColumn.OptionsColumn.AllowEdit = false;
+                    }
+                }
+            }
+            // Tạo và cấu hình RepositoryItemButtonEdit
+            repositoryItemButtonEditAction = new RepositoryItemButtonEdit();
+            repositoryItemButtonEditAction.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.HideTextEditor;
+            var button = repositoryItemButtonEditAction.Buttons[0];
+            button.Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Glyph;
+            button.Caption = Lang.Edit;
+            button.ImageOptions.Image = null;
+
+            // Gán sự kiện click
+            repositoryItemButtonEditAction.ButtonClick += RepositoryItemButtonEditAction_ButtonClick;
+
+            // Thêm vào repository
+            gridControlDevices.RepositoryItems.Add(repositoryItemButtonEditAction);
+
+            // Create Cancel button column (will be added to the grid later)
+            repositoryItemButtonEditCancel = new RepositoryItemButtonEdit();
+            repositoryItemButtonEditCancel.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.HideTextEditor;
+            repositoryItemButtonEditCancel.Buttons[0].Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Glyph;
+            repositoryItemButtonEditCancel.Buttons[0].Caption = Lang.Cancel;
+            repositoryItemButtonEditCancel.ButtonClick += RepositoryItemButtonEditCancel_ButtonClick;
+            gridControlDevices.RepositoryItems.Add(repositoryItemButtonEditCancel);
+
+
+            // Add Action Column
+            GridColumn actionColumn = new GridColumn
+            {
+                FieldName = "Action",
+                Caption = LocalizationManager.GetString("Action"),
+                VisibleIndex = gridViewDevices.Columns.Count,
+                UnboundType = DevExpress.Data.UnboundColumnType.Object,
+                OptionsColumn = { AllowEdit = true, ReadOnly = false },
+                ColumnEdit = repositoryItemButtonEditAction
+            };
+            gridViewDevices.Columns.Add(actionColumn);
+            actionColumn.Width = 100;
+
+            // Initialize LookUpEdit Repositories (will be populated in HandleEditAction)
+            repositoryItemGridLookUpEditDepartment = new RepositoryItemGridLookUpEdit();
+            repositoryItemGridLookUpEditPlant = new RepositoryItemGridLookUpEdit();
+
+            // Set up all necessary Repository Items for editing Department/Plant in the grid
+            ConfigureLookupEditRepositories(repositoryItemGridLookUpEditDepartment, "DepartmentCombo");
+            ConfigureLookupEditRepositories(repositoryItemGridLookUpEditPlant, "PlantCombo");
+        }
+
+        private void ConfigureLookupEditRepositories(RepositoryItemGridLookUpEdit ri, string name)
+        {
+            ri.Name = name;
+            ri.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            ri.ValueMember = name.Contains("Department") ? "DepartmentID" : "PlantID";
+            ri.DisplayMember = name.Contains("Department") ? "DepartmentName" : "PlantName";
+            ri.ShowFooter = false;
+            ri.View.OptionsView.ShowAutoFilterRow = true;
+            ri.View.OptionsView.ShowGroupPanel = false;
+            ri.View.OptionsView.ShowIndicator = false;
+            ri.PopupFormWidth = 200;
+            gridControlDevices.RepositoryItems.Add(ri);
+        }
+
         private void ApplyLocalization()
         {
-            if (dgvDevices.Columns.Contains("Address"))
-                dgvDevices.Columns["Address"].HeaderText = LocalizationManager.GetString("Address");
-            dgvDevices.Columns["Machine Name"].HeaderText = LocalizationManager.GetString("MachineName"); 
-            dgvDevices.Columns["Plant Name"].HeaderText = LocalizationManager.GetString("PlantName");
-            dgvDevices.Columns["Department Name"].HeaderText = LocalizationManager.GetString("DepartmentName");
-            dgvDevices.Columns["ConnectionStatus"].HeaderText = LocalizationManager.GetString("ConnectionStatus");
-            dgvDevices.Columns["IsActive"].HeaderText = LocalizationManager.GetString("IsActive");
-            dgvDevices.Columns["DeviceID"].Visible = false;
+            // Apply localization and styling for GridView columns
+            if (gridViewDevices.Columns["Address"] != null)
+                gridViewDevices.Columns["Address"].Caption = LocalizationManager.GetString("Address");
+            if (gridViewDevices.Columns["Machine Name"] != null)
+                gridViewDevices.Columns["Machine Name"].Caption = LocalizationManager.GetString("MachineName");
+            if (gridViewDevices.Columns["Plant Name"] != null)
+                gridViewDevices.Columns["Plant Name"].Caption = LocalizationManager.GetString("PlantName");
+            if (gridViewDevices.Columns["Department Name"] != null)
+                gridViewDevices.Columns["Department Name"].Caption = LocalizationManager.GetString("DepartmentName");
+            if (gridViewDevices.Columns["ConnectionStatus"] != null)
+                gridViewDevices.Columns["ConnectionStatus"].Caption = LocalizationManager.GetString("ConnectionStatus");
+            if (gridViewDevices.Columns["IsActive"] != null)
+                gridViewDevices.Columns["IsActive"].Caption = LocalizationManager.GetString("IsActive");
+            if (gridViewDevices.Columns["DeviceID"] != null)
+                gridViewDevices.Columns["DeviceID"].Visible = false;
 
-            // custom header
-            dgvDevices.EnableHeadersVisualStyles = false;
-            dgvDevices.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
-            dgvDevices.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            dgvDevices.ColumnHeadersHeight = 30;
+            // Set initial action text
+            repositoryItemButtonEditAction.Buttons[0].Caption = Lang.Edit;
 
-            // ✅ Add Action Column if it does not exist
-            if (!dgvDevices.Columns.Contains("Action"))
-            {
-                DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn
-                {
-                    Name = "Action",
-                    HeaderText = LocalizationManager.GetString("Action"),
-                    UseColumnTextForButtonValue = false  // ✅ Set to false to allow dynamic text change
-                };
-                dgvDevices.Columns.Add(actionColumn);
-            }
+            // Apply custom header style (DevExpress way)
+            gridViewDevices.Appearance.HeaderPanel.Font = new Font("Segoe UI", 11, FontStyle.Bold);
+            gridViewDevices.Appearance.HeaderPanel.ForeColor = Color.Black;
 
-            // ✅ Set every row to be read-only at the start
-            foreach (DataGridViewRow row in dgvDevices.Rows)
-            {
-                row.Cells["Address"].ReadOnly = true;
-                row.Cells["Machine Name"].ReadOnly = true;
-                row.Cells["Plant Name"].ReadOnly = true;
-                row.Cells["Department Name"].ReadOnly = true;
-                row.Cells["IsActive"].ReadOnly = true;
-                row.Cells["ConnectionStatus"].ReadOnly = true;
-                row.Cells["Action"].Value = Lang.Edit;
-            }
-
-            if (dgvDevices != null)
-            {
-                dgvDevices.CellClick += dgvDevices_CellClick; // Unsubscribe if exists
-                dgvDevices.CellClick += dgvDevices_CellClick; // Subscribe
-            }
+            gridViewDevices.BestFitColumns();
         }
 
-
-        private void dgvDevices_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void GridViewDevices_CustomRowCellEdit(object sender, CustomRowCellEditEventArgs e)
         {
-            if (e.RowIndex < 0 || e.RowIndex >= dgvDevices.Rows.Count || e.ColumnIndex < 0 || e.ColumnIndex >= dgvDevices.Columns.Count)
-                return;
+            GridView view = sender as GridView;
 
-            DataGridViewRow row = dgvDevices.Rows[e.RowIndex];
-
-            if (dgvDevices.Columns[e.ColumnIndex].Name == "Action")
+            // Use Repository Items for in-place editing when the row is being edited
+            if (e.RowHandle == editingRowHandle)
             {
-                string action = row.Cells["Action"].Value.ToString();
-
-
-                if (action == Lang.Edit)
+                if (e.Column.FieldName == "Action")
                 {
-                    // Reset "Action" column for all other rows to prevent multiple edits
-                    foreach (DataGridViewRow r in dgvDevices.Rows)
-                    {
-                        if (r.Index != e.RowIndex)
-                        {
-                            r.Cells["Action"].Value = Lang.Edit;
-                            SetRowEditable(r, false);
-                        }
-                    }
-                    isEditing = true;
-                    HandleEditAction(row);
+                    e.RepositoryItem = repositoryItemButtonEditAction;
                 }
-                else if (action == Lang.Update)
+                // When editing, Department Name and Plant Name columns get the LookUpEdit control
+                else if (e.Column.FieldName == "Department Name")
                 {
-                    HandleUpdateAction(row);
+                    e.RepositoryItem = repositoryItemGridLookUpEditDepartment;
+                }
+                else if (e.Column.FieldName == "Plant Name")
+                {
+                    e.RepositoryItem = repositoryItemGridLookUpEditPlant;
+                }
+                else if (e.Column.FieldName == "IsActive")
+                {
+                    e.RepositoryItem = repositoryItemCheckEditIsActive;
                 }
             }
-            else if (dgvDevices.Columns[e.ColumnIndex].Name == "CancelAction")
+            // Logic for Cancel button (using an Unbound column named "Cancel")
+            if (e.Column.FieldName == "Cancel")
             {
-                if (row.Cells["Action"].Value != null && row.Cells["Action"].Value.ToString() == Lang.Update)
+                if (e.RowHandle == editingRowHandle)
                 {
-                    isEditing = false;
-                    HandleCancelAction(row);
+                    e.RepositoryItem = repositoryItemButtonEditCancel;
                 }
+                else
+                {
+                    // Use a blank repository item to hide the button
+                    e.RepositoryItem = null;
+                }
+            }
+
+        }
+
+        private void GridViewDevices_RowCellClick(object sender, RowCellClickEventArgs e)
+        {
+            // DevExpress grid uses CustomRowCellEdit and button events instead of CellClick for actions.
+            // This event is generally not needed for the core logic implemented below.
+        }
+
+        private void RepositoryItemButtonEditAction_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        {
+            GridView view = gridViewDevices;
+            int rowHandle = view.FocusedRowHandle;
+
+            if (rowHandle == GridControl.InvalidRowHandle) return;
+
+            // Check the current caption of the button that was clicked
+            string actionCaption = repositoryItemButtonEditAction.Buttons[0].Caption;
+
+            if (actionCaption == Lang.Edit && !isEditing)
+            {
+                // Ensure only one row is edited at a time
+                if (editingRowHandle != GridControl.InvalidRowHandle)
+                {
+                    SetRowEditMode(editingRowHandle, false);
+                }
+
+                editingRowHandle = rowHandle;
+                isEditing = true;
+                HandleEditAction(rowHandle);
+                view.RefreshData();
+            }
+            else if (actionCaption == Lang.Update && rowHandle == editingRowHandle)
+            {
+                HandleUpdateAction(rowHandle);
+                view.RefreshData();
             }
         }
 
-        private void HandleEditAction(DataGridViewRow row)
+        private void RepositoryItemButtonEditCancel_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        {
+            GridView view = gridViewDevices;
+            int rowHandle = view.FocusedRowHandle;
+
+            if (rowHandle == GridControl.InvalidRowHandle || rowHandle != editingRowHandle) return;
+
+            HandleCancelAction(rowHandle);
+            view.RefreshData();
+        }
+
+        private void GridViewDevices_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
+        {
+            // If a value changes while editing, update the button text to Update
+            if (e.RowHandle == editingRowHandle && repositoryItemButtonEditAction.Buttons[0].Caption == Lang.Edit)
+            {
+                repositoryItemButtonEditAction.Buttons[0].Caption = Lang.Update;
+                gridViewDevices.InvalidateRowCell(editingRowHandle, gridViewDevices.Columns["Action"]);
+            }
+        }
+
+
+        private void HandleEditAction(int rowHandle)
         {
             try
             {
@@ -157,85 +327,220 @@ namespace DigitalProduction
                 if (departments == null || plants == null)
                     return;
 
-                // Store the original values for cancellation
-                row.Tag = new { DepartmentName = row.Cells["Department Name"].Value, PlantName = row.Cells["Plant Name"].Value };
+                DataRow row = gridViewDevices.GetDataRow(rowHandle);
+                int deviceId = Convert.ToInt32(row["DeviceID"]);
 
-                // Create and insert ComboBox columns
-                CreateComboBoxColumn("DepartmentCombo", "Department Name", departments, "DepartmentName", "DepartmentID");
-                CreateComboBoxColumn("PlantCombo", "Plant Name", plants, "PlantName", "PlantID");
+                // 1. Store original values in the class-level dictionary (FIX APPLIED HERE)
+                if (!originalEditValues.ContainsKey(deviceId))
+                {
+                    originalEditValues.Add(deviceId, new
+                    {
+                        DepartmentName = row["Department Name"],
+                        PlantName = row["Plant Name"]
+                    });
+                }
 
-                // Set initial values for ComboBox cells
-                SetComboBoxInitialValues(row, departments, plants);
+                // 2. Configure and populate LookUpEdit repositories
+                repositoryItemGridLookUpEditDepartment.DataSource = departments;
+                repositoryItemGridLookUpEditPlant.DataSource = plants;
 
-                // Hide original columns
-                SetColumnVisibility(false, "Department Name", "Plant Name");
+                // Get the current Name values
+                string deptName = row["Department Name"]?.ToString();
+                string plantName = row["Plant Name"]?.ToString();
 
-                // Change button text to Lang.Update
-                row.Cells["Action"].Value = Lang.Update;
+                // Find the corresponding ID for the current row
+                int deptID = departments.FirstOrDefault(d => string.Equals(d.DepartmentName, deptName, StringComparison.OrdinalIgnoreCase))?.DepartmentID ?? (departments.Any() ? departments.First().DepartmentID : 0);
+                int plantID = plants.FirstOrDefault(p => string.Equals(p.PlantName, plantName, StringComparison.OrdinalIgnoreCase))?.PlantID ?? (plants.Any() ? plants.First().PlantID : 0);
 
-                // Add Cancel button
-                AddCancelButton(row);
-                SetRowEditable(row, true);
+                // Temporarily replace the display text (Name) in the DataRow with the Value (ID) for the LookUpEdit to work correctly
+                row["Department Name"] = deptID;
+                row["Plant Name"] = plantID;
+
+                // 3. Add Cancel button column if not present
+                if (gridViewDevices.Columns["Cancel"] == null)
+                {
+                    GridColumn cancelColumn = new GridColumn
+                    {
+                        FieldName = "Cancel",
+                        Caption = Lang.Cancel,
+                        VisibleIndex = gridViewDevices.Columns.Count,
+                        UnboundType = DevExpress.Data.UnboundColumnType.Object,
+                        OptionsColumn = { AllowEdit = true, ReadOnly = false },
+                        ColumnEdit = repositoryItemButtonEditCancel
+                    };
+                    gridViewDevices.Columns.Add(cancelColumn);
+                    cancelColumn.Width = 100;
+                }
+
+                // 4. Set row to editable and change button text
+                SetRowEditMode(rowHandle, true);
+                repositoryItemButtonEditAction.Buttons[0].Caption = Lang.Update;
+
+                // Refresh specific cells to apply custom editors/button text
+                gridViewDevices.RefreshRowCell(rowHandle, gridViewDevices.Columns["Action"]);
+                gridViewDevices.RefreshRowCell(rowHandle, gridViewDevices.Columns["Cancel"]);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"An error occurred during edit: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                SetRowEditMode(rowHandle, false);
             }
         }
 
-        private void HandleUpdateAction(DataGridViewRow row)
+        private void HandleUpdateAction(int rowHandle)
         {
-            int deviceId = Convert.ToInt32(row.Cells["DeviceID"].Value);
-            int plantId = Convert.ToInt32(row.Cells["PlantCombo"].Value);
-            int departmentId = Convert.ToInt32(row.Cells["DepartmentCombo"].Value);
-            string address = row.Cells["Address"].Value?.ToString();
-            string machineName = row.Cells["Machine Name"].Value?.ToString();
-            bool isActive = Convert.ToBoolean(row.Cells["IsActive"].Value);
-            bool connectionStatus = Convert.ToBoolean(row.Cells["ConnectionStatus"].Value);
+            gridViewDevices.CloseEditor(); // Commit any pending changes from the editor
+            DataRow row = gridViewDevices.GetDataRow(rowHandle);
 
-            bool status = DbHelper.updateDevice(deviceId, departmentId, plantId, address, machineName, isActive, connectionStatus);
-            string message = status ? "Updated device at: " + address : "Cannot update device at: " + address;
-            if (status) {
-                RemoveColumnIfExists("DepartmentCombo");
-                RemoveColumnIfExists("PlantCombo");
-                SetColumnVisibility(true, "Department Name", "Plant Name");
-                string departmentName = Extentions.getNameFromDataTable(DbHelper.getDepartments(), departmentId, "departmentID", "departmentName");
-                string plantName = Extentions.getNameFromDataTable(DbHelper.getPlants(), plantId, "plantID", "plantName");
-                UpdateDepartmentAndPlantName(row.Index, "Department", departmentName);
-                UpdateDepartmentAndPlantName(row.Index, "Plant", plantName);
-            }
-            ShowMessage.ShowInfo(message, status ? "Success" : "Fail");
-            SetRowEditable(row, false);
-            row.Cells["Action"].Value = Lang.Edit;
+            if (row == null) return;
 
-            // Clear Cancel button text
-            RemoveColumnIfExists("CancelAction");
-            isEditing = false;
-        }
-
-        private void HandleCancelAction(DataGridViewRow row)
-        {
-            var originalValues = (dynamic)row.Tag;
-            if (originalValues != null)
+            try
             {
-                // Revert changes
-                row.Cells["Department Name"].Value = originalValues.DepartmentName;
-                row.Cells["Plant Name"].Value = originalValues.PlantName;
+                int deviceId = Convert.ToInt32(row["DeviceID"]);
+                // Retrieve the updated IDs from the DataRow (which were set by the LookUpEdit controls)
+                int plantId = Convert.ToInt32(row["Plant Name"]);
+                int departmentId = Convert.ToInt32(row["Department Name"]);
+                string address = row["Address"]?.ToString();
+                string machineName = row["Machine Name"]?.ToString();
+                bool isActive = Convert.ToBoolean(row["IsActive"]);
+                bool connectionStatus = Convert.ToBoolean(row["ConnectionStatus"]);
 
-                // Show original columns again
-                SetColumnVisibility(true, "Department Name", "Plant Name");
+                bool status = DbHelper.updateDevice(deviceId, departmentId, plantId, address, machineName, isActive, connectionStatus);
+                string message = status ? "Updated device at: " + address : "Cannot update device at: " + address;
 
-                SetRowEditable(row, false);
-                row.Cells["Action"].Value = Lang.Edit;
+                if (status)
+                {
+                    // Update the row's display values from ID back to Name for permanent display mode
+                    string departmentName = Extentions.getNameFromDataTable(DbHelper.getDepartments(), departmentId, "departmentID", "departmentName");
+                    string plantName = Extentions.getNameFromDataTable(DbHelper.getPlants(), plantId, "plantID", "plantName");
 
-                // Remove Cancel button and ComboBox columns
-                RemoveColumnIfExists("CancelAction");
-                RemoveColumnIfExists("DepartmentCombo");
-                RemoveColumnIfExists("PlantCombo");
+                    row["Department Name"] = departmentName;
+                    row["Plant Name"] = plantName;
+
+                    // Update the underlying DataTable to refresh the GridView display
+                    deviceDataTable.AcceptChanges();
+
+                    // Clear the original values from the dictionary upon successful update
+                    if (originalEditValues.ContainsKey(deviceId))
+                    {
+                        originalEditValues.Remove(deviceId);
+                    }
+                }
+
+                ShowMessage.ShowInfo(message, status ? "Success" : "Fail");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred during update: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Exit edit mode and clean up
+                SetRowEditMode(rowHandle, false);
+                isEditing = false;
+                editingRowHandle = GridControl.InvalidRowHandle;
+
+                repositoryItemButtonEditAction.Buttons[0].Caption = Lang.Edit;
+
+                // Remove Cancel button column if it exists
+                if (gridViewDevices.Columns["Cancel"] != null)
+                {
+                    gridViewDevices.Columns.Remove(gridViewDevices.Columns["Cancel"]);
+                }
+
+                gridViewDevices.RefreshData();
             }
         }
 
-        // Helper methods
+        private void HandleCancelAction(int rowHandle)
+        {
+            DataRow row = gridViewDevices.GetDataRow(rowHandle);
+            if (row == null) return;
+
+            int deviceId = Convert.ToInt32(row["DeviceID"]);
+
+            // FIX APPLIED HERE: Retrieve original values from the dictionary
+            if (originalEditValues.TryGetValue(deviceId, out object originalValueObj))
+            {
+                var originalValues = (dynamic)originalValueObj;
+
+                // Revert changes back to the DataRow
+                row["Department Name"] = originalValues.DepartmentName;
+                row["Plant Name"] = originalValues.PlantName;
+
+                // Clean up the dictionary
+                originalEditValues.Remove(deviceId);
+            }
+            // else: If for some reason the original value wasn't stored, the user sees the partial edit, but the row exits edit mode.
+
+
+            // Exit edit mode and clean up
+            SetRowEditMode(rowHandle, false);
+            isEditing = false;
+            editingRowHandle = GridControl.InvalidRowHandle;
+
+            repositoryItemButtonEditAction.Buttons[0].Caption = Lang.Edit;
+
+            // Remove Cancel button column if it exists
+            if (gridViewDevices.Columns["Cancel"] != null)
+            {
+                gridViewDevices.Columns.Remove(gridViewDevices.Columns["Cancel"]);
+            }
+
+            gridViewDevices.RefreshData();
+        }
+
+        private void SetRowEditMode(int rowHandle, bool isEditable)
+        {
+            // The CustomRowCellEdit event handles assigning the correct editor (LookUpEdit/TextEdit/CheckEdit)
+
+            // Set AllowEdit/ReadOnly state for columns that should be editable
+            foreach (GridColumn column in gridViewDevices.Columns)
+            {
+                bool isDataColumn = deviceDataTable.Columns.Contains(column.FieldName);
+
+                if (isDataColumn && column.FieldName != "DeviceID" && column.FieldName != "ConnectionStatus")
+                {
+                    // Editable columns: Address, Machine Name, Plant Name, Department Name, IsActive
+                    column.OptionsColumn.AllowEdit = isEditable;
+                    column.OptionsColumn.ReadOnly = !isEditable;
+                }
+                else if (column.FieldName == "Action" || column.FieldName == "Cancel")
+                {
+                    // Action/Cancel button columns are always available for edit/click
+                    column.OptionsColumn.AllowEdit = true;
+                    column.OptionsColumn.ReadOnly = false;
+                }
+                else
+                {
+                    // Read-only columns: DeviceID, ConnectionStatus
+                    column.OptionsColumn.AllowEdit = false;
+                    column.OptionsColumn.ReadOnly = true;
+                }
+            }
+
+            // Apply different back color for the row being edited
+            gridViewDevices.OptionsView.EnableAppearanceOddRow = !isEditable;
+            gridViewDevices.OptionsView.EnableAppearanceEvenRow = !isEditable;
+
+            if (isEditable)
+            {
+                // Set appearance for the row being edited
+                gridViewDevices.Appearance.FocusedRow.BackColor = Color.LightYellow;
+                gridViewDevices.Appearance.FocusedRow.Options.UseBackColor = true;
+            }
+            else
+            {
+                // Revert to default
+                gridViewDevices.Appearance.FocusedRow.BackColor = Color.Empty;
+                gridViewDevices.Appearance.FocusedRow.Options.UseBackColor = false;
+            }
+
+            // Force refresh of row appearance
+            gridViewDevices.LayoutChanged();
+        }
+
+        // Helper methods (kept mostly as-is, just adjusting data access)
         private List<Department> GetDepartments()
         {
             DataTable dt = DbHelper.getDepartments();
@@ -268,117 +573,8 @@ namespace DigitalProduction
             }).ToList();
         }
 
-        private void CreateComboBoxColumn<T>(string columnName, string headerText, List<T> dataSource, string displayMember, string valueMember)
-        {
-            var comboBoxColumn = new DataGridViewComboBoxColumn
-            {
-                Name = columnName,
-                HeaderText = headerText,
-                DataSource = dataSource,
-                DisplayMember = displayMember,
-                ValueMember = valueMember,
-                FlatStyle = FlatStyle.Flat,
-                DropDownWidth = 160,
-                Width = 130
-            };
 
-            // Insert the new ComboBox column only if it doesn't already exist
-            if (!dgvDevices.Columns.Contains(columnName))
-            {
-                int insertIndex = columnName == "DepartmentCombo" ? dgvDevices.Columns["Department Name"].Index : dgvDevices.Columns["Plant Name"].Index;
-                dgvDevices.Columns.Insert(insertIndex, comboBoxColumn);
-            }
-        }
-
-        private void SetComboBoxInitialValues(DataGridViewRow row, List<Department> departments, List<Plant> plants)
-        {
-            foreach (DataGridViewRow dgvRow in dgvDevices.Rows)
-            {
-                string deptName = dgvRow.Cells["Department Name"].Value?.ToString();
-                string plantName = dgvRow.Cells["Plant Name"].Value?.ToString();
-
-                int deptID = departments.FirstOrDefault(d => string.Equals(d.DepartmentName, deptName, StringComparison.OrdinalIgnoreCase))?.DepartmentID ?? departments.First().DepartmentID;
-                dgvRow.Cells["DepartmentCombo"].Value = deptID;
-
-                int plantID = plants.FirstOrDefault(p => string.Equals(p.PlantName, plantName, StringComparison.OrdinalIgnoreCase))?.PlantID ?? plants.First().PlantID;
-                dgvRow.Cells["PlantCombo"].Value = plantID;
-            }
-        }
-        private void SetColumnVisibility(bool isVisible, params string[] columnNames)
-        {
-            foreach (var name in columnNames)
-            {
-                if (dgvDevices.Columns.Contains(name))
-                {
-                    dgvDevices.Columns[name].Visible = isVisible;
-                }
-            }
-        }
-        private void AddCancelButton(DataGridViewRow row)
-        {
-            if (!dgvDevices.Columns.Contains("CancelAction"))
-            {
-                DataGridViewButtonColumn cancelColumn = new DataGridViewButtonColumn
-                {
-                    Name = "CancelAction",
-                    HeaderText = Lang.Cancel,
-                    Text = Lang.Cancel,
-                    UseColumnTextForButtonValue = true
-                };
-                dgvDevices.Columns.Add(cancelColumn);
-            }
-            row.Cells["CancelAction"].Value = Lang.Cancel;
-        }
-        private void UpdateDepartmentAndPlantName(int rowIndex, string key, string newName)
-        {
-            if (rowIndex >= 0 && rowIndex < dgvDevices.Rows.Count)
-            {
-                // Update the hidden column
-                dgvDevices.Rows[rowIndex].Cells[$"{key} Name"].Value = newName;
-
-                // Refresh to reflect changes
-                dgvDevices.Refresh();
-            }
-        }
-        private void RemoveColumnIfExists(string columnName)
-        {
-            if (dgvDevices.Columns.Contains(columnName))
-            {
-                dgvDevices.Columns.Remove(columnName);
-            }
-        }
-        private void SetRowEditable(DataGridViewRow row, bool isEditable)
-        {
-            Color backColor = isEditable ? Color.LightYellow : Color.White;
-            foreach (DataGridViewCell cell in row.Cells)
-            {
-                if (cell.OwningColumn.Name != "Action")
-                {
-                    cell.ReadOnly = !isEditable;
-                    cell.Style.BackColor = backColor;
-                }
-            }
-            row.Cells["ConnectionStatus"].ReadOnly = true;
-            row.Cells["ConnectionStatus"].Style.BackColor = Color.White;
-        }
-        private void UpdateDevice(string address, string machineName, string plantName, string departmentName, bool isActive, bool connectionStatus)
-        {
-            // Example: Update data in DataTable
-            foreach (DataRow row in deviceDataTable.Rows)
-            {
-                if (row["Address"].ToString() == address)
-                {
-                    row["Machine Name"] = machineName;
-                    row["Plant Name"] = plantName;
-                    row["Department Name"] = departmentName;
-                    row["IsActive"] = isActive;
-                    row["ConnectionStatus"] = connectionStatus;
-                    break;
-                }
-            }
-
-            dgvDevices.Refresh(); // Refresh UI after updating
-        }
+        // ... (Remaining methods like SetWebSocketClient, GetDataAndLoadToGridAsync, WebSocket_OnMessage, SafeInvoke, ShowMessageBox, PopulateDeviceDataTable, InitializeDeviceDataTable, CreateButtonContainer, Button_Click, showRegisterDevice, RegisterControl_ExitClicked, RegisterForm_DeviceCreated, CreatelabelTotalControls, SyncButton_Click are kept similar)
 
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
@@ -490,7 +686,7 @@ namespace DigitalProduction
         {
             SafeInvoke(() => MessageBox.Show(message, title, MessageBoxButtons.OK, icon));
         }
-      
+
         private void PopulateDeviceDataTable(List<Device> devices)
         {
             deviceDataTable.Rows.Clear();
@@ -506,11 +702,12 @@ namespace DigitalProduction
                     device.ConnectionStatus
                 );
             }
-            dgvDevices.Refresh();
+            gridControlDevices.RefreshDataSource();
         }
 
         public DataTable InitializeDeviceDataTable()
         {
+            var deviceDataTable = new DataTable("Devices");
             deviceDataTable.Columns.Add("DeviceID", typeof(int));
             deviceDataTable.Columns.Add("Address", typeof(string));
             deviceDataTable.Columns.Add("Machine Name", typeof(string));
@@ -519,7 +716,6 @@ namespace DigitalProduction
             deviceDataTable.Columns.Add("IsActive", typeof(bool));
             deviceDataTable.Columns.Add("ConnectionStatus", typeof(bool));
 
-            // ✅ Prevent binding issues by setting ReadOnly = false
             foreach (DataColumn column in deviceDataTable.Columns)
             {
                 column.ReadOnly = false;
@@ -545,9 +741,9 @@ namespace DigitalProduction
 
         private void showRegisterDevice()
         {
-            dgvDevices.Visible = false;
-            frmRegister.Location = dgvDevices.Location;
-            frmRegister.Size = dgvDevices.Size;
+            gridControlDevices.Visible = false;
+            frmRegister.Location = gridControlDevices.Location;
+            frmRegister.Size = gridControlDevices.Size;
             frmRegister.Visible = true;
             frmRegister.BringToFront();
             _webSocketClient = WebSocketClient.Instance;
@@ -556,7 +752,7 @@ namespace DigitalProduction
 
         private void RegisterControl_ExitClicked(object sender, EventArgs e)
         {
-            dgvDevices.Visible = true;
+            gridControlDevices.Visible = true;
             frmRegister.Visible = false;
         }
 
@@ -569,9 +765,9 @@ namespace DigitalProduction
                 newDevice.DepartmentName,
                 newDevice.IsActive
             );
-            dgvDevices.ClearSelection();
-            if (dgvDevices.Rows.Count > 0)
-                dgvDevices.Rows[0].Selected = true;
+            gridViewDevices.ClearSelection();
+            if (gridViewDevices.RowCount > 0)
+                gridViewDevices.SelectRow(0);
         }
 
         private void CreatelabelTotalControls(List<Device> devices)
@@ -600,11 +796,14 @@ namespace DigitalProduction
             };
             paginationPanel.Controls.Add(lblPageInfo);
 
-            // Add bottom panel (NO SetChildIndex!!)
             this.Controls.Add(paginationPanel);
 
             // Make sure grid stays above the bottom panel
             paginationPanel.SendToBack();
+
+            // Re-order control Z-index to ensure grid is visible
+            gridControlDevices.BringToFront();
+
 
             // Move Sync button to top panel
             SimpleButton syncButton = new SimpleButton()
@@ -612,7 +811,8 @@ namespace DigitalProduction
                 Text = LocalizationManager.GetString("Sync"),
                 Size = new Size(150, 40),
                 Location = new Point(180, 5),
-                ImageOptions = { Image = Properties.Resources.sync_icon }
+                // Assuming Properties.Resources.sync_icon exists in your project
+                // ImageOptions = { Image = Properties.Resources.sync_icon } 
             };
             syncButton.Click += SyncButton_Click;
 
@@ -621,7 +821,7 @@ namespace DigitalProduction
 
         private async void SyncButton_Click(object sender, EventArgs e)
         {
-            if (!isEditing) // Prevent refresh while editing
+            if (!isEditing)
             {
                 await GetDataAndLoadToGridAsync();
             }
@@ -630,6 +830,7 @@ namespace DigitalProduction
                 MessageBox.Show("Finish editing before refreshing.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
         public class Department
         {
             public int DepartmentID { get; set; }

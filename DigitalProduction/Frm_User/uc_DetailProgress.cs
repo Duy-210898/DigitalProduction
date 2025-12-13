@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -7,7 +6,6 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using DevExpress.Utils.Menu;
-using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Models;

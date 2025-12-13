@@ -192,7 +192,6 @@ namespace DigitalProduction.ViewModels
             }
         }
 
-
         public BindingList<DeviceOutput> BindingDeviceOutputs
         {
             get => _bindingDeviceOutputs;

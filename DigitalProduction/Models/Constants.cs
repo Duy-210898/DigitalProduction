@@ -15,6 +15,7 @@
         public const string SizeQty = "SizeQty";
         public const string Timestamp = "Timestamp";
         public const string UpdatedAt = "UpdatedAt";
+        public const string IpAddress = "IpAddress";
         public const string TotalPiecesPerPair = "TotalPiecesPerPair";
         public const string ActualCut = "ActualCut";
         public const string ActualPieces = "ActualPieces";

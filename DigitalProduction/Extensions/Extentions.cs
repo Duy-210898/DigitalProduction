@@ -8,6 +8,9 @@ using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
+using DigitalProduction.Models;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace DigitalProduction.Extensions
 {
@@ -68,6 +71,21 @@ namespace DigitalProduction.Extensions
                             gridView.Columns["EmployeeID"].OptionsEditForm.Caption = LocalizationManager.GetString("EmployeeID");
                             gridView.Columns["Username"].OptionsEditForm.Caption = LocalizationManager.GetString("Username");
                             gridView.Columns["Username"].OptionsColumn.ReadOnly = true;
+                            gridView.Columns["IsActive"].OptionsEditForm.Caption = LocalizationManager.GetString("IsActive");
+                            setupDepartmentLookup(gridView, gridControl);
+                            setupPositionLookup(gridView, gridControl);
+                            // Subscribe to the RowUpdated event in your setup or form initialization
+                            gridView.RowUpdated += GridView_RowUpdated;
+                            gridView.ShowPopupEditForm();
+                        }
+                        if (control.Equals("ucOperatorManagement"))
+                        {
+                            gridView.CloseEditor();
+                            gridView.OptionsEditForm.ShowUpdateCancelPanel = DevExpress.Utils.DefaultBoolean.True;
+                            gridView.OptionsEditForm.FormCaptionFormat = LocalizationManager.GetString("Edit");
+                            //gridView.Columns["DepartmentName"].OptionsEditForm.Visible = DevExpress.Utils.DefaultBoolean.False;
+                            gridView.Columns["EmployeeName"].OptionsEditForm.Caption = LocalizationManager.GetString("EmployeeName");
+                            gridView.Columns["EmployeeID"].OptionsEditForm.Caption = LocalizationManager.GetString("EmployeeID");
                             gridView.Columns["IsActive"].OptionsEditForm.Caption = LocalizationManager.GetString("IsActive");
                             setupDepartmentLookup(gridView, gridControl);
                             setupPositionLookup(gridView, gridControl);
@@ -183,6 +201,35 @@ namespace DigitalProduction.Extensions
                     {
                         ShowMessage.ShowError($"Failed to update user: {username}");
                     }
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage.ShowError($"Error updating row: {ex.Message}");
+                }
+                finally
+                {
+                    // Re-subscribe after the update logic is complete
+                    gridView.RowUpdated -= GridView_RowUpdated;
+                }
+            }
+            if (cloneControl.Equals("ucOperatorManagement"))
+            {
+                try
+                {
+                    // Your update logic goes here
+                    int newEmployeeID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "EmployeeID"));
+                    int newDepartmentID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "DepartmentID"));
+                    int newPositionID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "PositionID"));
+                    int newOperatorID = Convert.ToInt32(gridView.GetRowCellValue(e.RowHandle, "OperatorID"));
+                    string newOperatorName = gridView.GetRowCellValue(e.RowHandle, "OperatorName").ToString();
+                    bool newIsActive = Convert.ToBoolean(gridView.GetRowCellValue(e.RowHandle, "IsActive"));
+                    Employee employee = new Employee(newOperatorID, newOperatorName, newEmployeeID, newPositionID, newDepartmentID, newIsActive);
+                    // Call your update function
+                    bool statusUpdate = DbHelper.updateOperator(employee);
+
+                    string message = statusUpdate ? "Updated user : " + newOperatorName : "Cannot update user : " + newOperatorName;
+                    if (statusUpdate)
+                        ShowMessage.ShowInfo(message, statusUpdate ? "Success" : "Fail");
                 }
                 catch (Exception ex)
                 {

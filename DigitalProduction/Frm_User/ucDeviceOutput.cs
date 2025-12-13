@@ -112,7 +112,7 @@ namespace DigitalProduction
 
             // 1. Bind GridControl to ViewModel's list (e.g., BindingList<DeviceOutput>)
             gridControl_DeviceOutput.DataSource = _viewModel.BindingDeviceOutputs;
-            gridControl_DeviceOutput.LookAndFeel.UseDefaultLookAndFeel = false;
+            gridControl_DeviceOutput.LookAndFeel.UseDefaultLookAndFeel = true;
             gridControl_DeviceOutput.UseEmbeddedNavigator = true;
 
             // 2. Setup splash screen actions
@@ -175,6 +175,7 @@ namespace DigitalProduction
             // ✅ Bind visibility to ViewModel.IsLoading (NOT Enabled!)
             overlayPanel.DataBindings.Add("Visible", viewModelBindingSource, "IsLoading", true, DataSourceUpdateMode.OnPropertyChanged);
 
+            gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle_Header;
             gridView_DeviceOutput.RowStyle += GridView_DeviceOutput_RowStyle;
             gridView_DeviceOutput.CustomColumnDisplayText += GridView_DeviceOutput_CustomColumnDisplayText;
             this.Resize += UcDeviceOutput_Resize;
@@ -206,12 +207,13 @@ namespace DigitalProduction
             filterPanel.Controls.Add(syncButton);
 
             gridView_DeviceOutput.OptionsSelection.MultiSelect = true;
-            gridView_DeviceOutput.OptionsSelection.MultiSelectMode = GridMultiSelectMode.CellSelect;
+            gridView_DeviceOutput.OptionsSelection.MultiSelectMode = GridMultiSelectMode.RowSelect;
             gridView_DeviceOutput.OptionsBehavior.EditorShowMode = EditorShowMode.MouseDown;
             gridView_DeviceOutput.OptionsSelection.EnableAppearanceFocusedCell = true;
             gridView_DeviceOutput.OptionsSelection.EnableAppearanceHideSelection = false;
             gridView_DeviceOutput.OptionsView.ShowFooter = true;
             gridView_DeviceOutput.OptionsSelection.EnableAppearanceFocusedRow = true;
+            gridControl_DeviceOutput.ForceInitialize();
 
             gridView_DeviceOutput.SelectionChanged += gridView_DeviceOutput_SelectionChanged;
             gridView_DeviceOutput.CustomSummaryCalculate += gridView_DeviceOutput_CustomSummaryCalculate;
@@ -277,7 +279,15 @@ namespace DigitalProduction
                 }
             };
         }
-
+        private void GridView_DeviceOutput_RowStyle_Header(object sender, RowStyleEventArgs e)
+        {
+            var row = gridView_DeviceOutput.GetRow(e.RowHandle) as DeviceOutput;
+            if (row != null && row.IsGroupHeader)
+            {
+                e.Appearance.BackColor = Color.LightGray;
+                e.Appearance.Font = new Font(gridView_DeviceOutput.Appearance.Row.Font, FontStyle.Regular);
+            }
+        }
         private void GridView_DeviceOutput_CustomDrawFooterCell(object sender, FooterCellCustomDrawEventArgs e)
         {
             if (e.Column != null && e.Column.FieldName == "ActualSizeQty")

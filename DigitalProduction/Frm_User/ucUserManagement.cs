@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraSplashScreen;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
@@ -15,24 +17,22 @@ using Newtonsoft.Json;
 
 namespace DigitalProduction
 {
-    public partial class ucUserManagement : XtraUserControl
+    public partial class ucUserManagement : DevExpress.XtraEditors.XtraUserControl
     {
         public BindingList<Employee> employees = new BindingList<Employee>();
         private WebSocketClient _webSocketClient;
         private PanelControl groupPanelButtonContainer;
-        private SimpleButton button;
         private ucRegisterUser frmRegister;
         private PanelControl paginationPanel;
         private LabelControl lblPageInfo;
-        private bool isEditing = false;
-
-        private DataGridView dataGridView_UserManagement;
-
         public ucUserManagement()
         {
             InitializeComponent();
             LoadTextLable();
-            InitializeDataGridView();
+            gridView_UserManagement.CustomDrawGroupPanel += gridView_CustomDrawGroupPanel;
+            // gridView_OperatorManagement.ShowFindPanel();
+            gridView_UserManagement.OptionsFind.ShowFindButton = false;
+            gridView_UserManagement.RowHeight = 50;
             CreateButtonContainer();
 
             // show add new user
@@ -40,395 +40,209 @@ namespace DigitalProduction
             frmRegister.Visible = false;
             this.Controls.Add(frmRegister);
             frmRegister.ExitClicked += RegisterControl_ExitClicked;
-           // frmRegister.UserCreated += RegisterForm_UserCreated;
-        }
-        private void InitializeDataGridView()
-        {
-            dataGridView_UserManagement = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                ReadOnly = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                RowTemplate = { Height = 50 }
-            };
-
-            this.Controls.Add(dataGridView_UserManagement);
-        }
-        private void ApplyLocalization()
-        {
-            // Hide sensitive data like Password and deparmentID
-            dataGridView_UserManagement.Columns["Password"].Visible = false;
-            dataGridView_UserManagement.Columns["DepartmentID"].Visible = false;
-            dataGridView_UserManagement.Columns["OperatorID"].Visible = false;
-            dataGridView_UserManagement.Columns["OperatorName"].Visible = false;
-            dataGridView_UserManagement.Columns["PositionID"].Visible = false;
-            dataGridView_UserManagement.Columns["CreatedAt"].Visible = false;
-            dataGridView_UserManagement.Columns["OperatorNameUnaccented"].Visible = false;
-            dataGridView_UserManagement.Columns["UpdatedAt"].Visible = false;
-
-            if (dataGridView_UserManagement.Columns.Contains("Username"))
-                dataGridView_UserManagement.Columns["Username"].HeaderText = LocalizationManager.GetString("Username");
-            dataGridView_UserManagement.Columns["EmployeeID"].HeaderText = LocalizationManager.GetString("EmployeeID");
-            dataGridView_UserManagement.Columns["EmployeeName"].HeaderText = LocalizationManager.GetString("EmployeeName");
-            dataGridView_UserManagement.Columns["IsActive"].HeaderText = LocalizationManager.GetString("IsActive");
-            dataGridView_UserManagement.Columns["DepartmentName"].HeaderText = LocalizationManager.GetString("DepartmentName");
-            dataGridView_UserManagement.Columns["PositionName"].HeaderText = LocalizationManager.GetString("PositionName");
-
-
-            // custom header
-            dataGridView_UserManagement.EnableHeadersVisualStyles = false;
-            dataGridView_UserManagement.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
-            dataGridView_UserManagement.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            dataGridView_UserManagement.ColumnHeadersHeight = 30;
-
-
-            // ✅ Add Action Column if it does not exist
-            if (!dataGridView_UserManagement.Columns.Contains("Action"))
-            {
-                DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn
-                {
-                    Name = "Action",
-                    HeaderText = "Action",
-                    UseColumnTextForButtonValue = false  // ✅ Set to false to allow dynamic text change
-                };
-                dataGridView_UserManagement.Columns.Add(actionColumn);
-            }
-
-            // ✅ Set every row to be read-only at the start
-            foreach (DataGridViewRow row in dataGridView_UserManagement.Rows)
-            {
-                row.Cells["Username"].ReadOnly = true;
-                row.Cells["EmployeeID"].ReadOnly = true;
-                row.Cells["EmployeeName"].ReadOnly = true;
-                row.Cells["IsActive"].ReadOnly = true;
-                row.Cells["DepartmentName"].ReadOnly = true;
-                row.Cells["PositionName"].ReadOnly = true;
-
-                row.Cells["Action"].Value = Lang.Edit;
-            }
-            dataGridView_UserManagement.Columns["Action"].HeaderText = LocalizationManager.GetString("Action");
-
-            if (dataGridView_UserManagement != null)
-            {
-                dataGridView_UserManagement.CellClick -= dgvUserManagment_CellClick; // Unsubscribe if exists
-                dataGridView_UserManagement.CellClick += dgvUserManagment_CellClick; // Subscribe
-            }
-        }
-        private void dgvUserManagment_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-            if (e.RowIndex < 0 || e.RowIndex >= dataGridView_UserManagement.Rows.Count || e.ColumnIndex < 0 || e.ColumnIndex >= dataGridView_UserManagement.Columns.Count)
-                return;
-
-            DataGridViewRow row = dataGridView_UserManagement.Rows[e.RowIndex];
-
-            if (dataGridView_UserManagement.Columns[e.ColumnIndex].Name == "Action")
-            {
-                string action = row.Cells["Action"].Value.ToString();
-
-                if (action == Lang.Edit)
-                {
-                    // Reset "Action" column for all other rows to prevent multiple edits
-                    foreach (DataGridViewRow r in dataGridView_UserManagement.Rows)
-                    {
-                        if (r.Index != e.RowIndex)
-                        {
-                            r.Cells["Action"].Value = Lang.Edit;
-                            SetRowEditable(r, false);
-                        }
-                    }
-                    isEditing = true;
-                    HandleEditAction(row);
-                }
-                else if (action == Lang.Update)
-                {
-                    HandleUpdateAction(row);
-                }
-            }
-            else if (dataGridView_UserManagement.Columns[e.ColumnIndex].Name == "CancelAction")
-            {
-                if (row.Cells["Action"].Value != null && row.Cells["Action"].Value.ToString() == Lang.Update)
-                {
-                    isEditing = false;
-                    HandleCancelAction(row);
-                }
-            }
-        }
-        private void HandleUpdateAction(DataGridViewRow row)
-        {
-            string username = row.Cells["Username"].Value?.ToString();
-            int newEmployeeID = Convert.ToInt32(row.Cells["EmployeeID"].Value);
-            int newDepartmentID = Convert.ToInt32(row.Cells["DepartmentCombo"].Value);
-            int newPositionID = Convert.ToInt32(row.Cells["PositionCombo"].Value);
-            string newEmployeeName = row.Cells["EmployeeName"].Value.ToString();
-            bool newIsActive = Convert.ToBoolean(row.Cells["IsActive"].Value);
-
-            // Call your update function
-            bool status = DbHelper.updateUser(username, newEmployeeName, newEmployeeID, newDepartmentID, newPositionID, newIsActive);
-            string message = status ? "Updated user : " + username : "Cannot update user : " + username;
-            if (status)
-            {
-                RemoveColumnIfExists("DepartmentCombo");
-                RemoveColumnIfExists("PositionCombo");
-                SetColumnVisibility(true, "DepartmentName", "PositionName");
-                string departmentName = Extentions.getNameFromDataTable(DbHelper.getDepartments(), newDepartmentID, "departmentID", "departmentName");
-                string positionName = Extentions.getNameFromDataTable(DbHelper.getPositions(), newPositionID, "PositionID", "PositionName");
-                UpdateDepartmentAndPositionName(row.Index, "Department", departmentName);
-                UpdateDepartmentAndPositionName(row.Index, "Position", positionName);
-            }
-            ShowMessage.ShowInfo(message, status ? "Success" : "Fail");
-            SetRowEditable(row, false);
-            row.Cells["Action"].Value = Lang.Edit;
-
-            // Clear Cancel button text
-            RemoveColumnIfExists("CancelAction");
-            isEditing = false;
         }
 
-        private void HandleEditAction(DataGridViewRow row)
-        {
-            try
-            {
-                var departments = GetDepartments();
-                var positions = GetPositions();
-
-                if (departments == null || positions == null)
-                    return;
-
-                // Store the original values for cancellation
-                row.Tag = new { DepartmentName = row.Cells["DepartmentName"].Value, PositionName = row.Cells["PositionName"].Value };
-
-                // Create and insert ComboBox columns
-                CreateComboBoxColumn("DepartmentCombo", "Department Name", departments, "DepartmentName", "DepartmentID");
-                CreateComboBoxColumn("PositionCombo", "Position Name", positions, "PositionName", "PositionID");
-
-                // Set initial values for ComboBox cells
-                SetComboBoxInitialValues(row, departments, positions);
-
-                // Hide original columns
-                SetColumnVisibility(false, "DepartmentName", "PositionName");
-
-                // Change button text to Lang.Update
-                row.Cells["Action"].Value = Lang.Update;
-
-                // Add Cancel button
-                AddCancelButton(row);
-                SetRowEditable(row, true);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        private void HandleCancelAction(DataGridViewRow row)
-        {
-            var originalValues = (dynamic)row.Tag;
-            if (originalValues != null)
-            {
-                // Revert changes
-                row.Cells["DepartmentName"].Value = originalValues.DepartmentName;
-                row.Cells["PositionName"].Value = originalValues.PositionName;
-
-                // Show original columns again
-                SetColumnVisibility(true, "DepartmentName", "PositionName");
-
-                SetRowEditable(row, false);
-                row.Cells["Action"].Value = Lang.Edit;
-
-                // Remove Cancel button and ComboBox columns
-                RemoveColumnIfExists("CancelAction");
-                RemoveColumnIfExists("DepartmentCombo");
-                RemoveColumnIfExists("PositionCombo");
-            }
-        }
         private void CreatelabelTotalControls()
         {
-            // Check if paginationPanel already exists
+            // Remove any existing panel to prevent duplication
             if (paginationPanel != null)
             {
-                // Update the existing label instead of creating a new one
-                lblPageInfo.Text = $"{LocalizationManager.GetString("TotalRecords")}  {employees.Count}";
+                this.Controls.Remove(paginationPanel);
+                paginationPanel.Dispose();
             }
-            else
+
+            // Create a new PanelControl for pagination at the bottom
+            paginationPanel = new PanelControl()
             {
-                // Create a new PanelControl for pagination at the bottom
-                paginationPanel = new PanelControl()
-                {
-                    Dock = DockStyle.Bottom,
-                    Height = 50,
-                    Padding = new Padding(10)
-                };
+                Dock = DockStyle.Bottom,
+                Height = 50, // Adjust height
+                Padding = new Padding(10)
+            };
 
-                lblPageInfo = new LabelControl()
-                {
-                    Text = $"Total Records: {employees.Count}",
-                    Size = new Size(200, 30),
-                    ForeColor = Color.Green,
-                    Font = new Font("Arial", 10, FontStyle.Bold),
-                    AutoSizeMode = LabelAutoSizeMode.None,
-                    Location = new Point(20, 10)
-                };
+            // Create Label for page info (Total Records)
+            lblPageInfo = new LabelControl()
+            {
+                Text = $"Total Records: {employees.Count}",
+                Size = new Size(200, 30),
+                ForeColor = Color.Green,
+                Font = new Font("Arial", 10, FontStyle.Bold),
+                AutoSizeMode = LabelAutoSizeMode.None,
+                Location = new Point(20, 10)
+            };
+            //lblPageInfo.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
 
-                paginationPanel.Controls.Add(lblPageInfo);
-                this.Controls.Add(paginationPanel);
-                this.Controls.SetChildIndex(paginationPanel, 0);
+            // Add components to the panel
+            paginationPanel.Controls.Add(lblPageInfo);
+     
+            // Add the panel to the form (make sure it's added correctly)
+            this.Controls.Add(paginationPanel);
+            this.Controls.SetChildIndex(paginationPanel, 0); // Ensures it appears at the bottom
+        }
+
+        // Event to handle refresh button click
+        private void RefreshButton_Click(object sender, EventArgs e)
+        {
+            _ = GetDataAndLoadToGridAsync();
+        }
+
+
+        private void MainForm_Click(object sender, EventArgs e)
+        {
+            if (!frmRegister.Bounds.Contains(PointToClient(MousePosition)))
+            {
+                frmRegister.Visible = false;
             }
         }
-
-        private void RegisterForm_UserCreated(object sender, Employee newUser)
+        private void showRegisterUser()
         {
-            employees.Insert(0, newUser); // Refresh DataGridView
-            LoadDataGridView();
+            // Hide the GridView
+            gridControl_UserManagement.Visible = false;
+
+            // Show the user control
+            frmRegister.Location = gridControl_UserManagement.Location;
+            frmRegister.Size = gridControl_UserManagement.Size;
+            frmRegister.Visible = true;
+            frmRegister.BringToFront();
+        }
+        private void RegisterControl_ExitClicked(object sender, EventArgs e)
+        {
+            // Show the GridView
+            gridControl_UserManagement.Visible = true;
+
+            // Hide the user control
+            frmRegister.Visible = false;
+        }
+        private void registerButton_Click(object sender, EventArgs e)
+        {
+            // Logic for user registration goes here...
+
+            // Show popup
+            MessageBox.Show("User registered successfully!", "Registration Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private void gridView_CustomDrawGroupPanel(object sender, CustomDrawEventArgs e)
+        {
+            // Set the alignment of the GroupPanelText
+            e.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            e.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
+
+            // Optional: You can also change the font and color if necessary
+            e.Appearance.Font = new Font("Tahoma", 13, FontStyle.Bold);
+
+            e.Appearance.ForeColor = Color.Blue;
         }
 
-        private void LoadDataGridView()
-        {
-            this.Invoke((MethodInvoker)delegate
-            {
-                // Store the state of existing columns
-                var columnState = dataGridView_UserManagement.Columns
-                .Cast<DataGridViewColumn>()
-                .Select(c => new
-                {
-                    c.Name,
-                    c.Visible,
-                    c.DisplayIndex
-                })
-                .ToList();
-
-                // Reset the data source
-                dataGridView_UserManagement.DataSource = null;
-                dataGridView_UserManagement.DataSource = employees.ToList(); // Bind to updated list
-
-                // Ensure Action column exists and is set correctly
-                if (!dataGridView_UserManagement.Columns.Contains("Action"))
-                {
-                    DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn
-                    {
-                        Name = "Action",
-                        HeaderText = LocalizationManager.GetString("Action"),
-                        UseColumnTextForButtonValue = false // Allows for dynamic text
-                    };
-                    dataGridView_UserManagement.Columns.Add(actionColumn);
-                }
-
-                // Restore column state after resetting the data source
-                foreach (var column in columnState)
-                {
-                    if (dataGridView_UserManagement.Columns.Contains(column.Name))
-                    {
-                        dataGridView_UserManagement.Columns[column.Name].Visible = column.Visible;
-                        dataGridView_UserManagement.Columns[column.Name].DisplayIndex = column.DisplayIndex;
-                    }
-                }
-            });
-        }
-
-        private bool _isDataLoaded = false;
         public void SetWebSocketClient(WebSocketClient webSocketClient)
         {
-            if (_webSocketClient != null)
-            {
-                _webSocketClient.OnResponseReceived -= WebSocket_OnMessage;
-            }
-
-            _webSocketClient = webSocketClient ?? WebSocketClient.Instance;
+            _webSocketClient = WebSocketClient.Instance;
+            _ = GetDataAndLoadToGridAsync();
             _webSocketClient.OnResponseReceived += WebSocket_OnMessage;
-
-            if (!_isDataLoaded)
-            {
-                _ = GetDataAndLoadToGridAsync();
-            }
         }
 
+        // Send request to WebSocket or API and load data
         public async Task GetDataAndLoadToGridAsync()
         {
             var request = new { app = Global.App, action = "getUsers" };
             string jsonRequest = JsonConvert.SerializeObject(request);
 
-            try
-            {
-                string response = await _webSocketClient.SendAsync(jsonRequest);
-                if (string.IsNullOrEmpty(response))
-                {
-                    MessageBox.Show("No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    ConnectionManager.Instance.IsReconnecting = true;
-                    return;
-                }
-
-                WebSocket_OnMessage(response);
-                _isDataLoaded = true;
-            }
-            catch (TimeoutException)
-            {
-                MessageBox.Show("Request timed out.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            await _webSocketClient.SendAsync(jsonRequest);
         }
-
         private void WebSocket_OnMessage(string jsonData)
         {
             try
             {
+                // Assuming the response
                 ResponseMessage<List<Employee>> response = ResponseMessage<List<Employee>>.FromJson(jsonData);
 
-                if(response?.Action != "getUsers") return;
+                // Check if there are devices in the response
                 if (response?.Users != null && response.Users.Count > 0)
                 {
-                    // Show SplashScreen
-                    SplashScreenManager.ShowForm(this.FindForm(), typeof(frmLoading), true, true, false);
+                    var parentForm = this.FindForm();
+                    if (parentForm != null)
+                    {
+                        SplashScreenManager.ShowForm(parentForm, typeof(frmLoading), true, true, false);
+                    }
 
-                    // Simulate loading progress (optional)
+                    // Simulate loading progress
                     for (int i = 1; i <= 100; i += 20)
                     {
-                        SplashScreenManager.Default.SetWaitFormDescription($"Loading... {i}%");
-                        Thread.Sleep(10); // Adjust or remove if real data load is fast
+                        if (SplashScreenManager.Default?.IsSplashFormVisible == true)
+                        {
+                            SplashScreenManager.Default.SetWaitFormDescription($"Loading... {i}%");
+                        }
+                        Thread.Sleep(10);
                     }
 
-                    // Process data (off UI thread)
-                    employees.Clear();
-                    foreach (var employee in response.Users)
+                    SafeInvoke(() =>
                     {
-                        employees.Add(employee);
-                    }
+                        // Clear current employees list
+                        employees.Clear();
 
-                    // Invoke UI update
-                    this.Invoke((MethodInvoker)delegate
-                    {
+                        // Retrieve departments from the database as a DataTable
+                        DataTable departmentTable = DbHelper.getDepartments();
+                        DataTable positionTable = DbHelper.getPositions();
+
+                        foreach (var employee in response.Users)
+                        {
+                            // Find the department name by DepartmentID
+                            var departmentRow = departmentTable.AsEnumerable()
+                                                               .FirstOrDefault(row => row.Field<int>("DepartmentID") == employee.DepartmentID);
+                            var positionRow = positionTable.AsEnumerable()
+                                                               .FirstOrDefault(row => row.Field<int>("PositionID") == employee.PositionID);
+
+                            // If the department is found, assign the DepartmentName to the employee
+                            if (departmentRow != null)
+                            {
+                                employee.DepartmentName = departmentRow.Field<string>("DepartmentName");
+                            }
+                            else
+                            {
+                                employee.DepartmentName = "Unknown";
+                            }
+
+                            if (positionRow != null)
+                            {
+                                employee.PositionName = positionRow.Field<string>("PositionName");
+                            }
+                            else
+                            {
+                                employee.PositionName = "Unknown";
+                            }
+                            // Add the employee to the list
+                            employees.Add(employee);
+                        }
                         CreatelabelTotalControls();
-                        LoadDataGridView();
-                        ApplyLocalization();
-                    });
 
-                    // Close splash screen
-                    SplashScreenManager.CloseForm(false);
+                        // Refresh the grid control with the new employee data
+                        gridView_UserManagement.SortInfo.Clear();
+                        gridControl_UserManagement.DataSource = employees.OrderBy(e => e.EmployeeName.Split(' ').Last()).ToList();
+
+                        // Configure grid columns and apply the edit mode
+                        ConfigureGridView();
+                        gridView_UserManagement.EditFormPrepared += Extentions.GridView_EditFormPrepared;
+                        Extentions.showEditModeCellGridView(gridControl_UserManagement, gridView_UserManagement, "ucManagement");
+
+                        // Apply localization for the grid
+                        ApplyLocalization();
+                        paginationPanel?.Invalidate();
+                        paginationPanel?.Refresh();
+                    });
                 }
                 else
                 {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        MessageBox.Show("No Data Found");
-                    });
+                    SafeInvoke(() =>
+                        ShowMessage.ShowInfo("No Data Found"));
                 }
             }
             catch (JsonSerializationException jsonEx)
             {
-                this.Invoke((MethodInvoker)delegate
-                {
-                    MessageBox.Show($"JSON Deserialization Error: {jsonEx.Message}");
-                });
+                ShowMessage.ShowError($"JSON Deserialization Error: {jsonEx.Message}");
             }
             catch (Exception ex)
             {
-                this.Invoke((MethodInvoker)delegate
-                {
-                    MessageBox.Show($"An error occurred: {ex.Message}");
-                });
+                ShowMessage.ShowError($"An error occurred: {ex.Message}");
             }
             finally
             {
-                // Ensure splash screen is closed even on error
                 if (SplashScreenManager.Default?.IsSplashFormVisible == true)
                 {
                     SplashScreenManager.CloseForm(false);
@@ -436,225 +250,137 @@ namespace DigitalProduction
             }
         }
 
+        private void ConfigureGridView()
+        {
+            gridView_UserManagement.BestFitColumns();
+            // Hide sensitive data like Password and deparmentID
+            gridView_UserManagement.Columns["Password"].Visible = false;
+            gridView_UserManagement.Columns["DepartmentID"].Visible = false;
 
-        // Create button container and other existing methods remain unchanged...
+            gridView_UserManagement.Columns["OperatorName"].Visible = false;
+            gridView_UserManagement.Columns["PositionID"].Visible = false;
+            gridView_UserManagement.Columns["CreatedAt"].Visible = false;
+            gridView_UserManagement.Columns["UpdatedAt"].Visible = false;
+            gridView_UserManagement.Columns["OperatorID"].Visible = false;
+            gridView_UserManagement.Columns["OperatorName"].Visible = false;
+            gridView_UserManagement.Columns["OperatorNameUnaccented"].Visible = false;
+
+            // Format the DateTime columns
+            /*     gridView_UserManagement.Columns["CreatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+                 gridView_UserManagement.Columns["CreatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy hh:ss";
+                 gridView_UserManagement.Columns["UpdatedAt"].DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+                 gridView_UserManagement.Columns["UpdatedAt"].DisplayFormat.FormatString = "dd/MM/yyyy hh:ss";*/
+
+            // Apply sorting by Username in ascending order when the grid loads
+            gridView_UserManagement.SortInfo.Clear();
+            gridView_UserManagement.SortInfo.Add(new GridColumnSortInfo(gridView_UserManagement.Columns["EmployeeName"], DevExpress.Data.ColumnSortOrder.Ascending));
+
+            // Set custom column captions
+            gridView_UserManagement.Columns["EmployeeName"].Caption = "Full Name";
+            gridView_UserManagement.Columns["Username"].Caption = "Username";
+            gridView_UserManagement.Columns["DepartmentID"].Caption = "Department Name";
+            gridView_UserManagement.Columns["PositionID"].Caption = "Position Name";
+
+            // Optionally, format the IsActive column to display checkboxes
+            gridView_UserManagement.Columns["IsActive"].ColumnEdit = new DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit();
+            // Apply custom styles to column headers
+            gridView_UserManagement.Appearance.HeaderPanel.BorderColor = Color.LightSteelBlue;
+            gridView_UserManagement.Appearance.HeaderPanel.ForeColor = Color.Black;
+            gridView_UserManagement.Appearance.HeaderPanel.Font = new Font("Arial", 10, FontStyle.Bold);
+        }
+
+        private void LoadTextLable()
+        {
+            gridView_UserManagement.GroupPanelText = LocalizationManager.GetString("ListOfUser");
+            gridView_UserManagement.OptionsFind.FindNullPrompt = LocalizationManager.GetString("Find");
+        }
 
         private void CreateButtonContainer()
         {
-            int marginTop = 10;
-            int spacing = 10;
-
-            // Create a PanelControl to hold the button
+            // Container panel
             groupPanelButtonContainer = new PanelControl()
             {
                 Dock = DockStyle.Top,
-                Height = 70 // Adjust the height to suit your layout
+                Height = 50
             };
-
             Controls.Add(groupPanelButtonContainer);
-            button = new SimpleButton()
+
+            // --- Create User button ---
+            SimpleButton btnCreateUser = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("RegisterUser"),
-                Size = new Size(150, 40),
-                Location = new Point(spacing, marginTop)
+                Size = new Size(120, 35),
+                Location = new Point(10, 7)
             };
+            btnCreateUser.Click += Button_Click;
+            groupPanelButtonContainer.Controls.Add(btnCreateUser);
 
-            groupPanelButtonContainer.Controls.Add(button);
-            button.Click += Button_Click;
-            // Sync Data button
-            SimpleButton syncButton = new SimpleButton()
+            // --- Refresh button ---
+            SimpleButton btnRefresh = new SimpleButton()
             {
                 Text = LocalizationManager.GetString("Sync"),
-                Size = new Size(150, 40),
-                Location = new Point(button.Right + spacing, marginTop)
+                Size = new Size(100, 35),
+                Location = new Point(btnCreateUser.Right + 10, 7)
             };
-            syncButton.ImageOptions.Image = Properties.Resources.sync_icon;
-            syncButton.Click += SyncButton_Click;
-            groupPanelButtonContainer.Controls.Add(syncButton);
-        }
-        private async void SyncButton_Click(object sender, EventArgs e)
-        {
-            try
+
+            btnRefresh.Appearance.BackColor = Color.LightBlue;
+            btnRefresh.Appearance.Font = new Font("Arial", 9F, FontStyle.Bold);
+            btnRefresh.Appearance.Options.UseBackColor = true;
+
+            btnRefresh.Click += async (sender, e) =>
             {
-                if (!isEditing) // Prevent refresh while editing
-                {
-                    // Disable the button to prevent multiple clicks during sync
-                    ((SimpleButton)sender).Enabled = false;
-                    await GetDataAndLoadToGridAsync(); // Fetch and load data from the server
-                }
-                else
-                {
-                    MessageBox.Show("Finish editing before refreshing.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error during data sync: {ex.Message}", "Sync Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                ((SimpleButton)sender).Enabled = true; // Re-enable the button after the operation
-            }
+                btnRefresh.Enabled = false;
+                btnRefresh.Text = LocalizationManager.GetString("Loading") + "...";
+
+                await GetDataAndLoadToGridAsync();
+
+                btnRefresh.Enabled = true;
+                btnRefresh.Text = LocalizationManager.GetString("Sync");
+            };
+
+            groupPanelButtonContainer.Controls.Add(btnRefresh);
         }
         private void Button_Click(object sender, EventArgs e)
         {
             showRegisterUser();
         }
+        private void ApplyLocalization()
+        {
+            // grid view
+            gridControl_UserManagement.BeginUpdate();
 
-        private void showRegisterUser()
-        {
-            // Hide the DataGridView
-            dataGridView_UserManagement.Visible = false;
-            frmRegister.Location = dataGridView_UserManagement.Location;
-            frmRegister.Size = dataGridView_UserManagement.Size;
-            frmRegister.Visible = true;
-            frmRegister.BringToFront();
-        }
-
-        private void RegisterControl_ExitClicked(object sender, EventArgs e)
-        {
-            // Show the DataGridView
-            dataGridView_UserManagement.Visible = true;
-            frmRegister.Visible = false;
-        }
-
-        private void LoadTextLable()
-        {
-            // Assuming this is where you load the grid's header labels, adjust accordingly 
-        }
-        private void SetRowEditable(DataGridViewRow row, bool isEditable)
-        {
-            Color backColor = isEditable ? Color.LightYellow : Color.White;
-            foreach (DataGridViewCell cell in row.Cells)
+            if (!gridView_UserManagement.Columns.Count.Equals(0))
             {
-                if (cell.OwningColumn.Name != "Action")
+                gridView_UserManagement.Columns["Username"].Caption = LocalizationManager.GetString("Username");
+                gridView_UserManagement.Columns["EmployeeID"].Caption = LocalizationManager.GetString("EmployeeID");
+                gridView_UserManagement.Columns["EmployeeName"].Caption = LocalizationManager.GetString("EmployeeName");
+                gridView_UserManagement.Columns["IsActive"].Caption = LocalizationManager.GetString("IsActive");
+                gridView_UserManagement.Columns["DepartmentName"].Caption = LocalizationManager.GetString("Department");
+                gridView_UserManagement.Columns["PositionName"].Caption = LocalizationManager.GetString("Position");
+                gridView_UserManagement.Columns["Action"].Caption = LocalizationManager.GetString("Action");
+
+                //gridControl_UserManagement.DataSource = null;
+                //gridControl_UserManagement.DataSource = employees;
+                gridView_UserManagement.SortInfo.Clear();
+            }
+            gridControl_UserManagement.EndUpdate();
+        }
+        private void SafeInvoke(Action action)
+        {
+            if (IsDisposed || !IsHandleCreated) return;
+
+            if (InvokeRequired)
+            {
+                try
                 {
-                    cell.ReadOnly = !isEditable;
-                    cell.Style.BackColor = backColor;
+                    Invoke(action);
                 }
+                catch (ObjectDisposedException) { }
             }
-            row.Cells["UserName"].ReadOnly = true;
-            row.Cells["UserName"].Style.BackColor = Color.White;
-        }
-        private void AddCancelButton(DataGridViewRow row)
-        {
-            if (!dataGridView_UserManagement.Columns.Contains("CancelAction"))
+            else
             {
-                DataGridViewButtonColumn cancelColumn = new DataGridViewButtonColumn
-                {
-                    Name = "CancelAction",
-                    HeaderText = Lang.Cancel,
-                    Text = Lang.Cancel,
-                    UseColumnTextForButtonValue = true
-                };
-                dataGridView_UserManagement.Columns.Add(cancelColumn);
+                action();
             }
-            row.Cells["CancelAction"].Value = Lang.Cancel;
-        }
-        private void SetColumnVisibility(bool isVisible, params string[] columnNames)
-        {
-            foreach (var name in columnNames)
-            {
-                if (dataGridView_UserManagement.Columns.Contains(name))
-                {
-                    dataGridView_UserManagement.Columns[name].Visible = isVisible;
-                }
-            }
-        }
-        private void SetComboBoxInitialValues(DataGridViewRow row, List<Department> departments, List<Position> positions)
-        {
-            foreach (DataGridViewRow dgvRow in dataGridView_UserManagement.Rows)
-            {
-                string deptName = dgvRow.Cells["DepartmentName"].Value?.ToString();
-                string plantName = dgvRow.Cells["PositionName"].Value?.ToString();
-
-                int deptID = departments.FirstOrDefault(d => string.Equals(d.DepartmentName, deptName, StringComparison.OrdinalIgnoreCase))?.DepartmentID ?? departments.First().DepartmentID;
-                dgvRow.Cells["DepartmentCombo"].Value = deptID;
-
-                int positionID = positions.FirstOrDefault(p => string.Equals(p.PositionName, plantName, StringComparison.OrdinalIgnoreCase))?.PositionID ?? positions.First().PositionID;
-                dgvRow.Cells["PositionCombo"].Value = positionID;
-            }
-        }
-
-        private void CreateComboBoxColumn<T>(string columnName, string headerText, List<T> dataSource, string displayMember, string valueMember)
-        {
-            var comboBoxColumn = new DataGridViewComboBoxColumn
-            {
-                Name = columnName,
-                HeaderText = headerText,
-                DataSource = dataSource,
-                DisplayMember = displayMember,
-                ValueMember = valueMember,
-                FlatStyle = FlatStyle.Flat,
-                DropDownWidth = 160,
-                Width = 130
-            };
-
-            // Insert the new ComboBox column only if it doesn't already exist
-            if (!dataGridView_UserManagement.Columns.Contains(columnName))
-            {
-                int insertIndex = columnName == "DepartmentCombo" ? dataGridView_UserManagement.Columns["DepartmentName"].Index : dataGridView_UserManagement.Columns["PositionName"].Index;
-                dataGridView_UserManagement.Columns.Insert(insertIndex, comboBoxColumn);
-            }
-        }
-        private void RemoveColumnIfExists(string columnName)
-        {
-            if (dataGridView_UserManagement.Columns.Contains(columnName))
-            {
-                dataGridView_UserManagement.Columns.Remove(columnName);
-            }
-        }
-        private void UpdateDepartmentAndPositionName(int rowIndex, string key, string newName)
-        {
-            if (rowIndex >= 0 && rowIndex < dataGridView_UserManagement.Rows.Count)
-            {
-                // Update the hidden column
-                dataGridView_UserManagement.Rows[rowIndex].Cells[$"{key}Name"].Value = newName;
-
-                // Refresh to reflect changes
-                dataGridView_UserManagement.Refresh();
-            }
-        }
-        private List<Department> GetDepartments()
-        {
-            DataTable dt = DbHelper.getDepartments();
-            if (dt == null || dt.Rows.Count == 0)
-            {
-                MessageBox.Show("Error: No departments found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-
-            return dt.AsEnumerable().Select(s => new Department
-            {
-                DepartmentID = s.Field<int>("DepartmentID"),
-                DepartmentName = s.Field<string>("DepartmentName")
-            }).ToList();
-        }
-
-        private List<Position> GetPositions()
-        {
-            DataTable dt = DbHelper.getPositions();
-            if (dt == null || dt.Rows.Count == 0)
-            {
-                MessageBox.Show("Error: No plants found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-
-            return dt.AsEnumerable().Select(s => new Position
-            {
-                PositionID = s.Field<int>("PositionID"),
-                PositionName = s.Field<string>("PositionName")
-            }).ToList();
-        }
-        public class Department
-        {
-            public int DepartmentID { get; set; }
-            public string DepartmentName { get; set; }
-        }
-        public class Position
-        {
-            public int PositionID { get; set; }
-            public string PositionName { get; set; }
         }
     }
 }

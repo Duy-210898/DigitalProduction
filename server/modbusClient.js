@@ -3,7 +3,7 @@ const net = require('net');
 const Modbus = require('jsmodbus');
 const { ModbusPollingManager, isHMIConnected } = require('./ModbusPollingManager');
 const manager = new ModbusPollingManager(200);
-const { updateDeviceConnectionStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setDistributionIsComplete, setSubDistributionComplete, getSubDistributions, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb, logCutHistoryToDB } = require('./database');
+const { updateDeviceConnectionStatus, getDistributionIDFromSizeIDNoneStatus, getSizeDataFromDB, getDistributionDataFromDb, saveActualDataToDB, setDistributionIsComplete, setSubDistributionComplete, getSubDistributions, getSizeAndDistributionDataFromDb, getDistributionIDFromSizeID, getDistributionCompleteFromDb, logCutHistoryToDB } = require('./database');
 //const { notifyClientsToDeleteOrder } = require('./notifications');
 
 let countRemainSizeData = {};
@@ -90,7 +90,7 @@ async function attemptSingleConnection(ipAddress, entry) {
  * @param {string} ipAddress The IP address of the device.
  */
 async function connectToDevice(ipAddress) {
-  // if (ipAddress !== '10.30.4.144') return;
+  // if (ipAddress !== '10.30.4.195') return;
   const entry = modbusClients[ipAddress] = modbusClients[ipAddress] || {};
 
   // Prevent duplicate connects
@@ -247,7 +247,7 @@ async function checkAndSaveDistribution(client, ipAddress) {
       if (!modbusClients[ipAddress]?.SOs || modbusClients[ipAddress].SOs.length === 0) {
         return;
       }
-      // if (ipAddress !== '10.30.4.144') return;
+      // if (ipAddress !== '10.30.4.195') return;
       // interrupt HMI set distributionData again
       if (!modbusClients[ipAddress].sizeDataInfo ||
         typeof modbusClients[ipAddress].sizeDataInfo !== 'object' ||
@@ -979,14 +979,20 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
       }
       async function updateCompletionStatus(currentSO) {
         if (!currentSO || !Array.isArray(currentSO.Data)) return false;
-
+      
         const data = currentSO.Data;
+      
         for (const item of data) {
-          if (item.Status !== 'Stop' &&
+          const hasValidQty =
             typeof item.ActualSizeQty === 'number' &&
-            typeof item.SizeQty === 'number' &&
-            item.ActualSizeQty >= item.SizeQty) {
+            typeof item.SizeQty === 'number';
+      
+          if (!hasValidQty) continue;
+      
+          // === CASE 1: Mark Complete when ActualSizeQty >= SizeQty ===
+          if (item.Status !== 'Stop' && item.ActualSizeQty >= item.SizeQty) {
             item.Status = 'Complete';
+      
             const distributionIDFromSize = await getDistributionIDFromSizeID(
               ipAddress,
               item.OrderID,
@@ -994,16 +1000,37 @@ async function checkBitOnOffRegister3000(client, ipAddress, register3000Address)
               item.SizeID,
               item.PartID
             );
+      
             if (distributionIDFromSize?.DistributionID?.length > 0) {
-                const { DistributionID }  = distributionIDFromSize.DistributionID[0];
-                setDistributionIsComplete(DistributionID, "Complete");
+              const { DistributionID } = distributionIDFromSize.DistributionID[0];
+              setDistributionIsComplete(DistributionID, "Complete");
+            }
+          }
+      
+          // === CASE 2: If condition is NOT met anymore, change Complete → Pending ===
+          if (item.Status === 'Complete' && item.ActualSizeQty < item.SizeQty) {
+            item.Status = 'Pending';
+            const distributionIDFromSize = await  getDistributionIDFromSizeIDNoneStatus(
+              ipAddress,
+              item.OrderID,
+              item.IsLeather ? 1 : 0,
+              item.SizeID,
+              item.PartID
+            );
+      
+            if (distributionIDFromSize?.DistributionID?.length > 0) {
+              const { DistributionID } = distributionIDFromSize.DistributionID[0];
+              setDistributionIsComplete(DistributionID, "Pending");
             }
           }
         }
-
-        // Re-check if all items are now Complete or Stop
-        return data.every(item => item.Status === 'Complete' || item.Status === 'Stop');
+      
+        // Finally, check if all items are Complete or Stop
+        return data.every(item =>
+          item.Status === 'Complete' || item.Status === 'Stop'
+        );
       }
+      
       function removeCurrentSO(clientData) {
         if (
           !Array.isArray(clientData.SOs) ||
@@ -1092,9 +1119,9 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
   if (!hasMultipleSOs) return;
 
   const currentSO = modbusClients[ipAddress].SOs[modbusClients[ipAddress].indexMultipleSOs];
-  if (!currentSO) return;
+  if (currentSO == undefined) return;
+  // ✅ Create a unique list by both PartName and PartID
 
-  // Create unique list by PartName + PartID
   const uniquePartNameSOs = [
     ...new Map(
       currentSO.Data.map(item => [`${item.PartName}_${item.PartID}`, item])
@@ -1103,63 +1130,87 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
 
   if (uniquePartNameSOs.length === 0) return;
 
-  // Pick the currently selected part
+  // ✅ Pick the currently selected part (by index)
   const selectedItem = uniquePartNameSOs[modbusClients[ipAddress].indexMultiplePartNames];
   if (!selectedItem) return;
 
-  // Find all entries with the same PartName & PartID
+  // ✅ Find all entries in the same group (same PartName & PartID)
   const distribution = currentSO.Data.filter(
     item => item.PartName === selectedItem.PartName && item.PartID === selectedItem.PartID
   );
 
+  // console.log(`Selected PartName: ${selectedItem.PartName}, PartID: ${selectedItem.PartID}`);
+  // console.log(`Distribution:`, distribution);
+
   if (distribution.length === 0) return;
 
-  // Group by SizeID
-  const groupedBySize = distribution
+  const groupedBySizeExisted = distribution
+
     .filter(({ ActualCut, ActualSizeQty, ActualPieces }) =>
       ActualCut != null && ActualSizeQty != null && ActualPieces != null
     )
     .reduce((acc, item) => {
       const sizeID = item.SizeID;
-      if (!acc[sizeID]) acc[sizeID] = { cuts: [], qtys: [], pieces: [] };
-      acc[sizeID].cuts.push(item.ActualCut ?? 0);
-      acc[sizeID].qtys.push(item.ActualSizeQty ?? 0);
-      acc[sizeID].pieces.push(item.ActualPieces ?? 0);
+      const actualCut = item.ActualCut ?? 0;
+      const actualSizeQty = item.ActualSizeQty ?? 0;
+      const actualPieces = item.ActualPieces ?? 0;
+
+      if (!acc[sizeID]) {
+        acc[sizeID] = { cuts: [], qtys: [], pieces: [] };
+      }
+
+      acc[sizeID].cuts.push(actualCut);
+      acc[sizeID].qtys.push(actualSizeQty);
+      acc[sizeID].pieces.push(actualPieces);
+
       return acc;
     }, {});
 
-  const summedValues = Object.keys(groupedBySize).map(sizeID => {
-    const { cuts, qtys, pieces } = groupedBySize[sizeID];
+  if (!groupedBySizeExisted) return;
+
+  const summedValues = Object.keys(groupedBySizeExisted).map(sizeID => {
+    const { cuts, qtys, pieces } = groupedBySizeExisted[sizeID];
     return {
-      sizeID: parseInt(sizeID),
-      totalCuts: cuts.reduce((sum, v) => sum + v, 0),
-      totalQtys: qtys.reduce((sum, v) => sum + v, 0),
-      totalPieces: pieces.reduce((sum, v) => sum + v, 0)
+      sizeID,
+      totalCuts: cuts.reduce((sum, cut) => sum + cut, 0),
+      totalQtys: qtys.reduce((sum, qty) => sum + qty, 0),
+      totalPieces: pieces.reduce((sum, piece) => sum + piece, 0)
     };
   });
 
   if (summedValues.length === 0) return;
 
   const sizeInfo = modbusClients[ipAddress].sizeDataInfo;
-  if (!sizeInfo || !Array.isArray(sizeInfo.sizeID) || sizeInfo.sizeID.length === 0) return;
+  if (!sizeInfo) return;
 
   const fullSizeAddress = sizeInfo.sizeID;
-  if (!modbusClients[ipAddress].previousSizeData) modbusClients[ipAddress].previousSizeData = [];
+  if (!Array.isArray(fullSizeAddress) || fullSizeAddress.length === 0) return;
+
+  if (!modbusClients[ipAddress].previousSizeData) {
+    modbusClients[ipAddress].previousSizeData = [];
+  }
 
   const isLeatherMaterial = isLeather === 2;
-  const baseActualDefault = isLeatherMaterial ? 922 : 794;
-  const leatherSizeIDs = [45, 47, 49];
-  const sizeSpace = 16;
+  const typeMaterial = isLeatherMaterial ? 1 : 0;
+  let baseActual = typeMaterial ? 922 : 794;
+
 
   try {
-    // Split into groups for writing
+
     let sizeGroups = [];
+
     if (isLeatherMaterial) {
-      sizeGroups = [fullSizeAddress.slice(0, 3), fullSizeAddress.slice(3, 6)];
+      // Split into 2 arrays of 3 items
+      sizeGroups = [
+        fullSizeAddress.slice(0, 3),
+        fullSizeAddress.slice(3, 6)
+      ];
     } else {
+      // Just one group of up to 6 items
       sizeGroups = [fullSizeAddress.slice(0, 6)];
     }
 
+    // Iterate each group
     for (let g = 0; g < sizeGroups.length; g++) {
       const group = sizeGroups[g];
 
@@ -1169,26 +1220,40 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
 
           const sizeID = await safeRead(sizeAddressID, client);
           if (!sizeID || sizeID === 0) {
-            console.warn(`⚠️ Skipping invalid sizeID at group ${g} index ${index} for ${ipAddress}`);
+            console.warn(`⚠️ Skipping invalid sizeID at group ${g} index ${index} ${ipAddress}`);
             return;
           }
 
-          const matched = summedValues.find(item => item.sizeID === sizeID);
-          if (!matched) {
-          //  console.warn(`⚠️ No data found for sizeID ${sizeID}`);
-            return;
-          }
+          const matched = summedValues.find(item => parseInt(item.sizeID) === sizeID);
+          if (!matched) return;
 
-          // Determine per-column baseActual
-          let columnBase = leatherSizeIDs.includes(sizeAddressID) ? 223 : baseActualDefault;
-          const actualAddress = columnBase + sizeSpace * index;
+          let leatherSizeIDs = [45, 47, 49];
+          let isLeather = leatherSizeIDs.includes(sizeAddressID);
+
+          // Determine spacing rule
+          if (isLeather) {
+            baseActual = 223;
+          }
+          let sizeSpace = 16;
+          const actualAddress = baseActual + sizeSpace * (index);
+          //const existing = modbusClients[ipAddress].previousSizeData.find(data => data.sizeID === sizeID);
+
+          // const isSame =
+          //   existing &&
+          //   existing.actualCut === newData.actualCut &&
+          //   existing.actualPieces === newData.actualPieces &&
+          //   existing.actualQtys === newData.actualQtys;
+
+          // if (!isSame) {
+
+
 
           async function safeWrite(client, address, value) {
-            // Always write, even if value is 0
-            try {
+            if (value !== 0) {
+
               await client.writeSingleRegister(address, value);
-            } catch (err) {
-              console.error(`❌ Failed writing address ${address}:`, err);
+
+
             }
           }
 
@@ -1196,15 +1261,28 @@ async function writeActualSizesForMultipleSOs(ipAddress, client, isLeather) {
           await safeWrite(client, actualAddress + 4, matched.totalPieces);
           await safeWrite(client, actualAddress + 8, matched.totalQtys);
 
-         // console.log(`✅ Written sizeID ${sizeID} at group ${g}, index ${index}, address ${actualAddress}`);
+          // console.log(
+          //   `✅ Written values for sizeID=${sizeID}, addrID=${sizeAddressID}, cuts=${matched.totalCuts}, pieces=${matched.totalPieces}, qtys=${matched.totalQtys}, baseAddr=${actualAddress}, index=${index}, IP=${ipAddress}`
+          // );
+
+          //   if (existing) {
+          //     Object.assign(existing, newData);
+          //   } else {
+          //     modbusClients[ipAddress].previousSizeData.push(newData);
+          //   }
+          // } else {
+          //   console.log(`⏭️ Skipped writing for sizeID ${sizeID}, no change in values.`);
+          // }
+
+
+          //console.log(`✅ Written sizeID ${sizeID} at group ${g}, index ${index}, address ${actualAddress}`);
         })
       );
     }
   } catch (err) {
-    console.error("❌ Error during writeActualSizesForMultipleSOs:", err);
+    console.error("❌ Error during write:", err);
   }
 }
-
 /**
  * Check if a specific bit is on (1) or off (0)
  * @param {number} value - The value to check.

@@ -773,78 +773,85 @@ async function saveDistributionDataToDB(distributionList) {
 async function getDistributionDataFromDb(ipAddress) {
   try {
     const query = `
-      SELECT  
-          pr.OrderID,
-          pr.MasterWorkOrder,
-          pr.SO,
-          d.IpAddress,
-          dd.IsLeather,
-          p.Model,
-          o.OperatorName AS UserName,
-          o.EmployeeID AS OperatorID,
-          p.ART,
-          pa.PartID,
-          ISNULL(pa.VietnameseName, pa.PartName) AS PartName,
-          m.MaterialCode,
-          m.MaterialID,
-          m.MaterialName,
-          se.SizeID,
-          se.Size,
 
-          --SizeQty from SubDistribution, fallback to PartSizeOrder
-          ISNULL(sd.SizeQty, ps.SizeQty) AS SizeQty,
-
-          ISNULL(sd.InventoryQty, dd.InventoryQty) AS InventoryQty,
-          di.PiecesPerPair,
-          di.CuttingDieQty,
-          di.MaterialLayer,
-          di.TotalPiecesPerPair,
-          do.ActualCut,
-          do.ActualPieces,
-          do.ActualSizeQty,
-          ISNULL(sd.Status, dd.Status) AS Status,
-          dd.CreatedAt
-
-      FROM 
-          DistributionData AS dd
-      JOIN 
-          PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId  
-      JOIN 
-          Part AS pa ON pa.PartID = ps.PartID
-      JOIN 
-          Size AS se ON se.SizeID = ps.SizeID
-      JOIN 
-          Material AS m ON m.MaterialID = ps.MaterialID
-      JOIN 
-          ProductOrder AS pr ON ps.OrderId = pr.OrderID
-      JOIN 
-          Product AS p ON pr.ProductId = p.ProductId
-      LEFT JOIN 
-          DefaultInfo AS di ON di.ProductID = p.ProductId AND di.PartID = pa.PartId AND di.Model = p.Model
-
-      -- SubDistribution join
-      LEFT JOIN 
-          SubDistribution AS sd ON sd.DistributionID = dd.DistributionID
-      LEFT JOIN 
-          DeviceList AS d ON d.DeviceID = ISNULL(sd.DeviceID, dd.DeviceID)
-      -- Operator from sub or fallback
-      LEFT JOIN 
-          Operator AS o ON o.OperatorID = ISNULL(sd.OperatorID, dd.OperatorID)
-      LEFT JOIN 
-          DeviceOutput AS do ON do.SizeID = se.SizeID AND do.OrderID = pr.OrderID AND do.PartID = pa.PartID AND do.OperatorID = o.EmployeeID
-
-      WHERE 
-          dd.IsDelete = 0  
-          AND (d.IpAddress = @IpAddress)
-          AND ISNULL(sd.Status, dd.Status) IN ('Complete', 'Pending') 
-          AND EXISTS (
-              SELECT 1
-              FROM DistributionData AS sub_dd
-              WHERE sub_dd.Status = 'Pending'
-                AND FORMAT(dd.CreatedAt, 'dd/MM/yyyy HH:mm:ss') = FORMAT(sub_dd.CreatedAt, 'dd/MM/yyyy HH:mm:ss')
-          )
-      ORDER BY 
-          dd.CreatedAt ASC;
+        WITH DistributionCalculations AS (
+            SELECT
+                pr.OrderID,
+                pr.MasterWorkOrder,
+                pr.SO,
+                d.IpAddress,
+                dd.IsLeather,
+                p.Model,
+                o.OperatorName AS UserName,
+                o.EmployeeID AS OperatorID,
+                p.ART,
+                pa.PartID,
+                ISNULL(pa.VietnameseName, pa.PartName) AS PartName,
+                m.MaterialCode,
+                m.MaterialID,
+                m.MaterialName,
+                se.SizeID,
+                se.Size,
+                ps.UnitUsage,
+                -- Tính số bản Pending trong cùng CreatedAt
+                SUM(CASE WHEN ISNULL(sd.Status, dd.Status) = 'Pending' THEN 1 ELSE 0 END)
+                    OVER (PARTITION BY dd.CreatedAt) AS PendingCount,
+                -- SizeQty from SubDistribution, fallback to PartSizeOrder
+                ISNULL(sd.SizeQty, ps.SizeQty) AS SizeQty,
+                ISNULL(sd.InventoryQty, dd.InventoryQty) AS InventoryQty,
+                di.PiecesPerPair,
+                di.CuttingDieQty,
+                di.MaterialLayer,
+                di.TotalPiecesPerPair,
+                do.ActualCut,
+                do.ActualPieces,
+                do.ActualSizeQty,
+                ISNULL(sd.Status, dd.Status) AS Status,
+                dd.CreatedAt,
+                dd.DistributionID
+            FROM
+                DistributionData AS dd
+            JOIN
+                PartSizeOrder AS ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
+            JOIN
+                Part AS pa ON pa.PartID = ps.PartID
+            JOIN
+                Size AS se ON se.SizeID = ps.SizeID
+            JOIN
+                Material AS m ON m.MaterialID = ps.MaterialID
+            JOIN
+                ProductOrder AS pr ON ps.OrderId = pr.OrderID
+            JOIN
+                Product AS p ON pr.ProductId = p.ProductId
+            LEFT JOIN
+                DefaultInfo AS di ON di.ProductID = p.ProductId AND di.PartID = pa.PartId AND di.Model = p.Model
+            LEFT JOIN
+                SubDistribution AS sd ON sd.DistributionID = dd.DistributionID
+            LEFT JOIN
+                DeviceList AS d ON d.DeviceID = ISNULL(sd.DeviceID, dd.DeviceID)
+            LEFT JOIN
+                Operator AS o ON o.OperatorID = ISNULL(sd.OperatorID, dd.OperatorID)
+            LEFT JOIN
+                DeviceOutput AS do ON do.SizeID = se.SizeID AND do.OrderID = pr.OrderID AND do.PartID = pa.PartID AND do.OperatorID = o.EmployeeID
+            WHERE
+                dd.IsDelete = 0
+                AND (d.IpAddress = @ipAddress)
+                -- Giữ lại cả 'Complete' và 'Pending' để tính toán PendingCount chính xác
+                AND ISNULL(sd.Status, dd.Status) IN ('Complete', 'Pending')
+                -- BỎ điều kiện EXISTS vì nó đã được thay thế bằng logic PendingCount
+        )
+        SELECT
+            *
+        FROM
+            DistributionCalculations
+        WHERE
+            -- Logic 1: Nếu có Pending trong nhóm CreatedAt, lấy cả 'Pending' và 'Complete'
+            (PendingCount > 0 AND Status IN ('Pending', 'Complete'))
+            OR
+            -- Logic 2: Ngược lại (PendingCount <= 0), chỉ lấy 'Pending'
+            (PendingCount <= 0 AND Status = 'Pending')
+        ORDER BY
+            CreatedAt ASC;
     `;
 
     const request = new sql.Request();
@@ -1134,7 +1141,52 @@ async function getDistributionIDFromSizeID(ipAddress, orderId, isLeather, sizeID
     logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
   }
 }
+async function getDistributionIDFromSizeIDNoneStatus(ipAddress, orderId, isLeather, sizeID, partID) {
+  try {
+    const query = `
+      SELECT DISTINCT  
+        dd.DistributionID, 
+        ps.PartSizeOrderId,
+        se.SizeID
+      FROM DistributionData dd
+      LEFT JOIN DeviceList d ON dd.DeviceID = d.DeviceID
+      JOIN PartSizeOrder ps ON dd.PartSizeOrderId = ps.PartSizeOrderId
+      JOIN Part pa ON pa.PartID = ps.PartID
+      JOIN Size se ON se.SizeID = ps.SizeID
+      JOIN ProductOrder pr ON pr.OrderId = ps.OrderID
+      WHERE 
+        dd.IsDelete = 0
+        AND (d.IpAddress = @IpAddress OR dd.DeviceID IS NULL)
+        AND ps.OrderId = @OrderId
+        AND dd.IsLeather = @IsLeather
+        AND se.SizeID = @SizeID
+        AND pa.PartID = @PartID
+    `;
 
+    const request = new sql.Request();
+    request.input('IpAddress', sql.VarChar, ipAddress);
+    request.input('OrderId', sql.Int, orderId);
+    request.input('IsLeather', sql.Int, isLeather);
+    request.input('SizeID', sql.Int, sizeID);
+    request.input('PartID', sql.Int, partID);
+
+    const result = await request.query(query);
+
+    if (result.recordset.length > 0) {
+      const distributionIDData = result.recordset.map(item => ({
+        DistributionID: item.DistributionID,
+        SizeID: item.SizeID
+      }));
+
+      return { DistributionID: distributionIDData };
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error(`❌ Error fetching distribution data: ${error.message}`);
+    logToFile(errorLogPath, `Error fetching distribution data from DB: ${error.message}`);
+  }
+}
 async function getAllDeviceData() {
   try {
     const pool = await sql.connect(dbConfig);
@@ -1730,5 +1782,6 @@ module.exports = {
   getListOfSOsByYear,
   logCutHistoryToDB,
   getSubDistributions,
+  getDistributionIDFromSizeIDNoneStatus
  // calculateActiveHours
 };
