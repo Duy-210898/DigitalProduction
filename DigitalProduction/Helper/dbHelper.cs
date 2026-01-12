@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
-using static DigitalProduction.ucProgress;
 using static DigitalProduction.ucReportOrder;
 
 namespace DigitalProduction
@@ -327,6 +326,28 @@ namespace DigitalProduction
                 return false; // Indicate an error occurred
             }
         }
+        // get list machine 
+        public static DataTable getMachines(int plantID)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    string query = "SELECT DeviceID, MachineName FROM DeviceList WHERE PlantID=@PlantID";
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.Parameters.AddWithValue("@PlantID", plantID);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(dt);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+            return dt;
+        }
         // get list plant
         public static DataTable getPlants()
         {
@@ -371,25 +392,40 @@ namespace DigitalProduction
                 return dt;
             }
         }
-        public static bool dddNewDevice(int departmentId, int plantId, string ipAddress, string machineName)
+        public static bool addNewDevice(int departmentId, int plantId, string ipAddress, string machineName)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
 
                 // Check if IP Address already exists
-                string checkQuery = "SELECT COUNT(*) FROM DeviceList WHERE IpAddress = @IpAddress";
-                using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
+                if (!string.IsNullOrEmpty(ipAddress))
                 {
-                    checkCmd.Parameters.AddWithValue("@IpAddress", ipAddress);
-                    int count = (int)checkCmd.ExecuteScalar();
-
-                    if (count > 0)
+                    string checkQuery = "SELECT COUNT(*) FROM DeviceList WHERE IpAddress = @IpAddress";
+                    using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
                     {
-                        return false; // IP already exists, return false
+                        checkCmd.Parameters.AddWithValue("@IpAddress", ipAddress);
+                        int count = (int)checkCmd.ExecuteScalar();
+
+                        if (count > 0)
+                        {
+                            return false; // IP already exists, return false
+                        }
                     }
                 }
+                else {
+                    string checkQuery = "SELECT COUNT(*) FROM DeviceList WHERE MachineName = @MachineName";
+                    using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
+                    {
+                        checkCmd.Parameters.AddWithValue("@MachineName", machineName);
+                        int count = (int)checkCmd.ExecuteScalar();
 
+                        if (count > 0)
+                        {
+                            return false; // MachineName already exists, return false
+                        }
+                    }
+                }
                 // Insert new device if IP is unique
                 string insertQuery = @"INSERT INTO DeviceList (DepartmentID, PlantID, IpAddress, MachineName, IsActive, ConnectionStatus) 
                            VALUES (@DepartmentID, @PlantID, @IpAddress, @MachineName, @IsActive, @ConnectionStatus);";
@@ -1560,82 +1596,70 @@ namespace DigitalProduction
             }
         }
 
-        public static List<string> GetDistinctSOListByMonthAndDepartment(int month, int year, int departmentId)
+        public static List<string> GetDistinctSOListByMonthAndDepartment(int month, int year, int departmentId, int? plantID)
         {
             var soList = new List<string>();
-            string query = @"
-              -- Combined SOs from ProductOrder and ProductionSchedule
-              SELECT DISTINCT po.SO
-                FROM Product p
-                JOIN ProductOrder po ON p.ProductId = po.ProductId
-                JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
-                JOIN Part pa ON pso.PartId = pa.PartId
-                JOIN Material m ON pso.MaterialID = m.MaterialID
-                JOIN Size s ON pso.SizeId = s.SizeID
-                WHERE YEAR(po.CreatedAt) = @Year
-                  AND MONTH(po.CreatedAt) = @Month
-                  AND (
-                      EXISTS (
-                          SELECT 1
-                          FROM DistributionData d
-                          WHERE d.PartSizeOrderId = pso.PartSizeOrderId
-                      )
-                      OR EXISTS (
-                          SELECT 1
-                          FROM DeviceOutput do
-                          WHERE do.OrderID = po.OrderID
-                            AND do.PartId = pso.PartId
-                            AND do.SizeID = pso.SizeId
-                      )
-                  )
 
-                UNION
-
-                SELECT DISTINCT ps.SO
-                FROM ProductionSchedule ps
-                JOIN PartSizeOrder pso ON ps.OrderID = pso.OrderID
-                                     AND ps.PartID = pso.PartId
-                                     AND ps.SizeID = pso.SizeId
-                WHERE ps.SO IS NOT NULL AND ps.SO <> ''
-                  AND YEAR(ps.CreatedAt) = @Year
-                  AND MONTH(ps.CreatedAt) = @Month
-                  AND ps.DepartmentID = @DepartmentID
-                  AND (
-                      EXISTS (
-                          SELECT 1
-                          FROM DistributionData d2
-                          WHERE d2.PartSizeOrderId = pso.PartSizeOrderId
-                      )
-                      OR EXISTS (
-                          SELECT 1
-                          FROM DeviceOutput do2
-                          WHERE do2.OrderID = ps.OrderID
-                            AND do2.PartId = ps.PartID
-                            AND do2.SizeID = ps.SizeID
-                      )
-                  );"
-            ;
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            string filterPlant = "";
+            if (plantID.HasValue && plantID.Value > 0)
             {
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Month", month);
-                    cmd.Parameters.AddWithValue("@Year", year);
-                    cmd.Parameters.AddWithValue("@DepartmentID", departmentId);
+                // Lọc theo PlantID nếu có
+                filterPlant = "AND dl.PlantID = @PlantID";
+            }
 
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+            string query = $@"
+                    -- SO từ ProductOrder (phải có trong DistributionData nếu lọc theo Plant)
+                    SELECT DISTINCT po.SO
+                    FROM ProductOrder po
+                    LEFT JOIN PartSizeOrder pso ON po.OrderID = pso.OrderID
+                    LEFT JOIN DistributionData d ON d.PartSizeOrderId = pso.PartSizeOrderId
+                    LEFT JOIN DeviceList dl ON dl.DeviceID = d.DeviceID
+                    WHERE YEAR(po.CreatedAt) = @Year
+                      AND MONTH(po.CreatedAt) = @Month
+                      AND po.SO IS NOT NULL AND po.SO <> ''
+                      {filterPlant}
+
+                    UNION
+
+                    -- SO từ ProductionSchedule 
+                    SELECT DISTINCT ps.SO
+                    FROM ProductionSchedule ps
+                    LEFT JOIN PartSizeOrder pso ON ps.OrderID = pso.OrderID 
+                                               AND ps.PartID = pso.PartId 
+                                               AND ps.SizeID = pso.SizeId
+                    LEFT JOIN DistributionData d ON d.PartSizeOrderId = pso.PartSizeOrderId
+                    LEFT JOIN DeviceList dl ON dl.DeviceID = d.DeviceID
+                    WHERE YEAR(ps.CreatedAt) = @Year
+                      AND MONTH(ps.CreatedAt) = @Month
+                      AND ps.SO IS NOT NULL AND ps.SO <> ''
+                      AND ps.DepartmentID = @DepartmentID
+                      {filterPlant}
+                    ORDER BY SO ASC;
+                ";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@Month", month);
+                cmd.Parameters.AddWithValue("@Year", year);
+                cmd.Parameters.AddWithValue("@DepartmentID", departmentId);
+
+                if (plantID.HasValue && plantID.Value > 0)
+                    cmd.Parameters.AddWithValue("@PlantID", plantID.Value);
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            soList.Add(reader["SO"].ToString());
-                        }
+                        soList.Add(reader["SO"].ToString());
                     }
                 }
             }
 
             return soList;
         }
+
         public static List<ProductionSchedule> GetSchedulesByART(string art)
         {
             var result = new List<ProductionSchedule>();
@@ -2429,6 +2453,496 @@ namespace DigitalProduction
                     cmd.Parameters.AddWithValue("@ActiveHours", activeHours);
                     cmd.ExecuteNonQuery();
                 }
+            }
+        }
+        public static bool SaveDistribution(int deviceID, int partID, int sizeID, int userID, int orderID, DateTime scanDate)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    string query = @"
+                INSERT INTO DistributionData (DeviceID, PartID, SizeID, UserID, OrderID, ScanDate)
+                VALUES (@DeviceID, @PartID, @SizeID, @UserID, @OrderID, @ScanDate)";
+
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.Parameters.AddWithValue("@DeviceID", deviceID);
+                    cmd.Parameters.AddWithValue("@PartID", partID);
+                    cmd.Parameters.AddWithValue("@SizeID", sizeID);
+                    cmd.Parameters.AddWithValue("@UserID", userID);
+                    cmd.Parameters.AddWithValue("@OrderID", orderID);
+                    cmd.Parameters.AddWithValue("@ScanDate", scanDate);
+
+                    cmd.ExecuteNonQuery();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+        public static bool SaveDeviceOutput(int deviceID, int operatorID, int partID, int sizeID, int actualCut, int actualPieces, int actualSizeQty, DateTime outputDate)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    string query = @"
+                INSERT INTO DeviceOutput (DeviceID, OperatorID, PartID, SizeID, ActualCut, ActualPieces, ActualSizeQty, OutputDate)
+                VALUES (@DeviceID, @OperatorID, @PartID, @SizeID, @ActualCut, @ActualPieces, @ActualSizeQty, @OutputDate)";
+
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.Parameters.AddWithValue("@DeviceID", deviceID);
+                    cmd.Parameters.AddWithValue("@OperatorID", operatorID);
+                    cmd.Parameters.AddWithValue("@PartID", partID);
+                    cmd.Parameters.AddWithValue("@SizeID", sizeID);
+                    cmd.Parameters.AddWithValue("@ActualCut", actualCut);
+                    cmd.Parameters.AddWithValue("@ActualPieces", actualPieces);
+                    cmd.Parameters.AddWithValue("@ActualSizeQty", actualSizeQty);
+                    cmd.Parameters.AddWithValue("@OutputDate", outputDate);
+
+                    cmd.ExecuteNonQuery();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+        public static DataTable getEmployees()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    string query = @"
+                SELECT 
+                    EmployeeID, 
+                    OperatorID,
+                    OperatorName AS EmployeeName
+                FROM Operator";
+
+                    SqlCommand cmd = new SqlCommand(query, con);
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(dt);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi load Employee theo OperatorID: " + ex.Message);
+                }
+            }
+            return dt;
+        }
+        public static int? getEmployeeIDByOperatorID(int operatorID)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+
+                    string query = @"
+                SELECT TOP 1 EmployeeID
+                FROM Operator
+                WHERE OperatorID = @OperatorID
+            ";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@OperatorID", operatorID);
+
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                            return Convert.ToInt32(result);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi lấy EmployeeID: " + ex.Message);
+                }
+            }
+
+            return null; // không tìm thấy
+        }
+
+        public static int UpsertDistributionData(DistributionDto dto)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (SqlTransaction tran = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1️⃣ Check tồn tại (xử lý NULL đúng cách)
+                        string checkSql = @"
+                    SELECT TOP 1 DistributionID
+                    FROM DistributionData
+                    WHERE UserID = @UserID
+                      AND PartSizeOrderId = @PartSizeOrderId
+                      AND IsDelete = 0
+                      AND (@DeviceID IS NULL OR DeviceID = @DeviceID)
+                      AND (@OperatorID IS NULL OR OperatorID = @OperatorID)";
+
+                        int? distributionId = null;
+
+                        using (SqlCommand cmd = new SqlCommand(checkSql, conn, tran))
+                        {
+                            cmd.Parameters.Add("@UserID", SqlDbType.Int).Value = dto.UserID;
+                            cmd.Parameters.Add("@PartSizeOrderId", SqlDbType.Int).Value = dto.PartSizeOrderID;
+                            cmd.Parameters.Add("@DeviceID", SqlDbType.Int).Value = ToDbValue(dto.DeviceID);
+                            cmd.Parameters.Add("@OperatorID", SqlDbType.Int).Value = ToDbValue(dto.OperatorID);
+                            var result = cmd.ExecuteScalar();
+                            if (result != null && result != DBNull.Value)
+                                distributionId = Convert.ToInt32(result);
+                        }
+
+                        // 2️⃣ UPDATE
+                        if (distributionId.HasValue)
+                        {
+                            string updateSql = @"
+                        UPDATE DistributionData
+                        SET InventoryQty = @InventoryQty,
+                            IsLeather = @IsLeather,
+                            Status = @Status,
+                            UpdatedAt = GETDATE()
+                        WHERE DistributionID = @DistributionID";
+
+                            using (SqlCommand cmd = new SqlCommand(updateSql, conn, tran))
+                            {
+                                cmd.Parameters.Add("@InventoryQty", SqlDbType.Int).Value = dto.InventoryQty;
+                                cmd.Parameters.Add("@IsLeather", SqlDbType.Bit).Value = dto.IsLeather;
+                                cmd.Parameters.Add("@Status", SqlDbType.VarChar, 50).Value =
+                                    dto.Status ?? "Complete";
+                                cmd.Parameters.Add("@DistributionID", SqlDbType.Int).Value = distributionId.Value;
+
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            tran.Commit();
+                            return distributionId.Value;
+                        }
+
+                        // 3️⃣ INSERT
+                        string insertSql = @"
+                    INSERT INTO DistributionData
+                    (
+                        UserID,
+                        DeviceID,
+                        PartSizeOrderId,
+                        OperatorID,
+                        InventoryQty,
+                        Status,
+                        IsLeather,
+                        IsAutoCutting,
+                        IsDelete,
+                        CreatedAt,
+                        UpdatedAt
+                    )
+                    VALUES
+                    (
+                        @UserID,
+                        @DeviceID,
+                        @PartSizeOrderId,
+                        @OperatorID,
+                        @InventoryQty,
+                        @Status,
+                        @IsLeather,
+                        @IsAutoCutting,
+                        0,
+                        GETDATE(),
+                        GETDATE()
+                    );
+                    SELECT CAST(SCOPE_IDENTITY() AS INT);";
+
+                        using (SqlCommand cmd = new SqlCommand(insertSql, conn, tran))
+                        {
+                            cmd.Parameters.Add("@UserID", SqlDbType.Int).Value = dto.UserID;
+                            cmd.Parameters.Add("@DeviceID", SqlDbType.Int).Value = ToDbValue(dto.DeviceID);
+                            cmd.Parameters.Add("@PartSizeOrderId", SqlDbType.Int).Value = dto.PartSizeOrderID;
+                            cmd.Parameters.Add("@OperatorID", SqlDbType.Int).Value = ToDbValue(dto.OperatorID);
+                            cmd.Parameters.Add("@InventoryQty", SqlDbType.Int).Value = dto.InventoryQty;
+                            cmd.Parameters.Add("@Status", SqlDbType.VarChar, 50).Value =
+                                dto.Status ?? "Complete";
+                            cmd.Parameters.Add("@IsLeather", SqlDbType.Bit).Value = dto.IsLeather;
+                            cmd.Parameters.Add("@IsAutoCutting", SqlDbType.Bit).Value = dto.IsAutoCutting;
+                            int newId = (int)cmd.ExecuteScalar();
+                            tran.Commit();
+                            return newId;
+                        }
+                    }
+                    catch
+                    {
+                        tran.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+        private static object ToDbValue(int? value)
+        {
+            return value.HasValue ? (object)value.Value : DBNull.Value;
+        }
+
+        public static void UpsertDeviceOutput(DeviceOutputSaveDto dto)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (SqlTransaction tran = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        int? outputId = null;
+
+                        // 1️⃣ Check existence
+                        string checkSql = @"
+                    SELECT OutputID
+                    FROM DeviceOutput
+                    WHERE OperatorID = @OperatorID
+                      AND PartID = @PartID
+                      AND SizeID = @SizeID
+                      AND OrderID = @OrderID
+                ";
+
+                        using (SqlCommand cmd = new SqlCommand(checkSql, conn, tran))
+                        {
+                            cmd.Parameters.Add("@OperatorID", SqlDbType.Int).Value = dto.OperatorID;
+                            cmd.Parameters.Add("@PartID", SqlDbType.Int).Value = dto.PartID;
+                            cmd.Parameters.Add("@SizeID", SqlDbType.Int).Value = dto.SizeID;
+                            cmd.Parameters.Add("@OrderID", SqlDbType.Int).Value = dto.OrderID;
+
+                            var result = cmd.ExecuteScalar();
+                            if (result != null && result != DBNull.Value)
+                                outputId = Convert.ToInt32(result);
+                        }
+
+                        if (outputId.HasValue)
+                        {
+                            // 2️⃣ Update
+                            string updateSql = @"
+                        UPDATE DeviceOutput
+                        SET ActualCut = ISNULL(ActualCut,0) + @ActualCut,
+                            ActualPieces = ISNULL(ActualPieces,0) + @ActualPieces,
+                            ActualSizeQty = ISNULL(ActualSizeQty,0) + @ActualSizeQty,
+                            InventoryQty = @InventoryQty,
+                            UpdatedAt = GETDATE()
+                        WHERE OutputID = @OutputID
+                    ";
+
+                            using (SqlCommand cmd = new SqlCommand(updateSql, conn, tran))
+                            {
+                                cmd.Parameters.Add("@ActualCut", SqlDbType.Int).Value = dto.ActualCut;
+                                cmd.Parameters.Add("@ActualPieces", SqlDbType.Int).Value = dto.ActualPieces;
+                                cmd.Parameters.Add("@ActualSizeQty", SqlDbType.Int).Value = dto.ActualSizeQty;
+                                cmd.Parameters.Add("@InventoryQty", SqlDbType.Int).Value = dto.InventoryQty;
+                                cmd.Parameters.Add("@OutputID", SqlDbType.Int).Value = outputId.Value;
+
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        else
+                        {
+                            // 3️⃣ Insert
+                            string insertSql = @"
+                        INSERT INTO DeviceOutput
+                        (
+                            OperatorID,
+                            PartID,
+                            SizeID,
+                            OrderID,
+                            PiecesPerPair,
+                            MaterialLayer,
+                            CuttingDieQty,
+                            ActualCut,
+                            ActualPieces,
+                            ActualSizeQty,
+                            InventoryQty,
+                            TotalPiecesPerPair,
+                            IsLeather,
+                            CreatedAt,
+                            UpdatedAt
+                        )
+                        VALUES
+                        (
+                            @OperatorID,
+                            @PartID,
+                            @SizeID,
+                            @OrderID,
+                            @PiecesPerPair,
+                            @MaterialLayer,
+                            @CuttingDieQty,
+                            @ActualCut,
+                            @ActualPieces,
+                            @ActualSizeQty,
+                            @InventoryQty,
+                            @TotalPiecesPerPair,
+                            @IsLeather,
+                            GETDATE(),
+                            GETDATE()
+                        )
+                    ";
+
+                            using (SqlCommand cmd = new SqlCommand(insertSql, conn, tran))
+                            {
+                                cmd.Parameters.Add("@OperatorID", SqlDbType.Int).Value = dto.OperatorID;
+                                cmd.Parameters.Add("@PartID", SqlDbType.Int).Value = dto.PartID;
+                                cmd.Parameters.Add("@SizeID", SqlDbType.Int).Value = dto.SizeID;
+                                cmd.Parameters.Add("@OrderID", SqlDbType.Int).Value = dto.OrderID;
+                                cmd.Parameters.Add("@PiecesPerPair", SqlDbType.Int).Value = dto.PiecesPerPair;
+                                cmd.Parameters.Add("@MaterialLayer", SqlDbType.Int).Value = dto.MaterialLayer;
+                                cmd.Parameters.Add("@CuttingDieQty", SqlDbType.Int).Value = dto.CuttingDieQty;
+                                cmd.Parameters.Add("@ActualCut", SqlDbType.Int).Value = dto.ActualCut;
+                                cmd.Parameters.Add("@ActualPieces", SqlDbType.Int).Value = dto.ActualPieces;
+                                cmd.Parameters.Add("@ActualSizeQty", SqlDbType.Int).Value = dto.ActualSizeQty;
+                                cmd.Parameters.Add("@InventoryQty", SqlDbType.Int).Value = dto.InventoryQty;
+                                cmd.Parameters.Add("@TotalPiecesPerPair", SqlDbType.Int).Value = dto.TotalPiecesPerPair;
+                                cmd.Parameters.Add("@IsLeather", SqlDbType.Bit).Value = dto.IsLeather;
+
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        tran.Commit();
+                    }
+                    catch
+                    {
+                        tran.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+        public static void SaveDistributionAndDeviceOutputs(DistributionDto distribution, List<DeviceOutputSaveDto> outputs)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (SqlTransaction tran = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1️⃣ Upsert DistributionData
+                        int distributionId = UpsertDistributionData(distribution); 
+
+                        // 2️⃣ Upsert each DeviceOutput
+                        foreach (var output in outputs)
+                        {
+                            UpsertDeviceOutput(output);
+                        }
+
+                        tran.Commit();
+                    }
+                    catch
+                    {
+                        tran.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+        public static int? GetPartSizeOrderID(int? orderId, int? partId, int? sizeId)
+        {
+            if (!orderId.HasValue || !partId.HasValue || !sizeId.HasValue)
+                return null;
+
+            const string sql = @"
+        SELECT TOP 1 PartSizeOrderID
+        FROM PartSizeOrder
+        WHERE OrderID = @OrderID
+          AND PartID  = @PartID
+          AND SizeID  = @SizeID";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                // ❗ Không dùng AddWithValue (tránh lỗi kiểu dữ liệu)
+                cmd.Parameters.Add("@OrderID", SqlDbType.Int).Value = orderId.Value;
+                cmd.Parameters.Add("@PartID", SqlDbType.Int).Value = partId.Value;
+                cmd.Parameters.Add("@SizeID", SqlDbType.Int).Value = sizeId.Value;
+
+                conn.Open();
+                object result = cmd.ExecuteScalar();
+
+                return result == null || result == DBNull.Value
+                    ? (int?)null
+                    : Convert.ToInt32(result);
+            }
+        }
+
+
+
+        public static int? GetPartID(string partCode)
+        {
+            if (string.IsNullOrEmpty(partCode))
+                return null;
+
+            string sql = @"SELECT TOP 1 PartID FROM Part WHERE PartCode = @PartCode";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@PartCode", partCode);
+                conn.Open();
+                var result = cmd.ExecuteScalar();
+                return result != null && result != DBNull.Value ? Convert.ToInt32(result) : (int?)null;
+            }
+        }
+
+        public static int? GetSizeID(string sizeValue)
+        {
+            if (string.IsNullOrEmpty(sizeValue))
+                return null;
+
+            sizeValue = GetFirstSizeValue(sizeValue);
+            string sql = @"SELECT TOP 1 SizeID FROM Size WHERE Size = @Size";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@Size", sizeValue);
+                conn.Open();
+                var result = cmd.ExecuteScalar();
+                return result != null && result != DBNull.Value ? Convert.ToInt32(result) : (int?)null;
+            }
+        }
+        public static string GetFirstSizeValue(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return null;
+
+            // Bỏ { }
+            input = input.Trim('{', '}');
+
+            // Cắt theo dấu '-'
+            var parts = input.Split('-');
+
+            return parts.Length > 0 ? parts[0].Trim() : null;
+        }
+
+        public static int? GetOrderID(string so)
+        {
+            if (string.IsNullOrEmpty(so))
+                return null;
+
+            string sql = @"SELECT TOP 1 OrderID FROM ProductOrder WHERE SO = @SO";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@SO", so);
+                conn.Open();
+                var result = cmd.ExecuteScalar();
+                return result != null && result != DBNull.Value ? Convert.ToInt32(result) : (int?)null;
             }
         }
 

@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.txt_Quantity = new DevExpress.XtraEditors.SpinEdit();
             this.gridLookUpEditSO = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.cbxSize = new DevExpress.XtraEditors.ComboBoxEdit();
@@ -41,7 +42,6 @@
             this.emptySpaceItem3 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.emptySpaceItem4 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.emptySpaceItem5 = new DevExpress.XtraLayout.EmptySpaceItem();
-            this.emptySpaceItem6 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.emptySpaceItem7 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.emptySpaceItem8 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.emptySpaceItem2 = new DevExpress.XtraLayout.EmptySpaceItem();
@@ -50,12 +50,13 @@
             this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem8 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.txt_Quantity = new DevExpress.XtraEditors.SpinEdit();
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
             this.emptySpaceItem10 = new DevExpress.XtraLayout.EmptySpaceItem();
+            this.emptySpaceItem6 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.emptySpaceItem11 = new DevExpress.XtraLayout.EmptySpaceItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txt_Quantity.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).BeginInit();
@@ -68,7 +69,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem7)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem8)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem2)).BeginInit();
@@ -77,9 +77,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem8)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txt_Quantity.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem10)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem11)).BeginInit();
             this.SuspendLayout();
             // 
@@ -98,6 +98,21 @@
             this.layoutControl1.Size = new System.Drawing.Size(840, 396);
             this.layoutControl1.TabIndex = 1;
             this.layoutControl1.Text = "layoutControl1";
+            // 
+            // txt_Quantity
+            // 
+            this.txt_Quantity.EditValue = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.txt_Quantity.Location = new System.Drawing.Point(117, 108);
+            this.txt_Quantity.Name = "txt_Quantity";
+            this.txt_Quantity.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.txt_Quantity.Size = new System.Drawing.Size(376, 20);
+            this.txt_Quantity.StyleController = this.layoutControl1;
+            this.txt_Quantity.TabIndex = 35;
             // 
             // gridLookUpEditSO
             // 
@@ -140,7 +155,7 @@
             // 
             // dateTimePickerSchedule
             // 
-            this.dateTimePickerSchedule.EditValue = new System.DateTime(2025, 9, 18, 9, 19, 50, 284);
+            this.dateTimePickerSchedule.EditValue = new System.DateTime(2026, 1, 8, 9, 19, 50, 0);
             this.dateTimePickerSchedule.Location = new System.Drawing.Point(117, 12);
             this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
             this.dateTimePickerSchedule.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
@@ -229,12 +244,6 @@
             this.emptySpaceItem5.Name = "emptySpaceItem5";
             this.emptySpaceItem5.Size = new System.Drawing.Size(485, 10);
             // 
-            // emptySpaceItem6
-            // 
-            this.emptySpaceItem6.Location = new System.Drawing.Point(81, 120);
-            this.emptySpaceItem6.Name = "emptySpaceItem6";
-            this.emptySpaceItem6.Size = new System.Drawing.Size(250, 52);
-            // 
             // emptySpaceItem7
             // 
             this.emptySpaceItem7.Location = new System.Drawing.Point(0, 182);
@@ -287,21 +296,6 @@
             this.layoutControlItem8.Name = "layoutControlItem8";
             this.layoutControlItem8.Size = new System.Drawing.Size(485, 24);
             // 
-            // txt_Quantity
-            // 
-            this.txt_Quantity.EditValue = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.txt_Quantity.Location = new System.Drawing.Point(117, 108);
-            this.txt_Quantity.Name = "txt_Quantity";
-            this.txt_Quantity.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.txt_Quantity.Size = new System.Drawing.Size(376, 20);
-            this.txt_Quantity.StyleController = this.layoutControl1;
-            this.txt_Quantity.TabIndex = 35;
-            // 
             // layoutControlItem1
             // 
             this.layoutControlItem1.Control = this.txt_Quantity;
@@ -314,6 +308,12 @@
             this.emptySpaceItem10.Location = new System.Drawing.Point(331, 162);
             this.emptySpaceItem10.Name = "emptySpaceItem10";
             this.emptySpaceItem10.Size = new System.Drawing.Size(154, 10);
+            // 
+            // emptySpaceItem6
+            // 
+            this.emptySpaceItem6.Location = new System.Drawing.Point(81, 120);
+            this.emptySpaceItem6.Name = "emptySpaceItem6";
+            this.emptySpaceItem6.Size = new System.Drawing.Size(250, 52);
             // 
             // emptySpaceItem11
             // 
@@ -330,6 +330,7 @@
             this.Size = new System.Drawing.Size(840, 396);
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.txt_Quantity.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEditSO.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cbxSize.Properties)).EndInit();
@@ -342,7 +343,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem6)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem7)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem8)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem2)).EndInit();
@@ -351,9 +351,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem8)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txt_Quantity.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem10)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem6)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem11)).EndInit();
             this.ResumeLayout(false);
 

@@ -445,6 +445,5 @@ namespace DigitalProduction.Frm_User
             public string SO { get; set; }
             public DateTime CreatedAt { get; set; }
         }
-
     }
 }

@@ -166,7 +166,7 @@ async function getActualOutputData(startDate, endDate) {
       ) latestDO
 
       WHERE 
-          dd.IsDelete = 0 AND  latestDO.UpdatedAt >= @startDate AND latestDO.UpdatedAt < @endDate
+          dd.IsDelete = 0 AND  latestDO.UpdatedAt BETWEEN @startDate AND @endDate
       GROUP BY
           po.OrderID,
           po.MasterWorkOrder,
@@ -1256,7 +1256,7 @@ async function getDistributions(startDate, endDate) {
             ORDER BY do.UpdatedAt DESC
         ) do
         WHERE dd.IsDelete = 0 AND 
-          dd.UpdatedAt >= @startDate AND dd.UpdatedAt < @endDate
+          dd.UpdatedAt BETWEEN @startDate AND @endDate
         ORDER BY dd.UpdatedAt ASC;
     `;
 

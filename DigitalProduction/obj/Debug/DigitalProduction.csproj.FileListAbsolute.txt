@@ -233,3 +233,6 @@ D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_User
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_User.ucTreatment.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_User.uc_DetailProgress.resources
 D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.exe.licenses
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraTreeMap.v24.2.UI.dll
+D:\reps\DigitalProduction\DigitalProduction\bin\Debug\DevExpress.XtraTreeMap.v24.2.UI.xml
+D:\reps\DigitalProduction\DigitalProduction\obj\Debug\DigitalProduction.Frm_User.ucAddAutoDataCutting.resources

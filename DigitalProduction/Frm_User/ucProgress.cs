@@ -180,8 +180,7 @@ namespace DigitalProduction
             MessageBox.Show(
                 appliedCount > 0
                     ? $"Device '{selectedDeviceName}' applied to {appliedCount} row(s) with status 'Pending'."
-                    : "No 'Pending' rows found in the grid.",
-                "Result",
+                    : "No 'Pending' rows found in the grid.", "Result",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information
             );
@@ -416,8 +415,8 @@ namespace DigitalProduction
                 }
                 else
                 {
-                    //  MessageBox.Show("InvalidOperation or No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    //ConnectionManager.Instance.IsReconnecting = true;
+                    // MessageBox.Show("InvalidOperation or No response from server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // ConnectionManager.Instance.IsReconnecting = true;
                     // Retry logic or callback method
                     return;
                 }

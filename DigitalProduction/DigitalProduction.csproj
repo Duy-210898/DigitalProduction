@@ -25,7 +25,7 @@
     <InstallUrl>http://10.30.0.116:8080/Digital/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>161</ApplicationRevision>
+    <ApplicationRevision>164</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -80,11 +80,13 @@
     <ApplicationIcon>icon_digital.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Accessibility" />
     <Reference Include="DevExpress.BonusSkins.v24.2" />
     <Reference Include="DevExpress.Dashboard.v24.2.Core, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Data.Desktop.v24.2" />
     <Reference Include="DevExpress.Data.v24.2" />
     <Reference Include="DevExpress.DataAccess.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.TreeMap.v24.2.Core, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.Utils.v24.2" />
     <Reference Include="DevExpress.Sparkline.v24.2.Core" />
     <Reference Include="DevExpress.XtraBars.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
@@ -100,6 +102,8 @@
     <Reference Include="DevExpress.XtraScheduler.v24.2.Core, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraScheduler.v24.2.Core.Desktop, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraTreeList.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraTreeMap.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraTreeMap.v24.2.UI, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraVerticalGrid.v24.2, Version=24.2.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="EPPlus, Version=7.7.0.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
       <HintPath>..\packages\EPPlus.7.7.0\lib\net462\EPPlus.dll</HintPath>
@@ -134,6 +138,7 @@
       <HintPath>..\packages\System.Configuration.ConfigurationManager.9.0.1\lib\net462\System.Configuration.ConfigurationManager.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
       <Private>True</Private>
@@ -160,6 +165,8 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
     <Reference Include="System.Security" />
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
@@ -181,6 +188,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -198,6 +206,12 @@
     <Compile Include="Extensions\GenericGridLocalizer .cs" />
     <Compile Include="Extensions\RealTimeCutMonitor.cs" />
     <Compile Include="Extensions\SafeReader.cs" />
+    <Compile Include="Frm_User\ucAddAutoDataCutting.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Frm_User\ucAddAutoDataCutting.Designer.cs">
+      <DependentUpon>ucAddAutoDataCutting.cs</DependentUpon>
+    </Compile>
     <Compile Include="Frm_User\ucTreatment.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -247,6 +261,8 @@
     <Compile Include="Common\Lang.cs" />
     <Compile Include="Models\Constants.cs" />
     <Compile Include="Models\CuttingReportModel.cs" />
+    <Compile Include="Models\DeviceOutputSaveDto.cs" />
+    <Compile Include="Models\DistributionDto.cs" />
     <Compile Include="Models\DistributionModelView.cs" />
     <Compile Include="Models\PartItem.cs" />
     <Compile Include="Helper\PropertyUpdateHelper.cs" />
@@ -379,6 +395,9 @@
     <Compile Include="Validation\ValidationType.cs" />
     <Compile Include="Validation\Validator.cs" />
     <Compile Include="WebSocket\WebSocketClient.cs" />
+    <EmbeddedResource Include="Frm_User\ucAddAutoDataCutting.resx">
+      <DependentUpon>ucAddAutoDataCutting.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Frm_User\ucAddSupplementary.resx">
       <DependentUpon>ucAddSupplementary.cs</DependentUpon>
     </EmbeddedResource>

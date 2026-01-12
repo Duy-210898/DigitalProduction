@@ -42,6 +42,7 @@
             this.accordionControlSeparator2 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.btnAddSupplement = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnTreatmentPart = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btnAddDataCutting = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnDeviceManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.btnUserManager = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -61,6 +62,8 @@
             this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement5 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement7 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement10 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemTextEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl1)).BeginInit();
@@ -125,7 +128,8 @@
             this.btnDeviceOutput,
             this.accordionControlSeparator2,
             this.btnAddSupplement,
-            this.btnTreatmentPart});
+            this.btnTreatmentPart,
+            this.btnAddDataCutting});
             this.accordionControlElement3.Expanded = true;
             this.accordionControlElement3.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("accordionControlElement3.ImageOptions.Image")));
             this.accordionControlElement3.Name = "accordionControlElement3";
@@ -205,6 +209,15 @@
             this.btnTreatmentPart.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.btnTreatmentPart.Text = "Treatment Part";
             this.btnTreatmentPart.Click += new System.EventHandler(this.btnTreatment_Click);
+            // 
+            // btnAddDataCutting
+            // 
+            this.btnAddDataCutting.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F);
+            this.btnAddDataCutting.Appearance.Default.Options.UseFont = true;
+            this.btnAddDataCutting.Name = "btnAddDataCutting";
+            this.btnAddDataCutting.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.btnAddDataCutting.Text = "Add Auto Cutting";
+            this.btnAddDataCutting.Click += new System.EventHandler(this.btnAddDataCutting_Click);
             // 
             // accordionControlElement4
             // 
@@ -424,6 +437,22 @@
             this.accordionControlElement7.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.accordionControlElement7.Text = "View Distribution";
             // 
+            // accordionControlElement9
+            // 
+            this.accordionControlElement9.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F);
+            this.accordionControlElement9.Appearance.Default.Options.UseFont = true;
+            this.accordionControlElement9.Name = "accordionControlElement9";
+            this.accordionControlElement9.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.accordionControlElement9.Text = "Add Supplementary";
+            // 
+            // accordionControlElement10
+            // 
+            this.accordionControlElement10.Appearance.Default.Font = new System.Drawing.Font("Verdana", 11.25F);
+            this.accordionControlElement10.Appearance.Default.Options.UseFont = true;
+            this.accordionControlElement10.Name = "accordionControlElement10";
+            this.accordionControlElement10.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.accordionControlElement10.Text = "Add Supplementary";
+            // 
             // frmMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -482,6 +511,9 @@
         private DevExpress.XtraBars.Navigation.AccordionControlSeparator accordionControlSeparator1;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnAddSupplement;
         private DevExpress.XtraBars.Navigation.AccordionControlElement btnTreatmentPart;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement btnAddDataCutting;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement9;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement10;
     }
 }
 

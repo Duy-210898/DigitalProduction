@@ -350,6 +350,11 @@ namespace DigitalProduction
             await ShowUserControlAsync<ucTreatment>();
         }
 
+        private async void btnAddDataCutting_Click(object sender, EventArgs e)
+        {
+            await ShowUserControlAsync<ucAddAutoDataCutting>();
+        }
+
         private void frmMain_Load(object sender, EventArgs e)
         {
             if (Global.CurrentUser == null)
@@ -399,6 +404,7 @@ namespace DigitalProduction
             btnProgressDistribution.Text = LocalizationManager.GetString("Progress");
             btnReportOder.Text = LocalizationManager.GetString("OperatorPerformance");
             btnAddSupplement.Text = LocalizationManager.GetString("AddSupplementary");
+            btnAddDataCutting.Text = LocalizationManager.GetString("AddDataCutting");
             //  btnCuttingReportQty.Text = LocalizationManager.GetString("CuttingReport");
         }
 

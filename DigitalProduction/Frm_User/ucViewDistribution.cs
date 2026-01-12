@@ -23,12 +23,13 @@ namespace DigitalProduction
 
             lblFilterDate.Text = LocalizationManager.GetString("FilterDate");
             lblSelectSO.Text = LocalizationManager.GetString("SelectSO");
-
+            lblFilterPlant.Text = LocalizationManager.GetString("FilterPlant");
+            LoadPlantsToComboBox();
             // Set default to the first day of the previous month
             DateTime today = DateTime.Today;
-            DateTime firstDayLastMonth = new DateTime(today.Year, today.Month, 1).AddMonths(-1);
+           // DateTime firstDayLastMonth = new DateTime(today.Year, today.Month, 1).AddMonths(-1);
 
-            dateTimePickerViewSO.EditValue = firstDayLastMonth;
+            dateTimePickerViewSO.EditValue = today;
 
             // Show calendar in month view
             dateTimePickerViewSO.Properties.VistaCalendarViewStyle = VistaCalendarViewStyle.YearView;
@@ -142,8 +143,29 @@ namespace DigitalProduction
             {
                 LoadProductionSchedulesBySelectedSOs(gridLookUpSOs, gridControlViewSO, gridViewSO);
             };
+            gridLookUpPlant.EditValueChanged += GridLookUpPlant_EditValueChanged;
 
         }
+        private void GridLookUpPlant_EditValueChanged(object sender, EventArgs e)
+        {
+            // Lấy tháng/năm hiện tại trên bộ lọc
+            DateTime selectedDate = dateTimePickerViewSO.DateTime;
+            int departmentId = Global.CurrentUser.DepartmentID;
+
+            // Load lại SO theo Plant mới
+            SetupSOGridLookUp(
+                gridLookUpSOs,
+                selectedDate,
+                departmentId
+            );
+
+            // Reset SO & Grid
+            selectedSalesOrders.Clear();
+            gridLookUpSOs.EditValue = null;
+            gridControlViewSO.DataSource = null;
+            gridViewSO.Columns.Clear();
+        }
+
 
         private void SetupARTGridLookUp(DevExpress.XtraEditors.GridLookUpEdit cboART)
         {
@@ -186,13 +208,35 @@ namespace DigitalProduction
             cboART.Properties.PopupFilterMode = PopupFilterMode.Contains;
         }
 
+        private void LoadPlantsToComboBox()
+        {
+            DataTable dt = DbHelper.getPlants();
 
+            // Add a "All Plants" row
+            DataRow allRow = dt.NewRow();
+            allRow["PlantID"] = 0;
+            allRow["PlantName"] = LocalizationManager.GetString("All");
+            dt.Rows.InsertAt(allRow, 0);
+
+            gridLookUpPlant.Properties.DataSource = dt;
+            gridLookUpPlant.Properties.DisplayMember = "PlantName";
+            gridLookUpPlant.Properties.ValueMember = "PlantID";
+            gridLookUpPlant.Properties.NullText = "Plant...";
+            // Hide PlantID column in dropdown
+            var view = gridLookUpPlant.Properties.View;
+            view.Columns.Clear();
+            view.Columns.AddVisible("PlantName", "Plant Name");
+        }
 
         private void SetupSOGridLookUp(GridLookUpEdit cboSO, DateTime selectedDate, int departmentId)
         {
             // 1. Get list of SOs
+            int? plantId = null;
+            if (int.TryParse(gridLookUpPlant.EditValue?.ToString(), out int p) && p > 0)
+                plantId = p;
+
             List<string> soList = DbHelper.GetDistinctSOListByMonthAndDepartment(
-                selectedDate.Month, selectedDate.Year, departmentId
+                selectedDate.Month, selectedDate.Year, departmentId, plantId
             );
 
             // 2. Create a DataTable for binding
@@ -409,9 +453,8 @@ namespace DigitalProduction
                                 int target = row.Details[0].SizeQty;
                                 // Actual
                                 int actual = (int)row.Details.Min(a => a.CutQuantity);
-                                // Inventory
-                                int inventory = Math.Max(0, (int)row.Details
-                                    .Sum(d => (d.CutQuantity + d.InventoryQty) - d.TargetCut));
+                                // Delivered
+                                int delivered = row.Details.Min(d => d.TargetCut);
 
                                 // Status: if any detail is pending → Pending, else → Complete
                                 // ✅ Complete if any detail is complete
@@ -426,7 +469,7 @@ namespace DigitalProduction
                                 if (row != null)
                                 {
                                     e2.DisplayText = $"{row.Size} | {LocalizationManager.GetString(status)} | {LocalizationManager.GetString("Number")}: {minCutQty} " +
-                                        $" | {LocalizationManager.GetString("Target")}: {target} {LocalizationManager.GetString("Actual")}: {actual} | {LocalizationManager.GetString("Delivered")}: {inventory}";
+                                        $" | {LocalizationManager.GetString("Target")}: {target} {LocalizationManager.GetString("Actual")}: {actual} | {LocalizationManager.GetString("Delivered")}: {delivered}";
                                 }
                             }
                         };
@@ -509,10 +552,12 @@ namespace DigitalProduction
                             .Sum();
                         // Actual
                         int actual = row.Sizes.Min(a => a._);
-                        // Inventory
-                        int inventory = Math.Max(0, (int)row.Sizes
-                            .SelectMany(t => t.Details)
-                            .Sum(d => (d.CutQuantity + d.InventoryQty) - d.TargetCut));
+                        // Delivered
+                        List<int> deliveredPerDetail = row.Sizes
+                          .Select(t => Math.Max(0, t.Details.FirstOrDefault()?.TargetCut ?? 0))
+                          .ToList();
+
+                        int delivered = deliveredPerDetail.Sum();
                         bool hasComplete = actual >= target;
                         //bool hasPending = row.Sizes.SelectMany(sz => sz.Details).Any(d => d.StatusCode == Constants.Pending || d.StatusCode == string.Empty);
                         //bool allComplete = row.Sizes.SelectMany(sz => sz.Details).All(d => d.StatusCode == Constants.Complete);
@@ -520,7 +565,7 @@ namespace DigitalProduction
                         //string statusText = hasComplete ? Constants.Complete : (allComplete ? Constants.Complete : Constants.Pending);
                         string statusText = hasComplete ? Constants.Complete : Constants.Pending;
                         e.DisplayText = $"{row.SO} | {LocalizationManager.GetString(statusText)} | {LocalizationManager.GetString("Target")}: {target}" +
-                         $" | {LocalizationManager.GetString("Actual")}: {actual} | {LocalizationManager.GetString("Delivered")}: {inventory}";
+                         $" | {LocalizationManager.GetString("Actual")}: {actual} | {LocalizationManager.GetString("Delivered")}: {delivered}";
                     }
                 };
               
@@ -662,6 +707,11 @@ namespace DigitalProduction
         {
             // Reload SO list
             SetupSOGridLookUp(gridLookUpSOs, dateTimePickerViewSO.DateTime, Global.CurrentUser.DepartmentID);
+        }
+
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

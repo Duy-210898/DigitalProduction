@@ -138,7 +138,8 @@ CREATE TABLE DistributionData (
 	UpdatedAt DATETIME,
     IsLeather BIT,
     IsDelete BIT,
-	Note INT
+	Note INT,
+	IsAutoCutting BIT
 );
 
 GO
@@ -198,9 +199,11 @@ CREATE TABLE PartSizeOrder (
 	TargetCut INT,
 	Unit VARCHAR(50),
 	UnitUsage FLOAT,
+	Treatment BIT NOT NULL,
 	CreatedAt DATETIME DEFAULT GETDATE()
 );
 GO
+
 CREATE INDEX IX_PartSizeOrder_Keys
 ON PartSizeOrder (PartId, OrderId, SizeId);
 
@@ -228,6 +231,43 @@ CREATE TABLE TargetInDay (
     UpdatedAt DATETIME NULL                 -- Ngày cập nhật
 );
 GO
+-- ScheduleChangeModel
+CREATE TABLE dbo.ScheduleChangeModel
+(
+    ScheduleChangeModelID INT IDENTITY(1,1) PRIMARY KEY,
+    ExternalID INT NOT NULL UNIQUE,   -- MES ID from external system
+    SO NVARCHAR(50) NOT NULL,
+    size_no NVARCHAR(50) NOT NULL,
+    model_name NVARCHAR(255) NOT NULL,
+    art_no NVARCHAR(100) NULL,
+    line_no NVARCHAR(50) NULL,
+    note NVARCHAR(500) NULL,
+    plant NVARCHAR(50) NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- ScheduleInventory
+CREATE TABLE dbo.ScheduleInventory
+(
+    ScheduleInventoryID INT IDENTITY(1,1) PRIMARY KEY,
+    ExternalID INT NOT NULL, 
+	change_model_id INT NOT NULL,
+    type_stoc NVARCHAR(50) NOT NULL,
+    item_no NVARCHAR(100) NOT NULL,
+    SO NVARCHAR(50) NOT NULL,
+    size_no NVARCHAR(50) NOT NULL,
+    line_no NVARCHAR(50) NULL,
+    se_qty INT NOT NULL DEFAULT 0,
+    ov_qty INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_ScheduleInventory_ChangeModel
+        FOREIGN KEY (change_model_id)
+        REFERENCES dbo.ScheduleChangeModel(ExternalID)
+        ON DELETE CASCADE
+);
+GO
+
 
 ALTER TABLE Operator ADD CONSTRAINT UQ_Operator_EmployeeID UNIQUE (EmployeeID);
 
@@ -282,10 +322,28 @@ CREATE TABLE CuttingSyncRawData (
     LastNo NVARCHAR(100),
     UnitUsage FLOAT,
     TargetCut INT,
+	Treatment BIT NOT NULL,
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     SyncedBy NVARCHAR(100) NULL -- có thể là 'auto', 'system', 'username'
 );
 GO
+
+CREATE TABLE dbo.ScheduleAssemblyPlan
+(
+    AssemblyPlanID INT IDENTITY(1,1) PRIMARY KEY,
+    SO NVARCHAR(50) NOT NULL,
+	name NVARCHAR(255) NOT NULL,
+    production_mode NVARCHAR(200) NOT NULL,
+    plant NVARCHAR(10) NOT NULL,
+    operation NVARCHAR(200) NOT NULL,
+    line_number NVARCHAR(50) NOT NULL,
+    month NVARCHAR(10) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+	update_date DATE NULL,
+    CONSTRAINT UQ_AssemblyPlan UNIQUE (SO, line_number, month)
+);
+GO
+
 -- Foreign Key Constraints
 ALTER TABLE ProductionSchedule 
 	ADD CONSTRAINT FK_ProductionSchedule_Department FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID),

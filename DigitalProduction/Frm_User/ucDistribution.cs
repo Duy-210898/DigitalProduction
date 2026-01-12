@@ -812,8 +812,6 @@ namespace DigitalProduction
                     table.Columns["CompositeKey"],
                     subDistributionDataSource.Columns["CompositeKey"]);
 
-
-
                 gridControlOverview.DataSource = dataSet;
                 gridControlOverview.DataMember = "DistributionData"; // parent table
 
@@ -1449,7 +1447,6 @@ namespace DigitalProduction
 
                 if (!isDeviceData)
                 {
-
                     // fill cell OperatorName, Device and InventoryQty
                     string selectedOperatorName = gridLookUpOperator.Text.ToString().Trim();
                     int? selectedOperatorID = null;

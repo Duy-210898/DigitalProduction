@@ -13,7 +13,6 @@ using DevExpress.XtraGrid.Views.Grid;
 using DigitalProduction.Extensions;
 using DigitalProduction.Models;
 using Newtonsoft.Json;
-using static DigitalProduction.ucProgress;
 
 namespace DigitalProduction.Frm_Admin
 {
@@ -366,7 +365,6 @@ namespace DigitalProduction.Frm_Admin
 
             gridView.LayoutChanged();
         }
-
 
         // Naviagtion device list
         public void SetWebSocketClient(WebSocketClient webSocketClient)

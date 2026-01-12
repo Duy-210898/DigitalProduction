@@ -741,4 +741,16 @@
   <data name="Detail" xml:space="preserve">
     <value>Detail</value>
   </data>
+  <data name="All" xml:space="preserve">
+    <value>---All---</value>
+  </data>
+  <data name="FilterPlant" xml:space="preserve">
+    <value>Filter Plant</value>
+  </data>
+  <data name="AddDataCutting" xml:space="preserve">
+    <value>Add Auto Cutting</value>
+  </data>
+  <data name="IsSkivingknife" xml:space="preserve">
+    <value>Clicking knife</value>
+  </data>
 </root>

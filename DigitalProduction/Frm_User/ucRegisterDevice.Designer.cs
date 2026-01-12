@@ -75,7 +75,7 @@
             this.cb_plant.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.cb_plant.Properties.NullText = "Select Plant";
-            this.cb_plant.Size = new System.Drawing.Size(171, 24);
+            this.cb_plant.Size = new System.Drawing.Size(246, 24);
             this.cb_plant.TabIndex = 6;
             // 
             // cb_department
@@ -87,7 +87,7 @@
             this.cb_department.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.cb_department.Properties.NullText = "Select Department";
-            this.cb_department.Size = new System.Drawing.Size(171, 24);
+            this.cb_department.Size = new System.Drawing.Size(246, 24);
             this.cb_department.TabIndex = 5;
             // 
             // lblPlant
@@ -102,9 +102,9 @@
             // 
             // btn_close
             // 
-            this.btn_close.Location = new System.Drawing.Point(256, 222);
+            this.btn_close.Location = new System.Drawing.Point(309, 222);
             this.btn_close.Name = "btn_close";
-            this.btn_close.Size = new System.Drawing.Size(75, 23);
+            this.btn_close.Size = new System.Drawing.Size(97, 23);
             this.btn_close.TabIndex = 8;
             this.btn_close.Text = "Cancel";
             this.btn_close.Click += new System.EventHandler(this.btn_close_Click);
@@ -113,7 +113,7 @@
             // 
             this.btn_submit.Location = new System.Drawing.Point(160, 222);
             this.btn_submit.Name = "btn_submit";
-            this.btn_submit.Size = new System.Drawing.Size(75, 23);
+            this.btn_submit.Size = new System.Drawing.Size(89, 23);
             this.btn_submit.TabIndex = 7;
             this.btn_submit.Text = "Submit";
             this.btn_submit.Click += new System.EventHandler(this.btn_submit_Click);
@@ -134,7 +134,7 @@
             this.txt_machineName.Name = "txt_machineName";
             this.txt_machineName.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
             this.txt_machineName.Properties.Appearance.Options.UseFont = true;
-            this.txt_machineName.Size = new System.Drawing.Size(171, 26);
+            this.txt_machineName.Size = new System.Drawing.Size(246, 26);
             this.txt_machineName.TabIndex = 3;
             // 
             // lblAddressID
@@ -163,7 +163,7 @@
             this.txt_addressIP.Name = "txt_addressIP";
             this.txt_addressIP.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
             this.txt_addressIP.Properties.Appearance.Options.UseFont = true;
-            this.txt_addressIP.Size = new System.Drawing.Size(171, 26);
+            this.txt_addressIP.Size = new System.Drawing.Size(246, 26);
             this.txt_addressIP.TabIndex = 1;
             // 
             // ucRegisterDevice

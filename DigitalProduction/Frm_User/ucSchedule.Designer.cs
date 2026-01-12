@@ -321,7 +321,7 @@
             // 
             // dateTimePickerSchedule
             // 
-            this.dateTimePickerSchedule.EditValue = new System.DateTime(2025, 7, 30, 13, 44, 1, 398);
+            this.dateTimePickerSchedule.EditValue = new System.DateTime(2026, 1, 8, 0, 0, 0, 0);
             this.dateTimePickerSchedule.Location = new System.Drawing.Point(113, 119);
             this.dateTimePickerSchedule.Name = "dateTimePickerSchedule";
             this.dateTimePickerSchedule.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

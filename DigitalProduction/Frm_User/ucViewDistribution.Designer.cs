@@ -29,6 +29,10 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.gridLookUpPlant = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.lblFilterPlant = new DevExpress.XtraEditors.LabelControl();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.dateTimePickerViewSO = new DevExpress.XtraEditors.DateEdit();
             this.lblFilterDate = new DevExpress.XtraEditors.LabelControl();
@@ -43,6 +47,9 @@
             this.gridControlViewSO = new DevExpress.XtraGrid.GridControl();
             this.gridViewSO = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.tableLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpPlant.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView2)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerViewSO.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerViewSO.Properties.CalendarTimeProperties)).BeginInit();
@@ -61,6 +68,7 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.54673F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 66.45326F));
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel5, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 1, 1);
@@ -73,6 +81,54 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(910, 156);
             this.tableLayoutPanel1.TabIndex = 0;
+            this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
+            // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.ColumnCount = 1;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel5.Controls.Add(this.gridLookUpPlant, 0, 1);
+            this.tableLayoutPanel5.Controls.Add(this.lblFilterPlant, 0, 0);
+            this.tableLayoutPanel5.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(308, 3);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 2;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 40.90909F));
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 59.09091F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(255, 66);
+            this.tableLayoutPanel5.TabIndex = 7;
+            // 
+            // gridLookUpPlant
+            // 
+            this.gridLookUpPlant.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridLookUpPlant.Location = new System.Drawing.Point(3, 29);
+            this.gridLookUpPlant.Name = "gridLookUpPlant";
+            this.gridLookUpPlant.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gridLookUpPlant.Properties.Appearance.Options.UseFont = true;
+            this.gridLookUpPlant.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpPlant.Properties.PopupView = this.gridView2;
+            this.gridLookUpPlant.Size = new System.Drawing.Size(249, 26);
+            this.gridLookUpPlant.TabIndex = 2;
+            // 
+            // gridView2
+            // 
+            this.gridView2.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridView2.Name = "gridView2";
+            this.gridView2.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridView2.OptionsView.ShowGroupPanel = false;
+            // 
+            // lblFilterPlant
+            // 
+            this.lblFilterPlant.Appearance.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblFilterPlant.Appearance.Options.UseFont = true;
+            this.lblFilterPlant.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblFilterPlant.Location = new System.Drawing.Point(3, 3);
+            this.lblFilterPlant.Name = "lblFilterPlant";
+            this.lblFilterPlant.Size = new System.Drawing.Size(61, 14);
+            this.lblFilterPlant.TabIndex = 1;
+            this.lblFilterPlant.Text = "Filter Plant:";
             // 
             // tableLayoutPanel2
             // 
@@ -234,6 +290,10 @@
             this.Name = "ucViewDistribution";
             this.Size = new System.Drawing.Size(910, 627);
             this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpPlant.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView2)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dateTimePickerViewSO.Properties.CalendarTimeProperties)).EndInit();
@@ -267,5 +327,9 @@
         private DevExpress.XtraEditors.DateEdit dateTimePickerViewSO;
         private DevExpress.XtraEditors.GridLookUpEdit gridLookUpART;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
+        private DevExpress.XtraEditors.LabelControl lblFilterPlant;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpPlant;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView2;
     }
 }

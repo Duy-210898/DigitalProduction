@@ -22,7 +22,7 @@ namespace DigitalProduction
     {
         private BindingList<ProductionSchedule> productionSchedules = new BindingList<ProductionSchedule>();
         private WebSocketClient _webSocketClient;
-        private int? selectedYear = DateTime.Today.Year;
+        private int? selectedYear = DateTime.Now.Year;
         // Keep track of selected items
         public event EventHandler<RadioButton> RadioSelected;
         private static bool isLeather = false;

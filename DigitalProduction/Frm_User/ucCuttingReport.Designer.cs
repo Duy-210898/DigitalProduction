@@ -30,12 +30,12 @@
         {
             this.SuspendLayout();
             // 
-            // CuttingReport
+            // ucCuttingReport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Name = "CuttingReport";
-            this.Size = new System.Drawing.Size(499, 424);
+            this.Name = "ucCuttingReport";
+            this.Size = new System.Drawing.Size(803, 578);
             this.ResumeLayout(false);
 
         }

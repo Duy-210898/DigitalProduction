@@ -51,7 +51,6 @@ namespace DigitalProduction.Models
         public string SO { get; set; }
         public string PartName { get; set; }
         public string Size { get; set; }
-
     }
 
     public class SubDistribution

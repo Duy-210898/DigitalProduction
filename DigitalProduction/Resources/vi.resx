@@ -774,4 +774,16 @@
   <data name="Detail" xml:space="preserve">
     <value>Chi tiết</value>
   </data>
+  <data name="All" xml:space="preserve">
+    <value>---Tất cả---</value>
+  </data>
+  <data name="FilterPlant" xml:space="preserve">
+    <value>Lọc theo xưởng</value>
+  </data>
+  <data name="AddDataCutting" xml:space="preserve">
+    <value>Thêm chặt tự động</value>
+  </data>
+  <data name="IsSkivingknife" xml:space="preserve">
+    <value>Dao lắt</value>
+  </data>
 </root>

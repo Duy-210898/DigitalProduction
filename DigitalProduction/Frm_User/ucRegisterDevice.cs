@@ -98,8 +98,7 @@ namespace DigitalProduction
 
         private async void btn_submit_Click(object sender, EventArgs e)
         {
-            if (!txt_addressIP.ValidateInput(ValidationType.NotEmptyString) ||
-                !txt_machineName.ValidateInput(ValidationType.NotEmptyString) ||
+            if (!txt_machineName.ValidateInput(ValidationType.NotEmptyString) ||
                  !cb_department.ValidateInput(ValidationType.NotNull) ||
                   !cb_plant.ValidateInput(ValidationType.NotNull))
             {
@@ -111,15 +110,15 @@ namespace DigitalProduction
             string ipAddress = txt_addressIP.Text.Trim();
             string machineName = txt_machineName.Text.Trim();
 
-            await getConnectToHMIAdress(ipAddress);
+          //  await getConnectToHMIAdress(ipAddress);
 
-            if (!statusConnect)
-            {
-                ShowMessage.ShowError($"Device at {ipAddress} is unreachable. Please check the network.");
-                return;
-            }
+            //if (!statusConnect)
+            //{
+            //    ShowMessage.ShowError($"Device at {ipAddress} is unreachable. Please check the network.");
+            //    return;
+            //}
 
-            bool statusAddDevice = DbHelper.dddNewDevice(departmentID, plantId, ipAddress, machineName);
+            bool statusAddDevice = DbHelper.addNewDevice(departmentID, plantId, ipAddress, machineName);
             Console.WriteLine(statusAddDevice ? "Device added successfully!" : "Failed to add device (Duplicate IP or error).");
 
             if (statusAddDevice)
